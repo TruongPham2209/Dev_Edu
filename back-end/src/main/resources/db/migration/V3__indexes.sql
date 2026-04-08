@@ -1,8 +1,4 @@
--- Note:
--- 1) PRIMARY KEY and UNIQUE constraints in V1 already create indexes automatically.
--- 2) This file adds indexes mainly for foreign keys, sorting, and soft-delete filters.
-
-CREATE INDEX idx_auth_user_id ON auth_provider(user_id);
+CREATE INDEX IF NOT EXISTS idx_auth_user_id ON auth_provider(user_id);
 
 -- forum
 CREATE INDEX IF NOT EXISTS idx_forum_post_author_id ON "forum_post" (author_id);
@@ -18,16 +14,36 @@ CREATE INDEX IF NOT EXISTS idx_forum_comment_post_id_created_at
 	ON "forum_comment" (post_id, created_at ASC);
 
 -- course
-CREATE INDEX IF NOT EXISTS idx_course_category_id ON "course" (category_id);
-CREATE INDEX IF NOT EXISTS idx_course_created_by ON "course" (created_by);
-CREATE INDEX IF NOT EXISTS idx_course_active_created_at
-	ON "course" (created_at DESC)
-	WHERE deleted_at IS NULL;
+-- Search index for course title (only for active courses)
+CREATE INDEX idx_course_title_active
+    ON      course
+    USING   gin (unaccent(title) gin_trgm_ops)
+    WHERE   deleted_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_course_lecturer_lecturer_id ON "course_lecturer" (lecturer_id);
+CREATE INDEX IF NOT EXISTS idx_course_cat_active_created_id
+    ON      course (category_id, created_at DESC, id)
+    WHERE   deleted_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_course_payment_student_id_payment_date
-	ON "course_payment" (student_id, payment_date DESC);
+CREATE INDEX IF NOT EXISTS idx_course_cat_active_price_id
+    ON      course (category_id, price, id)
+    WHERE   deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_course_active_created_id
+    ON      course (created_at DESC, id)
+    WHERE   deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_course_active_price_id
+    ON      course (price, id)
+    WHERE   deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_course_deleted_created_id
+    ON      course (created_at DESC, id)
+    WHERE   deleted_at IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_course_lecturer_lecturer_username ON "course_lecturer" (lecturer_username);
+
+CREATE INDEX IF NOT EXISTS idx_course_payment_student_payment_date
+	ON "course_payment" (student_username, payment_date DESC);
 
 CREATE INDEX IF NOT EXISTS idx_enrollment_student_id ON "enrollment" (student_id);
 

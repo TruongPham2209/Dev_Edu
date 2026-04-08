@@ -14,11 +14,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 @Embeddable
 public class CourseLecturerId implements Serializable {
     @Column(name = "course_id", nullable = false)
     UUID courseId;
 
-    @Column(name = "lecturer_id", nullable = false)
-    UUID lecturerId;
+    @Column(name = "lecturer_username", nullable = false)
+    String lecturerUsername;
 }

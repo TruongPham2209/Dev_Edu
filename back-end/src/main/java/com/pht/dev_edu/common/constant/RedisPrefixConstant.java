@@ -5,4 +5,7 @@ public class RedisPrefixConstant {
     public static final String USER_EMAIL_PREFIX = "dev_edu:users:email:"; // Prefix for user data by email
 
     public static final String ROLE_PREFIX = "dev_edu:roles:"; // Prefix for role data
+
+    public static final String CATEGORY_PREFIX = "dev_edu:categories:"; // Prefix for category data
+    public static final String COURSE_PREFIX = "dev_edu:courses:"; // Prefix for course data
 }

@@ -32,6 +32,12 @@ public class CategoryEntity {
     @Column(name = "created_by", nullable = false)
     String createdBy;
 
+    @Column(name = "thumbnail_url", nullable = false, columnDefinition = "TEXT")
+    String thumbnailUrl;
+
+    @Column(name = "thumbnail_object_key", nullable = false)
+    String thumbnailObjectKey;
+
     @Column(name = "deleted_at")
     LocalDateTime deletedAt;
 

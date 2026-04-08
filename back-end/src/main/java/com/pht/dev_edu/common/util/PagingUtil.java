@@ -35,4 +35,8 @@ public class PagingUtil {
 
         return PageRequest.of(page, pageSize, sort);
     }
+
+    public static Pageable getPageable(int pageSize, Sort... sorts) {
+        return getPageable(0, pageSize, sorts);
+    }
 }

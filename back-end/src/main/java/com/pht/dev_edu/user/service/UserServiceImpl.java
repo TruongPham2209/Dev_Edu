@@ -5,7 +5,7 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ProviderEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.service.FileService;
+import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.common.util.RedisUtil;
 import com.pht.dev_edu.user.dto.RegisterUser;
 import com.pht.dev_edu.user.entity.RoleEntity;
@@ -170,12 +170,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new DataNotFoundException("User not found with username: " + username);
         }
 
-        var fileInfo = fileService.getFileInfo(avatarObjectKey);
+        var fileInfo = fileService.getFileInfo(username, avatarObjectKey);
         if (fileInfo == null) {
             throw new DataNotFoundException("File not found with object key: " + avatarObjectKey);
         }
 
-        if (!fileInfo.getOriginalFileContentType().startsWith("image/")) {
+        if (!fileInfo.getContentType().startsWith("image/")) {
             throw new BadRequestException("File must be an image");
         }
 
@@ -225,7 +225,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     cacheKey,
                     RoleEntity.class,
                     () -> roleRepository.findByName(roleName),
-                    RedisDurationConstant.USER_DATA_DURATION
+                    RedisDurationConstant.ROLE_DATA_DURATION
             );
             if (role == null) {
                 throw new DataNotFoundException("Role not found: " + roleName);

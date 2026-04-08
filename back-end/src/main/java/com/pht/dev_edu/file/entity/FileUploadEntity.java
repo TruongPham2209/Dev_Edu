@@ -1,11 +1,11 @@
-package com.pht.dev_edu.course.entity;
+package com.pht.dev_edu.file.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.pht.dev_edu.file.dto.UploadStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,49 +13,52 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "course")
+@Table(name = "file_upload")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CourseEntity {
+public class FileUploadEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
 
+    @Column(name = "object_key", nullable = false)
+    String objectKey;
+
+    @Column(name = "file_name")
+    String fileName;
+
+    @Column(name = "file_size")
+    Long fileSize;
+
+    @Column(name = "content_type")
+    String contentType;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    String title;
-
-    @Column(columnDefinition = "TEXT")
-    String description;
-
-    @Column(name = "category_id")
-    UUID categoryId;
-
-    @Column(name = "thumbnail_url", nullable = false, columnDefinition = "TEXT")
-    String thumbnailUrl;
-
-    @Column(name = "thumbnail_object_key", nullable = false)
-    String thumbnailObjectKey;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    BigDecimal price;
+    UploadStatus status;
 
     @Column(name = "created_by", nullable = false)
     String createdBy;
 
-    @Column(name = "deleted_at")
-    LocalDateTime deletedAt;
-
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     LocalDateTime createdAt;
+
+    @Column(name = "confirmed_at")
+    LocalDateTime confirmedAt;
+
+    @Column(name = "expired_at")
+    LocalDateTime expiredAt;
+
+    @Column(name = "check_sum")
+    String checkSum;
 
     @PrePersist
     public void prePersist() {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
         }
-
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }

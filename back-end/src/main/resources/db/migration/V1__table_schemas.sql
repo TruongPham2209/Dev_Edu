@@ -60,47 +60,50 @@ CREATE TABLE IF NOT EXISTS "forum_comment" (
 );
 
 CREATE TABLE IF NOT EXISTS "category" (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name            VARCHAR(255) NOT NULL UNIQUE,
-    created_by      VARCHAR(255) NOT NULL,
-    deleted_at      TIMESTAMP,
-    description     VARCHAR(255)
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name                    VARCHAR(255) NOT NULL UNIQUE,
+    thumbnail_object_key    VARCHAR(255) NOT NULL,
+    thumbnail_url           TEXT NOT NULL,
+    created_by              VARCHAR(255) NOT NULL,
+    deleted_at              TIMESTAMP,
+    description             VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS "course" (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title           VARCHAR(255) NOT NULL,
-    description     TEXT,
-    category_id     UUID,
-    price           DECIMAL(10, 2) NOT NULL,
-    created_by      VARCHAR(255) NOT NULL,
-    deleted_at      TIMESTAMP,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title                   VARCHAR(255) NOT NULL,
+    thumbnail_url           TEXT NOT NULL,
+    thumbnail_object_key    VARCHAR(255) NOT NULL,
+    description             TEXT,
+    category_id             UUID,
+    price                   DECIMAL(10, 2) NOT NULL,
+    created_by              VARCHAR(255) NOT NULL,
+    deleted_at              TIMESTAMP,
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "course_lecturer" (
-    course_id       UUID NOT NULL,
-    lecturer_id     UUID NOT NULL,
-    PRIMARY KEY (course_id, lecturer_id)
+    course_id           UUID NOT NULL,
+    lecturer_username   VARCHAR(255) NOT NULL,
+    PRIMARY KEY (course_id, lecturer_username)
 );
 
-CREATE TABLE IF NOT EXISTS "course_payment" (
+CREATE TABLE IF NOT EXISTS "payment_history" (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    course_id           UUID NOT NULL,
-    student_id          UUID NOT NULL,
+    username            VARCHAR(255) NOT NULL,
     amount              DECIMAL(10, 2) NOT NULL,
     status              VARCHAR(50) NOT NULL,
     payment_method      VARCHAR(50) NOT NULL,
     transaction_id      VARCHAR(255) NOT NULL,
-    payment_date        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (course_id, student_id)
+    payment_date        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "enrollment" (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    course_id       UUID NOT NULL,
-    student_id      UUID NOT NULL,
-    enrolled_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    course_id           UUID NOT NULL,
+    student_username    VARCHAR(255) NOT NULL,
+    payment_id          UUID NOT NULL,
+    enrolled_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (course_id, student_id)
 );
 
@@ -108,6 +111,7 @@ CREATE TABLE IF NOT EXISTS "lecture" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     course_id               UUID NOT NULL,
     title                   VARCHAR(255) NOT NULL,
+    summary                 VARCHAR(255),
     content                 TEXT,
     video_object_key        VARCHAR(255),
     lecture_order           INT NOT NULL,
@@ -130,18 +134,24 @@ CREATE TABLE IF NOT EXISTS "lecture_material" (
 CREATE TABLE IF NOT EXISTS "lecture_progress" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     lecture_id              UUID NOT NULL,
-    student_id              UUID NOT NULL,
+    student                 VARCHAR(255) NOT NULL,
     completed_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "lecture_comment" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     lecture_id              UUID NOT NULL,
-    student_id              UUID NOT NULL,
+    username                VARCHAR(255) NOT NULL,
     content                 TEXT NOT NULL,
+
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    parent_comment_id       UUID,
-    deleted_at              TIMESTAMP
+    deleted_at              TIMESTAMP,
+
+    root_comment_id         UUID, -- depth 0 comment
+    parent_comment_id       UUID, -- The parent depth
+    reply_to_comment_id     UUID, -- For depth 2 comments, this points to the parent comment; for depth 1 comments, this is null
+
+    depth                   INT NOT NULL -- 0 for top-level comment, 1 for reply, 2 for reply to reply (max depth 2)
 );
 
 CREATE TABLE IF NOT EXISTS "assignment" (
@@ -185,4 +195,32 @@ CREATE TABLE IF NOT EXISTS "livestream" (
     stream_url              TEXT,
     start_time              TIMESTAMP,
     end_time                TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "log_tracking" (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username                VARCHAR(255) NOT NULL,
+    aggregate_id            UUID NOT NULL,
+    action                  VARCHAR(255) NOT NULL,
+    details                 TEXT,
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "file_upload" (
+    id              UUID PRIMARY KEY,
+    object_key      VARCHAR(512) NOT NULL UNIQUE,
+
+    file_name       VARCHAR(255),
+    content_type    VARCHAR(100),
+    file_size       BIGINT,
+
+    status          VARCHAR(20) NOT NULL,
+
+    created_by      VARCHAR(100) NOT NULL,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    confirmed_at    TIMESTAMP,
+    expired_at      TIMESTAMP,
+
+    checksum        VARCHAR(128)
 );

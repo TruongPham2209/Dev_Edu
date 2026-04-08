@@ -2,7 +2,6 @@ package com.pht.dev_edu.user.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.dto.RoleEnum;
-import com.pht.dev_edu.common.exception.security.UnauthorizedException;
 import com.pht.dev_edu.common.util.ApiUtil;
 import com.pht.dev_edu.common.util.SecurityContextUtil;
 import com.pht.dev_edu.user.dto.RegisterUser;
@@ -34,10 +33,7 @@ public class LoginController {
             throw new IllegalArgumentException("Mật khẩu cũ và mật khẩu mới không được để trống.");
         }
 
-        String username = SecurityContextUtil.getCurrentUsername();
-        if (username == null) {
-            throw new UnauthorizedException("Vui lòng đăng nhập để thay đổi mật khẩu.");
-        }
+        String username = SecurityContextUtil.getCurrentUsernameForController();
         userService.changePassword(username, oldPassword, newPassword);
         return ApiUtil.buildSuccessResponse("Mật khẩu đã được thay đổi thành công.");
     }
@@ -64,10 +60,7 @@ public class LoginController {
             throw new IllegalArgumentException("avatarObjectKey không được để trống.");
         }
 
-        String username = SecurityContextUtil.getCurrentUsername();
-        if (username == null) {
-            throw new UnauthorizedException("Vui lòng đăng nhập để cập nhật avatar.");
-        }
+        String username = SecurityContextUtil.getCurrentUsernameForController();
         String newAvatarUrl = userService.updateAvatar(username, avatarObjectKey);
         return ApiUtil.buildSuccessResponse(newAvatarUrl);
     }
