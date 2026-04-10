@@ -22,19 +22,16 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ForumPostEntity {
+public class PostEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
 
-    @Column(nullable = false)
-    String title;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    String content;
-
     @Column(name = "author_id", nullable = false)
     UUID authorId;
+
+    @Column(name = "current_version_id")
+    UUID currentVersionId;
 
     @Column(name = "created_at")
     LocalDateTime createdAt;

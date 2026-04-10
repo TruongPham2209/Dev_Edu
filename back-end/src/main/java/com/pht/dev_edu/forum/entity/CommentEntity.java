@@ -21,7 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ForumCommentEntity {
+public class CommentEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
@@ -32,8 +32,8 @@ public class ForumCommentEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     String content;
 
-    @Column(name = "author_id", nullable = false)
-    UUID authorId;
+    @Column(name = "author", nullable = false)
+    String author;
 
     @Column(name = "parent_comment_id")
     UUID parentCommentId;
