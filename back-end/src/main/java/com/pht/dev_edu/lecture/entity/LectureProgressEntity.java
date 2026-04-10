@@ -29,8 +29,8 @@ public class LectureProgressEntity {
     @Column(name = "lecture_id", nullable = false)
     UUID lectureId;
 
-    @Column(name = "student_id", nullable = false)
-    UUID studentId;
+    @Column(name = "student", nullable = false)
+    String student;
 
     @Column(name = "completed_at")
     LocalDateTime completedAt;

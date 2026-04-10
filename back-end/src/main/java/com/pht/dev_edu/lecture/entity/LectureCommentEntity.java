@@ -29,8 +29,8 @@ public class LectureCommentEntity {
     @Column(name = "lecture_id", nullable = false)
     UUID lectureId;
 
-    @Column(name = "student_id", nullable = false)
-    UUID studentId;
+    @Column(nullable = false)
+    String username;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     String content;
@@ -38,17 +38,27 @@ public class LectureCommentEntity {
     @Column(name = "created_at")
     LocalDateTime createdAt;
 
+    @Column(name = "deleted_at")
+    LocalDateTime deletedAt;
+
+    @Column(name = "root_comment_id")
+    UUID rootCommentId;
+
     @Column(name = "parent_comment_id")
     UUID parentCommentId;
 
-    @Column(name = "deleted_at")
-    LocalDateTime deletedAt;
+    @Column(name = "reply_to_comment_id")
+    UUID replyToCommentId;
+
+    @Column(name = "depth", nullable = false)
+    Integer depth;
 
     @PrePersist
     public void prePersist() {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
         }
+
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }

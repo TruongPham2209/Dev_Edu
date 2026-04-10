@@ -4,12 +4,13 @@ import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.util.ApiUtil;
 import com.pht.dev_edu.common.util.SecurityContextUtil;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
-import com.pht.dev_edu.lecture.service.LectureCommentService;
+import com.pht.dev_edu.lecture.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RestController("LectureCommentController")
@@ -17,16 +18,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CommentController {
-    LectureCommentService lectureCommentService;
+    CommentService lectureCommentService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<ApiResponse> getComments(
             @RequestParam UUID lectureId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         String username = SecurityContextUtil.getCurrentUsernameForController();
-        var comments = lectureCommentService.getComments(username, lectureId, page, size);
+        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        var comments = lectureCommentService.getComments(authorities, username, lectureId, page, size);
         return ApiUtil.buildSuccessResponse(comments);
     }
 
@@ -38,21 +40,24 @@ public class CommentController {
             @RequestParam(defaultValue = "10") int size
     ) {
         String username = SecurityContextUtil.getCurrentUsernameForController();
-        var comments = lectureCommentService.getCommentsByParent(username, lectureId, parentCommentId, page, size);
+        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        var comments = lectureCommentService.getCommentsByParent(authorities, username, lectureId, parentCommentId, page, size);
         return ApiUtil.buildSuccessResponse(comments);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<ApiResponse> createComment(@RequestBody CommentRequest req) {
         String username = SecurityContextUtil.getCurrentUsernameForController();
-        var comment = lectureCommentService.create(username, req);
+        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        var comment = lectureCommentService.create(authorities, username, req);
         return ApiUtil.buildSuccessResponse(comment);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<ApiResponse> deleteComment(@RequestParam UUID commentId) {
         String username = SecurityContextUtil.getCurrentUsernameForController();
-        lectureCommentService.delete(username, commentId);
+        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        lectureCommentService.delete(authorities, username, commentId);
         return ApiUtil.buildSuccessResponse("Comment deleted successfully");
     }
 }

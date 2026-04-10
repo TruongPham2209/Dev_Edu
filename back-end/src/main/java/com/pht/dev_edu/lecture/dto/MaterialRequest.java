@@ -9,12 +9,13 @@ import java.util.UUID;
 
 @Data
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class CommentRequest {
-    @NotNull(message = "Lecture id must not be null")
+public class MaterialRequest {
+    @NotNull(message = "Lecture ID is required")
     UUID lectureId;
 
-    UUID parentCommentId; // nullable
+    @NotBlank(message = "Title is required")
+    String title;
 
-    @NotBlank(message = "Comment content must not be blank")
-    String content;
+    @NotBlank(message = "File object key is required")
+    String fileObjectKey;
 }

@@ -32,6 +32,9 @@ public class LectureEntity {
     @Column(nullable = false)
     String title;
 
+    @Column(nullable = false)
+    String summary;
+
     @Column(columnDefinition = "TEXT")
     String content;
 
@@ -46,6 +49,9 @@ public class LectureEntity {
 
     @Column(name = "created_by", nullable = false)
     String createdBy;
+
+    @Column(name = "duration")
+    Integer durationInSeconds;
 
     @Column(name = "uploaded_at")
     LocalDateTime uploadedAt;
