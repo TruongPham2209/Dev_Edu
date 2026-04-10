@@ -29,8 +29,8 @@ public class FeedbackEntity {
     @Column(name = "submission_id", nullable = false)
     UUID submissionId;
 
-    @Column(name = "lecturer_id", nullable = false)
-    UUID lecturerId;
+    @Column(name = "lecturer", nullable = false)
+    String lecturer;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     String feedback;
