@@ -29,8 +29,8 @@ public class SubmissionEntity {
     @Column(name = "assignment_id", nullable = false)
     UUID assignmentId;
 
-    @Column(name = "student_id", nullable = false)
-    UUID studentId;
+    @Column(name = "student_username", nullable = false)
+    String studentUsername;
 
     @Column(name = "file_object_key", nullable = false)
     String fileObjectKey;
