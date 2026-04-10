@@ -31,21 +31,22 @@ CREATE TABLE IF NOT EXISTS "user_role" (
 );
 
 CREATE TABLE IF NOT EXISTS "forum_post" (
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    title           VARCHAR(255) NOT NULL,
-    content         TEXT NOT NULL,
-    author_id       UUID NOT NULL,
-    tags            VARCHAR(255)[],
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    author                  VARCHAR(100) NOT NULL,
+    current_version_id      UUID,
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at              TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS "forum_post_history" (
+CREATE TABLE IF NOT EXISTS "forum_post_version" (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id         UUID NOT NULL,
+    version_number  INT NOT NULL,
     title           VARCHAR(255) NOT NULL,
     content         TEXT NOT NULL,
+    status          VARCHAR(50) NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -53,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "forum_comment" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     post_id                 UUID NOT NULL,
     content                 TEXT NOT NULL,
-    author_id               UUID NOT NULL,
+    author                  UUID NOT NULL,
     parent_comment_id       UUID,
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at              TIMESTAMP
@@ -114,6 +115,7 @@ CREATE TABLE IF NOT EXISTS "lecture" (
     summary                 VARCHAR(255),
     content                 TEXT,
     video_object_key        VARCHAR(255),
+    duration                INT, -- Duration in seconds
     lecture_order           INT NOT NULL,
     created_by              VARCHAR(255) NOT NULL,
     deleted_at              TIMESTAMP,
@@ -166,7 +168,7 @@ CREATE TABLE IF NOT EXISTS "assignment" (
 CREATE TABLE IF NOT EXISTS "assignment_submission" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     assignment_id           UUID NOT NULL,
-    student_id              UUID NOT NULL,
+    student_username        VARCHAR(255) NOT NULL,
     file_object_key         VARCHAR(255) NOT NULL,
     submitted_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (assignment_id, student_id)
@@ -175,14 +177,15 @@ CREATE TABLE IF NOT EXISTS "assignment_submission" (
 CREATE TABLE IF NOT EXISTS "submission_feedback" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     submission_id           UUID NOT NULL,
-    lecturer_id             UUID NOT NULL,
+    lecturer                VARCHAR(255) NOT NULL,
     feedback                TEXT NOT NULL,
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS "submission_tracking" (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    submission_id           UUID NOT NULL,
+    assignment_id           UUID NOT NULL,
+    actor                   VARCHAR(255) NOT NULL,
     status                  VARCHAR(50) NOT NULL,
     details                 TEXT,
     updated_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -8,4 +8,7 @@ public class RedisPrefixConstant {
 
     public static final String CATEGORY_PREFIX = "dev_edu:categories:"; // Prefix for category data
     public static final String COURSE_PREFIX = "dev_edu:courses:"; // Prefix for course data
+
+    public static final String LECTURE_PREFIX = "dev_edu:lectures:"; // Prefix for lecture data
+    public static final String LECTURE_COMMENT_PREFIX = "dev_edu:lecture_comments:"; // Prefix for lecture comment data
 }

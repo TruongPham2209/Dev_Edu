@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class FileController {
     FileService fileController;
 
-    @PostMapping("/")
+    @PostMapping("/pre-signed-url")
     public ResponseEntity<ApiResponse> uploadFile(@Valid @RequestBody FilePreSignUploadRequest req) {
         var fileInfo = fileController.generatePreSignedUrl(req);
         return ApiUtil.buildSuccessResponse(fileInfo);

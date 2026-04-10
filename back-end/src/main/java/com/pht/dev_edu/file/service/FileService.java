@@ -16,4 +16,6 @@ public interface FileService {
     String confirmImageUpload(String username, String fullObjectKey);
 
     void deleteFile(String fullObjectKey);
+
+    int getVideoDuration(String fullObjectKey);
 }

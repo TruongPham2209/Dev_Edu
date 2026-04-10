@@ -2,6 +2,7 @@ package com.pht.dev_edu.file.service;
 
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.exception.server.ServerInternalException;
 import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.file.dto.FilePreSignUploadRequest;
 import com.pht.dev_edu.file.dto.FileUploadResponse;
@@ -23,8 +24,11 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -217,6 +221,63 @@ public class FileServiceImpl implements FileService {
 
         // Xóa record trong database nếu có
         fileUploadRepository.deleteByObjectKey(fullObjectKey);
+    }
+
+    @Override
+    public int getVideoDuration(String fullObjectKey) {
+        var fileInfo = getFileInfo(fullObjectKey);
+
+        if (fileInfo == null) {
+            throw new DataNotFoundException("File not found.");
+        }
+
+        if (!fileInfo.getContentType().startsWith("video/")) {
+            throw new IllegalArgumentException("File is not a video.");
+        }
+
+        try {
+            String videoUrl = fileInfo.getDownloadUrl();
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    "ffprobe",
+                    "-v", "error",
+                    "-show_entries", "format=duration",
+                    "-of", "default=noprint_wrappers=1:nokey=1",
+                    videoUrl
+            );
+
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+
+            // 3. Đọc output
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream())
+            );
+
+            String output = reader.readLine();
+
+            // 4. Timeout (quan trọng)
+            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+
+            if (!finished) {
+                process.destroyForcibly();
+                throw new ServerInternalException("ffprobe timeout");
+            }
+
+            if (output == null || output.isBlank()) {
+                throw new ServerInternalException("Cannot read video duration");
+            }
+
+            // 5. Parse duration (seconds → int)
+            double duration = Double.parseDouble(output);
+
+            return (int) Math.ceil(duration);
+
+        } catch (Exception e) {
+            log.error("Failed to get video duration for file: {}", fullObjectKey, e);
+            throw new ServerInternalException("Failed to get video duration");
+        }
     }
 
     private String generateDownloadUrl(String bucket, String key) {
