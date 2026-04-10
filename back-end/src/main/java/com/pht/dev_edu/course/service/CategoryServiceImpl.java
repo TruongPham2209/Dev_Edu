@@ -13,6 +13,7 @@ import com.pht.dev_edu.common.util.SecurityContextUtil;
 import com.pht.dev_edu.course.dto.CategoryRequest;
 import com.pht.dev_edu.course.dto.CategoryResponse;
 import com.pht.dev_edu.course.entity.CategoryEntity;
+import com.pht.dev_edu.course.mapper.CategoryMapper;
 import com.pht.dev_edu.course.repo.CategoryRepository;
 import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.file.service.FileService;
@@ -33,9 +34,8 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryServiceImpl implements CategoryService {
     CategoryRepository categoryRepository;
-
     FileService fileService;
-
+    CategoryMapper categoryMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
@@ -45,7 +45,9 @@ public class CategoryServiceImpl implements CategoryService {
             case ACTIVE -> categoryRepository.findAllByDeletedAtIsNull();
             case DELETED -> categoryRepository.findAllByDeletedAtIsNotNull();
         };
-        return null;
+        return categories.stream()
+                .map(categoryMapper::entityToRes)
+                .toList();
     }
 
     @Override
@@ -61,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryResponse saveCategory(String author, CategoryRequest categoryReq) {
-        var category = author == null ? getCategoryById(categoryReq.getId()) : null;
+        var category = categoryReq.getId() != null ? getCategoryById(categoryReq.getId()) : categoryMapper.reqToEntity(categoryReq);
         if (category == null) {
             log.error("Category with id {} not found for update", categoryReq.getId());
             throw new DataNotFoundException("Category not found.");
@@ -85,9 +87,10 @@ public class CategoryServiceImpl implements CategoryService {
 
         // Update entity
         if (categoryReq.getId() != null) {
-            // Convert to entity
             category.setId(categoryReq.getId());
-//            category.setCreatedBy();
+            category.setName(categoryReq.getName());
+            category.setDescription(categoryReq.getDescription());
+            category.setThumbnailObjectKey(categoryReq.getThumbnailObjectKey());
 
             var tracking = TrackingEvent.builder()
                     .username(author)
@@ -96,11 +99,14 @@ public class CategoryServiceImpl implements CategoryService {
                     .details("Category updated with id: " + category.getId())
                     .build();
             kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        } else {
+            category.setCreatedBy(author);
         }
         category.setThumbnailUrl(thumbnailInfo.getPublicUrl());
         categoryRepository.save(category);
 
-        return null;
+        RedisUtil.invalidateCache(RedisPrefixConstant.CATEGORY_PREFIX + category.getId());
+        return categoryMapper.entityToRes(category);
     }
 
     @Override
