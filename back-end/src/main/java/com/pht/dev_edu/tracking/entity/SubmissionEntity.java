@@ -1,11 +1,8 @@
-package com.pht.dev_edu.assignment.entity;
+package com.pht.dev_edu.tracking.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import com.pht.dev_edu.assignment.dto.SubmissionEvent;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,16 +18,20 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TrackingEntity {
+public class SubmissionEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
 
-    @Column(name = "submission_id", nullable = false)
-    UUID submissionId;
+    @Column(name = "assignment_id", nullable = false)
+    UUID assignmentId;
 
     @Column(nullable = false)
-    String status;
+    String actor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    SubmissionEvent.Action status;
 
     @Column(columnDefinition = "TEXT")
     String details;
@@ -43,6 +44,7 @@ public class TrackingEntity {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
         }
+
         if (updatedAt == null) {
             updatedAt = LocalDateTime.now();
         }
