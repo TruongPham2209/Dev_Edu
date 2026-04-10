@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UUID> {
     boolean existsByCourseId(UUID courseId);
+
+    boolean existsByStudentUsernameAndCourseId(String studentUsername, UUID courseId);
 }

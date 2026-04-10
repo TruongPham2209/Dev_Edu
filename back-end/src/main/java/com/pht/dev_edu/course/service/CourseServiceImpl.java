@@ -15,6 +15,7 @@ import com.pht.dev_edu.course.dto.CourseResponse;
 import com.pht.dev_edu.course.entity.CourseEntity;
 import com.pht.dev_edu.course.entity.CourseLecturerEntity;
 import com.pht.dev_edu.course.entity.CourseLecturerId;
+import com.pht.dev_edu.course.mapper.CourseMapper;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.CourseRepository;
 import com.pht.dev_edu.course.repo.EnrollmentRepository;
@@ -47,6 +48,7 @@ public class CourseServiceImpl implements CourseService {
     UserService userService;
     CategoryService categoryService;
 
+    CourseMapper courseMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
@@ -57,7 +59,12 @@ public class CourseServiceImpl implements CourseService {
             throw new DataNotFoundException("Course not found.");
         }
 
-        return null;
+        if (courseEntity.getDeletedAt() != null) {
+            log.warn("Course with ID {} is deleted.", courseId);
+            throw new DataNotFoundException("Course not found.");
+        }
+
+        return courseMapper.entityToRes(courseEntity);
     }
 
     @Override
@@ -91,7 +98,7 @@ public class CourseServiceImpl implements CourseService {
             };
         }
 
-        var courseResponses = new CustomPaging<>(coursePage, c -> CourseResponse.builder().build());
+        var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
         if (pageRequest.getLastItemId() == null) {
             courseResponses.setCurrentPage(pageRequest.getPage());
         }
@@ -119,7 +126,7 @@ public class CourseServiceImpl implements CourseService {
             };
         }
 
-        var courseResponses = new CustomPaging<>(coursePage, c -> CourseResponse.builder().build());
+        var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
         if (pageRequest.getLastItemId() == null) {
             courseResponses.setCurrentPage(pageRequest.getPage());
         }
@@ -145,7 +152,7 @@ public class CourseServiceImpl implements CourseService {
             };
         }
 
-        var courseResponses = new CustomPaging<>(coursePage, c -> CourseResponse.builder().build());
+        var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
         if (pageRequest.getLastItemId() == null) {
             courseResponses.setCurrentPage(pageRequest.getPage());
         }
@@ -166,7 +173,11 @@ public class CourseServiceImpl implements CourseService {
         }
 
         // Convert course here
+        var courseEntity = courseMapper.reqToEntity(course);
         var thumbnailUrl = getThumbnailUrl(author, course.getThumbnailObjectKey());
+        courseEntity.setThumbnailUrl(thumbnailUrl);
+        courseEntity.setCreatedBy(author);
+        courseRepository.save(courseEntity);
 
         // Convert here and save here
         var courseLecturers = course.getLecturerUsernames().stream()
@@ -182,7 +193,7 @@ public class CourseServiceImpl implements CourseService {
                 .toList();
         courseLecturerRepository.saveAll(courseLecturers);
 
-        return null;
+        return courseMapper.entityToRes(courseEntity);
     }
 
     @Override
@@ -200,9 +211,12 @@ public class CourseServiceImpl implements CourseService {
         }
 
         // Convert here
+        var updatedCourse = courseMapper.reqToEntity(course);
         String thumbnailUrl = getThumbnailUrl(author, course.getThumbnailObjectKey());
-        existingCourse.setThumbnailUrl(thumbnailUrl);
-        courseRepository.save(existingCourse);
+        updatedCourse.setThumbnailUrl(thumbnailUrl);
+        updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
+        updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
+        courseRepository.save(updatedCourse);
 
         courseLecturerRepository.deleteByIdCourseId(course.getId());
 
@@ -227,17 +241,23 @@ public class CourseServiceImpl implements CourseService {
                 .details("Course updated with id: " + existingCourse.getId())
                 .build();
         kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        RedisUtil.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
 
-        return null;
+        return courseMapper.entityToRes(updatedCourse);
     }
 
     @Override
     @Transactional
     public void deleteCourse(String actor, UUID courseId) {
         var existingCourse = getCourseEntityById(courseId);
-        if (existingCourse == null || existingCourse.getDeletedAt() != null) {
-            log.error("Course with ID {} not found or already deleted.", courseId);
+        if (existingCourse == null) {
+            log.error("Course with ID {} not found.", courseId);
             throw new DataNotFoundException("Course not found.");
+        }
+
+        if (existingCourse.getDeletedAt() != null) {
+            log.warn("Course with ID {} is already deleted.", courseId);
+            return;
         }
 
         if (enrollmentRepository.existsByCourseId(courseId)) {
