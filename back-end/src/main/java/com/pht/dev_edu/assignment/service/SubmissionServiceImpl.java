@@ -3,7 +3,7 @@ package com.pht.dev_edu.assignment.service;
 import com.pht.dev_edu.assignment.dto.SubmissionEvent;
 import com.pht.dev_edu.assignment.dto.SubmissionRequest;
 import com.pht.dev_edu.assignment.dto.SubmissionResponse;
-import com.pht.dev_edu.assignment.mapper.SubmissionMapper;
+import com.pht.dev_edu.assignment.mapper.AssignmentSubmissionMapper;
 import com.pht.dev_edu.assignment.repo.SubmissionRepository;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Service("assignmentSubmissionService")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class SubmissionServiceImpl implements SubmissionService {
@@ -32,7 +32,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     AssignmentPermissionService assignmentPermissionService;
     FileService fileService;
 
-    SubmissionMapper submissionMapper;
+    AssignmentSubmissionMapper submissionMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override

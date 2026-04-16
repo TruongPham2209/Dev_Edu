@@ -6,7 +6,7 @@ import com.pht.dev_edu.assignment.entity.SubmissionEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface SubmissionMapper {
+public interface AssignmentSubmissionMapper {
     SubmissionResponse entityToResponse(SubmissionEntity submission);
 
     SubmissionEntity reqToEntity(SubmissionRequest submission);

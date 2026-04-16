@@ -9,7 +9,7 @@ import com.pht.dev_edu.common.util.RedisUtil;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
 import com.pht.dev_edu.lecture.dto.CommentResponse;
 import com.pht.dev_edu.lecture.entity.LectureCommentEntity;
-import com.pht.dev_edu.lecture.mapper.CommentMapper;
+import com.pht.dev_edu.lecture.mapper.LectureCommentMapper;
 import com.pht.dev_edu.lecture.repo.LectureCommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,12 +22,12 @@ import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Service("lectureCommentService")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CommentServiceImpl implements CommentService {
     LectureCommentRepository lectureCommentRepository;
-    CommentMapper commentMapper;
+    LectureCommentMapper commentMapper;
     LecturePermissionService lecturePermissionService;
 
     private static final int MAX_COMMENT_DEPTH = 2; // Count start from 0, so 0: root, 1: reply to root, 2: reply to reply

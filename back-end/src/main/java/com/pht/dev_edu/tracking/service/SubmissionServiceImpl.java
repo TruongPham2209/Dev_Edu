@@ -7,7 +7,7 @@ import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.tracking.entity.SubmissionEntity;
-import com.pht.dev_edu.tracking.mapper.SubmissionMapper;
+import com.pht.dev_edu.tracking.mapper.SubmissionTrackingMapper;
 import com.pht.dev_edu.tracking.repo.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,14 +22,14 @@ import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Service("submissionTrackingService")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class SubmissionServiceImpl implements SubmissionService {
     SubmissionRepository submissionRepository;
     AssignmentPermissionService assignmentPermissionService;
 
-    SubmissionMapper submissionMapper;
+    SubmissionTrackingMapper submissionMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override

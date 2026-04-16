@@ -1,10 +1,7 @@
 package com.pht.dev_edu.common.config;
 
 import com.pht.dev_edu.common.constant.WebEndpointConstant;
-import com.pht.dev_edu.common.security.AuthEntryPointHandler;
-import com.pht.dev_edu.common.security.AuthFailureHandler;
-import com.pht.dev_edu.common.security.OAuth2PasswordGrantAuthenticationConverter;
-import com.pht.dev_edu.common.security.OAuth2PasswordGrantAuthenticationProvider;
+import com.pht.dev_edu.common.security.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +22,7 @@ import org.springframework.security.oauth2.server.authorization.JdbcOAuth2Author
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
@@ -40,6 +38,7 @@ public class AuthorizationServerConfig {
     AuthEntryPointHandler entryPointHandler;
     AuthFailureHandler authFailureHandler;
     PasswordEncoder passwordEncoder;
+    LoggingSecurityFilter loggingSecurityFilter;
 
     @NonFinal
     @Value("${custom.oauth2.login-success-url}")
@@ -122,7 +121,8 @@ public class AuthorizationServerConfig {
                     logout.logoutSuccessHandler((request, response, authentication) -> {
                         response.sendRedirect(logoutSuccessUrl);
                     });
-                });
+                })
+                .addFilterBefore(loggingSecurityFilter, BearerTokenAuthenticationFilter.class);
 
         return http.build();
     }

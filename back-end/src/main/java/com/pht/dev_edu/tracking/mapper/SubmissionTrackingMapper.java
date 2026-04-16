@@ -5,6 +5,6 @@ import com.pht.dev_edu.tracking.entity.SubmissionEntity;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public interface SubmissionMapper {
+public interface SubmissionTrackingMapper {
     SubmissionLogResponse entityToResponse(SubmissionEntity entity);
 }
