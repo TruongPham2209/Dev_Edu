@@ -13,4 +13,6 @@ public class EventTrackingConstant {
     public static final String LECTURE_MATERIAL_DELETED = "lecture_material.deleted";
 
     public static final String FEEDBACK_DELETED = "feedback.deleted";
+
+    public static final String ASSIGNMENT_DELETED = "assignment.deleted";
 }

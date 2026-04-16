@@ -21,7 +21,6 @@ import com.pht.dev_edu.course.repo.CourseRepository;
 import com.pht.dev_edu.course.repo.EnrollmentRepository;
 import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.file.service.FileService;
-import com.pht.dev_edu.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +44,6 @@ public class CourseServiceImpl implements CourseService {
     EnrollmentRepository enrollmentRepository;
 
     FileService fileService;
-    UserService userService;
     CategoryService categoryService;
 
     CourseMapper courseMapper;
@@ -214,7 +212,6 @@ public class CourseServiceImpl implements CourseService {
         var updatedCourse = courseMapper.reqToEntity(course);
         String thumbnailUrl = getThumbnailUrl(author, course.getThumbnailObjectKey());
         updatedCourse.setThumbnailUrl(thumbnailUrl);
-        updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
         updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
         courseRepository.save(updatedCourse);
 

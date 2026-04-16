@@ -15,6 +15,8 @@ import com.pht.dev_edu.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +39,10 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     @Override
     public CustomPaging<SubmissionResponse> getSubmissionsByAssignment(Set<String> authorities, String actor, UUID assignmentId, int page, int size) {
-        assignmentPermissionService.checkViewAssignmentPermissionByAssignment(authorities, actor, assignmentId);
-        return null;
+        assignmentPermissionService.checkModifyAssignmentPermission(authorities, actor, assignmentId);
+        var pageable = PageRequest.of(page, size, Sort.by("submittedAt").descending());
+        var submissionPage = submissionRepository.findByAssignmentId(assignmentId, pageable);
+        return new CustomPaging<>(submissionPage, submissionMapper::entityToResponse);
     }
 
     @Override

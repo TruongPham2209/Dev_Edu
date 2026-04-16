@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,11 @@ public class LectureServiceImpl implements LectureService {
 
     @Override
     public List<LectureResponse> getLecturesByCourse(Set<String> authorities, String actor, UUID courseId) {
-        return List.of();
+        lecturePermissionService.checkViewPermissionByLecture(authorities, actor, courseId);
+        var lectures = lectureRepository.findLectureDetailsByCourseIdAndUsername(courseId, actor);
+        return lectures.stream()
+                .map(lectureMapper::projectionToResponse)
+                .toList();
     }
 
     @Override
@@ -49,8 +54,7 @@ public class LectureServiceImpl implements LectureService {
         var lecture = lectureRepository.findLectureDetailByIdAndUsername(lectureId, actor).orElseThrow(
                 () -> new RuntimeException("Lecture not found or you don't have permission to view it")
         );
-//        return lectureMapper.entityToResponse(lecture);
-        return null;
+        return lectureMapper.projectionToResponse(lecture);
     }
 
     @Override
@@ -68,15 +72,19 @@ public class LectureServiceImpl implements LectureService {
     public LectureResponse createLecture(Set<String> authorities, String actor, LectureRequest req) {
         lecturePermissionService.checkModifyPermissionByCourse(authorities, actor, req.getCourseId());
         var nextOrder = lectureRepository.getMaxOrderByCourseId(req.getCourseId()) + 1;
-        validateVideoObjectKey(actor, req.getVideoObjectKey());
-
-//        if ()
+        if (req.getVideoObjectKey() != null) {
+            validateVideoObjectKey(actor, req.getVideoObjectKey());
+            sendGetDurationEvent(req.getVideoObjectKey());
+        }
 
         var newLecture = lectureMapper.reqToEntity(req);
         newLecture.setLectureOrder(nextOrder);
         newLecture.setCreatedBy(actor);
-        lectureRepository.save(newLecture);
+        if (req.getVideoObjectKey() == null) {
+            newLecture.setDurationInSeconds(0);
+        }
 
+        lectureRepository.save(newLecture);
         return lectureMapper.entityToResponse(newLecture);
     }
 
@@ -95,14 +103,12 @@ public class LectureServiceImpl implements LectureService {
             throw new BadRequestException("Lecture not found.");
         }
 
-        validateVideoObjectKey(actor, req.getVideoObjectKey());
-        sendDeleteFileEvent(existingLecture.getVideoObjectKey());
-
         var updatedLecture = lectureMapper.reqToEntity(req);
         updatedLecture.setId(existingLecture.getId());
         updatedLecture.setCreatedBy(existingLecture.getCreatedBy());
         updatedLecture.setUploadedAt(existingLecture.getUploadedAt());
-        updatedLecture.setVideoObjectKey(req.getVideoObjectKey());
+        updatedLecture.setVideoObjectKey(existingLecture.getVideoObjectKey());
+
         lectureRepository.save(updatedLecture);
 
         var tracking = TrackingEvent.builder()
@@ -157,9 +163,17 @@ public class LectureServiceImpl implements LectureService {
     }
 
     private void sendDeleteFileEvent(String videoObjectKey) {
+        if (!StringUtils.hasText(videoObjectKey)) {
+            return;
+        }
+
         var deleteFileEvent = FileDeleteEvent.builder()
                 .fullObjectKey(videoObjectKey)
                 .build();
         kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
+    }
+
+    private void sendGetDurationEvent(String videoObjectKey) {
+
     }
 }

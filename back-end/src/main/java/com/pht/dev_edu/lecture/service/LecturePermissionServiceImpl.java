@@ -32,11 +32,11 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
 
     @Override
     public void checkViewPermissionByLecture(Set<String> authorities, String actor, UUID lectureId) {
+        var lecture = getLectureById(lectureId);
         if (authorities.contains(RoleEnum.ADMIN.name())) {
             return;
         }
 
-        var lecture = getLectureById(lectureId);
         if (!authorities.contains(RoleEnum.LECTURER.name())) {
             canAccessCourseByLecturer(actor, lecture.getCourseId());
             return;
@@ -47,6 +47,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
 
     @Override
     public void checkModifyPermissionByLecture(Set<String> authorities, String actor, UUID lectureId) {
+        var lecture = getLectureById(lectureId);
         if (authorities.contains(RoleEnum.ADMIN.name())) {
             return;
         }
@@ -55,12 +56,17 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
             throw new AccessDeniedException("Only lecturers can modify lectures");
         }
 
-        var lecture = getLectureById(lectureId);
         canAccessCourseByLecturer(actor, lecture.getId());
     }
 
     @Override
     public void checkModifyPermissionByCourse(Set<String> authorities, String actor, UUID courseId) {
+        var course = courseService.getCourseById(courseId);
+        if (course == null) {
+            log.error("Course with id {} not found", courseId);
+            throw new DataNotFoundException("Course not found");
+        }
+
         if (authorities.contains(RoleEnum.ADMIN.name())) {
             return;
         }
@@ -69,7 +75,6 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
             throw new AccessDeniedException("Only lecturers can modify courses");
         }
 
-        var course = courseService.getCourseById(courseId);
         canAccessCourseByLecturer(actor, course.getId());
     }
 
