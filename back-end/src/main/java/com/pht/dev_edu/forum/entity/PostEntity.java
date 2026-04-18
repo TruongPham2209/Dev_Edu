@@ -27,8 +27,8 @@ public class PostEntity {
     @Column(nullable = false, updatable = false)
     UUID id;
 
-    @Column(name = "author_id", nullable = false)
-    UUID authorId;
+    @Column(name = "author", nullable = false)
+    String author;
 
     @Column(name = "current_version_id")
     UUID currentVersionId;

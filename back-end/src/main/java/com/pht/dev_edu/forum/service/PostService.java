@@ -2,29 +2,26 @@ package com.pht.dev_edu.forum.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.forum.dto.PostRequest;
-import com.pht.dev_edu.forum.dto.PostResponse;
 import com.pht.dev_edu.forum.dto.PostStatus;
 import com.pht.dev_edu.forum.dto.PostVersionResponse;
+import com.pht.dev_edu.forum.dto.UpdatePostVersionResult;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface PostService {
-    CustomPaging<PostResponse> getPosts(UUID lastPostId);
+    CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor);
 
-    CustomPaging<PostResponse> searchPosts(String keyword, UUID lastPostId);
-
-    CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, UUID lastPostVersionId);
-
-    List<PostVersionResponse> getPostVersionsByPostId(UUID postId, boolean isAdmin);
+    List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId);
 
     PostVersionResponse create(String author, PostRequest postRequest);
 
     PostVersionResponse update(String author, PostRequest postRequest);
 
-    void deletePostVersion(String author, UUID postVersionId);
+    void deletePostVersion(Set<String> authorities, String author, UUID postVersionId);
 
-    void deletePost(String author, UUID postId);
+    void deletePost(Set<String> authorities, String author, UUID postId);
 
-    PostVersionResponse updatePostVersion(String actor, PostStatus postStatus, UUID postVersionId);
+    UpdatePostVersionResult updatePostVersion(String actor, PostStatus postStatus, UUID postVersionId);
 }

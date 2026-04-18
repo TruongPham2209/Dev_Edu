@@ -29,8 +29,17 @@ public class PostVersionEntity {
     @Column(name = "version_number", nullable = false)
     Integer versionNumber;
 
+    @Column(name = "thumb_url", nullable = false)
+    String thumbUrl;
+
+    @Column(name = "thumb_object_key", nullable = false)
+    String thumbObjectKey;
+
     @Column(nullable = false)
     String title;
+
+    @Column(name = "short_description", nullable = false, columnDefinition = "TEXT")
+    String shortDescription;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     String content;

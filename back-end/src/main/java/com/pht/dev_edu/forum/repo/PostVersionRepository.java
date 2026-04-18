@@ -1,9 +1,64 @@
 package com.pht.dev_edu.forum.repo;
 
+import com.pht.dev_edu.forum.dto.PostStatus;
 import com.pht.dev_edu.forum.entity.PostVersionEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface PostVersionRepository extends JpaRepository<PostVersionEntity, UUID> {
+    @Modifying // Remove if query throws an exception about "Modifying queries can only use void or int as return type!"
+    @Query(value = """
+            UPDATE forum_post_version
+            SET status = 'SUPERSEDED'
+            WHERE post_id = :postId
+              AND version_number < :version
+              AND status = 'PENDING'
+            RETURNING id
+            """, nativeQuery = true)
+    List<UUID> supersededOldVersionByPostId(UUID postId, int version);
+
+    boolean existsByPostIdAndStatusIn(UUID postId, List<PostStatus> statuses);
+
+    @Query(value = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM forum_post_version p
+                WHERE p.id = :postVersionId
+                  AND p.post_id IN (
+                      SELECT id FROM forum_post WHERE author = :author
+                  )
+            )
+            """, nativeQuery = true)
+    boolean isOwnerOfPostVersion(String author, UUID postVersionId);
+
+    @Modifying
+    @Query(value = """
+            DELETE FROM forum_post_version
+            WHERE   id      = :postVersionId
+            AND     status  = :status
+            """, nativeQuery = true)
+    int deleteByIdAndStatus(UUID id, PostStatus status);
+
+    List<PostVersionEntity> findByPostIdOrderByVersionNumberDesc(UUID postId);
+
+    List<PostVersionEntity> findByPostIdAndStatusOrderByVersionNumberDesc(UUID postId, PostStatus status);
+
+    @Query(value = """
+            SELECT *
+            FROM forum_post_version pv
+            WHERE   pv.status = :status
+            AND     (pv.updated_at, pv.id) < (:lastUpdatedAt, :lastId)
+            """, countQuery = """
+            SELECT COUNT(*)
+            FROM forum_post_version pv
+            WHERE   pv.status = :status
+            """,
+            nativeQuery= true)
+    Page<PostVersionEntity> findByStatusAndCursor(PostStatus status, UUID lastId, LocalDateTime lastUpdatedAt, org.springframework.data.domain.Pageable pageable);
 }

@@ -1,16 +1,38 @@
 package com.pht.dev_edu.forum.service;
 
+import com.pht.dev_edu.common.constant.EventTrackingConstant;
+import com.pht.dev_edu.common.constant.KafkaTopicConstant;
+import com.pht.dev_edu.common.constant.RedisDurationConstant;
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.common.dto.RoleEnum;
+import com.pht.dev_edu.common.dto.TimeStampCursor;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
+import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.PagingUtil;
+import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.forum.dto.PostRequest;
-import com.pht.dev_edu.forum.dto.PostResponse;
 import com.pht.dev_edu.forum.dto.PostStatus;
 import com.pht.dev_edu.forum.dto.PostVersionResponse;
+import com.pht.dev_edu.forum.dto.UpdatePostVersionResult;
+import com.pht.dev_edu.forum.entity.PostEntity;
+import com.pht.dev_edu.forum.mapper.PostVersionMapper;
+import com.pht.dev_edu.forum.repo.PostRepository;
+import com.pht.dev_edu.forum.repo.PostVersionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -18,48 +40,245 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class PostServiceImpl implements PostService {
+    PostVersionRepository postVersionRepository;
+    PostRepository postRepository;
+
+    FileService fileService;
+    PostVersionMapper postVersionMapper;
+    KafkaTemplate<String, Object> kafkaTemplate;
+
+    /*
+    Related post score: score = tag_similarity * 0.4 + text_similarity * 0.3 + save_cooccurrence * 0.3 => Dùng elastic search để tính toán điểm số này, sau đó sắp xếp và trả về kết quả
+     */
     @Override
-    public CustomPaging<PostResponse> getPosts(UUID lastPostId) {
-        return null;
+    public CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor) {
+        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "updated_at").and(Sort.by(Sort.Direction.DESC, "id")));
+        TimeStampCursor cursor = !StringUtils.hasText(lastCursor)
+                ? TimeStampCursor.getDefaultCursor(true)
+                : PagingUtil.decodeTimeStampCursor(lastCursor);
+        var postVersionPage = postVersionRepository.findByStatusAndCursor(status, cursor.getId(), cursor.getTimeStamp(), pageable);
+
+        var responsePaging = new CustomPaging<>(postVersionPage, postVersionMapper::entityToRes);
+        var lastPostVersion = postVersionPage.getContent().isEmpty() ? null : postVersionPage.getContent().getLast();
+        var nextCursor = lastPostVersion != null
+                ? PagingUtil.encodeTimeStampCursor(new TimeStampCursor(lastPostVersion.getUpdatedAt(), lastPostVersion.getId()))
+                : null;
+        responsePaging.setNextCursor(nextCursor);
+
+        return responsePaging;
     }
 
     @Override
-    public CustomPaging<PostResponse> searchPosts(String keyword, UUID lastPostId) {
-        return null;
+    public List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId) {
+        var post = getPostById(postId);
+        if (post == null) {
+            log.warn("Post {} not found", postId);
+            throw new DataNotFoundException("Post not found");
+        }
+
+        if (post.getDeletedAt() != null) {
+            log.warn("Post {} is deleted, cannot access versions for author {}", postId, actor);
+            throw new DataNotFoundException("Post not found");
+        }
+
+        boolean canAccessAllStatuses = post.getAuthor().equals(actor) || authorities.contains(RoleEnum.ADMIN.name());
+        var postVersions = canAccessAllStatuses
+                ? postVersionRepository.findByPostIdOrderByVersionNumberDesc(postId)
+                : postVersionRepository.findByPostIdAndStatusOrderByVersionNumberDesc(postId, PostStatus.APPROVED);
+        return postVersions.stream()
+                .map(postVersionMapper::entityToRes)
+                .toList();
     }
 
     @Override
-    public CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, UUID lastPostVersionId) {
-        return null;
-    }
-
-    @Override
-    public List<PostVersionResponse> getPostVersionsByPostId(UUID postId, boolean isAdmin) {
-        return List.of();
-    }
-
-    @Override
+    @Transactional
     public PostVersionResponse create(String author, PostRequest postRequest) {
-        return null;
+        var post = PostEntity.builder()
+                .author(author)
+                .currentVersionId(null) // Will be set after creating the first version
+                .build();
+        postRepository.save(post);
+
+        var thumbUrl = validateAndGetThumbUrl(postRequest.getThumbObjectKey(), author);
+
+        var postVersion = postVersionMapper.reqToEntity(postRequest);
+        postVersion.setPostId(post.getId());
+        postVersion.setThumbUrl(thumbUrl);
+        postVersionRepository.save(postVersion);
+
+        return postVersionMapper.entityToRes(postVersion);
     }
 
     @Override
+    @Transactional
     public PostVersionResponse update(String author, PostRequest postRequest) {
-        return null;
+        var post = getPostById(postRequest.getPostId());
+        if (post == null) {
+            log.warn("Post {} not found for author {}", postRequest.getPostId(), author);
+            throw new DataNotFoundException("Post not found");
+        }
+
+        if (post.getDeletedAt() != null) {
+            log.warn("Post {} is deleted, cannot update for author {}", postRequest.getPostId(), author);
+            throw new DataNotFoundException("Post not found");
+        }
+
+        if (!post.getAuthor().equals(author)) {
+            log.warn("Author {} is not the owner of post {}, cannot update", author, postRequest.getPostId());
+            throw new DataNotFoundException("Post not found");
+        }
+
+        if (!postVersionRepository.existsByPostIdAndStatusIn(post.getId(), List.of(PostStatus.PENDING, PostStatus.APPROVED))) {
+            log.warn("No pending or approved version found for post {}, cannot update for author {}", postRequest.getPostId(), author);
+            throw new DataNotFoundException("Cannot update this post");
+        }
+
+        var thumbUrl = validateAndGetThumbUrl(postRequest.getThumbObjectKey(), author);
+
+        var postVersion = postVersionMapper.reqToEntity(postRequest);
+        postVersion.setPostId(post.getId());
+        postVersion.setThumbUrl(thumbUrl);
+        postVersionRepository.save(postVersion);
+
+        return postVersionMapper.entityToRes(postVersion);
     }
 
     @Override
-    public void deletePostVersion(String author, UUID postVersionId) {
+    @Transactional
+    public void deletePostVersion(Set<String> authorities, String author, UUID postVersionId) {
+        if (!authorities.contains(RoleEnum.ADMIN.name()) && !postVersionRepository.isOwnerOfPostVersion(author, postVersionId)) {
+            log.warn("Author {} is not the owner of post version {}, cannot delete", author, postVersionId);
+            throw new DataNotFoundException("Post version not found");
+        }
 
+        int deletedCount = postVersionRepository.deleteByIdAndStatus(postVersionId, PostStatus.PENDING);
+        if (deletedCount == 0) {
+            log.warn("Post version {} not found or not in pending status, cannot delete for author {}", postVersionId, author);
+            throw new DataNotFoundException("Post version not found");
+        }
+
+        var trackingEvent = TrackingEvent.builder()
+                .aggregateId(postVersionId)
+                .action(EventTrackingConstant.POST_VERSION_DELETED)
+                .username(author)
+                .details(String.format("Deleted post version %s", postVersionId))
+                .build();
+        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
     }
 
     @Override
-    public void deletePost(String author, UUID postId) {
+    @Transactional
+    public void deletePost(Set<String> authorities, String author, UUID postId) {
+        var post = getPostById(postId);
+        if (post == null) {
+            log.warn("Post {} not found", postId);
+            return;
+        }
 
+        if (!post.getAuthor().equals(author) && !authorities.contains(RoleEnum.ADMIN.name())) {
+            log.error("Author {} is not the owner of post {}, cannot delete", author, postId);
+            throw new DataNotFoundException("Post not found");
+        }
+
+        if (post.getDeletedAt() != null) {
+            log.warn("Post {} is already deleted", postId);
+            return;
+        }
+
+        post.setDeletedAt(LocalDateTime.now());
+        postRepository.save(post);
+
+        // Invalidate cache
+        RedisUtil.invalidateCache(RedisPrefixConstant.POST_PREFIX + postId);
+
+        var trackingEvent = TrackingEvent.builder()
+                .aggregateId(postId)
+                .action(EventTrackingConstant.POST_DELETED)
+                .username(author)
+                .details(String.format("Deleted post %s", postId))
+                .build();
+        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
     }
 
     @Override
-    public PostVersionResponse updatePostVersion(String actor, PostStatus postStatus, UUID postVersionId) {
-        return null;
+    @Transactional
+    public UpdatePostVersionResult updatePostVersion(String actor, PostStatus postStatus, UUID postVersionId) {
+        if (postStatus == PostStatus.PENDING || postStatus == PostStatus.SUPERSEDED) {
+            log.warn("Invalid post status {} for updating post version {}", postStatus, postVersionId);
+            throw new IllegalArgumentException("Invalid post status for updating post version");
+        }
+
+        var postVersion = postVersionRepository.findById(postVersionId)
+                .orElseThrow(() -> new DataNotFoundException("Post version not found"));
+        if (postVersion.getStatus() != PostStatus.PENDING) {
+            log.warn("Post version {} is not in pending status, cannot update to {}", postVersionId, postStatus);
+            throw new IllegalStateException("Post version is not in pending status, cannot update");
+        }
+
+        var post = getPostById(postVersion.getPostId());
+        if (post == null) {
+            log.warn("Post {} not found for post version {}", postVersion.getPostId(), postVersionId);
+            throw new DataNotFoundException("Post not found for post version");
+        }
+
+        // Update older version to SUPERSEDED
+        var updatedIds = postVersionRepository.supersededOldVersionByPostId(post.getId(), postVersion.getVersionNumber());
+
+        if (post.getDeletedAt() != null) {
+            log.warn("Post {} is deleted, cannot update post version {}", post.getId(), postVersionId);
+            throw new IllegalStateException("Post is deleted, cannot update post version");
+        }
+
+        postVersion.setStatus(postStatus);
+        postVersion.setUpdatedAt(LocalDateTime.now());
+        postVersionRepository.save(postVersion);
+
+        if (postStatus == PostStatus.APPROVED) {
+            post.setCurrentVersionId(postVersion.getId());
+            post.setUpdatedAt(LocalDateTime.now());
+            postRepository.save(post);
+
+            // Invalidate cache
+            RedisUtil.invalidateCache(RedisPrefixConstant.POST_PREFIX + post.getId());
+        }
+
+        var trackingEvent = TrackingEvent.builder()
+                .aggregateId(postVersion.getId())
+                .action(EventTrackingConstant.POST_STATUS_UPDATED)
+                .username(actor)
+                .details(String.format("Updated post version %s to status %s", postVersionId, postStatus))
+                .build();
+        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
+
+        return new UpdatePostVersionResult(
+                updatedIds,
+                postStatus,
+                post.getCurrentVersionId()
+        );
+    }
+
+    private PostEntity getPostById(UUID postId) {
+        return RedisUtil.getDataFromCacheOrDb(
+                RedisPrefixConstant.POST_PREFIX + postId,
+                PostEntity.class,
+                () -> postRepository.findById(postId),
+                RedisDurationConstant.POST_DATA_DURATION
+        );
+    }
+
+    private String validateAndGetThumbUrl(String objectKey, String author) {
+        var fileInfo = fileService.getFileInfo(objectKey, author);
+        if (fileInfo == null) {
+            log.warn("File with object key {} not found for author {}", objectKey, author);
+            throw new DataNotFoundException("File not found for thumbnail");
+        }
+
+        var thumbUrl = fileInfo.getPublicUrl();
+        if (!StringUtils.hasText(thumbUrl)) {
+            log.warn("Thumbnail URL is empty for file with object key {} and author {}", objectKey, author);
+            throw new IllegalStateException("Thumbnail URL is empty");
+        }
+
+        return thumbUrl;
     }
 }
