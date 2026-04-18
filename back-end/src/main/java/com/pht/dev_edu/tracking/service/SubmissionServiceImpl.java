@@ -3,9 +3,8 @@ package com.pht.dev_edu.tracking.service;
 import com.pht.dev_edu.assignment.dto.SubmissionEvent;
 import com.pht.dev_edu.assignment.dto.SubmissionLogResponse;
 import com.pht.dev_edu.assignment.service.AssignmentPermissionService;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.common.util.KafkaUtil;
 import com.pht.dev_edu.tracking.entity.SubmissionEntity;
 import com.pht.dev_edu.tracking.mapper.SubmissionTrackingMapper;
 import com.pht.dev_edu.tracking.repo.SubmissionRepository;
@@ -57,10 +56,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         submissionRepository.save(submissionEntity);
 
         if (submissionEvent.getAction() == SubmissionEvent.Action.UNSUBMITTED) {
-            var deleteFileEvent = FileDeleteEvent.builder()
-                    .fullObjectKey(submissionEvent.getFullObjectKey())
-                    .build();
-            kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
+            KafkaUtil.sendDeleteFileEvent(submissionEvent.getFullObjectKey());
         }
     }
 }

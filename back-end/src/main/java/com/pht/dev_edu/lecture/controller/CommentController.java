@@ -3,8 +3,10 @@ package com.pht.dev_edu.lecture.controller;
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.util.ApiUtil;
 import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.lecture.dto.CommentPageRequest;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
 import com.pht.dev_edu.lecture.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
@@ -20,28 +22,16 @@ import java.util.UUID;
 public class CommentController {
     CommentService lectureCommentService;
 
-    @GetMapping
+    @PostMapping("/filter")
     public ResponseEntity<ApiResponse> getComments(
-            @RequestParam UUID lectureId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestBody @Valid CommentPageRequest req
     ) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
-        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
-        var comments = lectureCommentService.getComments(authorities, username, lectureId, page, size);
-        return ApiUtil.buildSuccessResponse(comments);
-    }
+        req.setDefaultPage();
 
-    @GetMapping("/parent")
-    public ResponseEntity<ApiResponse> getCommentsByParent(
-            @RequestParam UUID lectureId,
-            @RequestParam UUID parentCommentId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
         String username = SecurityContextUtil.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
-        var comments = lectureCommentService.getCommentsByParent(authorities, username, lectureId, parentCommentId, page, size);
+
+        var comments = lectureCommentService.getComments(authorities, username, req);
         return ApiUtil.buildSuccessResponse(comments);
     }
 

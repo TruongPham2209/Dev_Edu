@@ -35,13 +35,14 @@ public class AssignmentPermissionServiceImpl implements AssignmentPermissionServ
 
     @Override
     public void checkModifyAssignmentPermission(Set<String> authorities, String actor, UUID assignmentId) {
+        var assignment = assignmentRepository.findById(assignmentId).orElseThrow(
+                () -> new DataNotFoundException("Assignment not found.")
+        );
+
         if (authorities.contains(RoleEnum.ADMIN.name())) {
             return;
         }
 
-        var assignment = assignmentRepository.findById(assignmentId).orElseThrow(
-                () -> new DataNotFoundException("Assignment not found.")
-        );
         lecturePermissionService.checkModifyPermissionByLecture(authorities, actor, assignment.getLectureId());
     }
 }

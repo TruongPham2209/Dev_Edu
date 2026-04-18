@@ -1,6 +1,6 @@
 package com.pht.dev_edu.tracking.service;
 
-import com.pht.dev_edu.common.dto.TrackingEvent;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.tracking.entity.LogEntity;
 import com.pht.dev_edu.tracking.repo.LogRepository;
 import lombok.RequiredArgsConstructor;

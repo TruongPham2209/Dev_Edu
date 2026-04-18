@@ -4,8 +4,11 @@ import com.pht.dev_edu.course.entity.CourseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
@@ -20,78 +23,78 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
     Page<CourseEntity> findByDeletedAtIsNotNull(Pageable pageable);
 
     @Query(value = """
-            SELECT  c
-            FROM    CourseEntity c
-            WHERE   c.id > :lastId
+            SELECT  *
+            FROM    course
+            WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             """, countQuery = """
-            SELECT  COUNT(c.id)
-            FROM    CourseEntity c
-            """)
-    Page<CourseEntity> findByCursor(UUID lastId, Pageable pageable);
+            SELECT  COUNT(id)
+            FROM    course
+            """, nativeQuery = true)
+    Page<CourseEntity> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  c
-            FROM    CourseEntity c
-            WHERE   c.id > :lastId
-            AND    c.deletedAt IS NULL
+            SELECT  *
+            FROM    course
+            WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
+            AND     deleted_at IS NULL
             """, countQuery = """
             SELECT  COUNT(c.id)
-            FROM    CourseEntity c
-            WHERE   c.deletedAt IS NULL
-            """)
-    Page<CourseEntity> findActiveCoursesByCursor(UUID lastId, Pageable pageable);
+            FROM    course c
+            WHERE   c.deleted_at IS NULL
+            """, nativeQuery = true)
+    Page<CourseEntity> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  c
-            FROM    CourseEntity c
-            WHERE   c.id > :lastId
-            AND     c.deletedAt IS NOT NULL
+            SELECT  *
+            FROM    course
+            WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
+            AND     deleted_at IS NOT NULL
             """, countQuery = """
-            SELECT  COUNT(c.id)
-            FROM    CourseEntity c
-            WHERE   c.deletedAt IS NOT NULL
-            """)
-    Page<CourseEntity> findDeletedCoursesByCursor(UUID lastId, Pageable pageable);
+            SELECT  COUNT(id)
+            FROM    course
+            WHERE   deleted_at IS NOT NULL
+            """, nativeQuery = true)
+    Page<CourseEntity> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  c
-            FROM    CourseEntity c
-            WHERE   c.categoryId = :categoryId
-            AND     c.id > :lastId
+            SELECT  *
+            FROM    course
+            WHERE   c.category_id = :categoryId
+            AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             """, countQuery = """
-            SELECT  COUNT(c.id)
-            FROM    CourseEntity c
-            WHERE   c.categoryId = :categoryId
-            """)
-    Page<CourseEntity> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, Pageable pageable);
+            SELECT  COUNT(id)
+            FROM    course
+            WHERE   c.category_id = :categoryId
+            """, nativeQuery = true)
+    Page<CourseEntity> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  c
-            FROM    CourseEntity c
-            WHERE   c.id > :lastId
+            SELECT  *
+            FROM    course
+            WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             AND     c.categoryId = :categoryId
             AND     c.deletedAt IS NULL
             """, countQuery = """
-            SELECT  COUNT(c.id)
-            FROM    CourseEntity c
-            WHERE   c.categoryId = :categoryId
-            AND     c.deletedAt IS NULL
-            """)
-    Page<CourseEntity> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, Pageable pageable);
+            SELECT  COUNT(id)
+            FROM    course
+            WHERE   c.category_id = :categoryId
+            AND     c.deleted_at IS NULL
+            """, nativeQuery = true)
+    Page<CourseEntity> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  c
-            FROM    CourseEntity c
-            WHERE   c.id > :lastId
+            SELECT  *
+            FROM    course
+            WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             AND     c.categoryId = :categoryId
             AND     c.deletedAt IS NOT NULL
             """, countQuery = """
-            SELECT  COUNT(c.id)
-            FROM    CourseEntity c
-            WHERE   c.categoryId = :categoryId
-            AND     c.deletedAt IS NOT NULL
-            """)
-    Page<CourseEntity> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, Pageable pageable);
+            SELECT  COUNT(id)
+            FROM    course
+            WHERE   c.category_id = :categoryId
+            AND     c.deleted_at IS NOT NULL
+            """, nativeQuery = true)
+    Page<CourseEntity> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
                     SELECT  *
@@ -120,19 +123,19 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             SELECT  *
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.id > :lastId
+            AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             """, countQuery = """
             SELECT  *
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             """, nativeQuery = true)
-    Page<CourseEntity> searchCoursesByCursor(String keyword, UUID lastId, Pageable pageable);
+    Page<CourseEntity> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
             SELECT  *
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.id > :lastId
+            AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             AND     c.deleted_at IS NULL
             """, countQuery = """
             SELECT  *
@@ -140,13 +143,13 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at IS NULL
             """, nativeQuery = true)
-    Page<CourseEntity> searchActiveCoursesByCursor(String keyword, UUID lastId, Pageable pageable);
+    Page<CourseEntity> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
             SELECT  *
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.id > :lastId
+            AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             AND     c.deleted_at IS NOT NULL
             """, countQuery = """
             SELECT  *
@@ -154,5 +157,16 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseEntity> searchDeletedCoursesByCursor(String keyword, UUID lastId, Pageable pageable);
+    Page<CourseEntity> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+
+    boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
+
+    @Modifying
+    @Query(value = """
+            DELETE FROM course
+            WHERE deleted_at IS NOT NULL
+            AND deleted_at < :cutoffTime
+            RETURNING thumbnail_object_key
+            """, nativeQuery = true)
+    List<String> deleteCoursesBeforeCutoffTimeAndReturnObjectKey(LocalDateTime cutoffTime);
 }

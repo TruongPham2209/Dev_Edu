@@ -5,6 +5,7 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ProviderEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.common.util.RedisUtil;
 import com.pht.dev_edu.user.dto.RegisterUser;
@@ -175,7 +176,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new DataNotFoundException("File not found with object key: " + avatarObjectKey);
         }
 
-        if (!fileInfo.getContentType().startsWith("image/")) {
+        boolean isImageContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.IMAGE);
+        if (!isImageContentType) {
             throw new BadRequestException("File must be an image");
         }
 

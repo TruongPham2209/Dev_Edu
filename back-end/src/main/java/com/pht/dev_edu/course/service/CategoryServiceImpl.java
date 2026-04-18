@@ -5,9 +5,10 @@ import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ItemStatus;
-import com.pht.dev_edu.common.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
+import com.pht.dev_edu.common.util.KafkaUtil;
 import com.pht.dev_edu.common.util.RedisUtil;
 import com.pht.dev_edu.common.util.SecurityContextUtil;
 import com.pht.dev_edu.course.dto.CategoryRequest;
@@ -15,8 +16,9 @@ import com.pht.dev_edu.course.dto.CategoryResponse;
 import com.pht.dev_edu.course.entity.CategoryEntity;
 import com.pht.dev_edu.course.mapper.CategoryMapper;
 import com.pht.dev_edu.course.repo.CategoryRepository;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.course.repo.CourseRepository;
 import com.pht.dev_edu.file.service.FileService;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryServiceImpl implements CategoryService {
+    CourseRepository courseRepository;
     CategoryRepository categoryRepository;
     FileService fileService;
     CategoryMapper categoryMapper;
@@ -74,23 +77,29 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BadRequestException("Category not found.");
         }
 
-        var thumbnailInfo = fileService.getFileInfo(author, categoryReq.getThumbnailObjectKey());
-        if (!StringUtils.hasText(thumbnailInfo.getPublicUrl())) {
-            var deleteFileEvent = FileDeleteEvent.builder()
-                    .fullObjectKey(categoryReq.getThumbnailObjectKey())
-                    .build();
-            kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
+        boolean isNewObjectKey = categoryReq.getId() == null || !categoryReq.getThumbnailObjectKey().equals(category.getThumbnailObjectKey());
+        String thumbnailObjectKey = isNewObjectKey ? categoryReq.getThumbnailObjectKey() : category.getThumbnailObjectKey();
+        String thumbnailUrl = category.getThumbnailUrl();
 
-            log.error("Thumbnail with object key {} does not have a public URL", categoryReq.getThumbnailObjectKey());
-            throw new BadRequestException("Thumbnail is not accessible.");
+        if (isNewObjectKey) {
+            var thumbnailInfo = fileService.getFileInfo(author, categoryReq.getThumbnailObjectKey());
+            boolean isImage = FileContentTypeUtil.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtil.FileType.IMAGE);
+            if (!StringUtils.hasText(thumbnailInfo.getPublicUrl()) || !isImage) {
+                KafkaUtil.sendDeleteFileEvent(categoryReq.getThumbnailObjectKey());
+
+                log.error("Thumbnail with object key {} does not have a public URL", categoryReq.getThumbnailObjectKey());
+                throw new BadRequestException("Thumbnail is not accessible.");
+            }
+
+            thumbnailUrl = thumbnailInfo.getPublicUrl();
         }
 
         // Update entity
         if (categoryReq.getId() != null) {
-            category.setId(categoryReq.getId());
             category.setName(categoryReq.getName());
             category.setDescription(categoryReq.getDescription());
-            category.setThumbnailObjectKey(categoryReq.getThumbnailObjectKey());
+            category.setThumbnailObjectKey(thumbnailObjectKey);
+            category.setThumbnailUrl(thumbnailUrl);
 
             var tracking = TrackingEvent.builder()
                     .username(author)
@@ -102,7 +111,7 @@ public class CategoryServiceImpl implements CategoryService {
         } else {
             category.setCreatedBy(author);
         }
-        category.setThumbnailUrl(thumbnailInfo.getPublicUrl());
+        category.setThumbnailUrl(thumbnailUrl);
         categoryRepository.save(category);
 
         RedisUtil.invalidateCache(RedisPrefixConstant.CATEGORY_PREFIX + category.getId());
@@ -121,6 +130,11 @@ public class CategoryServiceImpl implements CategoryService {
         if (category.getDeletedAt() != null) {
             log.warn("Category with id {} is already deleted", categoryId);
             return;
+        }
+
+        if (courseRepository.existsByCategoryIdAndDeletedAtIsNull(categoryId)) {
+            log.error("Cannot delete category with id {} because it has active courses", categoryId);
+            throw new BadRequestException("Cannot delete category because it has active courses.");
         }
 
         var tracking = TrackingEvent.builder()

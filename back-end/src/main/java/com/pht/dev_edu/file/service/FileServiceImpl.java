@@ -1,9 +1,9 @@
 package com.pht.dev_edu.file.service;
 
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.server.ServerInternalException;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
+import com.pht.dev_edu.common.util.KafkaUtil;
 import com.pht.dev_edu.file.dto.FilePreSignUploadRequest;
 import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.dto.UploadStatus;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -147,7 +148,7 @@ public class FileServiceImpl implements FileService {
 
         // expired + grace
         if (LocalDateTime.now().isAfter(fileUpload.getExpiredAt().plusMinutes(1))) {
-            sendDeleteFileEvent(fullObjectKey);
+            KafkaUtil.sendDeleteFileEvent(fullObjectKey);
             throw new DataNotFoundException("File expired.");
         }
 
@@ -156,7 +157,7 @@ public class FileServiceImpl implements FileService {
             try {
                 return getFileInfo(fullObjectKey);
             } catch (NoSuchKeyException e) {
-                sendDeleteFileEvent(fullObjectKey);
+                KafkaUtil.sendDeleteFileEvent(fullObjectKey);
                 log.error("File not found on S3 for object key: {}", fullObjectKey);
                 throw new DataNotFoundException("File not found.");
             }
@@ -198,7 +199,44 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String confirmImageUpload(String username, String fullObjectKey) {
-        return "";
+        var fileUpload = fileUploadRepository.findByObjectKey(fullObjectKey)
+                .orElseThrow(() -> new DataNotFoundException("File not found."));
+
+        if (!fileUpload.getCreatedBy().equals(username)) {
+            throw new IllegalArgumentException("File not found.");
+        }
+
+        if (fileUpload.getStatus() == UploadStatus.FAILED) {
+            KafkaUtil.sendDeleteFileEvent(fullObjectKey);
+            throw new IllegalStateException("Upload file failed.");
+        }
+
+        // expired + grace
+        if (LocalDateTime.now().isAfter(fileUpload.getExpiredAt().plusMinutes(1))) {
+            KafkaUtil.sendDeleteFileEvent(fullObjectKey);
+            throw new DataNotFoundException("File expired.");
+        }
+
+        boolean isImage = FileContentTypeUtil.isValidContentType(
+                fileUpload.getContentType(),
+                FileContentTypeUtil.FileType.IMAGE
+        );
+        if (!isImage) {
+            throw new IllegalArgumentException("File is not an image.");
+        }
+
+        var fileInfo = getFileInfo(fullObjectKey);
+        if (fileInfo == null) {
+            throw new DataNotFoundException("File not found.");
+        }
+        if (!StringUtils.hasText(fileInfo.getPublicUrl())) {
+            throw new IllegalStateException("File is not public.");
+        }
+
+        fileUpload.setConfirmedAt(LocalDateTime.now());
+        fileUpload.setStatus(UploadStatus.COMPLETED);
+        fileUploadRepository.save(fileUpload);
+        return fileInfo.getPublicUrl();
     }
 
     @Override
@@ -338,7 +376,7 @@ public class FileServiceImpl implements FileService {
             log.error("Content type mismatch: expected={}, actual={}",
                     fileUpload.getContentType(), head.contentType());
 
-            sendDeleteFileEvent(fileUpload.getObjectKey());
+            KafkaUtil.sendDeleteFileEvent(fileUpload.getObjectKey());
             throw new IllegalStateException("Content type not match.");
         }
 
@@ -349,16 +387,9 @@ public class FileServiceImpl implements FileService {
                 log.error("File size mismatch: expected={}, actual={}",
                         fileUpload.getFileSize(), head.contentLength());
 
-                sendDeleteFileEvent(fileUpload.getObjectKey());
+                KafkaUtil.sendDeleteFileEvent(fileUpload.getObjectKey());
                 throw new IllegalStateException("File size not match.");
             }
         }
-    }
-
-    private void sendDeleteFileEvent(String fullObjectKey) {
-        var deleteFileEvent = FileDeleteEvent.builder()
-                .fullObjectKey(fullObjectKey)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
     }
 }

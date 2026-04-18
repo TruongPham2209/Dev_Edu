@@ -13,4 +13,6 @@ public interface AssignmentService {
     AssignmentResponse create(Set<String> authorities, String author, AssignmentRequest req);
 
     void delete(Set<String> authorities, String actor, UUID assignmentId);
+
+    void deleteById(UUID assignmentId);
 }

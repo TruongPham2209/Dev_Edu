@@ -10,7 +10,8 @@ import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
+import com.pht.dev_edu.common.util.KafkaUtil;
 import com.pht.dev_edu.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -89,17 +90,15 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private void validateSubmissionFile(String author, String objectKey) {
         var fileInfo = fileService.getFileInfo(author, objectKey);
-//        boolean isValidContentType = fileInfo.getContentType().equals("application/pdf") ||
-//                                     fileInfo.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-        boolean isValidContentType = true;
-//        if (!isValidContentType) {
-        var deleteFileEvent = FileDeleteEvent.builder()
-                .fullObjectKey(objectKey)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
+        boolean isValidContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.DOCUMENT, FileContentTypeUtil.FileType.ARCHIVE);
+
+        if (isValidContentType) {
+            return;
+        }
+
+        KafkaUtil.sendDeleteFileEvent(objectKey);
 
         log.error("Invalid file type for submission. Author: {}, ObjectKey: {}, ContentType: {}", author, objectKey, fileInfo.getContentType());
         throw new BadRequestException("Invalid file type.");
-//        }
     }
 }

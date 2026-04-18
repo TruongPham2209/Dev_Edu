@@ -1,11 +1,18 @@
 package com.pht.dev_edu.lecture.service;
 
+import com.pht.dev_edu.common.constant.EventTrackingConstant;
+import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.common.dto.TimeStampCursor;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.PagingUtil;
 import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.lecture.dto.CommentPageRequest;
+import com.pht.dev_edu.lecture.dto.CommentProjection;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
 import com.pht.dev_edu.lecture.dto.CommentResponse;
 import com.pht.dev_edu.lecture.entity.LectureCommentEntity;
@@ -14,8 +21,10 @@ import com.pht.dev_edu.lecture.repo.LectureCommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -29,17 +38,59 @@ public class CommentServiceImpl implements CommentService {
     LectureCommentRepository lectureCommentRepository;
     LectureCommentMapper commentMapper;
     LecturePermissionService lecturePermissionService;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     private static final int MAX_COMMENT_DEPTH = 2; // Count start from 0, so 0: root, 1: reply to root, 2: reply to reply
 
     @Override
-    public CustomPaging<CommentResponse> getComments(Set<String> authorities, String actor, UUID lectureId, int page, int size) {
-        return null;
-    }
+    public CustomPaging<CommentResponse> getComments(Set<String> authorities, String actor, CommentPageRequest req) {
+        // If lastItemId is not provided, use a default value that is greater than any possible comment id to get the first page
+        var cursor = StringUtils.hasText(req.getNextCursor()) ? PagingUtil.decodeTimeStampCursor(req.getNextCursor()) : TimeStampCursor.getDefaultCursor(true);
+        lecturePermissionService.checkViewPermissionByLecture(authorities, actor, req.getLectureId());
 
-    @Override
-    public CustomPaging<CommentResponse> getCommentsByParent(Set<String> authorities, String actor, UUID lectureId, UUID parentCommentId, int page, int size) {
-        return null;
+        if (req.getParentCommentId() == null) {
+            var pageComments = lectureCommentRepository.findRootCommentsByLectureId(
+                    req.getLectureId(),
+                    cursor.getId(),
+                    cursor.getTimeStamp(),
+                    req.toPageable()
+            );
+            return new CustomPaging<>(
+                    pageComments,
+                    c -> convertProjectionToResponse(c, actor)
+            );
+        }
+
+        var parentComment = findCommentById(req.getParentCommentId());
+        if (parentComment == null) {
+            log.error("Parent comment with id {} not found", req.getParentCommentId());
+            throw new DataNotFoundException("Parent comment not found");
+        }
+
+        if (parentComment.getDepth() == MAX_COMMENT_DEPTH) {
+            log.error("Parent comment with id {} has reached max depth {}, cannot get replies", req.getParentCommentId(), MAX_COMMENT_DEPTH);
+            throw new BadRequestException("Parent comment has reached max depth, cannot get replies");
+        }
+        var pageComments = switch (parentComment.getDepth()) {
+            case 0 -> lectureCommentRepository.findFirstLevelRepliesByParentCommentId(
+                    parentComment.getId(),
+                    cursor.getId(),
+                    cursor.getTimeStamp(),
+                    req.toPageable()
+            );
+            case 1 -> lectureCommentRepository.findSecondLevelRepliesByParentCommentId(
+                    parentComment.getId(),
+                    cursor.getId(),
+                    cursor.getTimeStamp(),
+                    req.toPageable()
+            );
+            default -> throw new IllegalStateException("Unexpected comment depth: " + parentComment.getDepth());
+        };
+
+        return new CustomPaging<>(
+                pageComments,
+                c -> convertProjectionToResponse(c, actor)
+        );
     }
 
     @Override
@@ -59,6 +110,11 @@ public class CommentServiceImpl implements CommentService {
             if (parentComment.getDepth() == MAX_COMMENT_DEPTH && parentComment.getDeletedAt() != null) {
                 log.warn("Parent comment with id {} is deleted and has reached max depth, cannot add reply", req.getParentCommentId());
                 throw new BadRequestException("Cannot add reply to a deleted comment that has reached max depth");
+            }
+
+            if (!lectureCommentRepository.hasNonDeletedReplies(parentComment.getId())) {
+                log.error("Parent comment with id {} is deleted and has no non-deleted replies, cannot add reply", req.getParentCommentId());
+                throw new BadRequestException("Cannot add reply to a deleted comment that has no non-deleted replies");
             }
 
             int newCommentDepth = Math.min(parentComment.getDepth() + 1, MAX_COMMENT_DEPTH);
@@ -95,7 +151,13 @@ public class CommentServiceImpl implements CommentService {
         comment.setDeletedAt(LocalDateTime.now());
         lectureCommentRepository.save(comment);
 
-        // Send tracking event
+        var trackingEvent = TrackingEvent.builder()
+                .action(EventTrackingConstant.COMMENT_DELETED)
+                .username(actor)
+                .details("Deleted comment with id " + commentId)
+                .aggregateId(commentId)
+                .build();
+        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
 
         RedisUtil.invalidateCache(RedisPrefixConstant.LECTURE_COMMENT_PREFIX + commentId);
     }
@@ -107,5 +169,14 @@ public class CommentServiceImpl implements CommentService {
                 () -> lectureCommentRepository.findById(commentId),
                 RedisDurationConstant.LECTURE_COMMENT_DATA_DURATION
         );
+    }
+
+    private CommentResponse convertProjectionToResponse(CommentProjection projection, String actor) {
+        var content = projection.getIsDeleted() ? "This comment has been deleted" : projection.getContent();
+        boolean isMine = projection.getAuthor().equals(actor);
+        var commentResponse = commentMapper.projectionToRes(projection);
+        commentResponse.setContent(content);
+        commentResponse.setIsMine(isMine);
+        return commentResponse;
     }
 }

@@ -20,4 +20,6 @@ public interface LectureService {
     LectureResponse updateLecture(Set<String> authorities, String actor, LectureRequest req);
 
     void deleteLecture(Set<String> authorities, String actor, UUID lectureId);
+
+    void deleteById(UUID lectureId);
 }

@@ -5,9 +5,12 @@ import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.common.dto.TrackingEvent;
+import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
+import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.common.util.PagingUtil;
 import com.pht.dev_edu.common.util.RedisUtil;
 import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
@@ -19,8 +22,8 @@ import com.pht.dev_edu.course.mapper.CourseMapper;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.CourseRepository;
 import com.pht.dev_edu.course.repo.EnrollmentRepository;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.file.service.FileService;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -80,32 +83,35 @@ public class CourseServiceImpl implements CourseService {
 
     private CustomPaging<CourseResponse> getAllCourses(CoursePageRequest pageRequest) {
         Page<CourseEntity> coursePage;
-        if (pageRequest.getLastItemId() == null) {
+        if (!StringUtils.hasText(pageRequest.getNextCursor())) {
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE -> courseRepository.findByDeletedAtIsNull(pageRequest.toPageable());
                 case DELETED -> courseRepository.findByDeletedAtIsNotNull(pageRequest.toPageable());
                 case ALL -> courseRepository.findAll(pageRequest.toPageable());
             };
         } else {
+            var cursor = PagingUtil.decodeTimeStampCursor(pageRequest.getNextCursor());
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCursor(pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCursor(pageRequest.getLastItemId(), pageRequest.toPageable());
-                case ALL -> courseRepository.findByCursor(pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
+                case ALL ->
+                        courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
             };
         }
 
         var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
-        if (pageRequest.getLastItemId() == null) {
+        if (StringUtils.hasText(pageRequest.getNextCursor())) {
             courseResponses.setCurrentPage(pageRequest.getPage());
+            courseResponses.setNextCursor(getNextCursor(coursePage));
         }
         return courseResponses;
     }
 
     private CustomPaging<CourseResponse> getCoursesByCategory(UUID categoryId, CoursePageRequest pageRequest) {
         Page<CourseEntity> coursePage;
-        if (pageRequest.getLastItemId() == null) {
+        if (!StringUtils.hasText(pageRequest.getNextCursor())) {
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
                         courseRepository.findByCategoryIdAndDeletedAtIsNull(categoryId, pageRequest.toPageable());
@@ -114,47 +120,58 @@ public class CourseServiceImpl implements CourseService {
                 case ALL -> courseRepository.findByCategoryId(categoryId, pageRequest.toPageable());
             };
         } else {
+            var cursor = PagingUtil.decodeTimeStampCursor(pageRequest.getNextCursor());
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
                 case ALL ->
-                        courseRepository.findByCategoryIdAndCursor(categoryId, pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
             };
         }
 
         var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
-        if (pageRequest.getLastItemId() == null) {
+        if (StringUtils.hasText(pageRequest.getNextCursor())) {
             courseResponses.setCurrentPage(pageRequest.getPage());
+            courseResponses.setNextCursor(getNextCursor(coursePage));
         }
         return courseResponses;
     }
 
     private CustomPaging<CourseResponse> searchCourses(String keyword, CoursePageRequest pageRequest) {
         Page<CourseEntity> coursePage;
-        if (pageRequest.getLastItemId() == null) {
+        if (!StringUtils.hasText(pageRequest.getNextCursor())) {
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE -> courseRepository.searchActiveCourses(keyword, pageRequest.toPageable());
                 case DELETED -> courseRepository.searchDeletedCourses(keyword, pageRequest.toPageable());
                 case ALL -> courseRepository.searchCourses(keyword, pageRequest.toPageable());
             };
         } else {
+            var cursor = PagingUtil.decodeTimeStampCursor(pageRequest.getNextCursor());
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.searchActiveCoursesByCursor(keyword, pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
                 case DELETED ->
-                        courseRepository.searchDeletedCoursesByCursor(keyword, pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
                 case ALL ->
-                        courseRepository.searchCoursesByCursor(keyword, pageRequest.getLastItemId(), pageRequest.toPageable());
+                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
             };
         }
 
         var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
-        if (pageRequest.getLastItemId() == null) {
+        if (StringUtils.hasText(pageRequest.getNextCursor())) {
             courseResponses.setCurrentPage(pageRequest.getPage());
+            courseResponses.setNextCursor(getNextCursor(coursePage));
         }
         return courseResponses;
+    }
+
+    private String getNextCursor(Page<CourseEntity> coursePage) {
+        var lastItem = coursePage.getContent().isEmpty() ? null : coursePage.getContent().getLast();
+        return lastItem != null
+                ? PagingUtil.encodeTimeStampCursor(new TimeStampCursor(lastItem.getCreatedAt(), lastItem.getId()))
+                : null;
     }
 
     @Override
@@ -208,9 +225,11 @@ public class CourseServiceImpl implements CourseService {
             throw new DataNotFoundException("Category not found.");
         }
 
-        // Convert here
         var updatedCourse = courseMapper.reqToEntity(course);
-        String thumbnailUrl = getThumbnailUrl(author, course.getThumbnailObjectKey());
+        boolean isNewThumbnail = !existingCourse.getThumbnailUrl().equals(getThumbnailUrl(author, course.getThumbnailObjectKey()));
+        String thumbnailUrl = isNewThumbnail
+                ? getThumbnailUrl(author, course.getThumbnailObjectKey())
+                : existingCourse.getThumbnailUrl();
         updatedCourse.setThumbnailUrl(thumbnailUrl);
         updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
         courseRepository.save(updatedCourse);
@@ -294,12 +313,9 @@ public class CourseServiceImpl implements CourseService {
 
     private String getThumbnailUrl(String author, String thumbnailObjectKey) {
         var thumbnailInfo = fileService.getFileInfo(author, thumbnailObjectKey);
-        if (!StringUtils.hasText(thumbnailInfo.getPublicUrl())) {
-            var deleteFileEvent = FileDeleteEvent.builder()
-                    .fullObjectKey(thumbnailObjectKey)
-                    .build();
-            kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
-
+        boolean isImage = FileContentTypeUtil.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtil.FileType.IMAGE);
+        if (!StringUtils.hasText(thumbnailInfo.getPublicUrl()) || !isImage) {
+            KafkaUtil.sendDeleteFileEvent(thumbnailObjectKey);
             log.error("Thumbnail with object key {} does not have a public URL", thumbnailObjectKey);
             throw new BadRequestException("Thumbnail is not accessible.");
         }

@@ -1,4 +1,4 @@
-package com.pht.dev_edu.livestream;
+package com.pht.dev_edu.livestream.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.Column;

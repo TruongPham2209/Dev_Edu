@@ -4,16 +4,18 @@ import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
-import com.pht.dev_edu.common.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
+import com.pht.dev_edu.common.util.KafkaUtil;
 import com.pht.dev_edu.common.util.RedisUtil;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.lecture.dto.LectureRequest;
 import com.pht.dev_edu.lecture.dto.LectureResponse;
 import com.pht.dev_edu.lecture.entity.LectureEntity;
 import com.pht.dev_edu.lecture.mapper.LectureMapper;
 import com.pht.dev_edu.lecture.repo.LectureRepository;
+import com.pht.dev_edu.tracking.dto.GetVideoDurationEvent;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -74,7 +76,6 @@ public class LectureServiceImpl implements LectureService {
         var nextOrder = lectureRepository.getMaxOrderByCourseId(req.getCourseId()) + 1;
         if (req.getVideoObjectKey() != null) {
             validateVideoObjectKey(actor, req.getVideoObjectKey());
-            sendGetDurationEvent(req.getVideoObjectKey());
         }
 
         var newLecture = lectureMapper.reqToEntity(req);
@@ -85,6 +86,7 @@ public class LectureServiceImpl implements LectureService {
         }
 
         lectureRepository.save(newLecture);
+        sendGetDurationEvent(req.getVideoObjectKey(), newLecture.getId());
         return lectureMapper.entityToResponse(newLecture);
     }
 
@@ -152,28 +154,39 @@ public class LectureServiceImpl implements LectureService {
         RedisUtil.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + lectureId);
     }
 
+    @Override
+    public void deleteById(UUID lectureId) {
+
+    }
+
     private void validateVideoObjectKey(String author, String videoObjectKey) {
         var fileInfo = fileService.getFileInfo(author, videoObjectKey);
-        if (fileInfo == null || !fileInfo.getContentType().startsWith("video/")) {
-            sendDeleteFileEvent(videoObjectKey);
+        if (fileInfo == null) {
+            KafkaUtil.sendDeleteFileEvent(videoObjectKey);
 
             log.error("Invalid video object key: {}", videoObjectKey);
             throw new BadRequestException("Invalid video file.");
         }
+
+        boolean isVideoContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.VIDEO);
+        if (!isVideoContentType) {
+            KafkaUtil.sendDeleteFileEvent(videoObjectKey);
+
+            log.error("Invalid video content type for object key {}: {}", videoObjectKey, fileInfo.getContentType());
+            throw new BadRequestException("Invalid video file.");
+        }
     }
 
-    private void sendDeleteFileEvent(String videoObjectKey) {
+    private void sendGetDurationEvent(String videoObjectKey, UUID lectureId) {
         if (!StringUtils.hasText(videoObjectKey)) {
             return;
         }
 
-        var deleteFileEvent = FileDeleteEvent.builder()
-                .fullObjectKey(videoObjectKey)
+        var getDurationEvent = GetVideoDurationEvent.builder()
+                .objectKey(videoObjectKey)
+                .entityId(lectureId)
+                .videoType(GetVideoDurationEvent.VideoType.LECTURE)
                 .build();
-        kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
-    }
-
-    private void sendGetDurationEvent(String videoObjectKey) {
-
+        kafkaTemplate.send(KafkaTopicConstant.VIDEO_DURATION_EVENT_TOPIC, getDurationEvent);
     }
 }

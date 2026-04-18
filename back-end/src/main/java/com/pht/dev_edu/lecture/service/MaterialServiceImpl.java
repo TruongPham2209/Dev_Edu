@@ -2,12 +2,16 @@ package com.pht.dev_edu.lecture.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
-import com.pht.dev_edu.common.dto.TrackingEvent;
+import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
+import com.pht.dev_edu.common.util.FileContentTypeUtil;
 import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.lecture.dto.MaterialRequest;
 import com.pht.dev_edu.lecture.dto.MaterialResponse;
+import com.pht.dev_edu.lecture.mapper.MaterialMapper;
 import com.pht.dev_edu.lecture.repo.LectureMaterialRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,24 +33,30 @@ public class MaterialServiceImpl implements MaterialService {
     LectureMaterialRepository lectureMaterialRepository;
 
     LecturePermissionService lecturePermissionService;
-    LectureService lectureService;
     FileService fileService;
 
+    MaterialMapper materialMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public List<MaterialResponse> getMaterialsByLecture(Set<String> authorities, String actor, UUID lectureId) {
         lecturePermissionService.checkViewPermissionByLecture(authorities, actor, lectureId);
         var materials = lectureMaterialRepository.findAllByLectureIdAndDeletedAtIsNull(lectureId);
-        return List.of();
+        return materials.stream().map(materialMapper::entityToRes).toList();
     }
 
     @Override
     @Transactional
     public MaterialResponse create(Set<String> authorities, String actor, MaterialRequest req) {
         lecturePermissionService.checkModifyPermissionByLecture(authorities, actor, req.getLectureId());
-        validateMaterialObjectKey(actor, req.getFileObjectKey());
-        return null;
+        var fileInfo = validateMaterialObjectKey(actor, req.getFileObjectKey());
+
+        var material = materialMapper.reqToEntity(req);
+        material.setFileType(fileInfo.getContentType());
+        material.setFileOriginalName(fileInfo.getOriginalFileName());
+        lectureMaterialRepository.save(material);
+
+        return materialMapper.entityToRes(material);
     }
 
     @Override
@@ -74,20 +84,23 @@ public class MaterialServiceImpl implements MaterialService {
     }
 
     // Change valid content types
-    private void validateMaterialObjectKey(String author, String objectKey) {
+    private FileUploadResponse validateMaterialObjectKey(String author, String objectKey) {
         var fileInfo = fileService.getFileInfo(author, objectKey);
-        if (fileInfo == null || !fileInfo.getContentType().startsWith("video/")) {
-            sendDeleteFileEvent(objectKey);
+        if (fileInfo == null) {
+            KafkaUtil.sendDeleteFileEvent(objectKey);
 
             log.error("Invalid video object key: {}", objectKey);
             throw new BadRequestException("Invalid video file.");
         }
-    }
 
-    private void sendDeleteFileEvent(String videoObjectKey) {
-        var deleteFileEvent = FileDeleteEvent.builder()
-                .fullObjectKey(videoObjectKey)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.FILE_DELETE_TOPIC, deleteFileEvent);
+        boolean isDocumentContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.DOCUMENT, FileContentTypeUtil.FileType.ARCHIVE);
+        if (!isDocumentContentType) {
+            KafkaUtil.sendDeleteFileEvent(objectKey);
+
+            log.error("Invalid content type for material file. ObjectKey: {}, ContentType: {}", objectKey, fileInfo.getContentType());
+            throw new BadRequestException("Invalid content type for material file.");
+        }
+
+        return fileInfo;
     }
 }
