@@ -1,6 +1,7 @@
 package com.pht.dev_edu.common.security;
 
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
+import com.pht.dev_edu.tracking.dto.RequestLoggingEvent;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,6 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 
 @Slf4j
 @Component
@@ -52,7 +52,7 @@ public class LoggingSecurityFilter extends OncePerRequestFilter {
             return;
         }
 
-        String event = getEvent(wrappedRequest, wrappedResponse, uri);
+        RequestLoggingEvent event = getEvent(wrappedRequest, wrappedResponse, uri);
 
         kafkaTemplate.send(KafkaTopicConstant.REQUEST_LOG_TOPIC, event);
 
@@ -60,7 +60,7 @@ public class LoggingSecurityFilter extends OncePerRequestFilter {
         wrappedResponse.copyBodyToResponse();
     }
 
-    private static String getEvent(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, String uri) throws UnsupportedEncodingException {
+    private static RequestLoggingEvent getEvent(ContentCachingRequestWrapper request, ContentCachingResponseWrapper response, String uri) throws UnsupportedEncodingException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String user = (auth != null) ? auth.getName() : "anonymous";
 
@@ -93,13 +93,12 @@ public class LoggingSecurityFilter extends OncePerRequestFilter {
             );
         }
 
-        return String.format("%s | %s | %s | timestamp=%s | req=%s | res=%s",
-                user,
-                request.getMethod(),
-                uri,
-                LocalDateTime.now().withNano(0),
-                requestBody,
-                responseBody
-        );
+        return RequestLoggingEvent.builder()
+                .username(user)
+                .method(request.getMethod())
+                .uri(uri)
+                .requestBody(requestBody)
+                .responseBody(responseBody)
+                .build();
     }
 }

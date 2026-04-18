@@ -1,4 +1,4 @@
-package com.pht.dev_edu.common.dto;
+package com.pht.dev_edu.tracking.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

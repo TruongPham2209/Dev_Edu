@@ -15,4 +15,10 @@ public class EventTrackingConstant {
     public static final String FEEDBACK_DELETED = "feedback.deleted";
 
     public static final String ASSIGNMENT_DELETED = "assignment.deleted";
+
+    public static final String COMMENT_DELETED = "comment.deleted";
+
+    public static final String POST_DELETED = "post.deleted";
+    public static final String POST_VERSION_DELETED = "post_version.deleted";
+    public static final String POST_STATUS_UPDATED = "post_status.updated";
 }

@@ -10,17 +10,23 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 @Named("lectureCommentMapper")
 public interface LectureCommentMapper {
-    @Mapping(target = "username", source = "")
-    @Mapping(target = "rootCommentId", source = "")
-    @Mapping(target = "replyToCommentId", source = "")
-    @Mapping(target = "id", source = "")
-    @Mapping(target = "depth", source = "")
-    @Mapping(target = "deletedAt", source = "")
-    @Mapping(target = "createdAt", source = "")
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "rootCommentId", ignore = true)
+    @Mapping(target = "replyToCommentId", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "depth", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     LectureCommentEntity reqToEntity(CommentRequest req);
 
-    @Mapping(target = "replyCount", source = "")
-    @Mapping(target = "isMine", source = "")
-    @Mapping(target = "isDeleted", source = "")
+    @Mapping(target = "replyCount", ignore = true)
+    @Mapping(target = "isMine", ignore = true)
+    @Mapping(target = "isDeleted", ignore = true)
     CommentResponse entityToRes(LectureCommentEntity entity);
+
+    @Mapping(target = "rootCommentId", ignore = true)
+    @Mapping(target = "parentCommentId", ignore = true)
+    @Mapping(target = "isMine", ignore = true)
+    @Mapping(target = "depth", ignore = true)
+    CommentResponse projectionToRes(com.pht.dev_edu.lecture.dto.CommentProjection projection);
 }

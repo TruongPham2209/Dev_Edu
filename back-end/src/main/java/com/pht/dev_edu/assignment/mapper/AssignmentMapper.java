@@ -17,4 +17,6 @@ public interface AssignmentMapper {
     @Mapping(target = "submittedAt", ignore = true)
     @Mapping(target = "fileObjectKey", ignore = true)
     AssignmentResponse entityToRes(AssignmentEntity assignment);
+
+    AssignmentResponse projectionToRes(com.pht.dev_edu.assignment.dto.AssignmentProjection projection);
 }

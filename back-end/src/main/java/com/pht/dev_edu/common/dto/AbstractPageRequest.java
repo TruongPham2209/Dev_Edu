@@ -8,19 +8,20 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 
 @Setter
 @Getter
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PROTECTED)
-public abstract class AbstractPageRequest<T> {
+public abstract class AbstractPageRequest {
     String sortBy;
     Integer page = 0;
     Integer size = 10;
-    T lastItemId;
+    String nextCursor;
 
     public final Pageable toPageable() {
-        if (lastItemId != null) {
+        if (!StringUtils.hasText(nextCursor)) {
             return PagingUtil.getPageable(size, toSort());
         }
 
@@ -28,4 +29,9 @@ public abstract class AbstractPageRequest<T> {
     }
 
     public abstract Sort[] toSort();
+
+    public final void setDefaultPage() {
+        this.page = 0;
+        this.size = 10;
+    }
 }
