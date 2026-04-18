@@ -3,6 +3,7 @@ package com.pht.dev_edu.lecture.repo;
 import com.pht.dev_edu.lecture.dto.LectureProjection;
 import com.pht.dev_edu.lecture.entity.LectureEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -58,4 +59,20 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                 WHERE   l.course_id = :courseId
             """, nativeQuery = true)
     Integer getMaxOrderByCourseId(UUID courseId);
+
+    @Modifying
+    @Query(value = """
+                UPDATE lecture
+                SET duration = :duration
+                WHERE id = :lectureId
+            """, nativeQuery = true)
+    void updateLectureVideoDuration(UUID lectureId, Integer duration);
+
+    @Query("""
+                SELECT l.id
+                FROM LectureEntity l
+                WHERE l.deletedAt IS NOT NULL
+                  AND l.deletedAt < :cutoffTime
+            """)
+    List<UUID> findDeletedIdsBeforeCutoffTime(java.time.LocalDateTime cutoffTime);
 }
