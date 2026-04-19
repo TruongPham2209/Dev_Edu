@@ -2,8 +2,8 @@ package com.pht.dev_edu.file.service;
 
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.server.ServerInternalException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
-import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.file.dto.FilePreSignUploadRequest;
 import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.dto.UploadStatus;
@@ -148,7 +148,7 @@ public class FileServiceImpl implements FileService {
 
         // expired + grace
         if (LocalDateTime.now().isAfter(fileUpload.getExpiredAt().plusMinutes(1))) {
-            KafkaUtil.sendDeleteFileEvent(fullObjectKey);
+            KafkaUtils.sendDeleteFileEvent(fullObjectKey);
             throw new DataNotFoundException("File expired.");
         }
 
@@ -157,7 +157,7 @@ public class FileServiceImpl implements FileService {
             try {
                 return getFileInfo(fullObjectKey);
             } catch (NoSuchKeyException e) {
-                KafkaUtil.sendDeleteFileEvent(fullObjectKey);
+                KafkaUtils.sendDeleteFileEvent(fullObjectKey);
                 log.error("File not found on S3 for object key: {}", fullObjectKey);
                 throw new DataNotFoundException("File not found.");
             }
@@ -207,19 +207,19 @@ public class FileServiceImpl implements FileService {
         }
 
         if (fileUpload.getStatus() == UploadStatus.FAILED) {
-            KafkaUtil.sendDeleteFileEvent(fullObjectKey);
+            KafkaUtils.sendDeleteFileEvent(fullObjectKey);
             throw new IllegalStateException("Upload file failed.");
         }
 
         // expired + grace
         if (LocalDateTime.now().isAfter(fileUpload.getExpiredAt().plusMinutes(1))) {
-            KafkaUtil.sendDeleteFileEvent(fullObjectKey);
+            KafkaUtils.sendDeleteFileEvent(fullObjectKey);
             throw new DataNotFoundException("File expired.");
         }
 
-        boolean isImage = FileContentTypeUtil.isValidContentType(
+        boolean isImage = FileContentTypeUtils.isValidContentType(
                 fileUpload.getContentType(),
-                FileContentTypeUtil.FileType.IMAGE
+                FileContentTypeUtils.FileType.IMAGE
         );
         if (!isImage) {
             throw new IllegalArgumentException("File is not an image.");
@@ -376,7 +376,7 @@ public class FileServiceImpl implements FileService {
             log.error("Content type mismatch: expected={}, actual={}",
                     fileUpload.getContentType(), head.contentType());
 
-            KafkaUtil.sendDeleteFileEvent(fileUpload.getObjectKey());
+            KafkaUtils.sendDeleteFileEvent(fileUpload.getObjectKey());
             throw new IllegalStateException("Content type not match.");
         }
 
@@ -387,7 +387,7 @@ public class FileServiceImpl implements FileService {
                 log.error("File size mismatch: expected={}, actual={}",
                         fileUpload.getFileSize(), head.contentLength());
 
-                KafkaUtil.sendDeleteFileEvent(fileUpload.getObjectKey());
+                KafkaUtils.sendDeleteFileEvent(fileUpload.getObjectKey());
                 throw new IllegalStateException("File size not match.");
             }
         }

@@ -2,8 +2,8 @@ package com.pht.dev_edu.user.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.dto.RoleEnum;
-import com.pht.dev_edu.common.util.ApiUtil;
-import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.user.dto.RegisterUser;
 import com.pht.dev_edu.user.service.UserService;
 import jakarta.validation.Valid;
@@ -33,9 +33,9 @@ public class LoginController {
             throw new IllegalArgumentException("Mật khẩu cũ và mật khẩu mới không được để trống.");
         }
 
-        String username = SecurityContextUtil.getCurrentUsernameForController();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
         userService.changePassword(username, oldPassword, newPassword);
-        return ApiUtil.buildSuccessResponse("Mật khẩu đã được thay đổi thành công.");
+        return ApiUtils.buildSuccessResponse("Mật khẩu đã được thay đổi thành công.");
     }
 
     @PreAuthorize("permitAll()")
@@ -43,14 +43,14 @@ public class LoginController {
     public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody RegisterUser registerUser) {
         registerUser.setRole(RoleEnum.STUDENT);
         userService.registerUser(registerUser);
-        return ApiUtil.buildSuccessResponse("Đăng ký thành công.");
+        return ApiUtils.buildSuccessResponse("Đăng ký thành công.");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users/batch-users")
     public ResponseEntity<ApiResponse> batchCreateUseres(@RequestBody List<@Valid RegisterUser> registerUsers) {
         userService.batchRegisterUsers(registerUsers);
-        return ApiUtil.buildSuccessResponse("Tạo người dùng hàng loạt thành công.");
+        return ApiUtils.buildSuccessResponse("Tạo người dùng hàng loạt thành công.");
     }
 
     @PutMapping("/users/avatar")
@@ -60,9 +60,9 @@ public class LoginController {
             throw new IllegalArgumentException("avatarObjectKey không được để trống.");
         }
 
-        String username = SecurityContextUtil.getCurrentUsernameForController();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
         String newAvatarUrl = userService.updateAvatar(username, avatarObjectKey);
-        return ApiUtil.buildSuccessResponse(newAvatarUrl);
+        return ApiUtils.buildSuccessResponse(newAvatarUrl);
     }
 
     // Sửa lại sau
@@ -76,6 +76,6 @@ public class LoginController {
         }
 
         userService.setUsernameForGoogleLogin(email, username);
-        return ApiUtil.buildSuccessResponse("Username đã được cập nhật thành công.");
+        return ApiUtils.buildSuccessResponse("Username đã được cập nhật thành công.");
     }
 }

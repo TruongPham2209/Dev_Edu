@@ -4,7 +4,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
-public class FileContentTypeUtil {
+public class FileContentTypeUtils {
 
     private static final List<String> PDFS = List.of(
             "application/pdf"
@@ -89,7 +89,7 @@ public class FileContentTypeUtil {
         for (FileType type : allowedTypes) {
             switch (type) {
                 case DOCUMENT -> {
-                    if (PDFS.contains(contentType) || WORDS.contains(contentType) || EXCELS.contains(contentType) || POWERPOINTS.contains(contentType)) {
+                    if (PDFS.contains(contentType) || WORDS.contains(contentType) || EXCELS.contains(contentType) || POWERPOINTS.contains(contentType) || TEXTS.contains(contentType)) {
                         return true;
                     }
                 }

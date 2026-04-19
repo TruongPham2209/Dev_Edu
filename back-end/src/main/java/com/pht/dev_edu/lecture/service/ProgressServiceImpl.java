@@ -4,7 +4,7 @@ import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.lecture.dto.ProgressSegmentRequest;
 import com.pht.dev_edu.lecture.entity.LectureEntity;
 import com.pht.dev_edu.lecture.entity.LectureProgressEntity;
@@ -34,7 +34,7 @@ public class ProgressServiceImpl implements ProgressService {
     @Transactional
     public void updateProgress(String actor, ProgressSegmentRequest req) {
         lecturePermissionService.checkViewPermissionByLecture(Set.of(RoleEnum.STUDENT.name()), actor, req.getLectureId());
-        var lecture = RedisUtil.getDataFromCacheOrDb(
+        var lecture = RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_PREFIX + req.getLectureId(),
                 LectureEntity.class,
                 () -> lectureRepository.findById(req.getLectureId()),

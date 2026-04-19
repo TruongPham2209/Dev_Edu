@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
  * Utility class for JSON processing using Jackson ObjectMapper.
  */
 @Slf4j
-public class MapperUtil {
+public class MapperUtils {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**

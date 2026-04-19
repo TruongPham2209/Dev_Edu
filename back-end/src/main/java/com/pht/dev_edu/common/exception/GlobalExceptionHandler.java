@@ -1,8 +1,8 @@
 package com.pht.dev_edu.common.exception;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
-import com.pht.dev_edu.common.util.ApiUtil;
-import com.pht.dev_edu.common.util.ExceptionUtil;
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.ExceptionUtils;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -45,13 +45,13 @@ public class GlobalExceptionHandler {
             case null, default -> "Xác thực không thành công. Vui lòng thử lại.";
         };
 
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.UNAUTHORIZED);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
     public ResponseEntity<ApiResponse> handleAccessDenied(Exception ex) {
         String message = "Bạn không có quyền truy cập vào tài nguyên này.";
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.FORBIDDEN);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class,
@@ -59,26 +59,26 @@ public class GlobalExceptionHandler {
             IllegalArgumentException.class, MissingServletRequestParameterException.class,
             ConstraintViolationException.class, BindException.class})
     public ResponseEntity<ApiResponse> handleClientErrors(Exception ex) {
-        String message = ExceptionUtil.getClientErrorMessage(ex);
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.BAD_REQUEST);
+        String message = ExceptionUtils.getClientErrorMessage(ex);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class, DuplicateKeyException.class})
     public ResponseEntity<ApiResponse> handleConflictErrors(Exception ex) {
-        String message = ExceptionUtil.getConflictErrorMessage(ex);
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.CONFLICT);
+        String message = ExceptionUtils.getConflictErrorMessage(ex);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler({UnsupportedOperationException.class, HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<ApiResponse> handleMethodNotAllowed(Exception ex) {
-        String message = ExceptionUtil.getMethodNotAllowedMessage(ex);
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.METHOD_NOT_ALLOWED);
+        String message = ExceptionUtils.getMethodNotAllowedMessage(ex);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler({TimeoutException.class})
     public ResponseEntity<ApiResponse> handleTimeoutAndIOErrors(Exception ex) {
         String message = "Yêu cầu đã hết hạn. Vui lòng thử lại sau.";
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.REQUEST_TIMEOUT);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.REQUEST_TIMEOUT);
     }
 
     @ExceptionHandler({TransactionSystemException.class, DataAccessResourceFailureException.class, IOException.class,
@@ -90,19 +90,19 @@ public class GlobalExceptionHandler {
         } else if (ex instanceof DataAccessResourceFailureException) {
             message = "Không thể kết nối đến cơ sở dữ liệu. Vui lòng thử lại sau.";
         } else {
-            message = ExceptionUtil.getServerErrorMessage(ex);
+            message = ExceptionUtils.getServerErrorMessage(ex);
         }
-        return ApiUtil.buildErrorResponse(message, ex, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ApiUtils.buildErrorResponse(message, ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(AbstractException.class)
     public ResponseEntity<ApiResponse> handleCustomErrors(AbstractException ex) {
-        return ApiUtil.buildErrorResponse(ex.getMessage(), ex, ex.getHttpStatus());
+        return ApiUtils.buildErrorResponse(ex.getMessage(), ex, ex.getHttpStatus());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleUndefineException(Exception ex) {
         log.error("Lỗi không xác định từ phía server: {}", ex.getMessage(), ex);
-        return ApiUtil.buildErrorResponse("Lỗi không xác định.", ex, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ApiUtils.buildErrorResponse("Lỗi không xác định.", ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

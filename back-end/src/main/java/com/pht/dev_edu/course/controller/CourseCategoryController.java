@@ -2,8 +2,8 @@ package com.pht.dev_edu.course.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.dto.ItemStatus;
-import com.pht.dev_edu.common.util.ApiUtil;
-import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.service.CourseService;
@@ -19,14 +19,14 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
-public class CourseCategory {
+public class CourseCategoryController {
     CourseService courseService;
 
     @PreAuthorize("permitAll()")
     @GetMapping("/courses")
     public ResponseEntity<ApiResponse> getCourses(
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) UUID lastId,
+            @RequestParam(required = false) String nextCursor,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) String keyword
     ) {
@@ -34,13 +34,13 @@ public class CourseCategory {
         CoursePageRequest pageRequest = CoursePageRequest.builder()
                 .status(ItemStatus.ACTIVE)
                 .size(12)
-                .lastItemId(lastId)
+                .nextCursor(nextCursor)
                 .sortBy(sortBy)
                 .build();
 
         var courses = courseService.getCourses(categoryId, keyword, pageRequest);
 
-        return ApiUtil.buildSuccessResponse(courses);
+        return ApiUtils.buildSuccessResponse(courses);
     }
 
     @PreAuthorize("permitAll()")
@@ -49,14 +49,14 @@ public class CourseCategory {
         var course = courseService.getCourseById(courseId);
         var lecturers = courseService.getLecturersForCourse(courseId);
         course.setLecturers(lecturers);
-        return ApiUtil.buildSuccessResponse(course);
+        return ApiUtils.buildSuccessResponse(course);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/courses")
     public ResponseEntity<ApiResponse> getAdminCourses(
             @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) UUID lastId,
+            @RequestParam(required = false) String nextCursor,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam ItemStatus status
@@ -64,36 +64,36 @@ public class CourseCategory {
         CoursePageRequest pageRequest = CoursePageRequest.builder()
                 .status(status)
                 .size(10)
-                .lastItemId(lastId)
+                .nextCursor(nextCursor)
                 .sortBy(sortBy)
                 .build();
 
         var courses = courseService.getCourses(categoryId, keyword, pageRequest);
 
-        return ApiUtil.buildSuccessResponse(courses);
+        return ApiUtils.buildSuccessResponse(courses);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/courses")
     public ResponseEntity<ApiResponse> createCourse(@RequestBody CourseRequest course) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
         var createdCourse = courseService.createCourse(username, course);
-        return ApiUtil.buildSuccessResponse(createdCourse);
+        return ApiUtils.buildSuccessResponse(createdCourse);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/courses")
     public ResponseEntity<ApiResponse> updateCourse(@RequestBody CourseRequest course) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
         var createdCourse = courseService.updateCourse(username, course);
-        return ApiUtil.buildSuccessResponse(createdCourse);
+        return ApiUtils.buildSuccessResponse(createdCourse);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/admin/courses")
     public ResponseEntity<ApiResponse> deleteCourse(@RequestParam UUID courseId) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
         courseService.deleteCourse(username, courseId);
-        return ApiUtil.buildSuccessResponse("Course deleted successfully");
+        return ApiUtils.buildSuccessResponse("Course deleted successfully");
     }
 }

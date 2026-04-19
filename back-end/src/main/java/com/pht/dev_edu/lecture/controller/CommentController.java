@@ -1,8 +1,8 @@
 package com.pht.dev_edu.lecture.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
-import com.pht.dev_edu.common.util.ApiUtil;
-import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.lecture.dto.CommentPageRequest;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
 import com.pht.dev_edu.lecture.service.CommentService;
@@ -28,26 +28,26 @@ public class CommentController {
     ) {
         req.setDefaultPage();
 
-        String username = SecurityContextUtil.getCurrentUsernameForController();
-        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
         var comments = lectureCommentService.getComments(authorities, username, req);
-        return ApiUtil.buildSuccessResponse(comments);
+        return ApiUtils.buildSuccessResponse(comments);
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse> createComment(@RequestBody CommentRequest req) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
-        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
         var comment = lectureCommentService.create(authorities, username, req);
-        return ApiUtil.buildSuccessResponse(comment);
+        return ApiUtils.buildSuccessResponse(comment);
     }
 
     @DeleteMapping
     public ResponseEntity<ApiResponse> deleteComment(@RequestParam UUID commentId) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
-        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
         lectureCommentService.delete(authorities, username, commentId);
-        return ApiUtil.buildSuccessResponse("Comment deleted successfully");
+        return ApiUtils.buildSuccessResponse("Comment deleted successfully");
     }
 }

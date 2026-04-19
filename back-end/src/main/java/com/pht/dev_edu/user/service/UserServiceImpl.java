@@ -5,9 +5,9 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ProviderEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.file.service.FileService;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.user.dto.RegisterUser;
 import com.pht.dev_edu.user.entity.RoleEntity;
 import com.pht.dev_edu.user.entity.UserEntity;
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserEntity findByUsername(String username) {
         String cacheKey = RedisPrefixConstant.USER_USERNAME_PREFIX + username;
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 cacheKey,
                 UserEntity.class,
                 () -> userRepository.findByUsername(username),
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserEntity findByEmail(String email) {
         String cacheKey = RedisPrefixConstant.USER_EMAIL_PREFIX + email;
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 cacheKey,
                 UserEntity.class,
                 () -> userRepository.findByEmail(email),
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        RedisUtil.updateCache(
+        RedisUtils.updateCache(
                 RedisPrefixConstant.USER_USERNAME_PREFIX + username,
                 user,
                 RedisDurationConstant.USER_DATA_DURATION
@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setUsername(username);
         userRepository.save(user);
 
-        RedisUtil.updateCache(
+        RedisUtils.updateCache(
                 RedisPrefixConstant.USER_USERNAME_PREFIX + username,
                 user,
                 RedisDurationConstant.USER_DATA_DURATION
@@ -176,7 +176,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new DataNotFoundException("File not found with object key: " + avatarObjectKey);
         }
 
-        boolean isImageContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.IMAGE);
+        boolean isImageContentType = FileContentTypeUtils.isValidContentType(fileInfo.getContentType(), FileContentTypeUtils.FileType.IMAGE);
         if (!isImageContentType) {
             throw new BadRequestException("File must be an image");
         }
@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setAvatarUrl(fileInfo.getPublicUrl());
         userRepository.save(user);
 
-        RedisUtil.updateCache(
+        RedisUtils.updateCache(
                 RedisPrefixConstant.USER_USERNAME_PREFIX + username,
                 user,
                 RedisDurationConstant.USER_DATA_DURATION
@@ -223,7 +223,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .toList();
         for (var roleName : roleNames) {
             String cacheKey = RedisPrefixConstant.ROLE_PREFIX + roleName;
-            var role = RedisUtil.getDataFromCacheOrDb(
+            var role = RedisUtils.getDataFromCacheOrDb(
                     cacheKey,
                     RoleEntity.class,
                     () -> roleRepository.findByName(roleName),

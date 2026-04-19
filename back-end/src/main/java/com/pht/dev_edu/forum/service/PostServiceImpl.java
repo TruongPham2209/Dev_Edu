@@ -9,8 +9,8 @@ import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.PagingUtil;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.forum.dto.PostRequest;
 import com.pht.dev_edu.forum.dto.PostStatus;
@@ -55,13 +55,13 @@ public class PostServiceImpl implements PostService {
         var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "updated_at").and(Sort.by(Sort.Direction.DESC, "id")));
         TimeStampCursor cursor = !StringUtils.hasText(lastCursor)
                 ? TimeStampCursor.getDefaultCursor(true)
-                : PagingUtil.decodeTimeStampCursor(lastCursor);
+                : PagingUtils.decodeTimeStampCursor(lastCursor);
         var postVersionPage = postVersionRepository.findByStatusAndCursor(status, cursor.getId(), cursor.getTimeStamp(), pageable);
 
         var responsePaging = new CustomPaging<>(postVersionPage, postVersionMapper::entityToRes);
         var lastPostVersion = postVersionPage.getContent().isEmpty() ? null : postVersionPage.getContent().getLast();
         var nextCursor = lastPostVersion != null
-                ? PagingUtil.encodeTimeStampCursor(new TimeStampCursor(lastPostVersion.getUpdatedAt(), lastPostVersion.getId()))
+                ? PagingUtils.encodeTimeStampCursor(new TimeStampCursor(lastPostVersion.getUpdatedAt(), lastPostVersion.getId()))
                 : null;
         responsePaging.setNextCursor(nextCursor);
 
@@ -189,7 +189,7 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
 
         // Invalidate cache
-        RedisUtil.invalidateCache(RedisPrefixConstant.POST_PREFIX + postId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.POST_PREFIX + postId);
 
         var trackingEvent = TrackingEvent.builder()
                 .aggregateId(postId)
@@ -239,7 +239,7 @@ public class PostServiceImpl implements PostService {
             postRepository.save(post);
 
             // Invalidate cache
-            RedisUtil.invalidateCache(RedisPrefixConstant.POST_PREFIX + post.getId());
+            RedisUtils.invalidateCache(RedisPrefixConstant.POST_PREFIX + post.getId());
         }
 
         var trackingEvent = TrackingEvent.builder()
@@ -258,7 +258,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private PostEntity getPostById(UUID postId) {
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.POST_PREFIX + postId,
                 PostEntity.class,
                 () -> postRepository.findById(postId),

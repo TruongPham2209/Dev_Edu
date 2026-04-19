@@ -1,8 +1,8 @@
 package com.pht.dev_edu.file.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
-import com.pht.dev_edu.common.util.ApiUtil;
-import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.file.dto.FilePreSignUploadRequest;
 import com.pht.dev_edu.file.service.FileService;
 import jakarta.validation.Valid;
@@ -21,19 +21,19 @@ public class FileController {
     @PostMapping("/pre-signed-url")
     public ResponseEntity<ApiResponse> uploadFile(@Valid @RequestBody FilePreSignUploadRequest req) {
         var fileInfo = fileController.generatePreSignedUrl(req);
-        return ApiUtil.buildSuccessResponse(fileInfo);
+        return ApiUtils.buildSuccessResponse(fileInfo);
     }
 
     @GetMapping("/download")
     public ResponseEntity<ApiResponse> getDownloadInfo(@RequestParam String fullObjectKey) {
         var fileInfo = fileController.getFileInfo(fullObjectKey);
-        return ApiUtil.buildSuccessResponse(fileInfo);
+        return ApiUtils.buildSuccessResponse(fileInfo);
     }
 
     @PostMapping("/confirm-image-upload")
     public ResponseEntity<ApiResponse> confirmImageUpload(@RequestParam String fullObjectKey) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
         var fileUrl = fileController.confirmImageUpload(username, fullObjectKey);
-        return ApiUtil.buildSuccessResponse(fileUrl);
+        return ApiUtils.buildSuccessResponse(fileUrl);
     }
 }

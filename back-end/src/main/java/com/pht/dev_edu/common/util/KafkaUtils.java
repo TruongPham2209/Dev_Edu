@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 @Component
-public class KafkaUtil {
+public class KafkaUtils {
 
     private static KafkaTemplate<String, Object> kafkaTemplate;
 
-    public KafkaUtil(KafkaTemplate<String, Object> kafkaTemplate) {
-        KafkaUtil.kafkaTemplate = kafkaTemplate;
+    public KafkaUtils(KafkaTemplate<String, Object> kafkaTemplate) {
+        KafkaUtils.kafkaTemplate = kafkaTemplate;
     }
 
     public static void sendDeleteFileEvent(String objectKey) {

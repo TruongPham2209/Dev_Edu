@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 @Slf4j
-public class ApiUtil {
+public class ApiUtils {
     public static ResponseEntity<ApiResponse> buildSuccessResponse(Object data) {
         ApiResponse response = ApiResponse.builder()
                 .success(true)

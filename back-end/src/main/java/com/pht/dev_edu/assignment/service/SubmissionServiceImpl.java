@@ -10,8 +10,8 @@ import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
-import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -90,13 +90,13 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     private void validateSubmissionFile(String author, String objectKey) {
         var fileInfo = fileService.getFileInfo(author, objectKey);
-        boolean isValidContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.DOCUMENT, FileContentTypeUtil.FileType.ARCHIVE);
+        boolean isValidContentType = FileContentTypeUtils.isValidContentType(fileInfo.getContentType(), FileContentTypeUtils.FileType.DOCUMENT, FileContentTypeUtils.FileType.ARCHIVE);
 
         if (isValidContentType) {
             return;
         }
 
-        KafkaUtil.sendDeleteFileEvent(objectKey);
+        KafkaUtils.sendDeleteFileEvent(objectKey);
 
         log.error("Invalid file type for submission. Author: {}, ObjectKey: {}, ContentType: {}", author, objectKey, fileInfo.getContentType());
         throw new BadRequestException("Invalid file type.");

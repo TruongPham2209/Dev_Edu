@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-public class ExceptionUtil {
+public class ExceptionUtils {
     public static String getClientErrorMessage(Exception ex) {
         String message;
         String logMessage = "";
@@ -108,5 +108,13 @@ public class ExceptionUtil {
         }
 
         return message;
+    }
+
+    public static String getStackTraceAsString(Exception ex) {
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement element : ex.getStackTrace()) {
+            sb.append(element.toString()).append("\n");
+        }
+        return sb.toString();
     }
 }

@@ -9,8 +9,8 @@ import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.PagingUtil;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.lecture.dto.CommentPageRequest;
 import com.pht.dev_edu.lecture.dto.CommentProjection;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
@@ -45,7 +45,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CustomPaging<CommentResponse> getComments(Set<String> authorities, String actor, CommentPageRequest req) {
         // If lastItemId is not provided, use a default value that is greater than any possible comment id to get the first page
-        var cursor = StringUtils.hasText(req.getNextCursor()) ? PagingUtil.decodeTimeStampCursor(req.getNextCursor()) : TimeStampCursor.getDefaultCursor(true);
+        var cursor = StringUtils.hasText(req.getNextCursor()) ? PagingUtils.decodeTimeStampCursor(req.getNextCursor()) : TimeStampCursor.getDefaultCursor(true);
         lecturePermissionService.checkViewPermissionByLecture(authorities, actor, req.getLectureId());
 
         if (req.getParentCommentId() == null) {
@@ -159,11 +159,11 @@ public class CommentServiceImpl implements CommentService {
                 .build();
         kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
 
-        RedisUtil.invalidateCache(RedisPrefixConstant.LECTURE_COMMENT_PREFIX + commentId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_COMMENT_PREFIX + commentId);
     }
 
     private LectureCommentEntity findCommentById(UUID commentId) {
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_COMMENT_PREFIX + commentId,
                 LectureCommentEntity.class,
                 () -> lectureCommentRepository.findById(commentId),

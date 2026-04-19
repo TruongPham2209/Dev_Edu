@@ -5,7 +5,7 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.security.AccessDeniedException;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.course.entity.CourseLecturerId;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.EnrollmentRepository;
@@ -95,7 +95,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
     }
 
     private LectureEntity getLectureById(UUID lectureId) {
-        var lecture = RedisUtil.getDataFromCacheOrDb(
+        var lecture = RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_PREFIX + lectureId,
                 LectureEntity.class,
                 () -> lectureRepository.findById(lectureId),

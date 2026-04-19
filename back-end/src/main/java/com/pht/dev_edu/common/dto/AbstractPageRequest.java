@@ -1,6 +1,6 @@
 package com.pht.dev_edu.common.dto;
 
-import com.pht.dev_edu.common.util.PagingUtil;
+import com.pht.dev_edu.common.util.PagingUtils;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,10 +22,10 @@ public abstract class AbstractPageRequest {
 
     public final Pageable toPageable() {
         if (!StringUtils.hasText(nextCursor)) {
-            return PagingUtil.getPageable(size, toSort());
+            return PagingUtils.getPageable(size, toSort());
         }
 
-        return PagingUtil.getPageable(page, size, toSort());
+        return PagingUtils.getPageable(page, size, toSort());
     }
 
     public abstract Sort[] toSort();

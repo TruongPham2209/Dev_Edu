@@ -10,15 +10,15 @@ import java.util.function.Supplier;
 
 
 @Component
-public class RedisUtil {
+public class RedisUtils {
 
     private static RedisTemplate<String, Object> redisTemplate;
     private static ObjectMapper objectMapper;
 
-    public RedisUtil(RedisTemplate<String, Object> redisTemplate,
-                     ObjectMapper objectMapper) {
-        RedisUtil.redisTemplate = redisTemplate;
-        RedisUtil.objectMapper = objectMapper;
+    public RedisUtils(RedisTemplate<String, Object> redisTemplate,
+                      ObjectMapper objectMapper) {
+        RedisUtils.redisTemplate = redisTemplate;
+        RedisUtils.objectMapper = objectMapper;
     }
 
     public static <T> T getDataFromCacheOrDb(

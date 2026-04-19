@@ -8,9 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Set;
 
-public class SecurityContextUtil {
+public class SecurityContextUtils {
     public static String getCurrentUsernameForController() {
-        String username = SecurityContextUtil.getCurrentUsername();
+        String username = SecurityContextUtils.getCurrentUsername();
         if (username == null) {
             throw new UnauthorizedException("Vui lòng đăng nhập để thực hiện thao tác này.");
         }
