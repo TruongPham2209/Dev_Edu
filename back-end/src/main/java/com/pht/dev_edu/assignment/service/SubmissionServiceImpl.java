@@ -42,7 +42,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     public CustomPaging<SubmissionResponse> getSubmissionsByAssignment(Set<String> authorities, String actor, UUID assignmentId, int page, int size) {
         assignmentPermissionService.checkModifyAssignmentPermission(authorities, actor, assignmentId);
         var pageable = PageRequest.of(page, size, Sort.by("submittedAt").descending());
-        var submissionPage = submissionRepository.findByAssignmentId(assignmentId, pageable);
+        var submissionPage = submissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignmentId, pageable);
         return new CustomPaging<>(submissionPage, submissionMapper::entityToResponse);
     }
 

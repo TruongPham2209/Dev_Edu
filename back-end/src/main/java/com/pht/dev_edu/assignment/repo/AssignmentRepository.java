@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UUID> {
-    List<AssignmentEntity> findByLectureIdAndDeletedAtIsNull(UUID lectureId);
+    List<AssignmentEntity> findByLectureIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID lectureId);
 
     @Query(value = """
                 SELECT  a.id                    AS id,
@@ -30,7 +30,7 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UU
 
     @Query("""
                 SELECT a.id
-                FROM AssignmentEntity a 
+                FROM AssignmentEntity a
                 WHERE a.deletedAt IS NOT NULL
                   AND a.deletedAt < :cutoffTime
             """)

@@ -13,15 +13,7 @@ import java.util.UUID;
 
 @Repository("assignmentSubmissionRepository")
 public interface SubmissionRepository extends JpaRepository<SubmissionEntity, UUID> {
-    Page<SubmissionEntity> findByAssignmentId(UUID assignmentId, Pageable pageable);
-
-    @Modifying
-    @Query(value = """
-                DELETE FROM assignment_submission
-                WHERE assignment_id = :assignmentId
-                RETURNING file_object_key
-            """, nativeQuery = true)
-    List<String> deleteByAssignmentIdAndReturnObjectKeys(UUID assignmentId);
+    Page<SubmissionEntity> findByAssignmentIdOrderBySubmittedAtDesc(UUID assignmentId, Pageable pageable);
 
     @Modifying
     @Query(value = """

@@ -9,17 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FeedbackRepository extends JpaRepository<FeedbackEntity, UUID> {
-    List<FeedbackEntity> findBySubmissionId(UUID submissionId);
-
-    @Modifying
-    @Query(value = """
-                DELETE FROM submission_feedback
-                WHERE submission_id IN (
-                    SELECT id FROM assignment_submission
-                    WHERE assignment_id = :assignmentId
-                )
-            """, nativeQuery = true)
-    void deleteByAssignmentId(UUID assignmentId);
+    List<FeedbackEntity> findBySubmissionIdOrderByCreatedAtDesc(UUID submissionId);
 
     @Modifying
     @Query(value = """

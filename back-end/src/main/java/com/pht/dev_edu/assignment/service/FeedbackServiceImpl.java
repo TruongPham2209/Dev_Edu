@@ -39,7 +39,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         );
 
         assignmentPermissionService.checkViewAssignmentPermissionByAssignment(authorities, actor, submission.getAssignmentId());
-        var feedbacks = feedbackRepository.findBySubmissionId(submissionId);
+        var feedbacks = feedbackRepository.findBySubmissionIdOrderByCreatedAtDesc(submissionId);
         return feedbacks.stream().map(feedbackMapper::entityToRes).toList();
     }
 

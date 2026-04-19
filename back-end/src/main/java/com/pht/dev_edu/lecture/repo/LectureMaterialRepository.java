@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface LectureMaterialRepository extends JpaRepository<LectureMaterialEntity, UUID> {
-    List<LectureMaterialEntity> findAllByLectureIdAndDeletedAtIsNull(UUID lectureId);
+    List<LectureMaterialEntity> findAllByLectureIdAndDeletedAtIsNullOrderByUploadedAtDesc(UUID lectureId);
 
     @Modifying
     @Query(value = """

@@ -40,7 +40,7 @@ public class MaterialServiceImpl implements MaterialService {
     @Override
     public List<MaterialResponse> getMaterialsByLecture(Set<String> authorities, String actor, UUID lectureId) {
         lecturePermissionService.checkViewPermissionByLecture(authorities, actor, lectureId);
-        var materials = lectureMaterialRepository.findAllByLectureIdAndDeletedAtIsNull(lectureId);
+        var materials = lectureMaterialRepository.findAllByLectureIdAndDeletedAtIsNullOrderByUploadedAtDesc(lectureId);
         return materials.stream().map(materialMapper::entityToRes).toList();
     }
 

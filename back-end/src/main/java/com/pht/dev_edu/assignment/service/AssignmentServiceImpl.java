@@ -45,7 +45,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentPermissionService.checkViewAssignmentPermissionByAssignment(authorities, actor, lectureId);
 
         if (!authorities.contains(RoleEnum.STUDENT.name())) {
-            var assignments = assignmentRepository.findByLectureIdAndDeletedAtIsNull(lectureId);
+            var assignments = assignmentRepository.findByLectureIdAndDeletedAtIsNullOrderByCreatedAtDesc(lectureId);
             return assignments.stream().map(assignmentMapper::entityToRes).toList();
         }
 

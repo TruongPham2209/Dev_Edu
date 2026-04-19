@@ -29,10 +29,9 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             SELECT EXISTS (
                 SELECT 1
                 FROM forum_post_version p
+                JOIN forum_post fp ON fp.id = p.post_id
                 WHERE p.id = :postVersionId
-                  AND p.post_id IN (
-                      SELECT id FROM forum_post WHERE author = :author
-                  )
+                  AND fp.author = :author
             )
             """, nativeQuery = true)
     boolean isOwnerOfPostVersion(String author, UUID postVersionId);
