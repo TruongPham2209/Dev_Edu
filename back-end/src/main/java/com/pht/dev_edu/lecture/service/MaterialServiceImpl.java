@@ -2,11 +2,10 @@ package com.pht.dev_edu.lecture.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
-import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.lecture.dto.MaterialRequest;
@@ -87,15 +86,15 @@ public class MaterialServiceImpl implements MaterialService {
     private FileUploadResponse validateMaterialObjectKey(String author, String objectKey) {
         var fileInfo = fileService.getFileInfo(author, objectKey);
         if (fileInfo == null) {
-            KafkaUtil.sendDeleteFileEvent(objectKey);
+            KafkaUtils.sendDeleteFileEvent(objectKey);
 
             log.error("Invalid video object key: {}", objectKey);
             throw new BadRequestException("Invalid video file.");
         }
 
-        boolean isDocumentContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.DOCUMENT, FileContentTypeUtil.FileType.ARCHIVE);
+        boolean isDocumentContentType = FileContentTypeUtils.isValidContentType(fileInfo.getContentType(), FileContentTypeUtils.FileType.DOCUMENT, FileContentTypeUtils.FileType.ARCHIVE);
         if (!isDocumentContentType) {
-            KafkaUtil.sendDeleteFileEvent(objectKey);
+            KafkaUtils.sendDeleteFileEvent(objectKey);
 
             log.error("Invalid content type for material file. ObjectKey: {}, ContentType: {}", objectKey, fileInfo.getContentType());
             throw new BadRequestException("Invalid content type for material file.");

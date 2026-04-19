@@ -15,4 +15,6 @@ public interface AssignmentService {
     void delete(Set<String> authorities, String actor, UUID assignmentId);
 
     void deleteById(UUID assignmentId);
+
+    void deleteByIds(List<UUID> assignmentIds);
 }

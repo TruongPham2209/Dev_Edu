@@ -7,10 +7,10 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ItemStatus;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
-import com.pht.dev_edu.common.util.KafkaUtil;
-import com.pht.dev_edu.common.util.RedisUtil;
-import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.course.dto.CategoryRequest;
 import com.pht.dev_edu.course.dto.CategoryResponse;
 import com.pht.dev_edu.course.entity.CategoryEntity;
@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryEntity getCategoryById(UUID categoryId) {
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.CATEGORY_PREFIX + categoryId,
                 CategoryEntity.class,
                 () -> categoryRepository.findById(categoryId),
@@ -83,9 +83,9 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (isNewObjectKey) {
             var thumbnailInfo = fileService.getFileInfo(author, categoryReq.getThumbnailObjectKey());
-            boolean isImage = FileContentTypeUtil.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtil.FileType.IMAGE);
+            boolean isImage = FileContentTypeUtils.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtils.FileType.IMAGE);
             if (!StringUtils.hasText(thumbnailInfo.getPublicUrl()) || !isImage) {
-                KafkaUtil.sendDeleteFileEvent(categoryReq.getThumbnailObjectKey());
+                KafkaUtils.sendDeleteFileEvent(categoryReq.getThumbnailObjectKey());
 
                 log.error("Thumbnail with object key {} does not have a public URL", categoryReq.getThumbnailObjectKey());
                 throw new BadRequestException("Thumbnail is not accessible.");
@@ -114,7 +114,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setThumbnailUrl(thumbnailUrl);
         categoryRepository.save(category);
 
-        RedisUtil.invalidateCache(RedisPrefixConstant.CATEGORY_PREFIX + category.getId());
+        RedisUtils.invalidateCache(RedisPrefixConstant.CATEGORY_PREFIX + category.getId());
         return categoryMapper.entityToRes(category);
     }
 
@@ -138,7 +138,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         var tracking = TrackingEvent.builder()
-                .username(SecurityContextUtil.getCurrentUsername())
+                .username(SecurityContextUtils.getCurrentUsername())
                 .aggregateId(category.getId())
                 .action(EventTrackingConstant.CATEGORY_DELETED)
                 .details("Category deleted with id: " + category.getId())
@@ -147,6 +147,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setDeletedAt(java.time.LocalDateTime.now());
         categoryRepository.save(category);
-        RedisUtil.invalidateCache(RedisPrefixConstant.CATEGORY_PREFIX + categoryId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.CATEGORY_PREFIX + categoryId);
     }
 }

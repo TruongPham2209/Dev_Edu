@@ -226,4 +226,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
     @Modifying
     @Query("DELETE FROM LectureCommentEntity lc WHERE lc.deletedAt < :cutoffTime AND lc.depth = 2")
     long deleteByDeletedAtBefore(LocalDateTime cutoffTime);
+
+    @Modifying
+    void deleteByLectureId(UUID lectureId);
 }

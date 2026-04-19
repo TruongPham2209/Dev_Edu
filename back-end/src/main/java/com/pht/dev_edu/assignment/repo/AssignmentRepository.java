@@ -35,4 +35,11 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UU
                   AND a.deletedAt < :cutoffTime
             """)
     List<UUID> findDeletedAssignmentIdsBeforeCutoffTime(java.time.LocalDateTime cutoffTime);
+
+    @Query("""
+                SELECT a.id
+                FROM AssignmentEntity a
+                WHERE a.lectureId = :lectureId
+            """)
+    List<UUID> findIdsByLectureId(UUID lectureId);
 }

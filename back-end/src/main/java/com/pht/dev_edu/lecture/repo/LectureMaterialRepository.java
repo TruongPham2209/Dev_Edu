@@ -19,4 +19,12 @@ public interface LectureMaterialRepository extends JpaRepository<LectureMaterial
             RETURNING file_object_key
             """, nativeQuery = true)
     List<String> deleteMaterialBeforeCutoffTimeAndReturnObjectKey(LocalDateTime cutoffTime);
+
+    @Modifying
+    @Query(value = """
+                    DELETE FROM lecture_material
+                    WHERE lecture_id = :lectureId
+                    RETURNING file_object_key
+            """, nativeQuery = true)
+    List<String> deleteMaterialsByLectureIdAndReturnObjectKey(UUID lectureId);
 }

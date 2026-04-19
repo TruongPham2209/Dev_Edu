@@ -1,8 +1,10 @@
 package com.pht.dev_edu.lecture.scheduler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.common.constant.CronJobConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
-import com.pht.dev_edu.common.service.BatchDeleteProcessor;
+import com.pht.dev_edu.common.service.DeleteProcessor;
+import com.pht.dev_edu.common.util.ExceptionUtils;
 import com.pht.dev_edu.lecture.repo.LectureRepository;
 import com.pht.dev_edu.lecture.service.LectureService;
 import com.pht.dev_edu.tracking.dto.CronJobEvent;
@@ -24,7 +26,9 @@ import java.time.LocalDateTime;
 public class LectureScheduler {
     LectureRepository lectureRepository;
     LectureService lectureService;
-    BatchDeleteProcessor batchDeleteProcessor;
+
+    ObjectMapper objectMapper;
+    DeleteProcessor batchDeleteProcessor;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     private static final long DELETION_DELAY_DAYS = 60;
@@ -33,21 +37,57 @@ public class LectureScheduler {
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedLectures() {
-        var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
-        var assignmentIds = lectureRepository.findDeletedIdsBeforeCutoffTime(cutoffTime);
+        var startTime = LocalDateTime.now();
 
-        var result = batchDeleteProcessor.processBatch(
-                assignmentIds,
-                id -> {
-                    lectureService.deleteById(id);
-                    return null;
-                }
-        );
-
-        var conJobEvent = CronJobEvent.builder()
+        var cronJobEvent = CronJobEvent.builder()
                 .cronJobName(CronJobConstant.CLEAN_DELETED_LECTURES_JOB)
-                .details("Deleted " + result.successIds().size() + " lectures, failed to delete " + result.failedIds().size() + " lectures.")
+                .startTime(startTime)
                 .build();
-        kafkaTemplate.send(KafkaTopicConstant.CRON_JOB_EVENT_TOPIC, conJobEvent);
+
+        try {
+            var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
+            var assignmentIds = lectureRepository.findDeletedIdsBeforeCutoffTime(cutoffTime);
+
+            var result = batchDeleteProcessor.processBatch(
+                    assignmentIds,
+                    id -> {
+                        lectureService.deleteById(id);
+                        return null;
+                    }
+            );
+
+            var successCount = result.successIds().size();
+            var failedCount = result.failedErrors().size();
+
+            cronJobEvent.setDetails(
+                    "Deleted " + successCount +
+                    " lecturers, failed to delete " + failedCount + " lecturers."
+            );
+
+            cronJobEvent.setStatus(
+                    failedCount == 0
+                            ? CronJobEvent.Status.SUCCESS
+                            : CronJobEvent.Status.PARTIAL_FAILURE
+            );
+
+            cronJobEvent.setErrorMessage(
+                    failedCount == 0
+                            ? null
+                            : objectMapper.writeValueAsString(result.failedErrors())
+            );
+        } catch (Exception e) {
+            log.error("Error occurred while cleaning deleted lectures", e);
+            cronJobEvent.setDetails("Error occurred while cleaning deleted lectures.");
+            cronJobEvent.setStatus(CronJobEvent.Status.FAILURE);
+            cronJobEvent.setErrorMessage(e.getMessage());
+            cronJobEvent.setErrorStackTrace(ExceptionUtils.getStackTraceAsString(e));
+        } finally {
+            var endTime = LocalDateTime.now();
+            log.info("Cron job '{}' completed. Start time: {}, End time: {}",
+                    CronJobConstant.CLEAN_DELETED_LECTURES_JOB, startTime, endTime);
+
+            cronJobEvent.setFinishedTime(endTime);
+            kafkaTemplate.send(KafkaTopicConstant.CRON_JOB_EVENT_TOPIC, cronJobEvent);
+        }
     }
 }

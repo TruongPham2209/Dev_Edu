@@ -18,6 +18,19 @@ public class CronJobEvent {
 
     String details;
 
-    @Builder.Default
-    LocalDateTime timestamp = LocalDateTime.now();
+    String errorMessage;
+
+    String errorStackTrace;
+
+    Status status;
+
+    LocalDateTime startTime;
+
+    LocalDateTime finishedTime;
+
+    public enum Status {
+        SUCCESS,
+        PARTIAL_FAILURE,
+        FAILURE
+    }
 }

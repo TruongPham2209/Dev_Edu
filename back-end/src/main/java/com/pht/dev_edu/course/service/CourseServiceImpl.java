@@ -8,10 +8,10 @@ import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
-import com.pht.dev_edu.common.util.KafkaUtil;
-import com.pht.dev_edu.common.util.PagingUtil;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
@@ -90,7 +90,7 @@ public class CourseServiceImpl implements CourseService {
                 case ALL -> courseRepository.findAll(pageRequest.toPageable());
             };
         } else {
-            var cursor = PagingUtil.decodeTimeStampCursor(pageRequest.getNextCursor());
+            var cursor = PagingUtils.decodeTimeStampCursor(pageRequest.getNextCursor());
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
                         courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
@@ -120,7 +120,7 @@ public class CourseServiceImpl implements CourseService {
                 case ALL -> courseRepository.findByCategoryId(categoryId, pageRequest.toPageable());
             };
         } else {
-            var cursor = PagingUtil.decodeTimeStampCursor(pageRequest.getNextCursor());
+            var cursor = PagingUtils.decodeTimeStampCursor(pageRequest.getNextCursor());
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
                         courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
@@ -148,7 +148,7 @@ public class CourseServiceImpl implements CourseService {
                 case ALL -> courseRepository.searchCourses(keyword, pageRequest.toPageable());
             };
         } else {
-            var cursor = PagingUtil.decodeTimeStampCursor(pageRequest.getNextCursor());
+            var cursor = PagingUtils.decodeTimeStampCursor(pageRequest.getNextCursor());
             coursePage = switch (pageRequest.getStatus()) {
                 case ACTIVE ->
                         courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
@@ -170,7 +170,7 @@ public class CourseServiceImpl implements CourseService {
     private String getNextCursor(Page<CourseEntity> coursePage) {
         var lastItem = coursePage.getContent().isEmpty() ? null : coursePage.getContent().getLast();
         return lastItem != null
-                ? PagingUtil.encodeTimeStampCursor(new TimeStampCursor(lastItem.getCreatedAt(), lastItem.getId()))
+                ? PagingUtils.encodeTimeStampCursor(new TimeStampCursor(lastItem.getCreatedAt(), lastItem.getId()))
                 : null;
     }
 
@@ -248,7 +248,7 @@ public class CourseServiceImpl implements CourseService {
                 )
                 .toList();
         courseLecturerRepository.saveAll(courseLecturers);
-        RedisUtil.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
+        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
 
         var tracking = TrackingEvent.builder()
                 .username(author)
@@ -257,7 +257,7 @@ public class CourseServiceImpl implements CourseService {
                 .details("Course updated with id: " + existingCourse.getId())
                 .build();
         kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
-        RedisUtil.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
+        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
 
         return courseMapper.entityToRes(updatedCourse);
     }
@@ -291,7 +291,7 @@ public class CourseServiceImpl implements CourseService {
 
         existingCourse.setDeletedAt(LocalDateTime.now());
         courseRepository.save(existingCourse);
-        RedisUtil.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + courseId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + courseId);
     }
 
     @Override
@@ -303,7 +303,7 @@ public class CourseServiceImpl implements CourseService {
 
     private CourseEntity getCourseEntityById(UUID courseId) {
         String cachedKey = RedisPrefixConstant.COURSE_PREFIX + courseId;
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 cachedKey,
                 CourseEntity.class,
                 () -> courseRepository.findById(courseId),
@@ -313,9 +313,9 @@ public class CourseServiceImpl implements CourseService {
 
     private String getThumbnailUrl(String author, String thumbnailObjectKey) {
         var thumbnailInfo = fileService.getFileInfo(author, thumbnailObjectKey);
-        boolean isImage = FileContentTypeUtil.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtil.FileType.IMAGE);
+        boolean isImage = FileContentTypeUtils.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtils.FileType.IMAGE);
         if (!StringUtils.hasText(thumbnailInfo.getPublicUrl()) || !isImage) {
-            KafkaUtil.sendDeleteFileEvent(thumbnailObjectKey);
+            KafkaUtils.sendDeleteFileEvent(thumbnailObjectKey);
             log.error("Thumbnail with object key {} does not have a public URL", thumbnailObjectKey);
             throw new BadRequestException("Thumbnail is not accessible.");
         }

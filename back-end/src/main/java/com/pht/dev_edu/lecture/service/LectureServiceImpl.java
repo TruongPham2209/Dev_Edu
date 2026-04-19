@@ -1,18 +1,24 @@
 package com.pht.dev_edu.lecture.service;
 
+import com.pht.dev_edu.assignment.repo.AssignmentRepository;
+import com.pht.dev_edu.assignment.service.AssignmentService;
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
-import com.pht.dev_edu.common.util.FileContentTypeUtil;
-import com.pht.dev_edu.common.util.KafkaUtil;
-import com.pht.dev_edu.common.util.RedisUtil;
+import com.pht.dev_edu.common.util.FileContentTypeUtils;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.lecture.dto.LectureRequest;
 import com.pht.dev_edu.lecture.dto.LectureResponse;
 import com.pht.dev_edu.lecture.entity.LectureEntity;
 import com.pht.dev_edu.lecture.mapper.LectureMapper;
+import com.pht.dev_edu.lecture.repo.LectureCommentRepository;
+import com.pht.dev_edu.lecture.repo.LectureMaterialRepository;
+import com.pht.dev_edu.lecture.repo.LectureProgressRepository;
 import com.pht.dev_edu.lecture.repo.LectureRepository;
 import com.pht.dev_edu.tracking.dto.GetVideoDurationEvent;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
@@ -24,9 +30,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -34,8 +42,14 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class LectureServiceImpl implements LectureService {
     LectureRepository lectureRepository;
+    LectureMaterialRepository lectureMaterialRepository;
+    LectureProgressRepository lectureProgressRepository;
+    LectureCommentRepository lectureCommentRepository;
+    AssignmentRepository assignmentRepository;
 
+    Executor executor;
     LecturePermissionService lecturePermissionService;
+    AssignmentService assignmentService;
     FileService fileService;
 
     LectureMapper lectureMapper;
@@ -61,7 +75,7 @@ public class LectureServiceImpl implements LectureService {
 
     @Override
     public LectureEntity getLectureById(UUID lectureId) {
-        return RedisUtil.getDataFromCacheOrDb(
+        return RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_PREFIX + lectureId,
                 LectureEntity.class,
                 () -> lectureRepository.findById(lectureId),
@@ -121,7 +135,7 @@ public class LectureServiceImpl implements LectureService {
                 .build();
         kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
 
-        RedisUtil.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + existingLecture.getId());
+        RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + existingLecture.getId());
         return lectureMapper.entityToResponse(updatedLecture);
     }
 
@@ -151,26 +165,46 @@ public class LectureServiceImpl implements LectureService {
                 .build();
         kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
 
-        RedisUtil.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + lectureId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + lectureId);
     }
 
     @Override
+    @Transactional
     public void deleteById(UUID lectureId) {
+        // lecture_material (*) -> lecture_progress -> lecture_comment -> assignment
+        List<String> objectKeys = new ArrayList<>();
+        var lecture = getLectureById(lectureId);
+        if (lecture != null) {
+            lectureRepository.delete(lecture);
+            objectKeys.add(lecture.getVideoObjectKey());
+        }
 
+        var materialObjectKeys = lectureMaterialRepository.deleteMaterialsByLectureIdAndReturnObjectKey(lectureId);
+        objectKeys.addAll(materialObjectKeys);
+
+        lectureProgressRepository.deleteByLectureId(lectureId);
+        lectureCommentRepository.deleteByLectureId(lectureId);
+
+        var assignmentIds = assignmentRepository.findIdsByLectureId(lectureId);
+        assignmentService.deleteByIds(assignmentIds);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            objectKeys.forEach(KafkaUtils::sendDeleteFileEvent);
+        }, executor);
     }
 
     private void validateVideoObjectKey(String author, String videoObjectKey) {
         var fileInfo = fileService.getFileInfo(author, videoObjectKey);
         if (fileInfo == null) {
-            KafkaUtil.sendDeleteFileEvent(videoObjectKey);
+            KafkaUtils.sendDeleteFileEvent(videoObjectKey);
 
             log.error("Invalid video object key: {}", videoObjectKey);
             throw new BadRequestException("Invalid video file.");
         }
 
-        boolean isVideoContentType = FileContentTypeUtil.isValidContentType(fileInfo.getContentType(), FileContentTypeUtil.FileType.VIDEO);
+        boolean isVideoContentType = FileContentTypeUtils.isValidContentType(fileInfo.getContentType(), FileContentTypeUtils.FileType.VIDEO);
         if (!isVideoContentType) {
-            KafkaUtil.sendDeleteFileEvent(videoObjectKey);
+            KafkaUtils.sendDeleteFileEvent(videoObjectKey);
 
             log.error("Invalid video content type for object key {}: {}", videoObjectKey, fileInfo.getContentType());
             throw new BadRequestException("Invalid video file.");

@@ -4,11 +4,15 @@ import com.pht.dev_edu.assignment.dto.AssignmentRequest;
 import com.pht.dev_edu.assignment.dto.AssignmentResponse;
 import com.pht.dev_edu.assignment.mapper.AssignmentMapper;
 import com.pht.dev_edu.assignment.repo.AssignmentRepository;
+import com.pht.dev_edu.assignment.repo.FeedbackRepository;
+import com.pht.dev_edu.assignment.repo.SubmissionRepository;
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.dto.RoleEnum;
-import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -27,6 +32,10 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class AssignmentServiceImpl implements AssignmentService {
     AssignmentRepository assignmentRepository;
+    SubmissionRepository submissionRepository;
+    FeedbackRepository feedbackRepository;
+
+    Executor executor;
     AssignmentPermissionService assignmentPermissionService;
     AssignmentMapper assignmentMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
@@ -78,6 +87,21 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public void deleteById(UUID assignmentId) {
+        deleteByIds(List.of(assignmentId));
+    }
 
+    @Override
+    @Transactional
+    public void deleteByIds(List<UUID> assignmentIds) {
+        // Implement hard delete
+        // assignment_submission (*) -> submission_feedback
+        assignmentRepository.deleteAllById(assignmentIds);
+
+        feedbackRepository.deleteByAssignmentIdIn(assignmentIds);
+        var fileObjectKeys = submissionRepository.deleteByAssignmentIdInAndReturnObjectKeys(assignmentIds);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            fileObjectKeys.forEach(KafkaUtils::sendDeleteFileEvent);
+        }, executor);
     }
 }

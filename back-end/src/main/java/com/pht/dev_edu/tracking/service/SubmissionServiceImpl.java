@@ -4,7 +4,8 @@ import com.pht.dev_edu.assignment.dto.SubmissionEvent;
 import com.pht.dev_edu.assignment.dto.SubmissionLogResponse;
 import com.pht.dev_edu.assignment.service.AssignmentPermissionService;
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.tracking.entity.SubmissionEntity;
 import com.pht.dev_edu.tracking.mapper.SubmissionTrackingMapper;
 import com.pht.dev_edu.tracking.repo.SubmissionRepository;
@@ -13,12 +14,12 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service("submissionTrackingService")
@@ -29,7 +30,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     AssignmentPermissionService assignmentPermissionService;
 
     SubmissionTrackingMapper submissionMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public CustomPaging<SubmissionLogResponse> getSubmissionLogsByAssignmentIdForStudent(Set<String> authorities, String actor, String studentUsername, UUID assignmentId, int page) {
@@ -56,7 +57,9 @@ public class SubmissionServiceImpl implements SubmissionService {
         submissionRepository.save(submissionEntity);
 
         if (submissionEvent.getAction() == SubmissionEvent.Action.UNSUBMITTED) {
-            KafkaUtil.sendDeleteFileEvent(submissionEvent.getFullObjectKey());
+            TransactionUtils.runAfterCommitAsync(() -> {
+                KafkaUtils.sendDeleteFileEvent(submissionEvent.getFullObjectKey());
+            }, executor);
         }
     }
 }

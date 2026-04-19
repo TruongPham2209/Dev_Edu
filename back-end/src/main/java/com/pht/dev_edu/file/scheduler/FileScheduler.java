@@ -2,9 +2,8 @@ package com.pht.dev_edu.file.scheduler;
 
 import com.pht.dev_edu.common.constant.CronJobConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
-import com.pht.dev_edu.common.util.KafkaUtil;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.tracking.dto.CronJobEvent;
-import com.pht.dev_edu.file.dto.FileDeleteEvent;
 import com.pht.dev_edu.file.repo.FileUploadRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,7 @@ public class FileScheduler {
     public void cleanExpiredAndFailedFiles() {
         var objectKeys = fileUploadRepository.deleteExpiredAndFailedFiles(java.time.LocalDateTime.now().minusDays(TIME_EXTEND_MINUTES));
         for (String objectKey : objectKeys) {
-            KafkaUtil.sendDeleteFileEvent(objectKey);
+            KafkaUtils.sendDeleteFileEvent(objectKey);
         }
 
         var conJobEvent = CronJobEvent.builder()
