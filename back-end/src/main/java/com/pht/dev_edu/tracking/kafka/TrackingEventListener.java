@@ -35,7 +35,7 @@ public class TrackingEventListener {
     @KafkaListener(topics = KafkaTopicConstant.TRACKING_EVENT_TOPIC)
     public void handleTrackingEvent(String payload) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, TrackingEvent.class);
-        logService.saveLog(event);
+        logService.saveTrackingLog(event);
     }
 
     @RetryableTopic(
@@ -54,10 +54,10 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.TRACKING_EVENT_TOPIC)
+    @KafkaListener(topics = KafkaTopicConstant.CRON_JOB_EVENT_TOPIC)
     public void handleCronJobEvent(String payload) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, CronJobEvent.class);
-//        logService.saveLog(event);
+        logService.saveCronJobLog(event);
     }
 
     @RetryableTopic(
@@ -65,9 +65,9 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.TRACKING_EVENT_TOPIC)
+    @KafkaListener(topics = KafkaTopicConstant.REQUEST_LOG_TOPIC)
     public void handleLogRequestEvent(String payload) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, RequestLoggingEvent.class);
-
+        logService.saveRequestLog(event);
     }
 }

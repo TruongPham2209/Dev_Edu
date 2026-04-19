@@ -1,11 +1,7 @@
 package com.pht.dev_edu.tracking.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,12 +12,12 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "log_tracking")
+@Table(name = "log_request")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LogEntity {
+public class LogRequestEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
@@ -29,24 +25,25 @@ public class LogEntity {
     @Column(nullable = false)
     String username;
 
-    @Column(name = "aggregate_id", nullable = false)
-    UUID aggregateId;
+    @Column(nullable = false)
+    String method;
 
-    String action;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    String uri;
 
-    @Column(columnDefinition = "TEXT")
-    String details;
+    @Column(name = "request_body", columnDefinition = "TEXT")
+    String requestBody;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    LocalDateTime createdAt;
+    @Column(name = "response_body", columnDefinition = "TEXT")
+    String responseBody;
+
+    @Column(nullable = false, updatable = false)
+    LocalDateTime timestamp;
 
     @PrePersist
     public void prePersist() {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
-        }
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
         }
     }
 }

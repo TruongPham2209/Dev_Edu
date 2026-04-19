@@ -3,8 +3,8 @@ package com.pht.dev_edu.tracking.controller;
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
-import com.pht.dev_edu.common.util.ApiUtil;
-import com.pht.dev_edu.common.util.SecurityContextUtil;
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.tracking.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,8 +30,8 @@ public class SubmissionTrackingController {
             @RequestParam(required = false) String studentUsername,
             @RequestParam(defaultValue = "0") int page
     ) {
-        String username = SecurityContextUtil.getCurrentUsernameForController();
-        Set<String> authorities = SecurityContextUtil.getCurrentUserAuthorities();
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
         if (authorities.contains(RoleEnum.STUDENT.name())) {
             studentUsername = username;
         }
@@ -41,6 +41,6 @@ public class SubmissionTrackingController {
         }
 
         var trackingLogs = submissionService.getSubmissionLogsByAssignmentIdForStudent(authorities, username, studentUsername, assignmentId, page);
-        return ApiUtil.buildSuccessResponse(trackingLogs);
+        return ApiUtils.buildSuccessResponse(trackingLogs);
     }
 }
