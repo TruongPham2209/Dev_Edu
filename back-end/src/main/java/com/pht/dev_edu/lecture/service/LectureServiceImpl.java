@@ -52,8 +52,8 @@ public class LectureServiceImpl implements LectureService {
     AssignmentService assignmentService;
     FileService fileService;
 
-    LectureMapper lectureMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
+    LectureMapper lectureMapper;
 
     @Override
     public List<LectureResponse> getLecturesByCourse(Set<String> authorities, String actor, UUID courseId) {
@@ -127,13 +127,15 @@ public class LectureServiceImpl implements LectureService {
 
         lectureRepository.save(updatedLecture);
 
-        var tracking = TrackingEvent.builder()
-                .username(actor)
-                .aggregateId(existingLecture.getId())
-                .action(EventTrackingConstant.LECTURE_UPDATED)
-                .details("Lecture updated with id: " + existingLecture.getId())
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(actor)
+                    .aggregateId(existingLecture.getId())
+                    .action(EventTrackingConstant.LECTURE_UPDATED)
+                    .details("Lecture updated with id: " + existingLecture.getId())
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + existingLecture.getId());
         return lectureMapper.entityToResponse(updatedLecture);
@@ -157,13 +159,15 @@ public class LectureServiceImpl implements LectureService {
         existingLecture.setDeletedAt(java.time.LocalDateTime.now());
         lectureRepository.save(existingLecture);
 
-        var tracking = TrackingEvent.builder()
-                .username(actor)
-                .aggregateId(lectureId)
-                .action(EventTrackingConstant.LECTURE_DELETED)
-                .details("Lecture deleted with id: " + lectureId)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(actor)
+                    .aggregateId(lectureId)
+                    .action(EventTrackingConstant.LECTURE_DELETED)
+                    .details("Lecture deleted with id: " + lectureId)
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + lectureId);
     }
@@ -216,11 +220,13 @@ public class LectureServiceImpl implements LectureService {
             return;
         }
 
-        var getDurationEvent = GetVideoDurationEvent.builder()
-                .objectKey(videoObjectKey)
-                .entityId(lectureId)
-                .videoType(GetVideoDurationEvent.VideoType.LECTURE)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.VIDEO_DURATION_EVENT_TOPIC, getDurationEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var getDurationEvent = GetVideoDurationEvent.builder()
+                    .objectKey(videoObjectKey)
+                    .entityId(lectureId)
+                    .videoType(GetVideoDurationEvent.VideoType.LECTURE)
+                    .build();
+            kafkaTemplate.send(KafkaTopicConstant.VIDEO_DURATION_EVENT_TOPIC, getDurationEvent);
+        }, executor);
     }
 }

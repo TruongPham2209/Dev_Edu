@@ -1,15 +1,16 @@
 package com.pht.dev_edu.forum.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.forum.dto.PostRequest;
 import com.pht.dev_edu.forum.dto.PostStatus;
@@ -26,7 +27,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -46,7 +47,7 @@ public class PostServiceImpl implements PostService {
 
     FileService fileService;
     PostVersionMapper postVersionMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor) {
@@ -153,13 +154,15 @@ public class PostServiceImpl implements PostService {
             throw new DataNotFoundException("Post version not found");
         }
 
-        var trackingEvent = TrackingEvent.builder()
-                .aggregateId(postVersionId)
-                .action(EventTrackingConstant.POST_VERSION_DELETED)
-                .username(author)
-                .details(String.format("Deleted post version %s", postVersionId))
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var trackingEvent = TrackingEvent.builder()
+                    .aggregateId(postVersionId)
+                    .action(EventTrackingConstant.POST_VERSION_DELETED)
+                    .username(author)
+                    .details(String.format("Deleted post version %s", postVersionId))
+                    .build();
+            KafkaUtils.sendTrackingEvent(trackingEvent);
+        }, executor);
     }
 
     @Override
@@ -187,13 +190,15 @@ public class PostServiceImpl implements PostService {
         // Invalidate cache
         RedisUtils.invalidateCache(RedisPrefixConstant.POST_PREFIX + postId);
 
-        var trackingEvent = TrackingEvent.builder()
-                .aggregateId(postId)
-                .action(EventTrackingConstant.POST_DELETED)
-                .username(author)
-                .details(String.format("Deleted post %s", postId))
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var trackingEvent = TrackingEvent.builder()
+                    .aggregateId(postId)
+                    .action(EventTrackingConstant.POST_DELETED)
+                    .username(author)
+                    .details(String.format("Deleted post %s", postId))
+                    .build();
+            KafkaUtils.sendTrackingEvent(trackingEvent);
+        }, executor);
     }
 
     @Override
@@ -238,13 +243,15 @@ public class PostServiceImpl implements PostService {
             RedisUtils.invalidateCache(RedisPrefixConstant.POST_PREFIX + post.getId());
         }
 
-        var trackingEvent = TrackingEvent.builder()
-                .aggregateId(postVersion.getId())
-                .action(EventTrackingConstant.POST_STATUS_UPDATED)
-                .username(actor)
-                .details(String.format("Updated post version %s to status %s", postVersionId, postStatus))
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var trackingEvent = TrackingEvent.builder()
+                    .aggregateId(postVersion.getId())
+                    .action(EventTrackingConstant.POST_STATUS_UPDATED)
+                    .username(actor)
+                    .details(String.format("Updated post version %s to status %s", postVersionId, postStatus))
+                    .build();
+            KafkaUtils.sendTrackingEvent(trackingEvent);
+        }, executor);
 
         return new UpdatePostVersionResult(
                 updatedIds,

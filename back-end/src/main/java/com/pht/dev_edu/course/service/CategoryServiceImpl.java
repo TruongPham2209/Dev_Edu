@@ -1,16 +1,12 @@
 package com.pht.dev_edu.course.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ItemStatus;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.FileContentTypeUtils;
-import com.pht.dev_edu.common.util.KafkaUtils;
-import com.pht.dev_edu.common.util.RedisUtils;
-import com.pht.dev_edu.common.util.SecurityContextUtils;
+import com.pht.dev_edu.common.util.*;
 import com.pht.dev_edu.course.dto.CategoryRequest;
 import com.pht.dev_edu.course.dto.CategoryResponse;
 import com.pht.dev_edu.course.entity.CategoryEntity;
@@ -22,13 +18,13 @@ import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -37,9 +33,10 @@ import java.util.UUID;
 public class CategoryServiceImpl implements CategoryService {
     CourseRepository courseRepository;
     CategoryRepository categoryRepository;
+
     FileService fileService;
     CategoryMapper categoryMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public List<CategoryResponse> getAllCategories(ItemStatus status) {
@@ -101,13 +98,15 @@ public class CategoryServiceImpl implements CategoryService {
             category.setThumbnailObjectKey(thumbnailObjectKey);
             category.setThumbnailUrl(thumbnailUrl);
 
-            var tracking = TrackingEvent.builder()
-                    .username(author)
-                    .aggregateId(category.getId())
-                    .action(EventTrackingConstant.CATEGORY_UPDATED)
-                    .details("Category updated with id: " + category.getId())
-                    .build();
-            kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+            TransactionUtils.runAfterCommitAsync(() -> {
+                var tracking = TrackingEvent.builder()
+                        .username(author)
+                        .aggregateId(category.getId())
+                        .action(EventTrackingConstant.CATEGORY_UPDATED)
+                        .details("Category updated with id: " + category.getId())
+                        .build();
+                KafkaUtils.sendTrackingEvent(tracking);
+            }, executor);
         } else {
             category.setCreatedBy(author);
         }
@@ -137,13 +136,15 @@ public class CategoryServiceImpl implements CategoryService {
             throw new BadRequestException("Cannot delete category because it has active courses.");
         }
 
-        var tracking = TrackingEvent.builder()
-                .username(SecurityContextUtils.getCurrentUsername())
-                .aggregateId(category.getId())
-                .action(EventTrackingConstant.CATEGORY_DELETED)
-                .details("Category deleted with id: " + category.getId())
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(SecurityContextUtils.getCurrentUsername())
+                    .aggregateId(category.getId())
+                    .action(EventTrackingConstant.CATEGORY_DELETED)
+                    .details("Category deleted with id: " + category.getId())
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
 
         category.setDeletedAt(java.time.LocalDateTime.now());
         categoryRepository.save(category);

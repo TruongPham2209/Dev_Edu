@@ -7,7 +7,6 @@ import com.pht.dev_edu.assignment.repo.AssignmentRepository;
 import com.pht.dev_edu.assignment.repo.FeedbackRepository;
 import com.pht.dev_edu.assignment.repo.SubmissionRepository;
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.KafkaUtils;
@@ -16,7 +15,6 @@ import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +36,6 @@ public class AssignmentServiceImpl implements AssignmentService {
     Executor executor;
     AssignmentPermissionService assignmentPermissionService;
     AssignmentMapper assignmentMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public List<AssignmentResponse> getAssignments(Set<String> authorities, String actor, UUID lectureId) {
@@ -75,13 +72,15 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setDeletedAt(LocalDateTime.now());
         assignmentRepository.save(assignment);
 
-        var tracking = TrackingEvent.builder()
-                .username(actor)
-                .action(EventTrackingConstant.ASSIGNMENT_DELETED)
-                .aggregateId(assignmentId)
-                .details("Deleted assignment with id: " + assignmentId)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(actor)
+                    .action(EventTrackingConstant.ASSIGNMENT_DELETED)
+                    .aggregateId(assignmentId)
+                    .details("Deleted assignment with id: " + assignmentId)
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
     }
 
     @Override

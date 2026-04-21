@@ -6,19 +6,20 @@ import com.pht.dev_edu.assignment.mapper.FeedbackMapper;
 import com.pht.dev_edu.assignment.repo.FeedbackRepository;
 import com.pht.dev_edu.assignment.repo.SubmissionRepository;
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
-import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -30,7 +31,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     AssignmentPermissionService assignmentPermissionService;
     FeedbackMapper feedbackMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public List<FeedbackResponse> getFeedbacksBySubmission(Set<String> authorities, String actor, UUID submissionId) {
@@ -71,14 +72,16 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         assignmentPermissionService.checkModifyAssignmentPermission(authorities, actor, submission.getAssignmentId());
 
-        var tracking = TrackingEvent.builder()
-                .action(EventTrackingConstant.FEEDBACK_DELETED)
-                .aggregateId(feedbackId)
-                .details("Feedback deleted content: " + feedback.getFeedback())
-                .username(actor)
-                .build();
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .action(EventTrackingConstant.FEEDBACK_DELETED)
+                    .aggregateId(feedbackId)
+                    .details("Feedback deleted content: " + feedback.getFeedback())
+                    .username(actor)
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
 
         feedbackRepository.delete(feedback);
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
     }
 }

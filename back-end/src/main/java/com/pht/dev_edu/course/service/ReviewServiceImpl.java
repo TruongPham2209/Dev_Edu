@@ -1,16 +1,20 @@
 package com.pht.dev_edu.course.service;
 
+import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.course.dto.ReviewRequest;
 import com.pht.dev_edu.course.dto.ReviewResponse;
 import com.pht.dev_edu.course.entity.CourseReviewEntity;
 import com.pht.dev_edu.course.mapper.ReviewMapper;
 import com.pht.dev_edu.course.repo.CourseReviewRepository;
 import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +28,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -34,6 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
     CourseReviewRepository reviewRepository;
 
     ReviewMapper reviewMapper;
+    Executor executor;
 
     @Override
     @Transactional
@@ -67,6 +73,16 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         reviewRepository.delete(review);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var trackingEvent = TrackingEvent.builder()
+                    .aggregateId(reviewId)
+                    .action(EventTrackingConstant.COURSE_REVIEW_DELETED)
+                    .username(username)
+                    .details(String.format("Review with ID %s for course ID %s was deleted by user %s", reviewId, review.getCourseId(), username))
+                    .build();
+            KafkaUtils.sendTrackingEvent(trackingEvent);
+        }, executor);
     }
 
     @Override

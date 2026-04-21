@@ -1,17 +1,13 @@
 package com.pht.dev_edu.course.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.FileContentTypeUtils;
-import com.pht.dev_edu.common.util.KafkaUtils;
-import com.pht.dev_edu.common.util.PagingUtils;
-import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.*;
 import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
@@ -28,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -36,6 +31,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 @Slf4j
@@ -51,7 +47,7 @@ public class CourseServiceImpl implements CourseService {
     CategoryService categoryService;
 
     CourseMapper courseMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public CourseResponse getCourseById(UUID courseId) {
@@ -208,15 +204,17 @@ public class CourseServiceImpl implements CourseService {
         courseLecturerRepository.saveAll(courseLecturers);
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
 
-        var tracking = TrackingEvent.builder()
-                .username(author)
-                .aggregateId(existingCourse.getId())
-                .action(EventTrackingConstant.COURSE_UPDATED)
-                .details("Course updated with id: " + existingCourse.getId())
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
-        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(author)
+                    .aggregateId(existingCourse.getId())
+                    .action(EventTrackingConstant.COURSE_UPDATED)
+                    .details("Course updated with id: " + existingCourse.getId())
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
 
+        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
         return courseMapper.entityToRes(updatedCourse);
     }
 
@@ -239,13 +237,15 @@ public class CourseServiceImpl implements CourseService {
             throw new BadRequestException("Cannot delete course with enrollments.");
         }
 
-        var tracking = TrackingEvent.builder()
-                .username(actor)
-                .aggregateId(existingCourse.getId())
-                .action(EventTrackingConstant.COURSE_DELETED)
-                .details("Course deleted with id: " + existingCourse.getId())
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(actor)
+                    .aggregateId(existingCourse.getId())
+                    .action(EventTrackingConstant.COURSE_DELETED)
+                    .details("Course deleted with id: " + existingCourse.getId())
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
 
         existingCourse.setDeletedAt(LocalDateTime.now());
         courseRepository.save(existingCourse);

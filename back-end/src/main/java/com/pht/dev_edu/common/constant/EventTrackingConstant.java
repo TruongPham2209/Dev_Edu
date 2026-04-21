@@ -3,6 +3,7 @@ package com.pht.dev_edu.common.constant;
 public class EventTrackingConstant {
     public static final String COURSE_UPDATED = "course.updated";
     public static final String COURSE_DELETED = "course.deleted";
+    public static final String COURSE_REVIEW_DELETED = "course_review.deleted";
 
     public static final String CATEGORY_UPDATED = "category.updated";
     public static final String CATEGORY_DELETED = "category.deleted";
@@ -21,4 +22,6 @@ public class EventTrackingConstant {
     public static final String POST_DELETED = "post.deleted";
     public static final String POST_VERSION_DELETED = "post_version.deleted";
     public static final String POST_STATUS_UPDATED = "post_status.updated";
+
+    public static final String FORUM_COMMENT_DELETED = "forum_comment.deleted";
 }

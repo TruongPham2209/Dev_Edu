@@ -1,21 +1,20 @@
 package com.pht.dev_edu.lecture.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
-import com.pht.dev_edu.common.util.KafkaUtils;
-import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.FileContentTypeUtils;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.lecture.dto.MaterialRequest;
 import com.pht.dev_edu.lecture.dto.MaterialResponse;
 import com.pht.dev_edu.lecture.mapper.MaterialMapper;
 import com.pht.dev_edu.lecture.repo.LectureMaterialRepository;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -35,7 +35,7 @@ public class MaterialServiceImpl implements MaterialService {
     FileService fileService;
 
     MaterialMapper materialMapper;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public List<MaterialResponse> getMaterialsByLecture(Set<String> authorities, String actor, UUID lectureId) {
@@ -73,13 +73,15 @@ public class MaterialServiceImpl implements MaterialService {
         material.setDeletedAt(LocalDateTime.now());
         lectureMaterialRepository.save(material);
 
-        var tracking = TrackingEvent.builder()
-                .username(actor)
-                .aggregateId(materialId)
-                .action(EventTrackingConstant.LECTURE_MATERIAL_DELETED)
-                .details("Lecture material deleted with ID: " + materialId)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, tracking);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var tracking = TrackingEvent.builder()
+                    .username(actor)
+                    .aggregateId(materialId)
+                    .action(EventTrackingConstant.LECTURE_MATERIAL_DELETED)
+                    .details("Lecture material deleted with ID: " + materialId)
+                    .build();
+            KafkaUtils.sendTrackingEvent(tracking);
+        }, executor);
     }
 
     // Change valid content types
