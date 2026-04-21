@@ -30,9 +30,9 @@ public class CourseScheduler {
         var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
 
         deleteProcessor.executeCleanupJob(
-                CronJobConstant.CLEAN_DELETED_MATERIALS_JOB,
+                CronJobConstant.CLEAN_DELETED_COURSES_JOB,
                 () -> courseRepository
-                        .deleteCoursesBeforeCutoffTimeAndReturnObjectKey(cutoffTime),
+                        .deleteCoursesBeforeCutoffTimeThenReturnObjectKey(cutoffTime),
                 "Deleted %d courses"
         );
     }

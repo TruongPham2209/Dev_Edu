@@ -21,7 +21,7 @@ import com.pht.dev_edu.course.entity.CourseLecturerId;
 import com.pht.dev_edu.course.mapper.CourseMapper;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.CourseRepository;
-import com.pht.dev_edu.course.repo.EnrollmentRepository;
+import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +36,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 @Slf4j
 @Service
@@ -70,108 +71,65 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest req) {
+        Function<TimeStampCursor, Page<CourseEntity>> queryFn;
         if (categoryId != null) {
-            return getCoursesByCategory(categoryId, req);
-        }
-
-        if (keyword != null) {
-            return searchCourses(keyword, req);
-        }
-
-        return getAllCourses(req);
-    }
-
-    private CustomPaging<CourseResponse> getAllCourses(CoursePageRequest pageRequest) {
-        Page<CourseEntity> coursePage;
-        if (!StringUtils.hasText(pageRequest.getNextCursor())) {
-            coursePage = switch (pageRequest.getStatus()) {
-                case ACTIVE -> courseRepository.findByDeletedAtIsNull(pageRequest.toPageable());
-                case DELETED -> courseRepository.findByDeletedAtIsNotNull(pageRequest.toPageable());
-                case ALL -> courseRepository.findAll(pageRequest.toPageable());
+            queryFn = cursor -> switch (req.getStatus()) {
+                case ACTIVE ->
+                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                case DELETED ->
+                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                case ALL ->
+                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+            };
+        } else if (keyword != null) {
+            queryFn = cursor -> switch (req.getStatus()) {
+                case ACTIVE ->
+                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                case DELETED ->
+                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                case ALL ->
+                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
             };
         } else {
-            var cursor = PagingUtils.decodeTimeStampCursor(pageRequest.getNextCursor());
-            coursePage = switch (pageRequest.getStatus()) {
+            queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
+                        courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), req.toPageable());
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-                case ALL ->
-                        courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
+                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                case ALL -> courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), req.toPageable());
             };
         }
 
-        var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
-        if (StringUtils.hasText(pageRequest.getNextCursor())) {
-            courseResponses.setCurrentPage(pageRequest.getPage());
-            courseResponses.setNextCursor(getNextCursor(coursePage));
-        }
-        return courseResponses;
+
+        return executeCoursePaging(req, queryFn);
     }
 
-    private CustomPaging<CourseResponse> getCoursesByCategory(UUID categoryId, CoursePageRequest pageRequest) {
-        Page<CourseEntity> coursePage;
-        if (!StringUtils.hasText(pageRequest.getNextCursor())) {
-            coursePage = switch (pageRequest.getStatus()) {
-                case ACTIVE ->
-                        courseRepository.findByCategoryIdAndDeletedAtIsNull(categoryId, pageRequest.toPageable());
-                case DELETED ->
-                        courseRepository.findByCategoryIdAndDeletedAtIsNotNull(categoryId, pageRequest.toPageable());
-                case ALL -> courseRepository.findByCategoryId(categoryId, pageRequest.toPageable());
-            };
-        } else {
-            var cursor = PagingUtils.decodeTimeStampCursor(pageRequest.getNextCursor());
-            coursePage = switch (pageRequest.getStatus()) {
-                case ACTIVE ->
-                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-                case DELETED ->
-                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-                case ALL ->
-                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-            };
+    private CustomPaging<CourseResponse> executeCoursePaging(
+            CoursePageRequest pageRequest,
+            Function<TimeStampCursor, Page<CourseEntity>> queryFn
+    ) {
+        var cursor = resolveCursor(pageRequest.getNextCursor());
+
+        var coursePage = queryFn.apply(cursor);
+
+        var pageResult = PagingUtils.getPagedWithCursor(
+                coursePage,
+                courseMapper::entityToRes,
+                CourseEntity::getCreatedAt,
+                CourseEntity::getId
+        );
+
+        if (StringUtils.hasText(pageRequest.getNextCursor())) {
+            pageResult.setCurrentPage(pageRequest.getPage());
         }
 
-        var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
-        if (StringUtils.hasText(pageRequest.getNextCursor())) {
-            courseResponses.setCurrentPage(pageRequest.getPage());
-            courseResponses.setNextCursor(getNextCursor(coursePage));
-        }
-        return courseResponses;
+        return pageResult;
     }
 
-    private CustomPaging<CourseResponse> searchCourses(String keyword, CoursePageRequest pageRequest) {
-        Page<CourseEntity> coursePage;
-        if (!StringUtils.hasText(pageRequest.getNextCursor())) {
-            coursePage = switch (pageRequest.getStatus()) {
-                case ACTIVE -> courseRepository.searchActiveCourses(keyword, pageRequest.toPageable());
-                case DELETED -> courseRepository.searchDeletedCourses(keyword, pageRequest.toPageable());
-                case ALL -> courseRepository.searchCourses(keyword, pageRequest.toPageable());
-            };
-        } else {
-            var cursor = PagingUtils.decodeTimeStampCursor(pageRequest.getNextCursor());
-            coursePage = switch (pageRequest.getStatus()) {
-                case ACTIVE ->
-                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-                case DELETED ->
-                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-                case ALL ->
-                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), pageRequest.toPageable());
-            };
-        }
-
-        var courseResponses = new CustomPaging<>(coursePage, courseMapper::entityToRes);
-        if (StringUtils.hasText(pageRequest.getNextCursor())) {
-            courseResponses.setCurrentPage(pageRequest.getPage());
-            courseResponses.setNextCursor(getNextCursor(coursePage));
-        }
-        return courseResponses;
-    }
-
-    private String getNextCursor(Page<CourseEntity> coursePage) {
-        var lastItem = coursePage.getContent().isEmpty() ? null : coursePage.getContent().getLast();
-        return lastItem != null
-                ? PagingUtils.encodeTimeStampCursor(new TimeStampCursor(lastItem.getCreatedAt(), lastItem.getId()))
-                : null;
+    private TimeStampCursor resolveCursor(String nextCursor) {
+        return StringUtils.hasText(nextCursor)
+                ? PagingUtils.decodeTimeStampCursor(nextCursor)
+                : TimeStampCursor.getDefaultCursor(true);
     }
 
     @Override

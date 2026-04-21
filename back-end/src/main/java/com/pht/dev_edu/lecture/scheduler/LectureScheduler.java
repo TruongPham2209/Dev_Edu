@@ -83,8 +83,8 @@ public class LectureScheduler {
             cronJobEvent.setErrorStackTrace(ExceptionUtils.getStackTraceAsString(e));
         } finally {
             var endTime = LocalDateTime.now();
-            log.info("Cron job '{}' completed. Start time: {}, End time: {}",
-                    CronJobConstant.CLEAN_DELETED_LECTURES_JOB, startTime, endTime);
+            log.info("Completed cleanDeletedLectures job. Start time: {}, End time: {}, Duration: {} seconds",
+                    startTime, endTime, java.time.Duration.between(startTime, endTime).getSeconds());
 
             cronJobEvent.setFinishedTime(endTime);
             kafkaTemplate.send(KafkaTopicConstant.CRON_JOB_EVENT_TOPIC, cronJobEvent);

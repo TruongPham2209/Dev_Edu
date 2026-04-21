@@ -7,7 +7,6 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
-import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.common.util.RedisUtils;
@@ -17,9 +16,11 @@ import com.pht.dev_edu.forum.dto.PostStatus;
 import com.pht.dev_edu.forum.dto.PostVersionResponse;
 import com.pht.dev_edu.forum.dto.UpdatePostVersionResult;
 import com.pht.dev_edu.forum.entity.PostEntity;
+import com.pht.dev_edu.forum.entity.PostVersionEntity;
 import com.pht.dev_edu.forum.mapper.PostVersionMapper;
 import com.pht.dev_edu.forum.repo.PostRepository;
 import com.pht.dev_edu.forum.repo.PostVersionRepository;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +48,6 @@ public class PostServiceImpl implements PostService {
     PostVersionMapper postVersionMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
 
-    /*
-    Related post score: score = tag_similarity * 0.4 + text_similarity * 0.3 + save_cooccurrence * 0.3 => Dùng elastic search để tính toán điểm số này, sau đó sắp xếp và trả về kết quả
-     */
     @Override
     public CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor) {
         var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "updated_at").and(Sort.by(Sort.Direction.DESC, "id")));
@@ -58,14 +56,12 @@ public class PostServiceImpl implements PostService {
                 : PagingUtils.decodeTimeStampCursor(lastCursor);
         var postVersionPage = postVersionRepository.findByStatusAndCursor(status, cursor.getId(), cursor.getTimeStamp(), pageable);
 
-        var responsePaging = new CustomPaging<>(postVersionPage, postVersionMapper::entityToRes);
-        var lastPostVersion = postVersionPage.getContent().isEmpty() ? null : postVersionPage.getContent().getLast();
-        var nextCursor = lastPostVersion != null
-                ? PagingUtils.encodeTimeStampCursor(new TimeStampCursor(lastPostVersion.getUpdatedAt(), lastPostVersion.getId()))
-                : null;
-        responsePaging.setNextCursor(nextCursor);
-
-        return responsePaging;
+        return PagingUtils.getPagedWithCursor(
+                postVersionPage,
+                postVersionMapper::entityToRes,
+                PostVersionEntity::getUpdatedAt,
+                PostVersionEntity::getId
+        );
     }
 
     @Override

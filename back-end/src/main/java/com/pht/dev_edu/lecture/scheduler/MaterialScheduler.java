@@ -31,7 +31,7 @@ public class MaterialScheduler {
         deleteProcessor.executeCleanupJob(
                 CronJobConstant.CLEAN_DELETED_MATERIALS_JOB,
                 () -> lectureMaterialRepository
-                        .deleteMaterialBeforeCutoffTimeAndReturnObjectKey(cutoffTime),
+                        .deleteMaterialBeforeCutoffTimeThenReturnObjectKey(cutoffTime),
                 "Deleted %d lecture materials."
         );
     }

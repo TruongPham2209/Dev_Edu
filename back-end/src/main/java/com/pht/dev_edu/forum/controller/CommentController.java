@@ -12,4 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CommentController {
     CommentService commentService;
+
+    // TODO: Implement endpoints
 }

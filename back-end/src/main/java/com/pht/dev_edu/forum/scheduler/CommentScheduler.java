@@ -21,6 +21,6 @@ public class CommentScheduler {
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedComments() {
-
+        // TODO: Implement logic to find comments marked for deletion and delete them if they have been marked for more than DELETION_DELAY_DAYS
     }
 }

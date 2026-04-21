@@ -21,5 +21,5 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, UUID> 
               AND deleted_at < :cutoffTime
             RETURNING thumbnail_object_key
             """, nativeQuery = true)
-    List<String> deleteCategoriesBeforeCutoffTimeAndReturnObjectKey(LocalDateTime cutoffTime);
+    List<String> deleteCategoriesBeforeCutoffTimeThenReturnObjectKey(LocalDateTime cutoffTime);
 }

@@ -179,7 +179,7 @@ public class LectureServiceImpl implements LectureService {
             objectKeys.add(lecture.getVideoObjectKey());
         }
 
-        var materialObjectKeys = lectureMaterialRepository.deleteMaterialsByLectureIdAndReturnObjectKey(lectureId);
+        var materialObjectKeys = lectureMaterialRepository.deleteMaterialsByLectureIdThenReturnObjectKey(lectureId);
         objectKeys.addAll(materialObjectKeys);
 
         lectureProgressRepository.deleteByLectureId(lectureId);

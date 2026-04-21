@@ -8,7 +8,7 @@ import com.pht.dev_edu.common.exception.security.AccessDeniedException;
 import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.course.entity.CourseLecturerId;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
-import com.pht.dev_edu.course.repo.EnrollmentRepository;
+import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import com.pht.dev_edu.course.service.CourseService;
 import com.pht.dev_edu.lecture.entity.LectureEntity;
 import com.pht.dev_edu.lecture.repo.LectureRepository;

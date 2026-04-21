@@ -12,12 +12,12 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "forum_comment")
+@Table(name = "saved_post")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentEntity {
+public class SavedPostEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
@@ -25,34 +25,19 @@ public class CommentEntity {
     @Column(name = "post_id", nullable = false)
     UUID postId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    String content;
+    @Column(nullable = false)
+    String username;
 
-    @Column(name = "author", nullable = false)
-    String author;
-
-    @Column(name = "root_comment_id")
-    UUID rootCommentId;
-
-    @Column(name = "replied_to_comment_id")
-    UUID repliedToCommentId;
-
-    @Column(name = "depth", nullable = false)
-    int depth;
-
-    @Column(name = "created_at")
-    LocalDateTime createdAt;
-
-    @Column(name = "deleted_at")
-    LocalDateTime deletedAt;
+    @Column(name = "saved_at")
+    LocalDateTime savedAt;
 
     @PrePersist
     public void prePersist() {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
         }
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
+        if (savedAt == null) {
+            savedAt = LocalDateTime.now();
         }
     }
 }

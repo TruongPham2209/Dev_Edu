@@ -4,14 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Utility class for handling pagination.
@@ -68,5 +73,34 @@ public class PagingUtils {
         } catch (IllegalArgumentException | JsonProcessingException e) {
             throw new IllegalArgumentException("Invalid cursor format", e);
         }
+    }
+
+    public static <T> String getNextTimeCursor(
+            Page<T> page,
+            Function<T, LocalDateTime> getTime,
+            Function<T, UUID> getId
+    ) {
+        var content = page.getContent();
+        if (content.isEmpty()) return null;
+
+        var lastItem = content.getLast();
+
+        return PagingUtils.encodeTimeStampCursor(
+                new TimeStampCursor(getTime.apply(lastItem), getId.apply(lastItem))
+        );
+    }
+
+    public static <T, R> CustomPaging<R> getPagedWithCursor(
+            Page<T> page,
+            Function<T, R> mapper,
+            Function<T, LocalDateTime> getTime,
+            Function<T, UUID> getId
+    ) {
+        var result = new CustomPaging<>(page, mapper);
+
+        var nextCursor = PagingUtils.getNextTimeCursor(page, getTime, getId);
+        result.setNextCursor(nextCursor);
+
+        return result;
     }
 }

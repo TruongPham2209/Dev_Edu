@@ -21,6 +21,6 @@ public class PostScheduler {
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedPosts() {
-
+        // TODO: Implement logic to find posts marked for deletion and delete them if they have been marked for more than DELETION_DELAY_DAYS
     }
 }

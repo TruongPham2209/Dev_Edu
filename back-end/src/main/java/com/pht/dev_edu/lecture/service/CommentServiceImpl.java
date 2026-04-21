@@ -6,7 +6,6 @@ import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
-import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
@@ -18,6 +17,7 @@ import com.pht.dev_edu.lecture.dto.CommentResponse;
 import com.pht.dev_edu.lecture.entity.LectureCommentEntity;
 import com.pht.dev_edu.lecture.mapper.LectureCommentMapper;
 import com.pht.dev_edu.lecture.repo.LectureCommentRepository;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -55,9 +55,11 @@ public class CommentServiceImpl implements CommentService {
                     cursor.getTimeStamp(),
                     req.toPageable()
             );
-            return new CustomPaging<>(
+            return PagingUtils.getPagedWithCursor(
                     pageComments,
-                    c -> convertProjectionToResponse(c, actor)
+                    c -> convertProjectionToResponse(c, actor),
+                    CommentProjection::getCreatedAt,
+                    CommentProjection::getId
             );
         }
 
@@ -87,9 +89,11 @@ public class CommentServiceImpl implements CommentService {
             default -> throw new IllegalStateException("Unexpected comment depth: " + parentComment.getDepth());
         };
 
-        return new CustomPaging<>(
+        return PagingUtils.getPagedWithCursor(
                 pageComments,
-                c -> convertProjectionToResponse(c, actor)
+                c -> convertProjectionToResponse(c, actor),
+                CommentProjection::getCreatedAt,
+                CommentProjection::getId
         );
     }
 

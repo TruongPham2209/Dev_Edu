@@ -23,5 +23,5 @@ public interface FileUploadRepository extends JpaRepository<FileUploadEntity, UU
                 AND expired_at < :cutoffDate
                 RETURNING object_key
             """, nativeQuery = true)
-    List<String> deleteExpiredAndFailedFiles(LocalDateTime cutoffDate);
+    List<String> deleteExpiredAndFailedFilesThenReturnObjectKeys(LocalDateTime cutoffDate);
 }

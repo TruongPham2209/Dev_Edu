@@ -30,9 +30,9 @@ public class CategoryScheduler {
         var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
 
         deleteProcessor.executeCleanupJob(
-                CronJobConstant.CLEAN_DELETED_MATERIALS_JOB,
+                CronJobConstant.CLEAN_DELETED_CATEGORIES_JOB,
                 () -> categoryRepository
-                        .deleteCategoriesBeforeCutoffTimeAndReturnObjectKey(cutoffTime),
+                        .deleteCategoriesBeforeCutoffTimeThenReturnObjectKey(cutoffTime),
                 "Deleted %d categories."
         );
     }

@@ -12,16 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
-    Page<CourseEntity> findByCategoryIdAndDeletedAtIsNull(UUID categoryId, Pageable pageable);
-
-    Page<CourseEntity> findByCategoryIdAndDeletedAtIsNotNull(UUID categoryId, Pageable pageable);
-
-    Page<CourseEntity> findByCategoryId(UUID categoryId, Pageable pageable);
-
-    Page<CourseEntity> findByDeletedAtIsNull(Pageable pageable);
-
-    Page<CourseEntity> findByDeletedAtIsNotNull(Pageable pageable);
-
     @Query(value = """
             SELECT  *
             FROM    course
@@ -97,29 +87,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
     Page<CourseEntity> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-                    SELECT  *
-                    FROM    course c
-                    WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            """, nativeQuery = true)
-    Page<CourseEntity> searchCourses(String keyword, Pageable pageable);
-
-    @Query(value = """
-                    SELECT  *
-                    FROM    course c
-                    WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
-                    AND     c.deleted_at IS NULL
-            """, nativeQuery = true)
-    Page<CourseEntity> searchActiveCourses(String keyword, Pageable pageable);
-
-    @Query(value = """
-                    SELECT  *
-                    FROM    course c
-                    WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
-                    AND     c.deleted_at IS NOT NULL
-            """, nativeQuery = true)
-    Page<CourseEntity> searchDeletedCourses(String keyword, Pageable pageable);
-
-    @Query(value = """
             SELECT  *
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
@@ -168,5 +135,5 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             AND deleted_at < :cutoffTime
             RETURNING thumbnail_object_key
             """, nativeQuery = true)
-    List<String> deleteCoursesBeforeCutoffTimeAndReturnObjectKey(LocalDateTime cutoffTime);
+    List<String> deleteCoursesBeforeCutoffTimeThenReturnObjectKey(LocalDateTime cutoffTime);
 }
