@@ -1,7 +1,7 @@
 package com.pht.dev_edu.enrollment.repo;
 
-import com.pht.dev_edu.course.dto.EnrolledCourseProjection;
-import com.pht.dev_edu.course.dto.EnrollmentUserProjection;
+import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
+import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
 import com.pht.dev_edu.enrollment.entity.EnrollmentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,6 +1,5 @@
 package com.pht.dev_edu.course.dto;
 
-import com.pht.dev_edu.enrollment.entity.EnrollmentEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -9,14 +8,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * DTO for {@link EnrollmentEntity}
+ * DTO for {@link com.pht.dev_edu.course.entity.CourseReviewEntity}
  */
 @Data
 @Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class EnrollmentUserResponse {
+public class ReviewResponse {
     UUID id;
+    String comment;
+    Integer rating;
     String username;
-    String fullName;
-    LocalDateTime enrolledAt;
+    LocalDateTime createdAt;
 }

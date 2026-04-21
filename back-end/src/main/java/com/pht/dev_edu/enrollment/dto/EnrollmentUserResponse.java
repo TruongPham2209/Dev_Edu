@@ -1,11 +1,10 @@
-package com.pht.dev_edu.course.dto;
+package com.pht.dev_edu.enrollment.dto;
 
 import com.pht.dev_edu.enrollment.entity.EnrollmentEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -15,12 +14,9 @@ import java.util.UUID;
 @Data
 @Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class EnrolledCourseResponse {
+public class EnrollmentUserResponse {
     UUID id;
-    UUID courseId;
-    String title;
-    String description;
-    String thumbnailUrl;
+    String username;
+    String fullName;
     LocalDateTime enrolledAt;
-    BigDecimal amount;
 }

@@ -1,9 +1,9 @@
 package com.pht.dev_edu.enrollment.mapper;
 
-import com.pht.dev_edu.course.dto.EnrolledCourseProjection;
-import com.pht.dev_edu.course.dto.EnrolledCourseResponse;
-import com.pht.dev_edu.course.dto.EnrollmentUserProjection;
-import com.pht.dev_edu.course.dto.EnrollmentUserResponse;
+import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
+import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
+import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

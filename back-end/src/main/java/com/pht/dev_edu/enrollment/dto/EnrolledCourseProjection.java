@@ -1,4 +1,4 @@
-package com.pht.dev_edu.course.dto;
+package com.pht.dev_edu.enrollment.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
