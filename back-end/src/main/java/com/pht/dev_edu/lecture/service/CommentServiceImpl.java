@@ -1,15 +1,16 @@
 package com.pht.dev_edu.lecture.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
-import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.lecture.dto.CommentPageRequest;
 import com.pht.dev_edu.lecture.dto.CommentProjection;
 import com.pht.dev_edu.lecture.dto.CommentRequest;
@@ -21,7 +22,6 @@ import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service("lectureCommentService")
@@ -38,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
     LectureCommentRepository lectureCommentRepository;
     LectureCommentMapper commentMapper;
     LecturePermissionService lecturePermissionService;
-    KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     private static final int MAX_COMMENT_DEPTH = 2; // Count start from 0, so 0: root, 1: reply to root, 2: reply to reply
 
@@ -155,13 +156,15 @@ public class CommentServiceImpl implements CommentService {
         comment.setDeletedAt(LocalDateTime.now());
         lectureCommentRepository.save(comment);
 
-        var trackingEvent = TrackingEvent.builder()
-                .action(EventTrackingConstant.COMMENT_DELETED)
-                .username(actor)
-                .details("Deleted comment with id " + commentId)
-                .aggregateId(commentId)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.TRACKING_EVENT_TOPIC, trackingEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var trackingEvent = TrackingEvent.builder()
+                    .action(EventTrackingConstant.COMMENT_DELETED)
+                    .username(actor)
+                    .details("Deleted comment with id " + commentId)
+                    .aggregateId(commentId)
+                    .build();
+            KafkaUtils.sendTrackingEvent(trackingEvent);
+        }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_COMMENT_PREFIX + commentId);
     }

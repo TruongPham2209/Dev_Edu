@@ -15,7 +15,9 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class CommentResponse {
     UUID id;
+    String author;
     String content;
-    UUID parentCommentId;
+    int replyCount;
+    UUID repliedToCommentId;
     LocalDateTime createdAt;
 }

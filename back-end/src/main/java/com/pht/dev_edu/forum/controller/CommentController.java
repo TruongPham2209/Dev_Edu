@@ -1,10 +1,17 @@
 package com.pht.dev_edu.forum.controller;
 
+import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
+import com.pht.dev_edu.forum.dto.CommentRequest;
 import com.pht.dev_edu.forum.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController("ForumCommentController")
 @RequestMapping("/api/v1/forum/comments")
@@ -13,5 +20,42 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController {
     CommentService commentService;
 
-    // TODO: Implement endpoints
+    @PreAuthorize("permitAll()")
+    @GetMapping("/")
+    public ResponseEntity<?> getRootComments(
+            @RequestParam UUID postId,
+            @RequestParam(required = false) String nextCursor
+    ) {
+        var comments = commentService.getCommentsByPostId(postId, nextCursor);
+        return ApiUtils.buildSuccessResponse(comments);
+    }
+
+    @PreAuthorize("permitAll()")
+    @GetMapping("/replies")
+    public ResponseEntity<?> getRepliedComments(
+            @RequestParam UUID parentCommentId,
+            @RequestParam(required = false) String nextCursor
+    ) {
+        var comments = commentService.getRepliedComments(parentCommentId, nextCursor);
+        return ApiUtils.buildSuccessResponse(comments);
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<?> createComment(
+            @RequestBody @Valid CommentRequest request
+    ) {
+        var username = SecurityContextUtils.getCurrentUsernameForController();
+        var createdComment = commentService.createComment(username, request);
+        return ApiUtils.buildSuccessResponse(createdComment);
+    }
+
+    @DeleteMapping("/")
+    public ResponseEntity<?> deleteComment(
+            @RequestParam UUID commentId
+    ) {
+        var username = SecurityContextUtils.getCurrentUsernameForController();
+        var authorities = SecurityContextUtils.getCurrentUserAuthorities();
+        commentService.deleteComment(authorities, username, commentId);
+        return ApiUtils.buildSuccessResponse("Comment deleted successfully.");
+    }
 }
