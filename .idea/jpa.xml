@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JpaBuddyIdeaProjectConfig" newRepositoryParent="org.springframework.data.jpa.repository.JpaRepository">
+    <option name="defaultUnitInitialized" value="true" />
+    <option name="renamerInitialized" value="true" />
+  </component>
+  <component name="JpaPluginProjectSettings">
+    <option name="lastSelectedLanguage" value="Java" />
+  </component>
+  <component name="PersistenceUnitSettings">
+    <persistence-units>
+      <persistence-unit moduleName="dev-edu" name="Default">
+        <packages>
+          <package value="com.pht.dev_edu" />
+        </packages>
+      </persistence-unit>
+    </persistence-units>
+  </component>
+</project>

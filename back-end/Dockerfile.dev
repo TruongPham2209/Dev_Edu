@@ -1,0 +1,13 @@
+FROM maven:3.9.9-eclipse-temurin-21
+
+WORKDIR /workspace
+
+COPY pom.xml ./
+RUN mvn -q -DskipTests dependency:go-offline || true
+
+COPY docker/dev-entrypoint.sh /usr/local/bin/dev-entrypoint.sh
+RUN chmod +x /usr/local/bin/dev-entrypoint.sh
+
+EXPOSE 9000
+
+ENTRYPOINT ["/usr/local/bin/dev-entrypoint.sh"]
