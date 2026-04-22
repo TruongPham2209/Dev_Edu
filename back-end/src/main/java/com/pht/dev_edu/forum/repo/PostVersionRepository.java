@@ -58,6 +58,18 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             FROM forum_post_version pv
             WHERE   pv.status = :status
             """,
-            nativeQuery= true)
+            nativeQuery = true)
     Page<PostVersionEntity> findByStatusAndCursor(PostStatus status, UUID lastId, LocalDateTime lastUpdatedAt, org.springframework.data.domain.Pageable pageable);
+
+    @Modifying
+    @Query(value = """
+            DELETE FROM forum_post_version fv
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM forum_post fp
+                WHERE fp.id = fv.post_id
+            )
+            RETURNING fv.id
+            """, nativeQuery = true)
+    List<UUID> deleteVersionByInvalidPost();
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
@@ -54,4 +55,17 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
             AND     deleted_at IS NULL
             """, nativeQuery = true)
     Page<CommentProjection> findReplyCommentsByRootCommentIdAndCursor(UUID rootCommentId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+
+    int deleteByDeletedAtIsBefore(LocalDateTime cutoffTime);
+
+    @Query(value = """
+            DELETE FROM forum_comment fc
+            WHERE post_id NOT EXISTS (
+                SELECT 1
+                FROM forum_post fp
+                WHERE fp.id = fc.post_id
+            )
+            RETURNING fc.id
+            """, nativeQuery = true)
+    List<UUID> deleteCommentWithoutPostReference();
 }

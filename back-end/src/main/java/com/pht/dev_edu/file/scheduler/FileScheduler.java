@@ -29,7 +29,7 @@ public class FileScheduler {
     public void cleanExpiredAndFailedFiles() {
         var cutoffTime = LocalDateTime.now().minusMinutes(TIME_EXTEND_MINUTES);
 
-        deleteProcessor.executeCleanupJob(
+        deleteProcessor.executeCleanupJobHasObjectKeys(
                 CronJobConstant.CLEAN_EXPIRED_AND_FAILED_FILES_JOB,
                 () -> fileUploadRepository.deleteExpiredAndFailedFilesThenReturnObjectKeys(cutoffTime),
                 "Deleted %d expired/failed files."

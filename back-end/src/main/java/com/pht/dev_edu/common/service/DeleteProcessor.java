@@ -61,7 +61,7 @@ public class DeleteProcessor {
         return new BatchResult<>(successIds, failedErrors);
     }
 
-    public void executeCleanupJob(
+    public void executeCleanupJobHasObjectKeys(
             String cronJobName,
             Supplier<List<String>> deleteFunction,
             String successMessageTemplate
@@ -83,6 +83,48 @@ public class DeleteProcessor {
             cronJobEvent.setStatus(CronJobEvent.Status.SUCCESS);
             cronJobEvent.setDetails(
                     successMessageTemplate.formatted(objectKeys.size())
+            );
+
+        } catch (Exception e) {
+            log.error("Error occurred in cron job: {}", cronJobName, e);
+
+            cronJobEvent.setDetails("Error occurred during cleanup: " + cronJobName);
+            cronJobEvent.setStatus(CronJobEvent.Status.FAILURE);
+            cronJobEvent.setErrorMessage(e.getMessage());
+            cronJobEvent.setErrorStackTrace(ExceptionUtils.getStackTraceAsString(e));
+        } finally {
+            var finishedTime = LocalDateTime.now();
+            cronJobEvent.setFinishedTime(finishedTime);
+
+            try {
+                kafkaTemplate.send(
+                        KafkaTopicConstant.CRON_JOB_EVENT_TOPIC,
+                        cronJobEvent
+                );
+            } catch (Exception ex) {
+                log.error("Failed to send cron job event", ex);
+            }
+        }
+    }
+
+    public void executeCleanupJob(
+            String cronJobName,
+            Supplier<Integer> deleteFunction,
+            String successMessageTemplate
+    ) {
+        var startTime = LocalDateTime.now();
+
+        var cronJobEvent = CronJobEvent.builder()
+                .cronJobName(cronJobName)
+                .startTime(startTime)
+                .build();
+
+        try {
+            var deletedRows = deleteFunction.get();
+
+            cronJobEvent.setStatus(CronJobEvent.Status.SUCCESS);
+            cronJobEvent.setDetails(
+                    successMessageTemplate.formatted(deletedRows)
             );
 
         } catch (Exception e) {

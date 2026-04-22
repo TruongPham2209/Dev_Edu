@@ -29,7 +29,7 @@ public class CategoryScheduler {
     public void cleanDeletedAssignments() {
         var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
 
-        deleteProcessor.executeCleanupJob(
+        deleteProcessor.executeCleanupJobHasObjectKeys(
                 CronJobConstant.CLEAN_DELETED_CATEGORIES_JOB,
                 () -> categoryRepository
                         .deleteCategoriesBeforeCutoffTimeThenReturnObjectKey(cutoffTime),

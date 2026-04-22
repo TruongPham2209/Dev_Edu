@@ -28,7 +28,7 @@ public class MaterialScheduler {
     public void cleanDeletedMaterials() {
         var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
 
-        deleteProcessor.executeCleanupJob(
+        deleteProcessor.executeCleanupJobHasObjectKeys(
                 CronJobConstant.CLEAN_DELETED_MATERIALS_JOB,
                 () -> lectureMaterialRepository
                         .deleteMaterialBeforeCutoffTimeThenReturnObjectKey(cutoffTime),
