@@ -6,8 +6,9 @@ import com.pht.dev_edu.common.dto.ProviderEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.FileContentTypeUtils;
-import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.user.dto.RegisterUser;
 import com.pht.dev_edu.user.entity.RoleEntity;
 import com.pht.dev_edu.user.entity.UserEntity;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     AuthProviderRepository authProviderRepository;
     RoleRepository roleRepository;
 
+    Executor executor;
     FileService fileService;
     PasswordEncoder passwordEncoder;
 
@@ -122,11 +125,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        RedisUtils.updateCache(
-                RedisPrefixConstant.USER_USERNAME_PREFIX + username,
-                user,
-                RedisDurationConstant.USER_DATA_DURATION
-        );
+        updateUserCache(user);
     }
 
     @Override
@@ -156,11 +155,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setUsername(username);
         userRepository.save(user);
 
-        RedisUtils.updateCache(
-                RedisPrefixConstant.USER_USERNAME_PREFIX + username,
-                user,
-                RedisDurationConstant.USER_DATA_DURATION
-        );
+        updateUserCache(user);
     }
 
     @Override
@@ -188,12 +183,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setAvatarUrl(fileInfo.getPublicUrl());
         userRepository.save(user);
 
-        RedisUtils.updateCache(
-                RedisPrefixConstant.USER_USERNAME_PREFIX + username,
-                user,
-                RedisDurationConstant.USER_DATA_DURATION
-        );
-
+        updateUserCache(user);
         return fileInfo.getPublicUrl();
     }
 
@@ -249,5 +239,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                             .build();
                 })
                 .toList();
+    }
+
+    private void updateUserCache(UserEntity user) {
+        TransactionUtils.runAfterCommitAsync(() -> {
+            RedisUtils.updateCache(
+                    RedisPrefixConstant.USER_USERNAME_PREFIX + user.getUsername(),
+                    user,
+                    RedisDurationConstant.USER_DATA_DURATION
+            );
+
+            RedisUtils.updateCache(
+                    RedisPrefixConstant.USER_EMAIL_PREFIX + user.getEmail(),
+                    user,
+                    RedisDurationConstant.USER_DATA_DURATION
+            );
+        }, executor);
     }
 }

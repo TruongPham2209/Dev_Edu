@@ -24,7 +24,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                             ELSE FALSE
                         END AS completed
                 FROM lecture l
-                JOIN lecture_progress lp
+                LEFT JOIN lecture_progress lp
                     ON  l.id        = lp.lecture_id
                     AND lp.student  = :username
                 WHERE   l.id = :lectureId
@@ -44,7 +44,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                             ELSE FALSE
                         END AS completed
                 FROM lecture l
-                JOIN lecture_progress lp
+                LEFT JOIN lecture_progress lp
                     ON  l.id        = lp.lecture_id
                     AND lp.student  = :username
                 WHERE   l.course_id = :lectureId
@@ -71,8 +71,8 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
     @Query("""
                 SELECT l.id
                 FROM LectureEntity l
-                WHERE l.deletedAt IS NOT NULL
-                  AND l.deletedAt < :cutoffTime
+                WHERE   l.deletedAt IS NOT NULL
+                AND     l.deletedAt < :cutoffTime
             """)
     List<UUID> findDeletedIdsBeforeCutoffTime(java.time.LocalDateTime cutoffTime);
 }

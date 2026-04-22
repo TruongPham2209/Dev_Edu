@@ -31,8 +31,8 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UU
     @Query("""
                 SELECT a.id
                 FROM AssignmentEntity a
-                WHERE a.deletedAt IS NOT NULL
-                  AND a.deletedAt < :cutoffTime
+                WHERE   a.deletedAt IS NOT NULL
+                AND     a.deletedAt < :cutoffTime
             """)
     List<UUID> findDeletedAssignmentIdsBeforeCutoffTime(java.time.LocalDateTime cutoffTime);
 

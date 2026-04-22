@@ -5,6 +5,7 @@ import com.pht.dev_edu.forum.dto.PostRequest;
 import com.pht.dev_edu.forum.dto.PostStatus;
 import com.pht.dev_edu.forum.dto.PostVersionResponse;
 import com.pht.dev_edu.forum.dto.UpdatePostVersionResult;
+import com.pht.dev_edu.forum.entity.PostEntity;
 
 import java.util.List;
 import java.util.Set;
@@ -24,4 +25,6 @@ public interface PostService {
     void deletePost(Set<String> authorities, String author, UUID postId);
 
     UpdatePostVersionResult updatePostVersion(String actor, PostStatus postStatus, UUID postVersionId);
+
+    PostEntity getPostById(UUID postId);
 }

@@ -260,7 +260,8 @@ public class PostServiceImpl implements PostService {
         );
     }
 
-    private PostEntity getPostById(UUID postId) {
+    @Override
+    public PostEntity getPostById(UUID postId) {
         return RedisUtils.getDataFromCacheOrDb(
                 RedisPrefixConstant.POST_PREFIX + postId,
                 PostEntity.class,

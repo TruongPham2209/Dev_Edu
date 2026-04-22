@@ -16,9 +16,9 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
     @Query(value = """
             UPDATE forum_post_version
             SET status = 'SUPERSEDED'
-            WHERE post_id = :postId
-              AND version_number < :version
-              AND status = 'PENDING'
+            WHERE post_id           = :postId
+              AND version_number    < :version
+              AND status            = 'PENDING'
             RETURNING id
             """, nativeQuery = true)
     List<UUID> supersededOldVersionByPostId(UUID postId, int version);
@@ -29,9 +29,10 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             SELECT EXISTS (
                 SELECT 1
                 FROM forum_post_version p
-                JOIN forum_post fp ON fp.id = p.post_id
-                WHERE p.id = :postVersionId
-                  AND fp.author = :author
+                JOIN forum_post fp
+                    ON fp.id = p.post_id
+                WHERE   p.id        = :postVersionId
+                AND     fp.author   = :author
             )
             """, nativeQuery = true)
     boolean isOwnerOfPostVersion(String author, UUID postVersionId);
@@ -71,5 +72,5 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             )
             RETURNING fv.id
             """, nativeQuery = true)
-    List<UUID> deleteVersionByInvalidPost();
+    List<UUID> deleteByInvalidPost();
 }

@@ -131,8 +131,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
     @Modifying
     @Query(value = """
             DELETE FROM course
-            WHERE deleted_at IS NOT NULL
-            AND deleted_at < :cutoffTime
+            WHERE   deleted_at IS NOT NULL
+            AND     deleted_at < :cutoffTime
             RETURNING thumbnail_object_key
             """, nativeQuery = true)
     List<String> deleteCoursesBeforeCutoffTimeThenReturnObjectKey(LocalDateTime cutoffTime);
