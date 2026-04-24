@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UUID> {
@@ -28,7 +27,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                             ON e.id = p.entity_id
                         WHERE   e.student_username      = :studentUsername
                         AND     p.entity_type           = 'COURSE'
-                        AND     (e.id, e.enrolled_at)   < (:lastId, :lastUpdatedAt)
+                        AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
             """, countQuery = """
                         SELECT COUNT(*)
                         FROM enrollment e
@@ -42,24 +41,14 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
             nativeQuery = true)
     Page<EnrolledCourseProjection> findEnrolledCoursesByStudentUsernameAndCursor(String studentUsername, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
 
+    // TODO: Implement this query to find courses assigned to a lecturer with cursor pagination
     @Query(value = """
-                        SELECT  e.id                 AS id,
-                                c.id                 AS courseId,
-                                c.title              AS title,
-                                c.description        AS description,
-                                c.thumbnail_url      AS thumbnailUrl,
-                                e.enrolled_at        AS enrolledAt,
-                                p.amount             AS amount
-                        FROM enrollment e
-                        JOIN course c
-                            ON e.course_id = c.id
-                        JOIN payment p 
-                            ON e.id = p.entity_id
-                        WHERE   e.student_username      = :studentUsername
-                        AND     e.course_id             = :courseId
-                        AND     p.entity_type           = 'COURSE'
-            """, nativeQuery = true)
-    Optional<EnrolledCourseProjection> findEnrolledCoursesByStudentAndCourseId(String studentUsername, UUID courseId);
+
+            """, countQuery = """
+
+            """,
+            nativeQuery = true)
+    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
 
 
     @Query(value = """
@@ -72,7 +61,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                             ON e.student_username = u.username
                         WHERE   e.student_username      = :studentUsername
                         AND     e.course_id             = :courseId
-                        AND     (e.id, e.enrolled_at)   < (:lastId, :lastUpdatedAt)
+                        AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
             """, countQuery = """
                         SELECT COUNT(*)
                         FROM enrollment e

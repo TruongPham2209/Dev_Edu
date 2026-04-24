@@ -1,15 +1,15 @@
 package com.pht.dev_edu.enrollment.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.course.dto.EnrolledCourseResponse;
-import com.pht.dev_edu.course.dto.EnrollmentUserResponse;
+import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 
 import java.util.UUID;
 
 public interface EnrollmentService {
-    EnrolledCourseResponse getEnrollmentInfo(String username, UUID courseId);
-
     CustomPaging<EnrolledCourseResponse> getEnrolledCourses(String username, String nextCursor);
+
+    CustomPaging<EnrolledCourseResponse> findCoursesAssignedToLecturer(String lecturerUsername, String nextCursor);
 
     CustomPaging<EnrollmentUserResponse> getEnrolledUsers(UUID courseId, String nextCursor);
 

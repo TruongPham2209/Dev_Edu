@@ -17,8 +17,8 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             UPDATE forum_post_version
             SET status = 'SUPERSEDED'
             WHERE post_id           = :postId
-              AND version_number    < :version
               AND status            = 'PENDING'
+              AND version_number    < :version
             RETURNING id
             """, nativeQuery = true)
     List<UUID> supersededOldVersionByPostId(UUID postId, int version);
@@ -45,15 +45,13 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             """, nativeQuery = true)
     int deleteByIdAndStatus(UUID id, PostStatus status);
 
-    List<PostVersionEntity> findByPostIdOrderByVersionNumberDesc(UUID postId);
-
     List<PostVersionEntity> findByPostIdAndStatusOrderByVersionNumberDesc(UUID postId, PostStatus status);
 
     @Query(value = """
             SELECT *
             FROM forum_post_version pv
-            WHERE   pv.status = :status
-            AND     (pv.updated_at, pv.id) < (:lastUpdatedAt, :lastId)
+            WHERE   (pv.updated_at, pv.id) < (:lastUpdatedAt, :lastId)
+            AND     pv.status = :status
             """, countQuery = """
             SELECT COUNT(*)
             FROM forum_post_version pv
