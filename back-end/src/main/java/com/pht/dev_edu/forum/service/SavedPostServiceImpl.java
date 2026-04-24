@@ -48,7 +48,7 @@ public class SavedPostServiceImpl implements SavedPostService {
     @Override
     @Transactional
     public void unSavePost(String username, UUID postId) {
-        savedPostRepository.deleteByUsernameAndPostId(username, postId);
+        savedPostRepository.deleteByPostIdAndUsername(postId, username);
     }
 
     @Override

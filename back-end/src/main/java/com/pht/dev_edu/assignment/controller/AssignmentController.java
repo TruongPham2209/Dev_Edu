@@ -79,7 +79,7 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse("Feedback deleted successfully");
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER'')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
     @GetMapping("/submissions")
     public ResponseEntity<ApiResponse> getSubmissions(
             @RequestParam UUID assignmentId,

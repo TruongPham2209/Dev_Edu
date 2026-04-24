@@ -5,6 +5,7 @@ import com.pht.dev_edu.forum.entity.CommentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
@@ -24,8 +25,8 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                 ON  r.root_comment_id = c.id
                 AND r.deleted_at IS NULL
             WHERE   c.post_id           = :postId
-            AND     c.deleted_at        IS NULL
             AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
+            AND     c.deleted_at        IS NULL
             AND     c.root_comment_id   IS NULL
             GROUP BY c.id
             """, countQuery = """
@@ -46,8 +47,8 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                     0                       AS replyCount
             FROM forum_comment
             WHERE   root_comment_id = :rootCommentId
-            AND     deleted_at IS NULL
             AND     (created_at, id) < (:lastCreatedAt, :lastId)
+            AND     deleted_at IS NULL
             """, countQuery = """
             SELECT  COUNT(id)
             FROM forum_comment
@@ -58,6 +59,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
 
     int deleteByDeletedAtIsBefore(LocalDateTime cutoffTime);
 
+    @Modifying
     @Query(value = """
             DELETE FROM forum_comment fc
             WHERE post_id NOT EXISTS (

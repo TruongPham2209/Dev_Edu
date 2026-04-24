@@ -100,7 +100,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .filter(review -> !review.getStudentUsername().equals(username))
                 .toList());
         if (!StringUtils.hasText(nextCursor) && StringUtils.hasText(username)) {
-            var myComments = reviewRepository.findByStudentUsernameAndCourseIdOrderByCreatedAtDesc(username, courseId);
+            var myComments = reviewRepository.findByCourseIdAndStudentUsernameOrderByCreatedAtDesc(courseId, username);
             content.addAll(0, myComments);
         }
         pageResult = new PageImpl<>(

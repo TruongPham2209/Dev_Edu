@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseReviewRepository extends JpaRepository<CourseReviewEntity, UUID> {
-    List<CourseReviewEntity> findByStudentUsernameAndCourseIdOrderByCreatedAtDesc(String studentUsername, UUID courseId);
+    List<CourseReviewEntity> findByCourseIdAndStudentUsernameOrderByCreatedAtDesc(UUID courseId, String studentUsername);
 
     @Query(value = """
             SELECT * FROM course_review

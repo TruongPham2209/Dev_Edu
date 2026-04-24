@@ -30,7 +30,7 @@ public class PostController {
     SearchPostService searchPostService;
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/versions/")
+    @GetMapping("/versions")
     public ResponseEntity<?> getAllVersions(
             @RequestParam PostStatus status,
             @RequestParam(required = false) String lastCursor
@@ -41,16 +41,17 @@ public class PostController {
 
     @GetMapping("/versions/{postId}")
     public ResponseEntity<?> getVersionsByPostId(
-            @PathVariable UUID postId
+            @PathVariable UUID postId,
+            @RequestParam(required = false) PostStatus status
     ) {
         var authorities = SecurityContextUtils.getCurrentUserAuthorities();
         var username = SecurityContextUtils.getCurrentUsername();
 
-        var versions = postService.getPostVersionsByPostId(authorities, username, postId);
+        var versions = postService.getPostVersionsByPostId(authorities, username, postId, status);
         return ApiUtils.buildSuccessResponse(versions);
     }
 
-    @PutMapping("/versions/")
+    @PutMapping("/versions")
     public ResponseEntity<?> updatePostVersion(
             @RequestBody Map<String, Object> requestBody
     ) {
@@ -79,7 +80,7 @@ public class PostController {
         return ApiUtils.buildSuccessResponse("Post version deleted successfully");
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody @Validated({CreateValidation.class}) PostRequest postRequest
     ) {
@@ -88,7 +89,7 @@ public class PostController {
         return ApiUtils.buildSuccessResponse(createdPost);
     }
 
-    @PutMapping("/")
+    @PutMapping
     public ResponseEntity<?> updatePost(
             @RequestBody @Validated({UpdateValidation.class}) PostRequest postRequest
     ) {
@@ -97,7 +98,7 @@ public class PostController {
         return ApiUtils.buildSuccessResponse(updatedPost);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<?> deletePost(
             @RequestParam UUID postId
     ) {

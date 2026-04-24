@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface PostService {
     CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor);
 
-    List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId);
+    List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status);
 
     PostVersionResponse create(String author, PostRequest postRequest);
 

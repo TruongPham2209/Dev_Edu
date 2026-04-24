@@ -53,7 +53,6 @@ public class PostScheduler {
         );
     }
 
-    // TODO: clean saved posts that reference deleted posts
     @Scheduled(fixedDelay = 12 * 60 * 60 * 1000)
     @Transactional
     public void cleanSavePosts() {

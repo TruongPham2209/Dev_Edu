@@ -21,7 +21,7 @@ public class CommentController {
     CommentService commentService;
 
     @PreAuthorize("permitAll()")
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<?> getRootComments(
             @RequestParam UUID postId,
             @RequestParam(required = false) String nextCursor
@@ -40,7 +40,7 @@ public class CommentController {
         return ApiUtils.buildSuccessResponse(comments);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> createComment(
             @RequestBody @Valid CommentRequest request
     ) {
@@ -49,7 +49,7 @@ public class CommentController {
         return ApiUtils.buildSuccessResponse(createdComment);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<?> deleteComment(
             @RequestParam UUID commentId
     ) {

@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController("ReviewController")
-@RequestMapping("/api/v1/reviews")
+@RequestMapping("/api/v1/courses/reviews")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class ReviewController {
     ReviewService reviewService;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<?> getReviews(
             @RequestParam UUID courseId,
             @RequestParam(required = false) String nextCursor
@@ -31,14 +31,14 @@ public class ReviewController {
     }
 
     @PreAuthorize("hasAuthority('STUDENT')")
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<?> createReview(@RequestBody @Valid ReviewRequest request) {
         var username = SecurityContextUtils.getCurrentUsername();
         var review = reviewService.createReview(username, request);
         return ApiUtils.buildSuccessResponse(review);
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<?> deleteReview(
             @RequestParam UUID reviewId
     ) {

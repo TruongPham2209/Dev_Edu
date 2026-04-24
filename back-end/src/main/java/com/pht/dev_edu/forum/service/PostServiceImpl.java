@@ -66,7 +66,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId) {
+    public List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status) {
         var post = getPostById(postId);
         if (post == null) {
             log.warn("Post {} not found", postId);
@@ -79,9 +79,8 @@ public class PostServiceImpl implements PostService {
         }
 
         boolean canAccessAllStatuses = post.getAuthor().equals(actor) || authorities.contains(RoleEnum.ADMIN.name());
-        var postVersions = canAccessAllStatuses
-                ? postVersionRepository.findByPostIdOrderByVersionNumberDesc(postId)
-                : postVersionRepository.findByPostIdAndStatusOrderByVersionNumberDesc(postId, PostStatus.APPROVED);
+        var statusToQuery = canAccessAllStatuses ? status : PostStatus.APPROVED;
+        var postVersions = postVersionRepository.findByPostIdAndStatusOrderByVersionNumberDesc(postId, statusToQuery);
         return postVersions.stream()
                 .map(postVersionMapper::entityToRes)
                 .toList();
@@ -151,7 +150,7 @@ public class PostServiceImpl implements PostService {
         int deletedCount = postVersionRepository.deleteByIdAndStatus(postVersionId, PostStatus.PENDING);
         if (deletedCount == 0) {
             log.warn("Post version {} not found or not in pending status, cannot delete for author {}", postVersionId, author);
-            throw new DataNotFoundException("Post version not found");
+            return;
         }
 
         TransactionUtils.runAfterCommitAsync(() -> {

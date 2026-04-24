@@ -92,7 +92,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             """, countQuery = """
-            SELECT  *
+            SELECT  COUNT(*)
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             """, nativeQuery = true)
@@ -105,7 +105,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             AND     c.deleted_at IS NULL
             """, countQuery = """
-            SELECT  *
+            SELECT  COUNT(*)
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at IS NULL
@@ -119,7 +119,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             AND     (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             AND     c.deleted_at IS NOT NULL
             """, countQuery = """
-            SELECT  *
+            SELECT  COUNT(*)
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at IS NOT NULL

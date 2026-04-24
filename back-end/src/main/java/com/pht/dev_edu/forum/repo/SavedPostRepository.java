@@ -15,14 +15,14 @@ import java.util.UUID;
 public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID> {
     @Modifying
     @Query(value = """
-            INSERT INTO saved_post (username, post_id)
-            VALUES (:username, :postId)
+            INSERT INTO saved_post (post_id, username)
+            VALUES (:postId, :username)
             ON CONFLICT DO NOTHING
             """, nativeQuery = true)
     void insertSavedPost(String username, UUID postId);
 
     @Modifying
-    void deleteByUsernameAndPostId(String username, UUID postId);
+    void deleteByPostIdAndUsername(UUID postId, String username);
 
     @Query(value = """
             SELECT  sv.id                   AS id,
