@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_auth_user_id ON auth_provider(user_id);
