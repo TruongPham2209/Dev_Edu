@@ -1,13 +1,98 @@
 package com.pht.dev_edu.enrollment.repo;
 
+import com.pht.dev_edu.enrollment.dto.CourseDiscountProjection;
+import com.pht.dev_edu.enrollment.dto.CourseOrderItemProjection;
 import com.pht.dev_edu.enrollment.entity.CourseDiscountEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEntity, UUID> {
-    // TODO: native query get all scheduled include all and specific course, order by createdAt desc, id desc with paging
+    @Query(value = """
+                SELECT  cd.id                       AS id,
+                        c.id                        AS courseId,
+                        c.title                     AS courseTitle,
+                        c.description               AS courseDescription,
+                        c.thumbnail_url             AS courseThumbnailUrl,
+                        cd.description              AS discountDescription,
+                        cd.discount_percentage      AS discountPercentage,
+                        cd.valid_from               AS validFrom,
+                        cd.valid_to                 AS validTo,
+                        cd.created_by               AS createdBy,
+                        cd.created_at               AS createdAt
+                FROM course_discount cd
+                LEFT JOIN course c
+                    ON c.id = cd.course_id
+                WHERE   (cd.valid_from, cd.id) < (:lastValidFrom, :lastId)
+                AND     cd.valid_from > NOW()
+            """, countQuery = """
+                SELECT  COUNT(*)
+                FROM course_discount cd
+                LEFT JOIN course c
+                    ON c.id = cd.course_id
+                WHERE   cd.valid_from > NOW()
+            """, nativeQuery = true)
+    Page<CourseDiscountProjection> getAllScheduledDiscountsWithCursor(UUID lastId, LocalDateTime lastValidFrom, Pageable pageable);
 
-    // TODO: native query get all scheduled by course id, order by createdAt desc, id desc
+    @Query(value = """
+                SELECT  cd.id                       AS id,
+                        c.id                        AS courseId,
+                        c.title                     AS courseTitle,
+                        c.description               AS courseDescription,
+                        c.thumbnail_url             AS courseThumbnailUrl,
+                        cd.description              AS discountDescription,
+                        cd.discount_percentage      AS discountPercentage,
+                        cd.valid_from               AS validFrom,
+                        cd.valid_to                 AS validTo,
+                        cd.created_by               AS createdBy,
+                        cd.created_at               AS createdAt
+                FROM course_discount cd
+                LEFT JOIN course c
+                    ON c.id = cd.course_id
+                WHERE   cd.course_id = :courseId
+                AND     cd.valid_from > NOW()
+                ORDER BY cd.created_at DESC, cd.id DESC
+            """, nativeQuery = true)
+    List<CourseDiscountProjection> getAllScheduledDiscountsByCourseId(UUID courseId);
+
+    @Query("SELECT discountPercentage FROM CourseDiscountEntity WHERE courseId IS NULL AND validFrom <= :now AND validTo >= :now ORDER BY discountPercentage DESC")
+    Optional<BigDecimal> getGlobalActiveDiscount(LocalDateTime now);
+
+    @Query(value = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM course_discount cd
+                    WHERE cd.course_id = :courseId
+                    AND (
+                        (cd.valid_from < :validTo AND cd.valid_to > :validFrom)
+                    )
+                )
+            """, nativeQuery = true)
+    boolean existsOverlappingDiscount(UUID courseId, LocalDateTime validFrom, LocalDateTime validTo);
+
+    @Query(value = """
+                SELECT  c.id                                    AS id,
+                        c.title                                 AS title,
+                        c.thumbnail_url                         AS thumbnailUrl,
+                        COALESCE(cd.discount_percentage, 0.0)   AS discountPercentage,
+                        c.price                                 AS originalPrice,
+                        (e.student_username IS NOT NULL)        AS registered
+                FROM course c
+                LEFT JOIN course_discount cd
+                    ON  c.id = cd.course_id
+                    AND cd.valid_from <= :now
+                    AND cd.valid_to >= :now
+                LEFT JOIN enrollment e
+                    ON  e.course_id = c.id
+                    AND e.student_username = :username
+                WHERE c.id IN :courseIds
+            """, nativeQuery = true)
+    List<CourseOrderItemProjection> findDiscountedCoursesForUser(String username, List<UUID> courseIds, LocalDateTime now);
 }

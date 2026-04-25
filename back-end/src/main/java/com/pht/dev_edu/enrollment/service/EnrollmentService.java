@@ -4,6 +4,7 @@ import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface EnrollmentService {
@@ -14,5 +15,7 @@ public interface EnrollmentService {
     CustomPaging<EnrollmentUserResponse> getEnrolledUsers(UUID courseId, String nextCursor);
 
     // Save the enrollment information after payment is successful
-    void enrollUserInCourse(String username, UUID courseId, UUID paymentId);
+    void enrollUserInCourse(String username, List<UUID> courseIds, UUID paymentId);
+
+    // TODO: Add method get courses in cart
 }

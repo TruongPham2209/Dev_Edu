@@ -44,7 +44,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewResponse createReview(String username, ReviewRequest request) {
-        if (!enrollmentRepository.existsByStudentUsernameAndCourseId(username, request.getCourseId())) {
+        if (enrollmentRepository.existsByStudentUsernameAndCourseId(username, request.getCourseId())) {
             log.error("User {} is not enrolled in course ID {} and cannot create a review", username, request.getCourseId());
             throw new BadRequestException("You must be enrolled in the course to create a review.");
         }

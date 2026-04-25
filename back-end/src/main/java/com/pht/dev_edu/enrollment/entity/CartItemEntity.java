@@ -33,9 +33,6 @@ public class CartItemEntity {
     @Column(name = "username", nullable = false)
     String username;
 
-    @Column(name = "payment_id", nullable = false)
-    UUID paymentId;
-
     @Column(name = "added_at")
     LocalDateTime addedAt;
 

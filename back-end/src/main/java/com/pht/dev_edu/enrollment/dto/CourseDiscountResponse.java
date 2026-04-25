@@ -17,7 +17,12 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class CourseDiscountResponse {
     UUID id;
-    String description;
+    UUID courseId;
+    String courseTitle;
+    String courseDescription;
+    String courseThumbnailUrl;
+
+    String discountDescription;
     BigDecimal discountPercentage;
     LocalDateTime validFrom;
     LocalDateTime validTo;

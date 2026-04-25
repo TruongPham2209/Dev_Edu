@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -136,4 +137,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             RETURNING thumbnail_object_key
             """, nativeQuery = true)
     List<String> deleteCoursesBeforeCutoffTimeThenReturnObjectKey(LocalDateTime cutoffTime);
+
+    @Query("SELECT c.id FROM CourseEntity c WHERE c.id IN :ids AND c.deletedAt IS NULL")
+    List<UUID> findActiveIdsByIdIn(@Param("ids") List<UUID> ids);
 }

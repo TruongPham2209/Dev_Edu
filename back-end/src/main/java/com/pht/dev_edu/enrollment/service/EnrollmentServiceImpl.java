@@ -1,27 +1,28 @@
 package com.pht.dev_edu.enrollment.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
-import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
-import com.pht.dev_edu.course.dto.EnrolledCourseProjection;
-import com.pht.dev_edu.course.dto.EnrolledCourseResponse;
-import com.pht.dev_edu.course.dto.EnrollmentUserProjection;
-import com.pht.dev_edu.course.dto.EnrollmentUserResponse;
-import com.pht.dev_edu.course.service.CourseService;
-import com.pht.dev_edu.enrollment.entity.EnrollmentEntity;
+import com.pht.dev_edu.course.repo.CourseRepository;
+import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
+import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
+import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 import com.pht.dev_edu.enrollment.mapper.EnrollmentMapper;
 import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -29,27 +30,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class EnrollmentServiceImpl implements EnrollmentService {
+    CourseRepository courseRepository;
     EnrollmentRepository enrollmentRepository;
     EnrollmentMapper enrollmentMapper;
-    CourseService courseService;
-
-    @Override
-    public EnrolledCourseResponse getEnrollmentInfo(String username, UUID courseId) {
-        var enrollment = enrollmentRepository.findEnrolledCoursesByStudentAndCourseId(username, courseId)
-                .orElseThrow(() -> {
-                    log.error("Enrollment not found for user {} and course ID {}", username, courseId);
-                    return new DataNotFoundException("Enrollment not found.");
-                });
-
-        return enrollmentMapper.toEnrolledCourseResponse(enrollment);
-    }
 
     @Override
     public CustomPaging<EnrolledCourseResponse> getEnrolledCourses(String username, String nextCursor) {
-        var pageable = PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "e.enrolled_at", "e.id"));
-        var timeCursor = StringUtils.hasText(nextCursor)
-                ? PagingUtils.decodeTimeStampCursor(nextCursor)
-                : TimeStampCursor.getDefaultCursor(true);
+        var pageable = buildCoursePageable();
+        var timeCursor = resolveTimeStampCursor(nextCursor);
 
         var enrollmentPage = enrollmentRepository.findEnrolledCoursesByStudentUsernameAndCursor(username, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
 
@@ -59,6 +47,30 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 EnrolledCourseProjection::getEnrolledAt,
                 EnrolledCourseProjection::getId
         );
+    }
+
+    @Override
+    public CustomPaging<EnrolledCourseResponse> findCoursesAssignedToLecturer(String lecturerUsername, String nextCursor) {
+        var pageable = buildCoursePageable();
+        var timeCursor = resolveTimeStampCursor(nextCursor);
+
+        var enrollmentPage = enrollmentRepository.findCoursesAssignedToLecturerByCursor(lecturerUsername, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
+        return PagingUtils.getPagedWithCursor(
+                enrollmentPage,
+                enrollmentMapper::toEnrolledCourseResponse,
+                EnrolledCourseProjection::getEnrolledAt,
+                EnrolledCourseProjection::getId
+        );
+    }
+
+    private Pageable buildCoursePageable() {
+        return PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "e.enrolled_at", "e.id"));
+    }
+
+    private TimeStampCursor resolveTimeStampCursor(String nextCursor) {
+        return StringUtils.hasText(nextCursor)
+                ? PagingUtils.decodeTimeStampCursor(nextCursor)
+                : TimeStampCursor.getDefaultCursor(true);
     }
 
     @Override
@@ -78,26 +90,18 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         );
     }
 
-    // TODO: Fix buy course flow -> using coupon -> remove cart -> enroll course
     @Override
     @Transactional
-    public void enrollUserInCourse(String username, UUID courseId, UUID paymentId) {
-        var course = courseService.getCourseById(courseId);
-        if (course == null) {
-            log.error("Course with ID {} not found for enrollment.", courseId);
-            throw new DataNotFoundException("Course not found.");
+    public void enrollUserInCourse(String username, List<UUID> courseIds, UUID paymentId) {
+        var activeIds = courseRepository.findActiveIdsByIdIn(courseIds);
+        if (activeIds.isEmpty()) {
+            log.warn("None of the provided course IDs are active: {}", courseIds);
+            throw new DataNotFoundException("No active courses found for the provided IDs.");
         }
 
-        if (enrollmentRepository.existsByStudentUsernameAndCourseId(username, courseId)) {
-            log.error("User {} is already enrolled in course ID {}.", username, courseId);
-            throw new BadRequestException("User is already enrolled in this course.");
+        for (UUID courseId : activeIds) {
+            var id = UuidCreator.getTimeOrderedEpoch();
+            enrollmentRepository.insertWithoutConstraintCheck(id, username, courseId, paymentId);
         }
-
-        var enrollment = EnrollmentEntity.builder()
-                .studentUsername(username)
-                .courseId(courseId)
-                .paymentId(paymentId)
-                .build();
-        enrollmentRepository.save(enrollment);
     }
 }

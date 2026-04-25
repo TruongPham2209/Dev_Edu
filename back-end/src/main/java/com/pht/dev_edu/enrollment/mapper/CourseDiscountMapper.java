@@ -13,5 +13,11 @@ public interface CourseDiscountMapper {
     @Mapping(target = "createdAt", ignore = true)
     CourseDiscountEntity reqToEntity(CourseDiscountRequest couponRequest);
 
+    @Mapping(target = "discountDescription", source = "description")
+    @Mapping(target = "courseTitle", ignore = true)
+    @Mapping(target = "courseThumbnailUrl", ignore = true)
+    @Mapping(target = "courseDescription", ignore = true)
     CourseDiscountResponse entityToRes(CourseDiscountEntity couponEntity);
+
+    CourseDiscountResponse projectionToRes(com.pht.dev_edu.enrollment.dto.CourseDiscountProjection projection);
 }

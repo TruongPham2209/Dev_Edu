@@ -3,7 +3,6 @@ package com.pht.dev_edu.enrollment.entity;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.pht.dev_edu.enrollment.dto.PaymentMethod;
 import com.pht.dev_edu.enrollment.dto.PaymentStatus;
-import com.pht.dev_edu.enrollment.dto.PurchaseEntityType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -40,13 +39,6 @@ public class PaymentHistoryEntity {
     @Column(nullable = false)
     PaymentStatus status;
 
-    @Column(name = "entity_id", nullable = false)
-    UUID entityId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "entity_type", nullable = false)
-    PurchaseEntityType entityType;
-
     @Column(name = "transaction_id", nullable = false, unique = true)
     String transactionId;
 
@@ -57,6 +49,10 @@ public class PaymentHistoryEntity {
     public void prePersist() {
         if (id == null) {
             id = UuidCreator.getTimeOrderedEpoch();
+        }
+
+        if (paymentTime == null) {
+            paymentTime = LocalDateTime.now();
         }
     }
 }

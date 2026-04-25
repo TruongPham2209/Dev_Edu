@@ -89,7 +89,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
     }
 
     private void canAccessCourseByStudent(String student, UUID courseId) {
-        if (!enrollmentRepository.existsByStudentUsernameAndCourseId(student, courseId)) {
+        if (enrollmentRepository.existsByStudentUsernameAndCourseId(student, courseId)) {
             throw new AccessDeniedException("Course not found");
         }
     }
