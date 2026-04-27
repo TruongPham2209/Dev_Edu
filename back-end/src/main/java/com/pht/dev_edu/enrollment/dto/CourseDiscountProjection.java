@@ -18,6 +18,8 @@ public interface CourseDiscountProjection {
 
     String getCourseThumbnailUrl();
 
+    BigDecimal getOriginalPrice();
+
     String getDiscountDescription();
 
     BigDecimal getDiscountPercentage();

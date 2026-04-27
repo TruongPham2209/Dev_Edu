@@ -13,32 +13,28 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UUID> {
-    // TODO: fix query logic (payment removed entity, need to join with order tables) + create index
     @Query(value = """
-                        SELECT  e.id                 AS id,
-                                c.id                 AS courseId,
-                                c.title              AS title,
-                                c.description        AS description,
-                                c.thumbnail_url      AS thumbnailUrl,
-                                e.enrolled_at        AS enrolledAt,
-                                p.amount             AS amount
+                        SELECT  e.id                    AS id,
+                                c.id                    AS courseId,
+                                c.title                 AS title,
+                                c.description           AS description,
+                                c.thumbnail_url         AS thumbnailUrl,
+                                e.enrolled_at           AS enrolledAt,
+                                oi.price                AS amount
                         FROM enrollment e
-                        JOIN course c
+                        LEFT JOIN course c
                             ON e.course_id = c.id
-                        JOIN payment p 
-                            ON e.id = p.entity_id
+                        LEFT JOIN order o
+                            ON e.order_id = o.id
+                        LEFT JOIN order_item oi
+                            ON  o.id = oi.order_id
+                            AND oi.course_id = c.id
                         WHERE   e.student_username      = :studentUsername
-                        AND     p.entity_type           = 'COURSE'
                         AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
             """, countQuery = """
-                        SELECT COUNT(*)
+                        SELECT COUNT(e.course_id)
                         FROM enrollment e
-                        JOIN course
-                            ON e.course_id = c.id
-                        JOIN payment p
-                            ON e.id = p.entity_id
                         WHERE   e.student_username  = :studentUsername
-                        AND     p.entity_type       = 'COURSE'
             """,
             nativeQuery = true)
     Page<EnrolledCourseProjection> findEnrolledCoursesByStudentUsernameAndCursor(String studentUsername, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
@@ -95,9 +91,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
 
     @Modifying
     @Query(value = """
-            INSERT INTO enrollment (id, student_username, course_id, payment_id)
-            VALUES (:id, :studentUsername, :courseId, :paymentId)
+            INSERT INTO enrollment (id, student_username, course_id, order_id)
+            VALUES (:id, :studentUsername, :courseId, :orderId)
             ON CONFLICT (student_username, course_id) DO NOTHING
             """, nativeQuery = true)
-    void insertWithoutConstraintCheck(UUID id, String studentUsername, UUID courseId, UUID paymentId);
+    void insertWithoutConstraintCheck(UUID id, String studentUsername, UUID courseId, UUID orderId);
 }

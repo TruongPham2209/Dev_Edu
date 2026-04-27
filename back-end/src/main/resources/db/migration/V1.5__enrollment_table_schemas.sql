@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "order_item" (
     item_id             UUID NOT NULL, -- course_id for course purchase, or other entity ID for different types of transactions
     item_type           VARCHAR(50) NOT NULL, -- 'course', 'subscription', etc.
     price               DECIMAL(10, 2) NOT NULL,
-    UNIQUE (order_id, item_id)
+    UNIQUE (order_id, item_type, item_id)
 );
 
 CREATE TABLE IF NOT EXISTS "cart_item" (
@@ -33,14 +33,14 @@ CREATE TABLE IF NOT EXISTS "cart_item" (
     item_id             UUID NOT NULL,
     item_type           VARCHAR(50) NOT NULL, -- 'course', 'subscription', etc.
     added_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (username, course_id)
+    UNIQUE (username, item_type, item_id)
 );
 
 CREATE TABLE IF NOT EXISTS "enrollment" (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     course_id           UUID NOT NULL,
     student_username    VARCHAR(255) NOT NULL,
-    payment_id          UUID NOT NULL,
+    order_id            UUID NOT NULL,
     enrolled_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (course_id, student_id)
 );

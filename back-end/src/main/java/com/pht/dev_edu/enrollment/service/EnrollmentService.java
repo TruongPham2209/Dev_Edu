@@ -14,8 +14,5 @@ public interface EnrollmentService {
 
     CustomPaging<EnrollmentUserResponse> getEnrolledUsers(UUID courseId, String nextCursor);
 
-    // Save the enrollment information after payment is successful
     void enrollUserInCourse(String username, List<UUID> courseIds, UUID paymentId);
-
-    // TODO: Add method get courses in cart
 }

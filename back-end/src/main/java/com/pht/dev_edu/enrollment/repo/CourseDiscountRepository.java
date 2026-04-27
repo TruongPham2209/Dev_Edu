@@ -16,11 +16,13 @@ import java.util.UUID;
 
 public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEntity, UUID> {
     @Query(value = """
-                SELECT  cd.id                       AS id,
-                        c.id                        AS courseId,
+                SELECT  c.id                        AS courseId,
                         c.title                     AS courseTitle,
+                        c.price                     AS originalPrice,
                         c.description               AS courseDescription,
                         c.thumbnail_url             AS courseThumbnailUrl,
+
+                        cd.id                       AS id,
                         cd.description              AS discountDescription,
                         cd.discount_percentage      AS discountPercentage,
                         cd.valid_from               AS validFrom,
@@ -42,11 +44,13 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
     Page<CourseDiscountProjection> getAllScheduledDiscountsWithCursor(UUID lastId, LocalDateTime lastValidFrom, Pageable pageable);
 
     @Query(value = """
-                SELECT  cd.id                       AS id,
-                        c.id                        AS courseId,
+                SELECT  c.id                        AS courseId,
                         c.title                     AS courseTitle,
                         c.description               AS courseDescription,
                         c.thumbnail_url             AS courseThumbnailUrl,
+                        c.price                     AS originalPrice,
+
+                        cd.id                       AS id,
                         cd.description              AS discountDescription,
                         cd.discount_percentage      AS discountPercentage,
                         cd.valid_from               AS validFrom,

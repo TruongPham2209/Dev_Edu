@@ -32,8 +32,8 @@ public class EnrollmentEntity {
     @Column(name = "student_username", nullable = false)
     String studentUsername;
 
-    @Column(name = "payment_id", nullable = false)
-    UUID paymentId;
+    @Column(name = "order_id", nullable = false)
+    UUID orderId;
 
     @Column(name = "enrolled_at")
     LocalDateTime enrolledAt;

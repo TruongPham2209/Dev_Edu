@@ -39,6 +39,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         var pageable = buildCoursePageable();
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
+        // Course info + enrollment info (enrolledAt) + amount paid (if any)
         var enrollmentPage = enrollmentRepository.findEnrolledCoursesByStudentUsernameAndCursor(username, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
 
         return PagingUtils.getPagedWithCursor(
@@ -54,6 +55,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         var pageable = buildCoursePageable();
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
+        // Only need course info, can ignore enrollment info
         var enrollmentPage = enrollmentRepository.findCoursesAssignedToLecturerByCursor(lecturerUsername, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
         return PagingUtils.getPagedWithCursor(
                 enrollmentPage,

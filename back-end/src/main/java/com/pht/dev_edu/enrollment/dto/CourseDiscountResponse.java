@@ -18,6 +18,7 @@ import java.util.UUID;
 public class CourseDiscountResponse {
     UUID id;
     UUID courseId;
+    BigDecimal originalPrice;
     String courseTitle;
     String courseDescription;
     String courseThumbnailUrl;
