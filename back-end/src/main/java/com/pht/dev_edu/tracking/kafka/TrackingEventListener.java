@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.assignment.dto.SubmissionEvent;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
+import com.pht.dev_edu.common.service.MailService;
 import com.pht.dev_edu.tracking.dto.CronJobEvent;
 import com.pht.dev_edu.tracking.dto.RequestLoggingEvent;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.tracking.service.LogService;
 import com.pht.dev_edu.tracking.service.SubmissionService;
+import com.pht.dev_edu.user.dto.MailPayload;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Component;
 public class TrackingEventListener {
     LogService logService;
     SubmissionService submissionService;
+    MailService mailService;
     ObjectMapper objectMapper;
 
     @RetryableTopic(
@@ -69,5 +72,23 @@ public class TrackingEventListener {
     public void handleLogRequestEvent(String payload) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, RequestLoggingEvent.class);
         logService.saveRequestLog(event);
+    }
+
+    @RetryableTopic(
+            attempts = "5",
+            backoff = @Backoff(delay = 5000, multiplier = 2),
+            dltTopicSuffix = "-dlq"
+    )
+    @KafkaListener(topics = KafkaTopicConstant.MAIL_SEND_TOPIC)
+    public void handleSendMailEvent(String payload) throws JsonProcessingException {
+        var event = objectMapper.readValue(payload, MailPayload.class);
+        var mailPayload = com.pht.dev_edu.common.dto.MailPayload.builder()
+                .toMail(event.getToMail())
+                .mailAttributes(event.getMailAttributes())
+                .fileAttributes(event.getFileAttributes())
+                .subject(event.getSubject().getValue())
+                .template(event.getTemplate().getValue())
+                .build();
+        mailService.sendMail(mailPayload);
     }
 }

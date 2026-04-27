@@ -8,10 +8,13 @@ import brevoModel.SendSmtpEmailAttachment;
 import brevoModel.SendSmtpEmailSender;
 import com.lowagie.text.pdf.BaseFont;
 import com.pht.dev_edu.common.dto.MailPayload;
+import com.pht.dev_edu.tracking.entity.MailTrackingEntity;
+import com.pht.dev_edu.tracking.repo.MailTrackingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextFontResolver;
@@ -31,8 +34,10 @@ public class MailServiceImpl implements MailService {
     TransactionalEmailsApi emailsApi;
     SendSmtpEmailSender sender;
     TemplateEngine templateEngine;
+    MailTrackingRepository mailTrackingRepository;
 
     @Override
+    @Transactional
     public void sendMail(MailPayload mailPayload) {
         String subject = mailPayload.getSubject();
         String templateName = mailPayload.getTemplate();
@@ -66,12 +71,18 @@ public class MailServiceImpl implements MailService {
             }
         }
 
-        sendMailWithBrevo(subject, htmlContent, mailPayload.getToMail(), true,
+        sendMailWithBrevo(subject, htmlContent, mailPayload.getToMail(), mailPayload.getTemplate(), true,
                 attachment != null ? List.of(attachment) : null
         );
     }
 
-    private void sendMailWithBrevo(String subject, String body, String toMail, boolean isHtml, List<SendSmtpEmailAttachment> attachments) {
+    private void sendMailWithBrevo(String subject, String body, String toMail, String template, boolean isHtml, List<SendSmtpEmailAttachment> attachments) {
+        MailTrackingEntity trackingEntity = MailTrackingEntity.builder()
+                .subject(subject)
+                .recipient(toMail)
+                .template(template)
+                .build();
+
         try {
             SendSmtpEmail email = new SendSmtpEmail();
             email.setSender(sender);
@@ -94,9 +105,22 @@ public class MailServiceImpl implements MailService {
 
             CreateSmtpEmail response = emailsApi.sendTransacEmail(email);
             log.info("Brevo response: {}", response);
+
+            var statusCode = response.getMessageId() != null ? "sent" : "failed";
+            trackingEntity.setStatus(statusCode);
+
+            if (!"sent".equals(statusCode)) {
+                trackingEntity.setErrorMessage("Failed to send email via Brevo");
+            }
         } catch (ApiException e) {
+            String errorMessage = String.format("Brevo API error: %d - %s", e.getCode(), e.getResponseBody());
             log.error("Brevo API error: {}", e.getResponseBody(), e);
             log.error("Error sending mail via Brevo Mail", e);
+
+            trackingEntity.setStatus("failed");
+            trackingEntity.setErrorMessage(errorMessage);
+        } finally {
+            mailTrackingRepository.save(trackingEntity);
         }
     }
 

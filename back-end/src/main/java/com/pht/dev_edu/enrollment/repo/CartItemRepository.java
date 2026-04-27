@@ -37,6 +37,8 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, UUID> 
                             AND cd.valid_to     >= NOW()
                         WHERE   ci.username             = :studentUsername
                         AND     (ci.added_at, ci.id)    < (:lastUpdatedAt, :lastId)
+                        AND     c.id                    IS NOT NULL
+                        AND     c.deleted_at            IS NULL
             """, countQuery = """
                         SELECT COUNT(ci.id)
                         FROM cart_item ci

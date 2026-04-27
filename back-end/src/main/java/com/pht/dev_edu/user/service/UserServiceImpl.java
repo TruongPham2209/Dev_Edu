@@ -1,5 +1,6 @@
 package com.pht.dev_edu.user.service;
 
+import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.ProviderEnum;
@@ -9,6 +10,7 @@ import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.service.FileService;
+import com.pht.dev_edu.user.dto.MailPayload;
 import com.pht.dev_edu.user.dto.RegisterUser;
 import com.pht.dev_edu.user.entity.RoleEntity;
 import com.pht.dev_edu.user.entity.UserEntity;
@@ -19,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -41,6 +45,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     RoleRepository roleRepository;
 
     Executor executor;
+    KafkaTemplate<String, Object> kafkaTemplate;
     FileService fileService;
     PasswordEncoder passwordEncoder;
 
@@ -78,6 +83,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         var userEntity = convertToUserEntity(List.of(registerUser)).getFirst();
         userRepository.save(userEntity);
+
+        TransactionUtils.runAfterCommitAsync(() -> sendWelcomeEmail(userEntity), executor);
     }
 
     @Override
@@ -99,6 +106,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         var userEntities = convertToUserEntity(registerUsers);
         userRepository.saveAll(userEntities);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            for (var user : userEntities) {
+                sendWelcomeEmail(user);
+            }
+        }, executor);
     }
 
     @Override
@@ -255,5 +268,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     RedisDurationConstant.USER_DATA_DURATION
             );
         }, executor);
+    }
+
+    private void sendWelcomeEmail(UserEntity user) {
+        var mailPayload = MailPayload.builder()
+                .toMail(user.getEmail())
+                .subject(MailPayload.Subject.WELCOME)
+                .template(MailPayload.Template.WELCOME_TEMPLATE)
+                .mailAttributes(Map.of(
+                        "username", user.getUsername(),
+                        "fullName", user.getFullName() != null ? user.getFullName() : user.getUsername()
+                ))
+                .build();
+        kafkaTemplate.send(KafkaTopicConstant.MAIL_SEND_TOPIC, mailPayload);
     }
 }

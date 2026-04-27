@@ -21,18 +21,18 @@ public class AuthFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull AuthenticationException exception) throws IOException, ServletException {
 
-        String errorMessage = "Thông tin đăng nhập không đúng";
+        String errorMessage = "Login failed.";
 
         if (exception instanceof LockedException) {
-            errorMessage = "Tài khoản đã bị khóa";
+            errorMessage = "Account is locked";
         } else if (exception instanceof DisabledException) {
-            errorMessage = "Tài khoản đã bị vô hiệu hóa";
+            errorMessage = "Account is disabled";
         } else if (exception instanceof CredentialsExpiredException) {
-            errorMessage = "Mật khẩu đã hết hạn";
+            errorMessage = "Credentials have expired";
         } else if (exception instanceof AccountExpiredException) {
-            errorMessage = "Tài khoản đã hết hạn";
+            errorMessage = "Account has expired";
         } else if (exception instanceof BadCredentialsException) {
-            errorMessage = "Sai thông tin đăng nhập.";
+            errorMessage = "Invalid username or password";
         }
 
         // set attribute vào session

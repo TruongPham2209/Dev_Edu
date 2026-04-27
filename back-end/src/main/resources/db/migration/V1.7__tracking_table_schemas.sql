@@ -55,3 +55,13 @@ CREATE TABLE IF NOT EXISTS "file_upload" (
 
     checksum        VARCHAR(128)
 );
+
+CREATE TABLE IF NOT EXISTS "mail_tracking" (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipient       VARCHAR(255) NOT NULL,
+    subject         VARCHAR(255) NOT NULL,
+    template        VARCHAR(255) NOT NULL,
+    status          VARCHAR(50) NOT NULL,
+    error_message   TEXT,
+    sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
