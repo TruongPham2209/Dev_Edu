@@ -50,9 +50,22 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, UUID> 
 
     @Modifying
     @Query(value = """
-        INSERT INTO cart_item (id, username, item_type, item_id)
-        VALUES (:id, :username, :itemType, :itemId)
-        ON CONFLICT (username, item_type, item_id) DO NOTHING
-    """, nativeQuery = true)
+                INSERT INTO cart_item (id, username, item_type, item_id)
+                VALUES (:id, :username, :itemType, :itemId)
+                ON CONFLICT (username, item_type, item_id) DO NOTHING
+            """, nativeQuery = true)
     void insertCartItemWithoutConstraintCheck(UUID id, String username, PurchaseEntityType itemType, UUID itemId);
+
+    @Modifying
+    @Query(value = """
+            DELETE FROM cart_item ci
+            WHERE EXISTS(
+                SELECT 1
+                FROM course c
+                WHERE   ci.item_id = c.id
+                AND     ci.item_type = 'COURSE'
+                AND     c.deleted_at IS NOT NULL
+            )
+            """, nativeQuery = true)
+    List<UUID> deleteInvalidCourseCartItems();
 }

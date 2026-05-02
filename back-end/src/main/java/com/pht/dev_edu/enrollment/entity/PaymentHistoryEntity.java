@@ -45,6 +45,9 @@ public class PaymentHistoryEntity {
     @Column(name = "payment_time")
     LocalDateTime paymentTime;
 
+    @Column(name = "expiartion_time")
+    LocalDateTime expirationTime;
+
     @PrePersist
     public void prePersist() {
         if (id == null) {

@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Slf4j
@@ -28,7 +30,9 @@ public class PaymentUtils {
     @Value("${vnpay.hashSecret}")
     private static String vnpayHashSecret;
 
-    public static Map<String, String> createVnPayPaymentParams(String paymentId, BigDecimal amount, String ipAddress, int expiredMinutes, String desc) {
+    private static final String HCM_ZONE = "Asia/Ho_Chi_Minh";
+
+    public static Map<String, String> createVnPayPaymentParams(String paymentId, BigDecimal amount, String ipAddress, String desc, LocalDateTime expireTime) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
@@ -51,11 +55,15 @@ public class PaymentUtils {
         Date now = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
 
-        Calendar expire = Calendar.getInstance();
-        expire.setTime(now);
-        expire.add(Calendar.MINUTE, expiredMinutes);
+        TimeZone timeZone = TimeZone.getTimeZone(HCM_ZONE);
+        format.setTimeZone(timeZone);
+
+        ZoneId zoneId = ZoneId.of(HCM_ZONE);
+
         vnp_Params.put("vnp_CreateDate", format.format(now));
-        vnp_Params.put("vnp_ExpireDate", format.format(expire.getTime()));
+        vnp_Params.put("vnp_ExpireDate", format.format(
+                Date.from(expireTime.atZone(zoneId).toInstant())
+        ));
 
         return vnp_Params;
     }

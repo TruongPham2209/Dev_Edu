@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS "payment_history" (
 
     payment_method      VARCHAR(50) NOT NULL,
     transaction_id      VARCHAR(255) NOT NULL,
-    payment_time        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    payment_time        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expiration_time     TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "order" (

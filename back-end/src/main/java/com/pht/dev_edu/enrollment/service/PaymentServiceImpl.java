@@ -46,6 +46,9 @@ public class PaymentServiceImpl implements PaymentService {
         BigDecimal totalAmount;
         String description = "";
 
+        var now = LocalDateTime.now();
+        var expirationTime = now.plusMinutes(EXPIRATION_TIME_MINUTES);
+
         UUID paymentId = UuidCreator.getTimeOrderedEpoch();
         PaymentHistoryEntity payment = PaymentHistoryEntity.builder()
                 .id(paymentId)
@@ -53,6 +56,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .status(PaymentStatus.PENDING)
                 .username(username)
                 .transactionId(paymentId.toString())
+                .expirationTime(expirationTime)
                 .build();
 
         OrderEntity order = OrderEntity.builder()
@@ -96,8 +100,8 @@ public class PaymentServiceImpl implements PaymentService {
                         paymentId.toString(),
                         payment.getAmount(),
                         purchaseRequest.getIpAddress(),
-                        EXPIRATION_TIME_MINUTES,
-                        description
+                        description,
+                        expirationTime
                 );
 
                 var paymentUrl = PaymentUtils.getPaymentUrl(vnPayParams);
