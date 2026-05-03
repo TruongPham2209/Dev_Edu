@@ -38,8 +38,8 @@ public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID
                 AND p.current_version_id    IS NOT NULL
             LEFT JOIN forum_post_version pv
                 ON  p.current_version_id = pv.id
-            WHERE   sv.username = :username
-            AND     (sv.saved_at, sv.id) < (:lastSavedAt, :lastId)
+            WHERE   sv.username             = :username
+            AND     (sv.saved_at, sv.id)    < (:lastSavedAt, :lastId)
             """, countQuery = """
             SELECT COUNT(sv.post_id)
             FROM saved_post sv
@@ -54,7 +54,7 @@ public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID
     @Modifying
     @Query(value = """
             DELETE FROM saved_post sp
-            WHERE post_id NOT EXISTS (
+            WHERE NOT EXISTS (
                 SELECT 1
                 FROM forum_post p
                 WHERE p.id = sp.post_id
