@@ -18,7 +18,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                     c.author        AS author,
                     c.content       AS content,
                     null            AS repliedToCommentId,
-                    c.creted_at     AS createdAt,
+                    c.created_at    AS createdAt,
                     COUNT(r.id)     AS replyCount
             FROM forum_comment c
             LEFT JOIN forum_comment r
@@ -31,7 +31,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
             GROUP BY c.id
             """, countQuery = """
             SELECT  COUNT(id)
-            FROM forum_comment
+            FROM forum_comment c
             WHERE   c.post_id           = :postId
             AND     c.deleted_at        IS NULL
             AND     c.root_comment_id   IS NULL
@@ -43,7 +43,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                     author                  AS author,
                     content                 AS content,
                     root_comment_id         AS repliedToCommentId,
-                    creted_at               AS createdAt,
+                    created_at              AS createdAt,
                     0                       AS replyCount
             FROM forum_comment
             WHERE   root_comment_id = :rootCommentId
@@ -62,7 +62,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
     @Modifying
     @Query(value = """
             DELETE FROM forum_comment fc
-            WHERE post_id NOT EXISTS (
+            WHERE NOT EXISTS (
                 SELECT 1
                 FROM forum_post fp
                 WHERE fp.id = fc.post_id

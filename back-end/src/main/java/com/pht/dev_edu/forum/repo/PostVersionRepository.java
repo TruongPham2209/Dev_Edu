@@ -50,8 +50,8 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
     @Query(value = """
             SELECT *
             FROM forum_post_version pv
-            WHERE   (pv.updated_at, pv.id) < (:lastUpdatedAt, :lastId)
-            AND     pv.status = :status
+            WHERE   (pv.updated_at, pv.id)  < (:lastUpdatedAt, :lastId)
+            AND     pv.status               = :status
             """, countQuery = """
             SELECT COUNT(*)
             FROM forum_post_version pv

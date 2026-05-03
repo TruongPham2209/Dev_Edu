@@ -54,7 +54,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
     List<LectureProjection> findLectureDetailsByCourseIdAndUsername(UUID courseId, String username);
 
     @Query(value = """
-                SELECT  COALESCE(MAX(l.order), 0) 
+                SELECT  COALESCE(MAX(l.lecture_order), 0)
                 FROM    lecture l
                 WHERE   l.course_id = :courseId
             """, nativeQuery = true)

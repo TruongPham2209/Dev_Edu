@@ -20,8 +20,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
                     ON o.id = oi.order_id
                 WHERE   o.username      = :username
                 AND     o.status        IN ('PENDING', 'COMPLETED')
-                AND     oi.entity_type  = :entityType
-                AND     oi.entity_id    IN :itemIds
+                AND     oi.item_type    = :entityType
+                AND     oi.item_id      IN :itemIds
             )
             """, nativeQuery = true)
     boolean existsByUsernameAndItem(String username, PurchaseEntityType entityType, List<UUID> itemIds);

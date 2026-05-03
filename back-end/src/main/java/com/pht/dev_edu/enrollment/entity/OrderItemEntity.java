@@ -26,12 +26,12 @@ public class OrderItemEntity {
     @Column(name = "order_id", nullable = false)
     UUID orderId;
 
-    @Column(name = "entity_id", nullable = false)
-    UUID entityId;
+    @Column(name = "item_id", nullable = false)
+    UUID itemId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "entity_type", nullable = false)
-    PurchaseEntityType entityType;
+    @Column(name = "item_type", nullable = false)
+    PurchaseEntityType itemType;
 
     @Column(nullable = false)
     BigDecimal price;

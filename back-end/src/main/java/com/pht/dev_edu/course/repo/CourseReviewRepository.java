@@ -15,8 +15,8 @@ public interface CourseReviewRepository extends JpaRepository<CourseReviewEntity
 
     @Query(value = """
             SELECT * FROM course_review
-            WHERE   course_id = :courseId
-            AND     (created_at, id) < (:lastCreatedAt, :lastId)
+            WHERE   course_id           = :courseId
+            AND     (created_at, id)    < (:lastCreatedAt, :lastId)
             """, countQuery = """
                     SELECT COUNT(*) FROM course_review
                     WHERE   course_id = :courseId

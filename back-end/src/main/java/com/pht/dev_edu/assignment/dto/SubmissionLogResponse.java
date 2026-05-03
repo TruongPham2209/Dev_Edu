@@ -1,5 +1,6 @@
 package com.pht.dev_edu.assignment.dto;
 
+import com.pht.dev_edu.tracking.entity.SubmissionTrackingEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * DTO for {@link com.pht.dev_edu.tracking.entity.SubmissionEntity}
+ * DTO for {@link SubmissionTrackingEntity}
  */
 @Data
 @Builder

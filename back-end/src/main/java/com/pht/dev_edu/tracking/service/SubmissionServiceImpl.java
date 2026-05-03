@@ -6,7 +6,7 @@ import com.pht.dev_edu.assignment.service.AssignmentPermissionService;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
-import com.pht.dev_edu.tracking.entity.SubmissionEntity;
+import com.pht.dev_edu.tracking.entity.SubmissionTrackingEntity;
 import com.pht.dev_edu.tracking.mapper.SubmissionTrackingMapper;
 import com.pht.dev_edu.tracking.repo.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         String details = submissionEvent.getAction() == SubmissionEvent.Action.SUBMITTED
                 ? String.format("Submitted object key: %s", submissionEvent.getFullObjectKey())
                 : "Unsubmitted";
-        SubmissionEntity submissionEntity = SubmissionEntity.builder()
+        SubmissionTrackingEntity submissionEntity = SubmissionTrackingEntity.builder()
                 .assignmentId(submissionEvent.getAssignmentId())
                 .actor(submissionEvent.getUsername())
                 .updatedAt(submissionEvent.getTimestamp())

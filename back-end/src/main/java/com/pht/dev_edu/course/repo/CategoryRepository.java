@@ -17,8 +17,8 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, UUID> 
     @Modifying
     @Query(value = """
             DELETE FROM category
-            WHERE   deleted_at IS NOT NULL
-            AND     deleted_at < :cutoffTime
+            WHERE   deleted_at  IS NOT NULL
+            AND     deleted_at  < :cutoffTime
             RETURNING thumbnail_object_key
             """, nativeQuery = true)
     List<String> deleteCategoriesBeforeCutoffTimeThenReturnObjectKey(LocalDateTime cutoffTime);

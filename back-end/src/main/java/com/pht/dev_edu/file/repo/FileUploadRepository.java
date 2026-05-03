@@ -18,9 +18,9 @@ public interface FileUploadRepository extends JpaRepository<FileUploadEntity, UU
 
     @Modifying // Remove if error occurs, but should be needed for delete operations
     @Query(value = """
-                DELETE FROM file_upload_entity
-                WHERE status IN ('FAILED', 'PENDING')
-                AND expired_at < :cutoffDate
+                DELETE FROM file_upload
+                WHERE   status  IN ('FAILED', 'PENDING')
+                AND     expired_at  < :cutoffDate
                 RETURNING object_key
             """, nativeQuery = true)
     List<String> deleteExpiredAndFailedFilesThenReturnObjectKeys(LocalDateTime cutoffDate);

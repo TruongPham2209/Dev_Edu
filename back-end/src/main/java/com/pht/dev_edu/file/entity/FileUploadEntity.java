@@ -51,7 +51,7 @@ public class FileUploadEntity {
     @Column(name = "expired_at")
     LocalDateTime expiredAt;
 
-    @Column(name = "check_sum")
+    @Column(name = "checksum")
     String checkSum;
 
     @PrePersist

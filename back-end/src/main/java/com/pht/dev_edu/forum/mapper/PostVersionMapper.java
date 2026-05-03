@@ -13,7 +13,7 @@ public interface PostVersionMapper {
     @Mapping(target = "versionNumber", constant = "0")
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "thumbUrl", ignore = true)
-    @Mapping(target = "status", constant = "PostStatus.PENDING")
+    @Mapping(target = "status", expression = "java(com.pht.dev_edu.forum.dto.PostStatus.PENDING)")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     PostVersionEntity reqToEntity(PostRequest postVersionResponse);

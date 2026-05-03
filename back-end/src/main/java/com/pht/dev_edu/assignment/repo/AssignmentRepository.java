@@ -19,11 +19,11 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UU
                         s.file_object_key       AS fileObjectKey,
                         s.submitted_at          AS submittedAt
                 FROM assignment a
-                LEFT JOIN submission s
-                    ON  a.id = s.assignment_id
-                    AND s.student_username = :student
-                WHERE   a.lecture_id = :lectureId
-                AND     a.deleted_at IS NULL
+                LEFT JOIN assignment_submission s
+                    ON  a.id                = s.assignment_id
+                    AND s.student_username  = :student
+                WHERE   a.lecture_id    = :lectureId
+                AND     a.deleted_at    IS NULL
                 ORDER BY a.created_at DESC
             """, nativeQuery = true)
     List<AssignmentProjection> findByLectureIdAndStudentUsername(UUID lectureId, String studentUsername);

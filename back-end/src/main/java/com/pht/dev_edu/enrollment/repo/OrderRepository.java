@@ -12,7 +12,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
     @Modifying
     @Query(value = """
             DELETE FROM order
-            WHERE   id          IN :paymentIds
+            WHERE id IN :paymentIds
             RETURNING id
             """, nativeQuery = true)
     List<UUID> deleteInvalidOrders(List<UUID> paymentIds);

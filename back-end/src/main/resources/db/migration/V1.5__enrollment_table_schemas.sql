@@ -43,5 +43,5 @@ CREATE TABLE IF NOT EXISTS "enrollment" (
     student_username    VARCHAR(255) NOT NULL,
     order_id            UUID NOT NULL,
     enrolled_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (course_id, student_id)
+    UNIQUE (course_id, student_username)
 );

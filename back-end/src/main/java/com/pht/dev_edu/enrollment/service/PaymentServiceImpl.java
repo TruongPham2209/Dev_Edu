@@ -156,12 +156,12 @@ public class PaymentServiceImpl implements PaymentService {
                     return;
                 }
 
-                var entityType = items.getFirst().getEntityType();
+                var entityType = items.getFirst().getItemType();
                 switch (entityType) {
                     case COURSE -> {
                         var username = payment.getUsername();
                         var courseIds = items.stream()
-                                .map(OrderItemEntity::getEntityId)
+                                .map(OrderItemEntity::getItemId)
                                 .toList();
                         enrollmentService.enrollUserInCourse(username, courseIds, payment.getId());
                     }
@@ -246,8 +246,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .filter(item -> !item.isRegistered())
                 .map(c -> OrderItemEntity.builder()
                         .orderId(orderId)
-                        .entityType(PurchaseEntityType.COURSE)
-                        .entityId(c.getId())
+                        .itemType(PurchaseEntityType.COURSE)
+                        .itemId(c.getId())
                         .price(c.getDiscountedPrice())
                         .build())
                 .toList();

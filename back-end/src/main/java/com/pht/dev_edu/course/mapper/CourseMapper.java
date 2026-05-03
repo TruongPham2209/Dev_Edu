@@ -14,6 +14,6 @@ public interface CourseMapper {
     @Mapping(target = "createdAt", ignore = true)
     CourseEntity reqToEntity(CourseRequest req);
 
-    @Mapping(target = "lecturers", constant = "new ArrayList<>()")
+    @Mapping(target = "lecturers", expression = "java(new java.util.ArrayList<>())")
     CourseResponse entityToRes(CourseEntity entity);
 }

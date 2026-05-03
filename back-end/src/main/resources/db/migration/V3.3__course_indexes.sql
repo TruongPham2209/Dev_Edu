@@ -6,7 +6,7 @@ CREATE INDEX IF NOT EXISTS idx_category_deleted
 -- course
 CREATE INDEX idx_course_title_active
     ON      course
-    USING   gin (unaccent(title) gin_trgm_ops)
+    USING   gin (immutable_unaccent(title) gin_trgm_ops)
     WHERE   deleted_at IS NULL;
 
 CREATE INDEX IF NOT EXISTS idx_course_active_category_id_cursor

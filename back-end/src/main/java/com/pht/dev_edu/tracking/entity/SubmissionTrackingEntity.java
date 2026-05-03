@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SubmissionEntity {
+public class SubmissionTrackingEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;

@@ -27,7 +27,6 @@ public class OrderScheduler {
     private static final long EXPIRED_ORDER_DELAY_DAYS = 7;
     private static final long INVALID_CART_ITEM_DELAY_DAYS = 3;
 
-    // TODO: clean payment, order, order item, cart item
     @Transactional
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void cleanCancelledPayments() {

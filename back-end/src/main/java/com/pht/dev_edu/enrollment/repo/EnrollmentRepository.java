@@ -27,8 +27,8 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         LEFT JOIN order o
                             ON e.order_id = o.id
                         LEFT JOIN order_item oi
-                            ON  o.id = oi.order_id
-                            AND oi.course_id = c.id
+                            ON  o.id        = oi.order_id
+                            AND oi.item_id  = c.id
                         WHERE   e.student_username      = :studentUsername
                         AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
             """, countQuery = """
@@ -69,7 +69,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                                 u.full_name          AS studentFullName,
                                 e.enrolled_at        AS enrolledAt
                         FROM enrollment e
-                        JOIN user u
+                        JOIN "user" u
                             ON e.student_username = u.username
                         WHERE   e.student_username      = :studentUsername
                         AND     e.course_id             = :courseId
@@ -77,7 +77,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
             """, countQuery = """
                         SELECT COUNT(*)
                         FROM enrollment e
-                        JOIN user u
+                        JOIN "user" u
                             ON e.student_username = u.username
                         WHERE   e.student_username      = :studentUsername
                         AND     e.course_id             = :courseId

@@ -15,7 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_order_item_order_id
 
 -- payment
 CREATE INDEX IF NOT EXISTS idx_payment_username_time_cursor
-    ON payment (username, created_at DESC, id DESC);
+    ON payment_history (username, payment_time DESC, id DESC);
 
 
 -- enrollment
@@ -23,4 +23,4 @@ CREATE INDEX IF NOT EXISTS idx_enrollment_course_id
     ON enrollment (course_id);
 
 CREATE INDEX IF NOT EXISTS idx_enrollment_username_time_cursor
-    ON enrollment (username, course_id, enrolled_at DESC, id DESC);
+    ON enrollment (student_username, course_id, enrolled_at DESC, id DESC);

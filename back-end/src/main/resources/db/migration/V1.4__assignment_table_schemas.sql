@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "assignment_submission" (
     student_username        VARCHAR(255) NOT NULL,
     file_object_key         VARCHAR(255) NOT NULL,
     submitted_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (assignment_id, student_id)
+    UNIQUE (assignment_id, student_username)
 );
 
 CREATE TABLE IF NOT EXISTS "submission_feedback" (

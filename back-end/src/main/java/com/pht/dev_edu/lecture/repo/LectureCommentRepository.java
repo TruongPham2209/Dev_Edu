@@ -24,10 +24,10 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                             WHERE   lecture_id  = :lectureId
                             AND     deleted_at IS NULL
                             AND     depth       = 0
-                            AND     (created_at, id) < (lastCreatedAt, :lastId)
-                            
+                            AND     (created_at, id) < (:lastCreatedAt, :lastId)
+            
                             UNION ALL
-                            
+            
                             SELECT  c.id                AS id,
                                     c.content           AS content,
                                     c.created_at        AS createdAt,
@@ -39,7 +39,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                             WHERE   lecture_id  = :lectureId
                             AND     deleted_at IS NOT NULL
                             AND     depth       = 0
-                            AND     (created_at, id) < (lastCreatedAt, :lastId)
+                            AND     (created_at, id) < (:lastCreatedAt, :lastId)
                             AND     EXISTS(
                                 SELECT 1
                                 FROM lecture_comment AS lc
@@ -50,7 +50,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                         SELECT      vc.id                   AS id,
                                     vc.content              AS content,
                                     vc.createdAt            AS createdAt,
-                                    CASE WHEN vc.deletedAt IS NOT NULL THEN true 
+                                    CASE WHEN vc.deletedAt IS NOT NULL THEN true
                                     ELSE false END          AS isDeleted,
                                     vc.author               AS author,
                                     COUNT(lc.id)            AS replyCount
@@ -67,13 +67,13 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.root_comment_id   AS rootCommentId,
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
-                            FROM lecture_comment
+                            FROM lecture_comment c
                             WHERE   lecture_id  = :lectureId
                             AND     deleted_at IS NULL
                             AND     depth       = 0
-                            
+            
                             UNION ALL
-                            
+            
                             SELECT  c.id                AS id,
                                     c.content           AS content,
                                     c.created_at        AS createdAt,
@@ -81,6 +81,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.root_comment_id   AS rootCommentId,
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
+                            FROM lecture_comment c
                             WHERE   lecture_id  = :lectureId
                             AND     deleted_at IS NOT NULL
                             AND     depth       = 0
@@ -111,9 +112,9 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                             AND     deleted_at IS NULL
                             AND     depth               = 1
                             AND     (created_at, id)    < (:lastCreatedAt, :lastId)
-                            
+            
                             UNION ALL
-                            
+            
                             SELECT  c.id                AS id,
                                     c.content           AS content,
                                     c.created_at        AS createdAt,
@@ -136,7 +137,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                         SELECT      vc.id                   AS id,
                                     vc.content              AS content,
                                     vc.createdAt            AS createdAt,
-                                    CASE WHEN vc.deletedAt IS NOT NULL THEN true 
+                                    CASE WHEN vc.deletedAt IS NOT NULL THEN true
                                     ELSE false END          AS isDeleted,
                                     vc.author               AS author,
                                     COUNT(lc.id)            AS replyCount
@@ -153,13 +154,13 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.root_comment_id   AS rootCommentId,
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
-                            FROM lecture_comment
+                            FROM lecture_comment c
                             WHERE   parent_comment_id   = :parent_comment_id
-                            AND     deleted_at IS NULL
+                            AND     deleted_at          IS NULL
                             AND     depth               = 1
-                            
+            
                             UNION ALL
-                            
+            
                             SELECT  c.id                AS id,
                                     c.content           AS content,
                                     c.created_at        AS createdAt,
@@ -167,8 +168,9 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.root_comment_id   AS rootCommentId,
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
+                            FROM lecture_comment c
                             WHERE   parent_comment_id   = :parent_comment_id
-                            AND     deleted_at IS NOT NULL
+                            AND     deleted_at          IS NOT NULL
                             AND     depth               = 1
                             AND     EXISTS(
                                 SELECT 1
@@ -186,21 +188,21 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
     @Query(value = """
                         SELECT      lc.id                   AS id,
                                     lc.content              AS content,
-                                    lc.createdAt            AS createdAt,
-                                    lc.author               AS author,
+                                    lc.created_at           AS createdAt,
+                                    lc.username             AS author,
                                     false                   AS isDeleted,
                                     0                       AS replyCount
                         FROM  lecture_comment lc
-                        WHERE   lc.parent_comment_id = :parentCommentId
-                        AND     lc.deleted_at IS NULL
-                        AND     lc.depth = 2
-                        AND     (lc.created_at, lc.id) < (:lastCreatedAt, :lastCommentId)
+                        WHERE   lc.parent_comment_id    = :parentCommentId
+                        AND     lc.deleted_at           IS NULL
+                        AND     lc.depth                = 2
+                        AND     (lc.created_at, lc.id)  < (:lastCreatedAt, :lastCommentId)
             """, countQuery = """
                         SELECT    COUNT(*)
                         FROM  lecture_comment lc
-                        WHERE   lc.parent_comment_id = :parentCommentId
-                        AND     lc.deleted_at IS NULL
-                        AND     lc.depth = 2
+                        WHERE   lc.parent_comment_id    = :parentCommentId
+                        AND     lc.deleted_at           IS NULL
+                        AND     lc.depth                = 2
             """
             , nativeQuery = true)
     Page<CommentProjection> findSecondLevelRepliesByParentCommentId(UUID parentCommentId, UUID lastCommentId, LocalDateTime lastCreatedAt, org.springframework.data.domain.Pageable pageable);
