@@ -4,5 +4,5 @@ target
 .vscode
 *.iml
 .env
-.env.*
+.env.dev
 docker-compose.yml

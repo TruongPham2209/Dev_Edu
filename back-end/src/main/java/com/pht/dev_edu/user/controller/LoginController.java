@@ -48,7 +48,7 @@ public class LoginController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users/batch-users")
-    public ResponseEntity<ApiResponse> batchCreateUseres(@RequestBody List<@Valid RegisterUser> registerUsers) {
+    public ResponseEntity<ApiResponse> batchCreateUsers(@RequestBody List<@Valid RegisterUser> registerUsers) {
         userService.batchRegisterUsers(registerUsers);
         return ApiUtils.buildSuccessResponse("Tạo người dùng hàng loạt thành công.");
     }

@@ -29,10 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -96,7 +93,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new BadRequestException("All users must have a role");
         }
 
-        if (usernames.size() != (Set.of(usernames)).size() || emails.size() != (Set.of(emails)).size()) {
+        if (usernames.size() != (new HashSet<>(usernames)).size() || emails.size() != (new HashSet<>(emails)).size()) {
             throw new BadRequestException("Duplicate usernames or emails in the request");
         }
 
@@ -247,6 +244,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                     return UserEntity.builder()
                             .username(registerUser.getUsername())
                             .email(registerUser.getEmail())
+                            .fullName(registerUser.getFullName())
                             .password(passwordEncoder.encode(registerUser.getPassword()))
                             .roles(Set.of(role))
                             .build();
