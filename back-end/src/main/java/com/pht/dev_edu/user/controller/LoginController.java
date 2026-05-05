@@ -65,7 +65,7 @@ public class LoginController {
         return ApiUtils.buildSuccessResponse(newAvatarUrl);
     }
 
-    // Sửa lại sau
+    // TODO: set username after login with google, email get from jwt instead of request body
     @PutMapping("/users/username")
     public ResponseEntity<ApiResponse> setUsernameForGoogleLogin(@RequestBody Map<String, String> request) {
         String email = request.get("email");

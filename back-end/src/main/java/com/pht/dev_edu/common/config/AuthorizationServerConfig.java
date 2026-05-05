@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -97,6 +98,10 @@ public class AuthorizationServerConfig {
                 ))
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers(
+                            WebEndpointConstant.PERMIT_ALL_MATCHERS.toArray(new String[0])
+                    ).permitAll();
+                    authorize.requestMatchers(
+                            HttpMethod.GET,
                             WebEndpointConstant.PERMIT_ALL_MATCHERS.toArray(new String[0])
                     ).permitAll();
                     authorize.requestMatchers("/api/clients/**").hasAuthority("ADMIN");

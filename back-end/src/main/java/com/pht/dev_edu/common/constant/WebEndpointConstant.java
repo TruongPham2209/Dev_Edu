@@ -6,6 +6,7 @@ import java.util.List;
 public class WebEndpointConstant {
     public static final List<String> PERMIT_ALL_MATCHERS = new ArrayList<>();
     public static final List<String> CSRF_IGNORING_MATCHERS = new ArrayList<>();
+    public static final List<String> GET_PERMIT_ALL_ENDPOINTS = new ArrayList<>();
 
     static {
         CSRF_IGNORING_MATCHERS.addAll(List.of(
@@ -19,6 +20,13 @@ public class WebEndpointConstant {
                 "/favicon.ico", "/.well-known/**",
                 "/css/**", "/js/**", "/images/**",
                 "/actuator/**"
+        ));
+
+        GET_PERMIT_ALL_ENDPOINTS.addAll(List.of(
+                "/api/v1/categories",
+                "/api/v1/courses",
+                "/api/v1/courses/reviews",
+                "/api/v1/users/register"
         ));
     }
 }
