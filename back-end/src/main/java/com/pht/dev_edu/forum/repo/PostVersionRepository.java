@@ -43,7 +43,7 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             WHERE   id      = :postVersionId
             AND     status  = :status
             """, nativeQuery = true)
-    int deleteByIdAndStatus(UUID id, PostStatus status);
+    int deleteByIdAndStatus(UUID id, String status);
 
     List<PostVersionEntity> findByPostIdAndStatusOrderByVersionNumberDesc(UUID postId, PostStatus status);
 
@@ -58,7 +58,7 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             WHERE   pv.status = :status
             """,
             nativeQuery = true)
-    Page<PostVersionEntity> findByStatusAndCursor(PostStatus status, UUID lastId, LocalDateTime lastUpdatedAt, org.springframework.data.domain.Pageable pageable);
+    Page<PostVersionEntity> findByStatusAndCursor(String status, UUID lastId, LocalDateTime lastUpdatedAt, org.springframework.data.domain.Pageable pageable);
 
     @Modifying
     @Query(value = """

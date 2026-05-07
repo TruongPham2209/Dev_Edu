@@ -17,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
@@ -35,10 +36,12 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.TRACKING_EVENT_TOPIC)
-    public void handleTrackingEvent(String payload) throws JsonProcessingException {
+    @KafkaListener(topics = KafkaTopicConstant.TRACKING_EVENT_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void handleTrackingEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, TrackingEvent.class);
         logService.saveTrackingLog(event);
+
+        ack.acknowledge();
     }
 
     @RetryableTopic(
@@ -46,10 +49,12 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.SUBMISSION_EVENT_TOPIC)
-    public void handleSubmissionEvent(String payload) throws JsonProcessingException {
+    @KafkaListener(topics = KafkaTopicConstant.SUBMISSION_EVENT_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void handleSubmissionEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, SubmissionEvent.class);
         submissionService.saveSubmissionLog(event);
+
+        ack.acknowledge();
     }
 
     @RetryableTopic(
@@ -57,10 +62,12 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.CRON_JOB_EVENT_TOPIC)
-    public void handleCronJobEvent(String payload) throws JsonProcessingException {
+    @KafkaListener(topics = KafkaTopicConstant.CRON_JOB_EVENT_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void handleCronJobEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, CronJobEvent.class);
         logService.saveCronJobLog(event);
+
+        ack.acknowledge();
     }
 
     @RetryableTopic(
@@ -68,10 +75,12 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.REQUEST_LOG_TOPIC)
-    public void handleLogRequestEvent(String payload) throws JsonProcessingException {
+    @KafkaListener(topics = KafkaTopicConstant.REQUEST_LOG_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void handleLogRequestEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, RequestLoggingEvent.class);
         logService.saveRequestLog(event);
+
+        ack.acknowledge();
     }
 
     @RetryableTopic(
@@ -79,8 +88,8 @@ public class TrackingEventListener {
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
-    @KafkaListener(topics = KafkaTopicConstant.MAIL_SEND_TOPIC)
-    public void handleSendMailEvent(String payload) throws JsonProcessingException {
+    @KafkaListener(topics = KafkaTopicConstant.MAIL_SEND_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void handleSendMailEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, MailPayload.class);
         var mailPayload = com.pht.dev_edu.common.dto.MailPayload.builder()
                 .toMail(event.getToMail())
@@ -90,5 +99,7 @@ public class TrackingEventListener {
                 .template(event.getTemplate().getValue())
                 .build();
         mailService.sendMail(mailPayload);
+
+        ack.acknowledge();
     }
 }

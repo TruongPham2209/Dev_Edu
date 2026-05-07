@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -32,10 +31,10 @@ import java.util.concurrent.Executor;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CourseDiscountServiceImpl implements CourseDiscountService {
     CourseDiscountRepository discountRepository;
+    CourseDiscountRepository courseDiscountRepository;
 
     Executor executor;
     CourseDiscountMapper discountMapper;
-    private final CourseDiscountRepository courseDiscountRepository;
 
 
     @Override
@@ -43,7 +42,7 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "cd.created_at", "cd.id"));
+        var pageable = PageRequest.of(0, 20);
 
         var discountPage = discountRepository.getAllScheduledDiscountsWithCursor(cursor.getId(), cursor.getTimeStamp(), pageable);
 
@@ -78,9 +77,10 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
         }
 
         var validFrom = couponRequest.getValidFrom().atStartOfDay();
-        var validTo = (couponRequest.getValidTo().plusDays(1).atStartOfDay()).minusNanos(1);
+        var validTo = (couponRequest.getValidTo().plusDays(1).atStartOfDay()).minusSeconds(1);
 
-        if (courseDiscountRepository.existsOverlappingDiscount(
+        if (couponRequest.getCourseId() != null
+                && courseDiscountRepository.existsOverlappingDiscount(
                 couponRequest.getCourseId(),
                 validFrom,
                 validTo
@@ -88,6 +88,16 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
             log.error("Overlapping discount exists for courseId: {}, validFrom: {}, validTo: {}",
                     couponRequest.getCourseId(), couponRequest.getValidFrom(), couponRequest.getValidTo());
             throw new BadRequestException("Overlapping discount exists for the specified course and time period");
+        }
+
+        if (couponRequest.getCourseId() == null
+                && courseDiscountRepository.existsOverlappingDiscount(
+                validFrom,
+                validTo
+        )) {
+            log.error("Overlapping global discount exists for validFrom: {}, validTo: {}",
+                    couponRequest.getValidFrom(), couponRequest.getValidTo());
+            throw new BadRequestException("Overlapping global discount exists for the specified time period");
         }
 
         var couponEntity = discountMapper.reqToEntity(couponRequest);

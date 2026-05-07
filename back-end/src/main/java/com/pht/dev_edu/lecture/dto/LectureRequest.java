@@ -17,7 +17,7 @@ public class LectureRequest {
     @NotNull(message = "Lecture id must not be null", groups = {UpdateValidation.class})
     UUID id;
 
-    @NotNull(message = "Course id must not be null", groups = {CreateValidation.class, UpdateValidation.class})
+    @NotNull(message = "Course id must not be null", groups = {CreateValidation.class})
     UUID courseId;
 
     @NotBlank(message = "Lecture title must not be blank", groups = {CreateValidation.class, UpdateValidation.class})

@@ -32,26 +32,46 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
     Optional<LectureProjection> findLectureDetailByIdAndUsername(UUID lectureId, String username);
 
     @Query(value = """
-                SELECT  l.id AS id,
-                        l.title AS title,
-                        l.summary AS summary,
-                        l.content AS content,
-                        l.video_object_key AS videoObjectKey,
-                        l.lecture_order AS lectureOrder,
-                        l.uploaded_at AS uploadedAt,
+                SELECT  l.id                    AS id,
+                        l.title                 AS title,
+                        l.summary               AS summary,
+                        CASE
+                            WHEN lp.lecture_id IS NOT NULL THEN l.content
+                        END                     AS content,
+                        CASE
+                            WHEN lp.lecture_id IS NOT NULL THEN l.video_object_key
+                        END                     AS video_object_key,
+                        l.lecture_order         AS lectureOrder,
+                        l.uploaded_at           AS uploadedAt,
                         CASE
                             WHEN lp.lecture_id IS NOT NULL THEN TRUE
                             ELSE FALSE
-                        END AS completed
+                        END                     AS completed
                 FROM lecture l
                 LEFT JOIN lecture_progress lp
                     ON  l.id        = lp.lecture_id
                     AND lp.student  = :username
-                WHERE   l.course_id = :lectureId
-                AND     l.deleted_at IS NULL
-                ORDER BY l.lecture_order ASC
+                WHERE   l.course_id     = :courseId
+                AND     l.deleted_at    IS NULL
+                ORDER BY l.lecture_order
             """, nativeQuery = true)
     List<LectureProjection> findLectureDetailsByCourseIdAndUsername(UUID courseId, String username);
+
+    @Query(value = """
+                SELECT  l.id                    AS id,
+                        l.title                 AS title,
+                        l.summary               AS summary,
+                        l.content               AS content,
+                        l.video_object_key      AS video_object_key,
+                        l.lecture_order         AS lectureOrder,
+                        l.uploaded_at           AS uploadedAt,
+                        FALSE                   AS completed
+                FROM lecture l
+                WHERE   l.course_id     = :courseId
+                AND     l.deleted_at    IS NULL
+                ORDER BY l.lecture_order
+            """, nativeQuery = true)
+    List<LectureProjection> findLectureDetailsByCourseId(UUID courseId);
 
     @Query(value = """
                 SELECT  COALESCE(MAX(l.lecture_order), 0)

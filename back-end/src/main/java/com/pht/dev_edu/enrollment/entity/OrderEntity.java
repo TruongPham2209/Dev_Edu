@@ -14,7 +14,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "order")
+@Table(name = "\"order\"")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

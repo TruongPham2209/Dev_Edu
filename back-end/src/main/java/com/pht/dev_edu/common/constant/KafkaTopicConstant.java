@@ -1,6 +1,8 @@
 package com.pht.dev_edu.common.constant;
 
 public class KafkaTopicConstant {
+    public static final String KAFKA_CONSUMER_GROUP = "dev-edu-group";
+
     // File Topics
     public static final String FILE_DELETE_TOPIC = "file-delete-topic";
     public static final String VIDEO_DURATION_EVENT_TOPIC = "video-duration-event-topic";

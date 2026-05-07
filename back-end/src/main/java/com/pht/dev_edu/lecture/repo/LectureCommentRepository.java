@@ -21,10 +21,10 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
                             FROM lecture_comment c
-                            WHERE   lecture_id  = :lectureId
-                            AND     deleted_at IS NULL
-                            AND     depth       = 0
-                            AND     (created_at, id) < (:lastCreatedAt, :lastId)
+                            WHERE   lecture_id          = :lectureId
+                            AND     deleted_at          IS NULL
+                            AND     depth               = 0
+                            AND     (created_at, id)    < (:lastCreatedAt, :lastCommentId)
             
                             UNION ALL
             
@@ -36,15 +36,15 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
                             FROM lecture_comment c
-                            WHERE   lecture_id  = :lectureId
-                            AND     deleted_at IS NOT NULL
-                            AND     depth       = 0
-                            AND     (created_at, id) < (:lastCreatedAt, :lastId)
+                            WHERE   lecture_id          = :lectureId
+                            AND     deleted_at          IS NOT NULL
+                            AND     depth               = 0
+                            AND     (created_at, id)    < (:lastCreatedAt, :lastCommentId)
                             AND     EXISTS(
                                 SELECT 1
                                 FROM lecture_comment AS lc
-                                WHERE   lc.root_comment_id = c.id
-                                AND     lc.deleted_at IS NULL
+                                WHERE   lc.root_comment_id  = c.id
+                                AND     lc.deleted_at       IS NULL
                             )
                         )
                         SELECT      vc.id                   AS id,
@@ -57,7 +57,8 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                         FROM validComments vc
                         LEFT JOIN lecture_comment lc
                             ON vc.id = lc.parent_comment_id
-                        GROUP BY vc.id
+                        GROUP BY vc.id, vc.content, vc.createdAt, vc.deletedAt, vc.author
+                        ORDER BY vc.createdAt DESC, vc.id DESC
             """, countQuery = """
                         WITH validComments AS (
                             SELECT  c.id                AS id,
@@ -69,7 +70,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.username          AS author
                             FROM lecture_comment c
                             WHERE   lecture_id  = :lectureId
-                            AND     deleted_at IS NULL
+                            AND     deleted_at  IS NULL
                             AND     depth       = 0
             
                             UNION ALL
@@ -83,13 +84,13 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.username          AS author
                             FROM lecture_comment c
                             WHERE   lecture_id  = :lectureId
-                            AND     deleted_at IS NOT NULL
+                            AND     deleted_at  IS NOT NULL
                             AND     depth       = 0
                             AND     EXISTS(
                                 SELECT 1
-                                FROM lecture_comment AS lc
-                                WHERE   lc.root_comment_id = c.id
-                                AND     lc.deleted_at IS NULL
+                                FROM lecture_comment lc
+                                WHERE   lc.root_comment_id  = c.id
+                                AND     lc.deleted_at       IS NULL
                             )
                         )
                         SELECT    COUNT(*)
@@ -108,10 +109,10 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
                             FROM lecture_comment c
-                            WHERE   parent_comment_id   = :parent_comment_id
+                            WHERE   parent_comment_id   = :parentCommentId
                             AND     deleted_at IS NULL
                             AND     depth               = 1
-                            AND     (created_at, id)    < (:lastCreatedAt, :lastId)
+                            AND     (created_at, id)    < (:lastCreatedAt, :lastCommentId)
             
                             UNION ALL
             
@@ -123,15 +124,15 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
                             FROM lecture_comment c
-                            WHERE   parent_comment_id   = :parent_comment_id
-                            AND     deleted_at IS NOT NULL
+                            WHERE   parent_comment_id   = :parentCommentId
+                            AND     deleted_at          IS NOT NULL
                             AND     depth               = 1
-                            AND     (created_at, id)    < (:lastCreatedAt, :lastId)
+                            AND     (created_at, id)    < (:lastCreatedAt, :lastCommentId)
                             AND     EXISTS(
                                 SELECT 1
                                 FROM lecture_comment AS lc
-                                WHERE   lc.parent_comment_id = c.id
-                                AND     lc.deleted_at IS NULL
+                                WHERE   lc.parent_comment_id    = c.id
+                                AND     lc.deleted_at           IS NULL
                             )
                         )
                         SELECT      vc.id                   AS id,
@@ -139,12 +140,15 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     vc.createdAt            AS createdAt,
                                     CASE WHEN vc.deletedAt IS NOT NULL THEN true
                                     ELSE false END          AS isDeleted,
+                                    vc.rootCommentId        AS rootCommentId,
+                                    vc.parentCommentId      AS parentCommentId,
                                     vc.author               AS author,
                                     COUNT(lc.id)            AS replyCount
                         FROM validComments vc
                         LEFT JOIN lecture_comment lc
                             ON vc.id = lc.parent_comment_id
-                        GROUP BY vc.id
+                        GROUP BY vc.id, vc.content, vc.createdAt, vc.deletedAt, vc.author, vc.rootCommentId, vc.parentCommentId
+                        ORDER BY vc.createdAt DESC, vc.id DESC
             """, countQuery = """
                         WITH validComments AS (
                             SELECT  c.id                AS id,
@@ -155,7 +159,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
                             FROM lecture_comment c
-                            WHERE   parent_comment_id   = :parent_comment_id
+                            WHERE   parent_comment_id   = :parentCommentId
                             AND     deleted_at          IS NULL
                             AND     depth               = 1
             
@@ -169,14 +173,14 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     c.parent_comment_id AS parentCommentId,
                                     c.username          AS author
                             FROM lecture_comment c
-                            WHERE   parent_comment_id   = :parent_comment_id
+                            WHERE   parent_comment_id   = :parentCommentId
                             AND     deleted_at          IS NOT NULL
                             AND     depth               = 1
                             AND     EXISTS(
                                 SELECT 1
-                                FROM lecture_comment AS lc
-                                WHERE   lc.parent_comment_id = c.id
-                                AND     lc.deleted_at IS NULL
+                                FROM lecture_comment lc
+                                WHERE   lc.parent_comment_id    = c.id
+                                AND     lc.deleted_at           IS NULL
                             )
                         )
                         SELECT    COUNT(*)
@@ -188,6 +192,8 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
     @Query(value = """
                         SELECT      lc.id                   AS id,
                                     lc.content              AS content,
+                                    lc.root_comment_id      AS rootCommentId,
+                                    lc.parent_comment_id    AS parentCommentId,
                                     lc.created_at           AS createdAt,
                                     lc.username             AS author,
                                     false                   AS isDeleted,
@@ -197,6 +203,7 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                         AND     lc.deleted_at           IS NULL
                         AND     lc.depth                = 2
                         AND     (lc.created_at, lc.id)  < (:lastCreatedAt, :lastCommentId)
+                        ORDER BY lc.created_at DESC, lc.id DESC
             """, countQuery = """
                         SELECT    COUNT(*)
                         FROM  lecture_comment lc

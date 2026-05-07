@@ -12,5 +12,5 @@ public interface SubmissionService {
 
     SubmissionResponse submit(String studentUsername, SubmissionRequest req);
 
-    void unSubmit(String studentUsername, UUID submissionId);
+    void unSubmit(String studentUsername, UUID assignmentId);
 }

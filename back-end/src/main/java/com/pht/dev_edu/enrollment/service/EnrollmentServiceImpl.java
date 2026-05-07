@@ -17,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -66,7 +65,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     private Pageable buildCoursePageable() {
-        return PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "e.enrolled_at", "e.id"));
+        return PageRequest.of(0, 15);
     }
 
     private TimeStampCursor resolveTimeStampCursor(String nextCursor) {
@@ -77,7 +76,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     public CustomPaging<EnrollmentUserResponse> getEnrolledUsers(UUID courseId, String nextCursor) {
-        var pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "e.enrolled_at", "e.id"));
+        var pageable = PageRequest.of(0, 20);
         var timeCursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);

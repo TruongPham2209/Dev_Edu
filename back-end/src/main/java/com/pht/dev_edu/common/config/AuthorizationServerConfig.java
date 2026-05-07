@@ -102,7 +102,7 @@ public class AuthorizationServerConfig {
                     ).permitAll();
                     authorize.requestMatchers(
                             HttpMethod.GET,
-                            WebEndpointConstant.PERMIT_ALL_MATCHERS.toArray(new String[0])
+                            WebEndpointConstant.GET_PERMIT_ALL_ENDPOINTS.toArray(new String[0])
                     ).permitAll();
                     authorize.requestMatchers("/api/clients/**").hasAuthority("ADMIN");
                     authorize.anyRequest().authenticated();

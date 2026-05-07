@@ -17,7 +17,7 @@ public class KafkaUtils {
     }
 
     public static void sendDeleteFileEvent(String objectKey) {
-        if (!StringUtils.hasText(objectKey)) {
+        if (StringUtils.hasText(objectKey)) {
             kafkaTemplate.send(
                     KafkaTopicConstant.FILE_DELETE_TOPIC,
                     new FileDeleteEvent(objectKey)

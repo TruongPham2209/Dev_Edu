@@ -18,17 +18,30 @@ import java.util.*;
 @Slf4j
 @Component
 public class PaymentUtils {
-    @Value("${vnpay.url}")
     private static String vnpayUrl;
-
-    @Value("${vnpay.returnUrl}")
     private static String vnpayReturnUrl;
-
-    @Value("${vnpay.tmnCode}")
     private static String vnpayTmnCode;
-
-    @Value("${vnpay.hashSecret}")
     private static String vnpayHashSecret;
+
+    @Value("${vnpay.url}")
+    public void setVnpayUrl(String value) {
+        vnpayUrl = value;
+    }
+
+    @Value("${vnpay.return-url}")
+    public void setVnpayReturnUrl(String value) {
+        vnpayReturnUrl = value;
+    }
+
+    @Value("${vnpay.tmn-code}")
+    public void setVnpayTmnCode(String value) {
+        vnpayTmnCode = value;
+    }
+
+    @Value("${vnpay.hash-secret}")
+    public void setVnpayHashSecret(String value) {
+        vnpayHashSecret = value;
+    }
 
     private static final String HCM_ZONE = "Asia/Ho_Chi_Minh";
 
@@ -118,7 +131,7 @@ public class PaymentUtils {
             return sb.toString();
 
         } catch (Exception ex) {
-            log.error("Error while calculating HMAC SHA512: {}", ex.getMessage());
+            log.error("Error while calculating HMAC SHA512: {}", ex.getMessage(), ex);
             throw new ServerInternalException("Error while calculating HMAC SHA512.");
         }
     }

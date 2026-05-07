@@ -42,7 +42,7 @@ public class PostController {
     @GetMapping("/versions/{postId}")
     public ResponseEntity<?> getVersionsByPostId(
             @PathVariable UUID postId,
-            @RequestParam(required = false) PostStatus status
+            @RequestParam(required = false, defaultValue = "APPROVED") PostStatus status
     ) {
         var authorities = SecurityContextUtils.getCurrentUserAuthorities();
         var username = SecurityContextUtils.getCurrentUsername();
@@ -51,8 +51,9 @@ public class PostController {
         return ApiUtils.buildSuccessResponse(versions);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/versions")
-    public ResponseEntity<?> updatePostVersion(
+    public ResponseEntity<?> updatePostVersionStatus(
             @RequestBody Map<String, Object> requestBody
     ) {
         var postVersionIdObj = requestBody.get("postVersionId");

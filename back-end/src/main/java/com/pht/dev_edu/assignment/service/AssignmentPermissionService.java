@@ -9,4 +9,6 @@ public interface AssignmentPermissionService {
     void checkViewAssignmentPermissionByAssignment(Set<String> authorities, String actor, UUID assignmentId);
 
     void checkModifyAssignmentPermission(Set<String> authorities, String actor, UUID assignmentId);
+
+    void checkModifyAssignmentPermissionByLecture(Set<String> authorities, String actor, UUID lectureId);
 }

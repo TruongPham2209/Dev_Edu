@@ -20,6 +20,9 @@ public class FileController {
 
     @PostMapping("/pre-signed-url")
     public ResponseEntity<ApiResponse> uploadFile(@Valid @RequestBody FilePreSignUploadRequest req) {
+        var username = SecurityContextUtils.getCurrentUsername();
+        req.setUsername(username);
+
         var fileInfo = fileController.generatePreSignedUrl(req);
         return ApiUtils.buildSuccessResponse(fileInfo);
     }

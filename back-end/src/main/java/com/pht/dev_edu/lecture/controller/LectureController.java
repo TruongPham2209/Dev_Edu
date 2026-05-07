@@ -56,7 +56,7 @@ public class LectureController {
         return ApiUtils.buildSuccessResponse(materials);
     }
 
-    @PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse> createLecture(@Validated({CreateValidation.class}) @RequestBody LectureRequest req) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -65,7 +65,7 @@ public class LectureController {
         return ApiUtils.buildSuccessResponse(lecture);
     }
 
-    @PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     @PostMapping("/materials")
     public ResponseEntity<ApiResponse> createMaterials(@Valid @RequestBody MaterialRequest req) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -74,7 +74,7 @@ public class LectureController {
         return ApiUtils.buildSuccessResponse(material);
     }
 
-    @PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     @PutMapping
     public ResponseEntity<ApiResponse> updateLecture(@Validated({UpdateValidation.class}) @RequestBody LectureRequest req) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -83,7 +83,7 @@ public class LectureController {
         return ApiUtils.buildSuccessResponse(lecture);
     }
 
-    @PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     @DeleteMapping
     public ResponseEntity<ApiResponse> deleteLecture(@RequestParam UUID lectureId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -92,7 +92,7 @@ public class LectureController {
         return ApiUtils.buildSuccessResponse("Lecture deleted successfully");
     }
 
-    @PreAuthorize("hasAnyRole('LECTURER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     @DeleteMapping("/materials")
     public ResponseEntity<ApiResponse> deleteMaterial(@RequestParam UUID materialId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -101,7 +101,7 @@ public class LectureController {
         return ApiUtils.buildSuccessResponse("Material deleted successfully");
     }
 
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAuthority('STUDENT')")
     @PutMapping("/progress")
     public ResponseEntity<ApiResponse> updateProgress(@RequestBody ProgressSegmentRequest req) {
         String username = SecurityContextUtils.getCurrentUsernameForController();

@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -56,7 +55,7 @@ public class SavedPostServiceImpl implements SavedPostService {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "sp.saved_at", "sp.id"));
+        var pageable = PageRequest.of(0, 10);
 
         var savedPostsPage = savedPostRepository.findByUsernameAndCursor(username, cursor.getId(), cursor.getTimeStamp(), pageable);
         return PagingUtils.getPagedWithCursor(

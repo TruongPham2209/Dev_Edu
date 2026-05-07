@@ -45,4 +45,9 @@ public class AssignmentPermissionServiceImpl implements AssignmentPermissionServ
 
         lecturePermissionService.checkModifyPermissionByLecture(authorities, actor, assignment.getLectureId());
     }
+
+    @Override
+    public void checkModifyAssignmentPermissionByLecture(Set<String> authorities, String actor, UUID lectureId) {
+        lecturePermissionService.checkModifyPermissionByLecture(authorities, actor, lectureId);
+    }
 }

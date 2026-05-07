@@ -2,8 +2,10 @@ package com.pht.dev_edu.lecture.dto;
 
 import com.pht.dev_edu.common.dto.AbstractPageRequest;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Sort;
@@ -11,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
@@ -22,7 +26,6 @@ public class CommentPageRequest extends AbstractPageRequest {
 
     @Override
     public Sort[] toSort() {
-        Sort sortBy = Sort.by(Sort.Direction.DESC, "created_at").and(Sort.by(Sort.Direction.DESC, "id"));
-        return new Sort[]{sortBy};
+        return new Sort[]{};
     }
 }

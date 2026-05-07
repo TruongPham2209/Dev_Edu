@@ -24,13 +24,14 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         FROM enrollment e
                         LEFT JOIN course c
                             ON e.course_id = c.id
-                        LEFT JOIN order o
+                        LEFT JOIN "order" o
                             ON e.order_id = o.id
                         LEFT JOIN order_item oi
                             ON  o.id        = oi.order_id
                             AND oi.item_id  = c.id
                         WHERE   e.student_username      = :studentUsername
                         AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
+                        ORDER BY e.enrolled_at DESC, e.id DESC
             """, countQuery = """
                         SELECT COUNT(e.course_id)
                         FROM enrollment e
@@ -52,6 +53,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                             ON cl.course_id = c.id
                         WHERE   cl.lecturer_username  = :lecturerUsername
                         AND     (c.created_at, c.id) < (:lastUpdatedAt, :lastId)
+                        ORDER BY c.created_at DESC, c.id DESC
             """, countQuery = """
                         SELECT  COUNT(c.id)
                         FROM course_lecturer cl
@@ -69,18 +71,15 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                                 u.full_name          AS studentFullName,
                                 e.enrolled_at        AS enrolledAt
                         FROM enrollment e
-                        JOIN "user" u
+                        LEFT JOIN "user" u
                             ON e.student_username = u.username
-                        WHERE   e.student_username      = :studentUsername
-                        AND     e.course_id             = :courseId
+                        WHERE   e.course_id             = :courseId
                         AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
+                        ORDER BY e.enrolled_at DESC, e.id DESC
             """, countQuery = """
-                        SELECT COUNT(*)
+                        SELECT COUNT(e.student_username)
                         FROM enrollment e
-                        JOIN "user" u
-                            ON e.student_username = u.username
-                        WHERE   e.student_username      = :studentUsername
-                        AND     e.course_id             = :courseId
+                        WHERE e.course_id = :courseId
             """,
             nativeQuery = true)
     Page<EnrollmentUserProjection> findEnrolledUsersByCourseIdAndCursor(UUID courseId, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);

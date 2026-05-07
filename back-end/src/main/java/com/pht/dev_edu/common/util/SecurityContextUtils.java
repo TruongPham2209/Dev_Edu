@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class SecurityContextUtils {
     public static String getCurrentUsernameForController() {
         String username = SecurityContextUtils.getCurrentUsername();
         if (username == null) {
-            throw new UnauthorizedException("Vui lòng đăng nhập để thực hiện thao tác này.");
+            throw new UnauthorizedException("Please login to access this resource");
         }
         return username;
     }
@@ -34,6 +35,8 @@ public class SecurityContextUtils {
             return ((UserDetails) principal).getUsername();
         } else if (principal instanceof String) {
             return (String) principal;
+        } else if (principal instanceof Jwt jwt) {
+            return jwt.getClaimAsString("sub");
         }
 
         return null;

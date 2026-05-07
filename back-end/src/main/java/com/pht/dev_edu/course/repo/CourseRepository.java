@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
+
+
     @Query(value = """
             SELECT  *
             FROM    course c

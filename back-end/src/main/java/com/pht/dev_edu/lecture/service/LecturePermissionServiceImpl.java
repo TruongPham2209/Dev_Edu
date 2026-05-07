@@ -37,7 +37,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
             return;
         }
 
-        if (!authorities.contains(RoleEnum.LECTURER.name())) {
+        if (authorities.contains(RoleEnum.LECTURER.name())) {
             canAccessCourseByLecturer(actor, lecture.getCourseId());
             return;
         }
@@ -56,7 +56,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
             throw new AccessDeniedException("Only lecturers can modify lectures");
         }
 
-        canAccessCourseByLecturer(actor, lecture.getId());
+        canAccessCourseByLecturer(actor, lecture.getCourseId());
     }
 
     @Override
@@ -89,7 +89,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
     }
 
     private void canAccessCourseByStudent(String student, UUID courseId) {
-        if (enrollmentRepository.existsByStudentUsernameAndCourseId(student, courseId)) {
+        if (!enrollmentRepository.existsByStudentUsernameAndCourseId(student, courseId)) {
             throw new AccessDeniedException("Course not found");
         }
     }

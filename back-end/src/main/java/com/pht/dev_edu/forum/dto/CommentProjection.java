@@ -18,4 +18,6 @@ public interface CommentProjection {
     Integer getReplyCount();
 
     LocalDateTime getCreatedAt();
+
+    boolean getIsDeleted();
 }

@@ -40,6 +40,7 @@ public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID
                 ON  p.current_version_id = pv.id
             WHERE   sv.username             = :username
             AND     (sv.saved_at, sv.id)    < (:lastSavedAt, :lastId)
+            ORDER BY sv.saved_at DESC, sv.id DESC
             """, countQuery = """
             SELECT COUNT(sv.post_id)
             FROM saved_post sv

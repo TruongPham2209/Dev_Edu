@@ -26,7 +26,8 @@ public class CommentController {
             @RequestParam UUID postId,
             @RequestParam(required = false) String nextCursor
     ) {
-        var comments = commentService.getCommentsByPostId(postId, nextCursor);
+        var username = SecurityContextUtils.getCurrentUsername();
+        var comments = commentService.getCommentsByPostId(username, postId, nextCursor);
         return ApiUtils.buildSuccessResponse(comments);
     }
 
@@ -36,7 +37,8 @@ public class CommentController {
             @RequestParam UUID parentCommentId,
             @RequestParam(required = false) String nextCursor
     ) {
-        var comments = commentService.getRepliedComments(parentCommentId, nextCursor);
+        var username = SecurityContextUtils.getCurrentUsername();
+        var comments = commentService.getRepliedComments(username, parentCommentId, nextCursor);
         return ApiUtils.buildSuccessResponse(comments);
     }
 

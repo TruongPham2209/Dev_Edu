@@ -39,10 +39,10 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public List<AssignmentResponse> getAssignments(Set<String> authorities, String actor, UUID lectureId) {
-        assignmentPermissionService.checkViewAssignmentPermissionByAssignment(authorities, actor, lectureId);
+        assignmentPermissionService.checkViewAssignmentPermissionByLecture(authorities, actor, lectureId);
 
         if (!authorities.contains(RoleEnum.STUDENT.name())) {
-            var assignments = assignmentRepository.findByLectureIdAndDeletedAtIsNullOrderByCreatedAtDesc(lectureId);
+            var assignments = assignmentRepository.findByLectureIdAndDeletedAtIsNullOrderByCreatedAt(lectureId);
             return assignments.stream().map(assignmentMapper::entityToRes).toList();
         }
 
@@ -53,7 +53,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Override
     @Transactional
     public AssignmentResponse create(Set<String> authorities, String author, AssignmentRequest req) {
-        assignmentPermissionService.checkModifyAssignmentPermission(authorities, author, req.getLectureId());
+        assignmentPermissionService.checkModifyAssignmentPermissionByLecture(authorities, author, req.getLectureId());
         var assignment = assignmentMapper.reqToEntity(req);
         assignmentRepository.save(assignment);
 

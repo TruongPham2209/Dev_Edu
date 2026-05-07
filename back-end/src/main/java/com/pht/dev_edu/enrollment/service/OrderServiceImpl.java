@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -46,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
         cartItemRepository.insertCartItemWithoutConstraintCheck(
                 id,
                 username,
-                PurchaseEntityType.COURSE,
+                PurchaseEntityType.COURSE.name(),
                 courseId
         );
     }
@@ -61,9 +60,10 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
+    // TODO: update dto to see original and discounted price
     @Override
     public CustomPaging<EnrolledCourseResponse> getCoursesInCart(String username, String nextCursor) {
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "e.enrolled_at", "e.id"));
+        var pageable = PageRequest.of(0, 10);
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
         var globalDiscountPercentage = courseDiscountRepository.getGlobalActiveDiscount(LocalDateTime.now()).orElse(BigDecimal.ZERO);

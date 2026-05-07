@@ -6,6 +6,7 @@ import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
+import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.common.util.KafkaUtils;
@@ -55,10 +56,12 @@ public class LectureServiceImpl implements LectureService {
     KafkaTemplate<String, Object> kafkaTemplate;
     LectureMapper lectureMapper;
 
+    // TODO: update check permission to validate whether lecturer can see details
     @Override
     public List<LectureResponse> getLecturesByCourse(Set<String> authorities, String actor, UUID courseId) {
-        lecturePermissionService.checkViewPermissionByLecture(authorities, actor, courseId);
-        var lectures = lectureRepository.findLectureDetailsByCourseIdAndUsername(courseId, actor);
+        var lectures = authorities.stream().anyMatch(a -> List.of(RoleEnum.LECTURER.name(), RoleEnum.ADMIN.name()).contains(a))
+                ? lectureRepository.findLectureDetailsByCourseId(courseId)
+                : lectureRepository.findLectureDetailsByCourseIdAndUsername(courseId, actor);
         return lectures.stream()
                 .map(lectureMapper::projectionToResponse)
                 .toList();
@@ -119,13 +122,11 @@ public class LectureServiceImpl implements LectureService {
             throw new BadRequestException("Lecture not found.");
         }
 
-        var updatedLecture = lectureMapper.reqToEntity(req);
-        updatedLecture.setId(existingLecture.getId());
-        updatedLecture.setCreatedBy(existingLecture.getCreatedBy());
-        updatedLecture.setUploadedAt(existingLecture.getUploadedAt());
-        updatedLecture.setVideoObjectKey(existingLecture.getVideoObjectKey());
+        existingLecture.setTitle(req.getTitle());
+        existingLecture.setSummary(req.getSummary());
+        existingLecture.setContent(req.getContent());
 
-        lectureRepository.save(updatedLecture);
+        lectureRepository.save(existingLecture);
 
         TransactionUtils.runAfterCommitAsync(() -> {
             var tracking = TrackingEvent.builder()
@@ -138,7 +139,7 @@ public class LectureServiceImpl implements LectureService {
         }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.LECTURE_PREFIX + existingLecture.getId());
-        return lectureMapper.entityToResponse(updatedLecture);
+        return lectureMapper.entityToResponse(existingLecture);
     }
 
     @Override

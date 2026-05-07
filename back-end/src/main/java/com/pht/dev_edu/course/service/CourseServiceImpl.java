@@ -49,6 +49,7 @@ public class CourseServiceImpl implements CourseService {
     CourseMapper courseMapper;
     Executor executor;
 
+    // TODO: update get course with discount
     @Override
     public CourseResponse getCourseById(UUID courseId) {
         var courseEntity = getCourseEntityById(courseId);
@@ -165,6 +166,7 @@ public class CourseServiceImpl implements CourseService {
         return courseMapper.entityToRes(courseEntity);
     }
 
+    // TODO: check whether valid lecturer
     @Override
     @Transactional
     public CourseResponse updateCourse(String author, CourseRequest course) {
@@ -180,10 +182,10 @@ public class CourseServiceImpl implements CourseService {
         }
 
         var updatedCourse = courseMapper.reqToEntity(course);
-        boolean isNewThumbnail = !existingCourse.getThumbnailUrl().equals(getThumbnailUrl(author, course.getThumbnailObjectKey()));
+        boolean isNewThumbnail = existingCourse.getThumbnailObjectKey().equals(course.getThumbnailObjectKey());
         String thumbnailUrl = isNewThumbnail
-                ? getThumbnailUrl(author, course.getThumbnailObjectKey())
-                : existingCourse.getThumbnailUrl();
+                ? existingCourse.getThumbnailUrl()
+                : getThumbnailUrl(author, course.getThumbnailObjectKey());
         updatedCourse.setThumbnailUrl(thumbnailUrl);
         updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
         courseRepository.save(updatedCourse);
@@ -215,7 +217,11 @@ public class CourseServiceImpl implements CourseService {
         }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
-        return courseMapper.entityToRes(updatedCourse);
+
+        var updatedCourses = courseMapper.entityToRes(updatedCourse);
+        updatedCourses.setLecturers(course.getLecturerUsernames());
+
+        return updatedCourses;
     }
 
     @Override

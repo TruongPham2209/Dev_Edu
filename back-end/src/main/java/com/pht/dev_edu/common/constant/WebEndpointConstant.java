@@ -25,8 +25,12 @@ public class WebEndpointConstant {
         GET_PERMIT_ALL_ENDPOINTS.addAll(List.of(
                 "/api/v1/categories",
                 "/api/v1/courses",
+                "/api/v1/courses/**",
+                "/api/v1/lectures",
                 "/api/v1/courses/reviews",
-                "/api/v1/users/register"
+                "/api/v1/users/register",
+                "/api/v1/forum/comments",
+                "//api/v1/forum/comments/replies"
         ));
     }
 }

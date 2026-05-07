@@ -12,6 +12,7 @@ import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service("assignmentSubmissionService")
@@ -37,6 +39,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
     AssignmentSubmissionMapper submissionMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
+    Executor executor;
 
     @Override
     public CustomPaging<SubmissionResponse> getSubmissionsByAssignment(Set<String> authorities, String actor, UUID assignmentId, int page, int size) {
@@ -56,36 +59,37 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setStudentUsername(studentUsername);
         submissionRepository.save(submission);
 
-        var submissionEvent = SubmissionEvent.builder()
-                .fullObjectKey(req.getFileObjectKey())
-                .action(SubmissionEvent.Action.SUBMITTED)
-                .assignmentId(req.getAssignmentId())
-                .username(studentUsername)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.SUBMISSION_EVENT_TOPIC, submissionEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var submissionEvent = SubmissionEvent.builder()
+                    .fullObjectKey(req.getFileObjectKey())
+                    .action(SubmissionEvent.Action.SUBMITTED)
+                    .assignmentId(req.getAssignmentId())
+                    .username(studentUsername)
+                    .build();
+            kafkaTemplate.send(KafkaTopicConstant.SUBMISSION_EVENT_TOPIC, submissionEvent);
+        }, executor);
+
         return submissionMapper.entityToResponse(submission);
     }
 
     @Override
     @Transactional
-    public void unSubmit(String studentUsername, UUID submissionId) {
-        var submission = submissionRepository.findById(submissionId).orElseThrow(
+    public void unSubmit(String studentUsername, UUID assignmentId) {
+        var submission = submissionRepository.findByAssignmentIdAndStudentUsername(assignmentId, studentUsername).orElseThrow(
                 () -> new DataNotFoundException("Submission not found.")
         );
 
-        if (!submission.getStudentUsername().equals(studentUsername)) {
-            throw new DataNotFoundException("Submission not found.");
-        }
-
         submissionRepository.delete(submission);
 
-        var submissionEvent = SubmissionEvent.builder()
-                .fullObjectKey(submission.getFileObjectKey())
-                .action(SubmissionEvent.Action.UNSUBMITTED)
-                .assignmentId(submission.getAssignmentId())
-                .username(studentUsername)
-                .build();
-        kafkaTemplate.send(KafkaTopicConstant.SUBMISSION_EVENT_TOPIC, submissionEvent);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            var submissionEvent = SubmissionEvent.builder()
+                    .fullObjectKey(submission.getFileObjectKey())
+                    .action(SubmissionEvent.Action.UNSUBMITTED)
+                    .assignmentId(submission.getAssignmentId())
+                    .username(studentUsername)
+                    .build();
+            kafkaTemplate.send(KafkaTopicConstant.SUBMISSION_EVENT_TOPIC, submissionEvent);
+        }, executor);
     }
 
     private void validateSubmissionFile(String author, String objectKey) {

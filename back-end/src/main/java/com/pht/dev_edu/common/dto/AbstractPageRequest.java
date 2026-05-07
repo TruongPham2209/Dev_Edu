@@ -20,8 +20,11 @@ public abstract class AbstractPageRequest {
     Integer size = 10;
     String nextCursor;
 
+    public AbstractPageRequest() {
+    }
+
     public final Pageable toPageable() {
-        if (!StringUtils.hasText(nextCursor)) {
+        if (StringUtils.hasText(nextCursor)) {
             return PagingUtils.getPageable(size, toSort());
         }
 

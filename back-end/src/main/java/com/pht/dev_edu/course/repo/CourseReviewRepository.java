@@ -13,6 +13,8 @@ import java.util.UUID;
 public interface CourseReviewRepository extends JpaRepository<CourseReviewEntity, UUID> {
     List<CourseReviewEntity> findByCourseIdAndStudentUsernameOrderByCreatedAtDesc(UUID courseId, String studentUsername);
 
+    boolean existsByCourseIdAndStudentUsername(UUID courseId, String studentUsername);
+
     @Query(value = """
             SELECT * FROM course_review
             WHERE   course_id           = :courseId

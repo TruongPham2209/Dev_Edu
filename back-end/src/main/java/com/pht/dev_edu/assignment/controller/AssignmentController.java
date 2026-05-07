@@ -35,7 +35,7 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse(assignments);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LECTURER')")
     @PostMapping
     public ResponseEntity<ApiResponse> createAssignment(@Valid @RequestBody AssignmentRequest req) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
@@ -44,7 +44,7 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse(newAssignment);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LECTURER')")
     @DeleteMapping
     public ResponseEntity<ApiResponse> deleteAssignment(@RequestParam UUID assignmentId) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
@@ -61,7 +61,7 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse(feedbacks);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LECTURER')")
     @PostMapping("/feedbacks")
     public ResponseEntity<ApiResponse> createFeedback(@Valid @RequestBody FeedbackRequest req) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
@@ -70,7 +70,7 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse(newFeedback);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LECTURER')")
     @DeleteMapping("/feedbacks")
     public ResponseEntity<ApiResponse> deleteFeedback(@RequestParam UUID feedbackId) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
@@ -79,7 +79,7 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse("Feedback deleted successfully");
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'LECTURER')")
     @GetMapping("/submissions")
     public ResponseEntity<ApiResponse> getSubmissions(
             @RequestParam UUID assignmentId,
@@ -92,7 +92,6 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse(submissions);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
     @PostMapping("/submissions")
     public ResponseEntity<ApiResponse> createSubmission(@Valid @RequestBody SubmissionRequest req) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
@@ -100,11 +99,10 @@ public class AssignmentController {
         return ApiUtils.buildSuccessResponse(newSubmission);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'LECTURER')")
     @DeleteMapping("/submissions")
-    public ResponseEntity<ApiResponse> deleteSubmission(@RequestParam UUID submissionId) {
+    public ResponseEntity<ApiResponse> cancelSubmission(@RequestParam UUID assignmentId) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
-        submissionService.unSubmit(username, submissionId);
+        submissionService.unSubmit(username, assignmentId);
         return ApiUtils.buildSuccessResponse("Submission deleted successfully");
     }
 }

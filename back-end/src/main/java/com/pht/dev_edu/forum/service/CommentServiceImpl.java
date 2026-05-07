@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -75,9 +74,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CustomPaging<CommentResponse> getCommentsByPostId(UUID postId, String nextCursor) {
+    public CustomPaging<CommentResponse> getCommentsByPostId(String username, UUID postId, String nextCursor) {
         var cursor = resolveCursor(nextCursor);
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created_at", "id"));
+        var pageable = PageRequest.of(0, 10);
 
         var commentPage = commentRepository.findRootCommentsByPostIdAndCursor(
                 postId,
@@ -88,16 +87,16 @@ public class CommentServiceImpl implements CommentService {
 
         return PagingUtils.getPagedWithCursor(
                 commentPage,
-                forumCommentMapper::projectionToRes,
+                c -> convertProjectionToRes(c, username),
                 CommentProjection::getCreatedAt,
                 CommentProjection::getId
         );
     }
 
     @Override
-    public CustomPaging<CommentResponse> getRepliedComments(UUID parentCommentId, String nextCursor) {
+    public CustomPaging<CommentResponse> getRepliedComments(String username, UUID parentCommentId, String nextCursor) {
         var cursor = resolveCursor(nextCursor);
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created_at", "id"));
+        var pageable = PageRequest.of(0, 10);
 
         var commentPage = commentRepository.findReplyCommentsByRootCommentIdAndCursor(
                 parentCommentId,
@@ -108,7 +107,7 @@ public class CommentServiceImpl implements CommentService {
 
         return PagingUtils.getPagedWithCursor(
                 commentPage,
-                forumCommentMapper::projectionToRes,
+                c ->  convertProjectionToRes(c, username),
                 CommentProjection::getCreatedAt,
                 CommentProjection::getId
         );
@@ -146,5 +145,15 @@ public class CommentServiceImpl implements CommentService {
         return StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
+    }
+
+    private CommentResponse convertProjectionToRes(CommentProjection projection, String actor) {
+        var content = projection.getIsDeleted() ? "This comment has been deleted" : projection.getContent();
+        boolean isMine = projection.getAuthor().equals(actor);
+        var commentResponse = forumCommentMapper.projectionToRes(projection);
+        commentResponse.setContent(content);
+        commentResponse.setIsMine(isMine);
+        commentResponse.setIsDeleted(projection.getIsDeleted());
+        return commentResponse;
     }
 }

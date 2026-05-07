@@ -91,6 +91,18 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
 
+        if (payment.getAmount().compareTo(BigDecimal.ZERO) == 0) {
+            payment.setStatus(PaymentStatus.COMPLETED);
+            order.setStatus(PaymentStatus.COMPLETED);
+
+            paymentHistoryRepository.save(payment);
+            orderRepository.save(order);
+
+            confirmOrderByPaymentId(paymentId, username);
+
+            return purchaseDetail;
+        }
+
         paymentHistoryRepository.save(payment);
         orderRepository.save(order);
 
@@ -150,25 +162,7 @@ public class PaymentServiceImpl implements PaymentService {
                     return;
                 }
 
-                var items = orderItemRepository.findByOrderId(payment.getId());
-                if (items.isEmpty()) {
-                    log.warn("No order items found for VNPAY return: orderId={}", payment.getId());
-                    return;
-                }
-
-                var entityType = items.getFirst().getItemType();
-                switch (entityType) {
-                    case COURSE -> {
-                        var username = payment.getUsername();
-                        var courseIds = items.stream()
-                                .map(OrderItemEntity::getItemId)
-                                .toList();
-                        enrollmentService.enrollUserInCourse(username, courseIds, payment.getId());
-                    }
-                    case SUBSCRIPTION -> {
-                        log.warn("Subscription return handling not implemented yet");
-                    }
-                }
+                confirmOrderByPaymentId(paymentId, payment.getUsername());
             }
             default -> {
                 log.warn("Unsupported payment method in return handling: {}", method);
@@ -211,7 +205,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private List<CourseItemResponse> orderCourses(String username, UUID orderId, List<UUID> courseIds) {
-        if (orderItemRepository.existsByUsernameAndItem(username, PurchaseEntityType.COURSE, courseIds)) {
+        if (orderItemRepository.existsByUsernameAndItem(username, PurchaseEntityType.COURSE.name(), courseIds)) {
             log.warn("User {} already has pending or completed order for courses: {}", username, courseIds);
             throw new BadRequestException("You already have a pending or completed order for some of these courses");
         }
@@ -255,5 +249,26 @@ public class PaymentServiceImpl implements PaymentService {
 
         cartItemRepository.deleteByUsernameAndItemTypeAndItemIdIn(username, PurchaseEntityType.COURSE, courseIds);
         return courseItems;
+    }
+
+    private void confirmOrderByPaymentId(UUID paymentId, String username) {
+        var items = orderItemRepository.findByOrderId(paymentId);
+        if (items.isEmpty()) {
+            log.warn("No order items found for VNPAY return: orderId={}", paymentId);
+            return;
+        }
+
+        var entityType = items.getFirst().getItemType();
+        switch (entityType) {
+            case COURSE -> {
+                var courseIds = items.stream()
+                        .map(OrderItemEntity::getItemId)
+                        .toList();
+                enrollmentService.enrollUserInCourse(username, courseIds, paymentId);
+            }
+            case SUBSCRIPTION -> {
+                log.warn("Subscription return handling not implemented yet");
+            }
+        }
     }
 }

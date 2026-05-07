@@ -5,6 +5,7 @@ import com.pht.dev_edu.common.dto.ItemStatus;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.common.validation.CreateValidation;
+import com.pht.dev_edu.common.validation.UpdateValidation;
 import com.pht.dev_edu.course.dto.CategoryRequest;
 import com.pht.dev_edu.course.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -29,14 +30,14 @@ public class CategoryController {
         return ApiUtils.buildSuccessResponse(categories);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/admin/categories")
     public ResponseEntity<ApiResponse> getAllCategoriesForAdmin(@RequestParam ItemStatus status) {
         var categories = categoryService.getAllCategories(status);
         return ApiUtils.buildSuccessResponse(categories);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/admin/categories")
     public ResponseEntity<ApiResponse> createCategory(@Validated({CreateValidation.class}) @RequestBody CategoryRequest category) {
         var author = SecurityContextUtils.getCurrentUsername();
@@ -44,15 +45,15 @@ public class CategoryController {
         return ApiUtils.buildSuccessResponse(createdCategory);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/admin/categories")
-    public ResponseEntity<ApiResponse> updateCategory(@Validated @RequestBody CategoryRequest category) {
+    public ResponseEntity<ApiResponse> updateCategory(@Validated({UpdateValidation.class}) @RequestBody CategoryRequest category) {
         var author = SecurityContextUtils.getCurrentUsername();
         var updatedCategory = categoryService.saveCategory(author, category);
         return ApiUtils.buildSuccessResponse(updatedCategory);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/admin/categories/{categoryId}")
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable UUID categoryId) {
         categoryService.deleteCategory(categoryId);

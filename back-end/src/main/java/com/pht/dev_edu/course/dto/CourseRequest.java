@@ -28,7 +28,7 @@ public class CourseRequest {
     @NotBlank(message = "Description cannot be blank", groups = {UpdateValidation.class, CreateValidation.class})
     String description;
 
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0",
+    @DecimalMin(value = "0.0", message = "Price must be greater than 0",
             groups = {UpdateValidation.class, CreateValidation.class})
     BigDecimal price;
 

@@ -20,4 +20,6 @@ public class CommentResponse {
     int replyCount;
     UUID repliedToCommentId;
     LocalDateTime createdAt;
+    Boolean isDeleted;
+    Boolean isMine;
 }

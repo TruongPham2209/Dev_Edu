@@ -338,7 +338,7 @@ public class FileServiceImpl implements FileService {
     }
 
     private String generateObjectKey(String filename) {
-        return String.format("%s/%s-%s", "uploads", System.currentTimeMillis(), filename);
+        return String.format("%s/%s-%s", "dev_edu", System.currentTimeMillis(), filename);
     }
 
     private HeadObjectResponse headObject(String bucket, String key) {

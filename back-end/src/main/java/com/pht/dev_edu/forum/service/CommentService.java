@@ -10,9 +10,9 @@ import java.util.UUID;
 public interface CommentService {
     CommentResponse createComment(String username, CommentRequest request);
 
-    CustomPaging<CommentResponse> getCommentsByPostId(UUID postId, String nextCursor);
+    CustomPaging<CommentResponse> getCommentsByPostId(String username, UUID postId, String nextCursor);
 
-    CustomPaging<CommentResponse> getRepliedComments(UUID parentCommentId, String nextCursor);
+    CustomPaging<CommentResponse> getRepliedComments(String username, UUID parentCommentId, String nextCursor);
 
     void deleteComment(Set<String> authorities, String username, UUID commentId);
 }

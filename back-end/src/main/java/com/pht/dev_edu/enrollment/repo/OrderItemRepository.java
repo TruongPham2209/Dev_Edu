@@ -1,6 +1,5 @@
 package com.pht.dev_edu.enrollment.repo;
 
-import com.pht.dev_edu.enrollment.dto.PurchaseEntityType;
 import com.pht.dev_edu.enrollment.entity.OrderItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,7 +14,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
     @Query(value = """
             SELECT EXISTS (
                 SELECT 1
-                FROM order o
+                FROM "order" o
                 JOIN order_item oi
                     ON o.id = oi.order_id
                 WHERE   o.username      = :username
@@ -24,7 +23,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
                 AND     oi.item_id      IN :itemIds
             )
             """, nativeQuery = true)
-    boolean existsByUsernameAndItem(String username, PurchaseEntityType entityType, List<UUID> itemIds);
+    boolean existsByUsernameAndItem(String username, String entityType, List<UUID> itemIds);
 
     @Modifying
     int deleteByOrderIdIn(List<UUID> orderIds);

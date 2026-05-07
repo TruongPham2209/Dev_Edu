@@ -105,6 +105,8 @@ public class CommentServiceImpl implements CommentService {
 
         var commentEntity = commentMapper.reqToEntity(req);
         commentEntity.setUsername(author);
+        commentEntity.setDepth(0);
+
         if (req.getParentCommentId() != null) {
             var parentComment = findCommentById(req.getParentCommentId());
             if (parentComment == null) {
@@ -117,7 +119,7 @@ public class CommentServiceImpl implements CommentService {
                 throw new BadRequestException("Cannot add reply to a deleted comment that has reached max depth");
             }
 
-            if (!lectureCommentRepository.hasNonDeletedReplies(parentComment.getId())) {
+            if (parentComment.getDeletedAt() != null && !lectureCommentRepository.hasNonDeletedReplies(parentComment.getId()) ) {
                 log.error("Parent comment with id {} is deleted and has no non-deleted replies, cannot add reply", req.getParentCommentId());
                 throw new BadRequestException("Cannot add reply to a deleted comment that has no non-deleted replies");
             }

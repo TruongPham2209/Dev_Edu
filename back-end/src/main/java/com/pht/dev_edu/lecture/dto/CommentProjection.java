@@ -13,6 +13,10 @@ public interface CommentProjection {
 
     String getAuthor();
 
+    UUID getParentCommentId();
+
+    UUID getRootCommentId();
+
     LocalDateTime getCreatedAt();
 
     int getReplyCount();

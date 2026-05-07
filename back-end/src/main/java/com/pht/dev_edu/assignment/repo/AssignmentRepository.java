@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UUID> {
-    List<AssignmentEntity> findByLectureIdAndDeletedAtIsNullOrderByCreatedAtDesc(UUID lectureId);
+    List<AssignmentEntity> findByLectureIdAndDeletedAtIsNullOrderByCreatedAt(UUID lectureId);
 
     @Query(value = """
                 SELECT  a.id                    AS id,
@@ -21,10 +21,10 @@ public interface AssignmentRepository extends JpaRepository<AssignmentEntity, UU
                 FROM assignment a
                 LEFT JOIN assignment_submission s
                     ON  a.id                = s.assignment_id
-                    AND s.student_username  = :student
+                    AND s.student_username  = :studentUsername
                 WHERE   a.lecture_id    = :lectureId
                 AND     a.deleted_at    IS NULL
-                ORDER BY a.created_at DESC
+                ORDER BY a.created_at
             """, nativeQuery = true)
     List<AssignmentProjection> findByLectureIdAndStudentUsername(UUID lectureId, String studentUsername);
 

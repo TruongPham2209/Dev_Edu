@@ -6,6 +6,7 @@ import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
+import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.PagingUtils;
@@ -55,7 +56,7 @@ public class PostServiceImpl implements PostService {
         TimeStampCursor cursor = !StringUtils.hasText(lastCursor)
                 ? TimeStampCursor.getDefaultCursor(true)
                 : PagingUtils.decodeTimeStampCursor(lastCursor);
-        var postVersionPage = postVersionRepository.findByStatusAndCursor(status, cursor.getId(), cursor.getTimeStamp(), pageable);
+        var postVersionPage = postVersionRepository.findByStatusAndCursor(status.name(), cursor.getId(), cursor.getTimeStamp(), pageable);
 
         return PagingUtils.getPagedWithCursor(
                 postVersionPage,
@@ -147,7 +148,7 @@ public class PostServiceImpl implements PostService {
             throw new DataNotFoundException("Post version not found");
         }
 
-        int deletedCount = postVersionRepository.deleteByIdAndStatus(postVersionId, PostStatus.PENDING);
+        int deletedCount = postVersionRepository.deleteByIdAndStatus(postVersionId, PostStatus.PENDING.name());
         if (deletedCount == 0) {
             log.warn("Post version {} not found or not in pending status, cannot delete for author {}", postVersionId, author);
             return;
@@ -205,14 +206,14 @@ public class PostServiceImpl implements PostService {
     public UpdatePostVersionResult updatePostVersion(String actor, PostStatus postStatus, UUID postVersionId) {
         if (postStatus == PostStatus.PENDING || postStatus == PostStatus.SUPERSEDED) {
             log.warn("Invalid post status {} for updating post version {}", postStatus, postVersionId);
-            throw new IllegalArgumentException("Invalid post status for updating post version");
+            throw new BadRequestException("Invalid post status for updating post version");
         }
 
         var postVersion = postVersionRepository.findById(postVersionId)
                 .orElseThrow(() -> new DataNotFoundException("Post version not found"));
         if (postVersion.getStatus() != PostStatus.PENDING) {
             log.warn("Post version {} is not in pending status, cannot update to {}", postVersionId, postStatus);
-            throw new IllegalStateException("Post version is not in pending status, cannot update");
+            throw new BadRequestException("Post version is not in pending status, cannot update");
         }
 
         var post = getPostById(postVersion.getPostId());
@@ -226,7 +227,7 @@ public class PostServiceImpl implements PostService {
 
         if (post.getDeletedAt() != null) {
             log.warn("Post {} is deleted, cannot update post version {}", post.getId(), postVersionId);
-            throw new IllegalStateException("Post is deleted, cannot update post version");
+            throw new BadRequestException("Post is deleted, cannot update post version");
         }
 
         postVersion.setStatus(postStatus);
@@ -279,7 +280,7 @@ public class PostServiceImpl implements PostService {
         var thumbUrl = fileInfo.getPublicUrl();
         if (!StringUtils.hasText(thumbUrl)) {
             log.warn("Thumbnail URL is empty for file with object key {} and author {}", objectKey, author);
-            throw new IllegalStateException("Thumbnail URL is empty");
+            throw new BadRequestException("Thumbnail URL is empty");
         }
 
         return thumbUrl;

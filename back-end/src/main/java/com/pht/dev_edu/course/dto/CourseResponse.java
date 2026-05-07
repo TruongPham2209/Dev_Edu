@@ -18,6 +18,7 @@ import java.util.UUID;
 public class CourseResponse {
     UUID id;
     String title;
+    String thumbnailObjectKey;
     String thumbnailUrl;
     String description;
     BigDecimal price;

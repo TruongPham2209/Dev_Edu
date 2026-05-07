@@ -87,11 +87,11 @@ public class MaterialServiceImpl implements MaterialService {
     // Change valid content types
     private FileUploadResponse validateMaterialObjectKey(String author, String objectKey) {
         var fileInfo = fileService.getFileInfo(author, objectKey);
-        if (fileInfo == null) {
+        if (fileInfo == null || fileInfo.getPublicUrl() != null) {
             KafkaUtils.sendDeleteFileEvent(objectKey);
 
-            log.error("Invalid video object key: {}", objectKey);
-            throw new BadRequestException("Invalid video file.");
+            log.error("Invalid material object key: {}", objectKey);
+            throw new BadRequestException("Invalid material file.");
         }
 
         boolean isDocumentContentType = FileContentTypeUtils.isValidContentType(fileInfo.getContentType(), FileContentTypeUtils.FileType.DOCUMENT, FileContentTypeUtils.FileType.ARCHIVE);

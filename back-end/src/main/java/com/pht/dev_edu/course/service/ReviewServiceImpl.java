@@ -44,9 +44,14 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewResponse createReview(String username, ReviewRequest request) {
-        if (enrollmentRepository.existsByStudentUsernameAndCourseId(username, request.getCourseId())) {
+        if (!enrollmentRepository.existsByStudentUsernameAndCourseId(username, request.getCourseId())) {
             log.error("User {} is not enrolled in course ID {} and cannot create a review", username, request.getCourseId());
             throw new BadRequestException("You must be enrolled in the course to create a review.");
+        }
+
+        if (reviewRepository.existsByCourseIdAndStudentUsername(request.getCourseId(), username)) {
+            log.error("User {} has already created a review for course ID {}", username, request.getCourseId());
+            throw new BadRequestException("You have already created a review for this course.");
         }
 
         var reviewEntity = reviewMapper.reqToEntity(request);
@@ -79,7 +84,7 @@ public class ReviewServiceImpl implements ReviewService {
                     .aggregateId(reviewId)
                     .action(EventTrackingConstant.COURSE_REVIEW_DELETED)
                     .username(username)
-                    .details(String.format("Review with ID %s for course ID %s was deleted by user %s", reviewId, review.getCourseId(), username))
+                    .details(String.format("Review for course ID %s was deleted by user %s with content: %s", review.getCourseId(), username, review.getComment()))
                     .build();
             KafkaUtils.sendTrackingEvent(trackingEvent);
         }, executor);

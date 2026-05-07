@@ -34,6 +34,7 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
                     ON c.id = cd.course_id
                 WHERE   (cd.valid_from, cd.id) < (:lastValidFrom, :lastId)
                 AND     cd.valid_from > NOW()
+                ORDER BY cd.created_at DESC, cd.id DESC
             """, countQuery = """
                 SELECT  COUNT(*)
                 FROM course_discount cd
@@ -82,10 +83,22 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
     boolean existsOverlappingDiscount(UUID courseId, LocalDateTime validFrom, LocalDateTime validTo);
 
     @Query(value = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM course_discount cd
+                    WHERE cd.course_id IS NULL
+                    AND (
+                        (cd.valid_from < :validTo AND cd.valid_to > :validFrom)
+                    )
+                )
+            """, nativeQuery = true)
+    boolean existsOverlappingDiscount(LocalDateTime validFrom, LocalDateTime validTo);
+
+    @Query(value = """
                 SELECT  c.id                                    AS id,
                         c.title                                 AS title,
                         c.thumbnail_url                         AS thumbnailUrl,
-                        COALESCE(cd.discount_percentage, 0.0)   AS discountPercentage,
+                        COALESCE(cd.discount_percentage, 0.0)   AS discountedPercentage,
                         c.price                                 AS originalPrice,
                         (e.student_username IS NOT NULL)        AS registered
                 FROM course c

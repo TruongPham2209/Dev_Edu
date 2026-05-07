@@ -19,15 +19,17 @@ public class TimeStampCursor {
     UUID id;
 
     public static TimeStampCursor getDefaultCursor(boolean isDescending) {
+        var now  = LocalDateTime.now();
+
         if (!isDescending) {
             return TimeStampCursor.builder()
-                    .timeStamp(LocalDateTime.MIN)
+                    .timeStamp(now.minusYears(100))
                     .id(new UUID(Long.MIN_VALUE, Long.MIN_VALUE))
                     .build();
         }
 
         return TimeStampCursor.builder()
-                .timeStamp(LocalDateTime.MAX)
+                .timeStamp(now.plusYears(100))
                 .id(new UUID(Long.MAX_VALUE, Long.MAX_VALUE))
                 .build();
     }

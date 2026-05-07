@@ -39,6 +39,7 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, UUID> 
                         AND     (ci.added_at, ci.id)    < (:lastUpdatedAt, :lastId)
                         AND     c.id                    IS NOT NULL
                         AND     c.deleted_at            IS NULL
+                        ORDER BY ci.added_at DESC, ci.id DESC
             """, countQuery = """
                         SELECT COUNT(ci.id)
                         FROM cart_item ci
@@ -54,7 +55,7 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, UUID> 
                 VALUES (:id, :username, :itemType, :itemId)
                 ON CONFLICT (username, item_type, item_id) DO NOTHING
             """, nativeQuery = true)
-    void insertCartItemWithoutConstraintCheck(UUID id, String username, PurchaseEntityType itemType, UUID itemId);
+    void insertCartItemWithoutConstraintCheck(UUID id, String username, String itemType, UUID itemId);
 
     @Modifying
     @Query(value = """
