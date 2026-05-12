@@ -1,5 +1,8 @@
 package com.pht.dev_edu.common.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.WebEndpointConstant;
 import com.pht.dev_edu.common.security.*;
 import lombok.AccessLevel;
@@ -21,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.authorization.JdbcOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
@@ -133,12 +138,66 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    JdbcRegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-        return new JdbcRegisteredClientRepository(jdbcTemplate);
+    public RegisteredClientRepository registeredClientRepository(
+            JdbcTemplate jdbcTemplate
+    ) {
+
+        JdbcRegisteredClientRepository delegate =
+                new JdbcRegisteredClientRepository(jdbcTemplate);
+
+        Cache<String, RegisteredClient> clientIdCache =
+                Caffeine.newBuilder()
+                        .maximumSize(100)
+                        .expireAfterWrite(
+                                RedisDurationConstant.REGISTERED_CLIENT_DURATION
+                        )
+                        .build();
+
+        Cache<String, RegisteredClient> idCache =
+                Caffeine.newBuilder()
+                        .maximumSize(100)
+                        .expireAfterWrite(
+                                RedisDurationConstant.REGISTERED_CLIENT_DURATION
+                        )
+                        .build();
+
+        return new RegisteredClientRepository() {
+
+            @Override
+            public void save(RegisteredClient registeredClient) {
+                delegate.save(registeredClient);
+
+                clientIdCache.put(
+                        registeredClient.getClientId(),
+                        registeredClient
+                );
+
+                idCache.put(
+                        registeredClient.getId(),
+                        registeredClient
+                );
+            }
+
+            @Override
+            public RegisteredClient findById(String id) {
+                return idCache.get(
+                        id,
+                        delegate::findById
+                );
+            }
+
+            @Override
+            public RegisteredClient findByClientId(String clientId) {
+                return clientIdCache.get(
+                        clientId,
+                        delegate::findByClientId
+                );
+            }
+        };
     }
 
     @Bean
-    public OAuth2AuthorizationService oAuth2AuthorizationService(JdbcTemplate jdbcTemplate, JdbcRegisteredClientRepository registeredClientRepository) {
-        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
+    public OAuth2AuthorizationService oAuth2AuthorizationService(JdbcTemplate jdbcTemplate) {
+        return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository(jdbcTemplate));
     }
 }

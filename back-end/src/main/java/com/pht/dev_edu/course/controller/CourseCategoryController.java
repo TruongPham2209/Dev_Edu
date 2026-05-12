@@ -2,6 +2,7 @@ package com.pht.dev_edu.course.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.dto.ItemStatus;
+import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.common.validation.CreateValidation;
@@ -16,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RestController("CourseCategoryController")
@@ -32,11 +34,19 @@ public class CourseCategoryController {
             @RequestParam(required = false) String nextCursor,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false, defaultValue = "0") int page
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam ItemStatus status
     ) {
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+        if (authorities.contains(RoleEnum.ADMIN.name())) {
+            page = 10;
+        } else {
+            page = 12;
+            status = ItemStatus.ACTIVE;
+        }
 
         CoursePageRequest pageRequest = CoursePageRequest.builder()
-                .status(ItemStatus.ACTIVE)
+                .status(status)
                 .size(12)
                 .page(page)
                 .nextCursor(nextCursor)
@@ -51,37 +61,12 @@ public class CourseCategoryController {
     @PreAuthorize("permitAll()")
     @GetMapping("/courses/{courseId}/")
     public ResponseEntity<ApiResponse> getCourseById(@PathVariable UUID courseId) {
-        var course = courseService.getCourseById(courseId);
-        var lecturers = courseService.getLecturersForCourse(courseId);
-        course.setLecturers(lecturers);
+        var course = courseService.getCourseDetails(courseId);
         return ApiUtils.buildSuccessResponse(course);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/admin/courses")
-    public ResponseEntity<ApiResponse> getAdminCourses(
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String nextCursor,
-            @RequestParam(required = false) UUID categoryId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam ItemStatus status
-    ) {
-        CoursePageRequest pageRequest = CoursePageRequest.builder()
-                .status(status)
-                .size(10)
-                .page(page)
-                .nextCursor(nextCursor)
-                .sortBy(sortBy)
-                .build();
-
-        var courses = courseService.getCourses(categoryId, keyword, pageRequest);
-
-        return ApiUtils.buildSuccessResponse(courses);
-    }
-
-    @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping("/admin/courses")
+    @PostMapping("/courses")
     public ResponseEntity<ApiResponse> createCourse(@RequestBody @Validated({CreateValidation.class}) CourseRequest course) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         var createdCourse = courseService.createCourse(username, course);
@@ -89,7 +74,7 @@ public class CourseCategoryController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PutMapping("/admin/courses")
+    @PutMapping("/courses")
     public ResponseEntity<ApiResponse> updateCourse(@RequestBody @Validated({UpdateValidation.class}) CourseRequest course) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         var createdCourse = courseService.updateCourse(username, course);
@@ -97,7 +82,7 @@ public class CourseCategoryController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @DeleteMapping("/admin/courses")
+    @DeleteMapping("/courses")
     public ResponseEntity<ApiResponse> deleteCourse(@RequestParam UUID courseId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         courseService.deleteCourse(username, courseId);

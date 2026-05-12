@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserEntity findByUsername(String username) {
         String cacheKey = RedisPrefixConstant.USER_USERNAME_PREFIX + username;
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 cacheKey,
                 UserEntity.class,
                 () -> userRepository.findByUsername(username),
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserEntity findByEmail(String email) {
         String cacheKey = RedisPrefixConstant.USER_EMAIL_PREFIX + email;
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 cacheKey,
                 UserEntity.class,
                 () -> userRepository.findByEmail(email),
@@ -223,7 +223,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .toList();
         for (var roleName : roleNames) {
             String cacheKey = RedisPrefixConstant.ROLE_PREFIX + roleName;
-            var role = RedisUtils.getDataFromCacheOrDb(
+            var role = RedisUtils.getOptionalDataFromCacheOrDb(
                     cacheKey,
                     RoleEntity.class,
                     () -> roleRepository.findByName(roleName),

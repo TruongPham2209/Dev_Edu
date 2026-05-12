@@ -1,6 +1,7 @@
 package com.pht.dev_edu.forum.repo;
 
 import com.pht.dev_edu.forum.dto.PostStatus;
+import com.pht.dev_edu.forum.dto.SupersededVersionProjection;
 import com.pht.dev_edu.forum.entity.PostVersionEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,9 +20,9 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             WHERE post_id           = :postId
               AND status            = 'PENDING'
               AND version_number    < :version
-            RETURNING id
+            RETURNING id, thumb_object_key AS thumbnailObjectKey
             """, nativeQuery = true)
-    List<UUID> supersededOldVersionByPostId(UUID postId, int version);
+    List<SupersededVersionProjection> supersededOldVersionByPostId(UUID postId, int version);
 
     boolean existsByPostIdAndStatusIn(UUID postId, List<PostStatus> statuses);
 
@@ -42,8 +43,9 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             DELETE FROM forum_post_version
             WHERE   id      = :postVersionId
             AND     status  = :status
+            RETURNING thumb_object_key
             """, nativeQuery = true)
-    int deleteByIdAndStatus(UUID id, String status);
+    List<String> deleteByIdAndStatusThenReturnObjectKeys(UUID postVersionId, String status);
 
     List<PostVersionEntity> findByPostIdAndStatusOrderByVersionNumberDesc(UUID postId, PostStatus status);
 
@@ -68,7 +70,14 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
                 FROM forum_post fp
                 WHERE fp.id = fv.post_id
             )
-            RETURNING fv.id
+            RETURNING fv.thumb_object_key
             """, nativeQuery = true)
-    List<UUID> deleteByInvalidPost();
+    List<String> deleteByInvalidPostThenReturnObjectKeys();
+
+    @Query(value = """
+            SELECT COALESCE(MAX(version_number), 0) + 1
+            FROM forum_post_version
+            WHERE post_id = :postId
+            """, nativeQuery = true)
+    int getNextVersionNumberByPostId(UUID postId);
 }

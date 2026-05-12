@@ -1,5 +1,6 @@
 package com.pht.dev_edu.course.repo;
 
+import com.pht.dev_edu.course.dto.CourseDetailProjection;
 import com.pht.dev_edu.course.entity.CourseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,21 +14,66 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
-
+    @Query(value = """
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
+            FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
+            WHERE   c.id            = :id
+            AND     c.deleted_at    IS NULL
+            """, nativeQuery = true)
+    CourseDetailProjection findCourseDetail(UUID id);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
             """, countQuery = """
             SELECT  COUNT(id)
             FROM    course
             """, nativeQuery = true)
-    Page<CourseEntity> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             AND     deleted_at              IS NULL
             """, countQuery = """
@@ -35,11 +81,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             FROM    course c
             WHERE   c.deleted_at IS NULL
             """, nativeQuery = true)
-    Page<CourseEntity> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             AND     deleted_at              IS NOT NULL
             """, countQuery = """
@@ -47,11 +106,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             FROM    course
             WHERE   deleted_at IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseEntity> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   c.category_id           = :categoryId
             AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             """, countQuery = """
@@ -59,11 +131,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             FROM    course c
             WHERE   c.category_id = :categoryId
             """, nativeQuery = true)
-    Page<CourseEntity> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             AND     c.category_id           = :categoryId
             AND     c.deleted_at            IS NULL
@@ -73,11 +158,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   c.category_id   = :categoryId
             AND     c.deleted_at    IS NULL
             """, nativeQuery = true)
-    Page<CourseEntity> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             AND     c.category_id           = :categoryId
             AND     c.deleted_at            IS NOT NULL
@@ -87,11 +185,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   c.category_id   = :categoryId
             AND     c.deleted_at    IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseEntity> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   unaccent(c.title)       ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             """, countQuery = """
@@ -99,11 +210,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             FROM    course c
             WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
             """, nativeQuery = true)
-    Page<CourseEntity> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   unaccent(c.title)       ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             AND     c.deleted_at            IS NULL
@@ -113,11 +237,24 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   unaccent(c.title)   ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at        IS NULL
             """, nativeQuery = true)
-    Page<CourseEntity> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  *
+            SELECT  c.id                        AS id,
+                    c.title                     AS title,
+                    c.description               AS description,
+                    c.thumbnail_url             AS thumbnailUrl,
+                    c.thumbnail_object_key      AS thumbnailObjectKey,
+                    c.created_at                AS createdAt,
+                    c.created_by                AS createdBy,
+                    c.price                     AS originalPrice,
+            
+                    cd.discount_percentage      AS discountedPercentage,
+                    cd.valid_to                 AS validTo
             FROM    course c
+            LEFT JOIN course_discount cd
+                ON c.id = cd.course_id
+                AND now() BETWEEN cd.valid_from AND cd.valid_to
             WHERE   unaccent(c.title)       ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
             AND     c.deleted_at            IS NOT NULL
@@ -127,7 +264,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   unaccent(c.title)   ILIKE unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at        IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseEntity> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
 

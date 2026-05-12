@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface LectureProjection {
     UUID getId();
 
+    UUID getCourseId();
+
     String getTitle();
 
     String getSummary();

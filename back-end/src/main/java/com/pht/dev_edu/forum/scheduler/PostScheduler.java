@@ -43,12 +43,9 @@ public class PostScheduler {
     @Scheduled(fixedDelay = 12 * 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedPostVersions() {
-        deleteProcessor.executeCleanupJob(
+        deleteProcessor.executeCleanupJobHasObjectKeys(
                 CronJobConstant.CLEAN_DELETED_FORUM_POSTS_JOB,
-                () -> {
-                    var deletedIds = postVersionRepository.deleteByInvalidPost();
-                    return deletedIds.size();
-                },
+                postVersionRepository::deleteByInvalidPostThenReturnObjectKeys,
                 "Deleted %d post versions with invalid post reference"
         );
     }

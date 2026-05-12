@@ -1,6 +1,9 @@
 package com.pht.dev_edu.common.constant;
 
 public class RedisPrefixConstant {
+    public static final String REGISTERED_CLIENT_ID = "dev_edu:clients:id:";
+    public static final String REGISTERED_CLIENT_CLIENT_ID = "dev_edu:clients:client_id:";
+
     public static final String USER_USERNAME_PREFIX = "dev_edu:users:username:"; // Prefix for user data by username
     public static final String USER_EMAIL_PREFIX = "dev_edu:users:email:"; // Prefix for user data by email
 
@@ -11,6 +14,7 @@ public class RedisPrefixConstant {
 
     public static final String LECTURE_PREFIX = "dev_edu:lectures:"; // Prefix for lecture data
     public static final String LECTURE_COMMENT_PREFIX = "dev_edu:lecture_comments:"; // Prefix for lecture comment data
+    public static final String LECTURE_PROGRESS_PREFIX = "dev_edu:lecture_progress:"; // Prefix for lecture progress data
 
     public static final String POST_PREFIX = "dev_edu:posts:"; // Prefix for post data
 }

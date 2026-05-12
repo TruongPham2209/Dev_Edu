@@ -19,8 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,7 +109,7 @@ public class InitDataConfig {
     @Transactional
     @Order(2)
     CommandLineRunner initRegisteredClients(
-            JdbcRegisteredClientRepository repository,
+            RegisteredClientRepository repository,
             JdbcTemplate jdbcTemplate,
             PasswordEncoder passwordEncoder
     ) {
@@ -118,7 +118,7 @@ public class InitDataConfig {
             var totalClients = jdbcTemplate.queryForObject(sql, Long.class);
             log.info("Total clients in database: {}", totalClients);
 
-            if  (totalClients == null || totalClients != 0) {
+            if (totalClients == null || totalClients != 0) {
                 return;
             }
 

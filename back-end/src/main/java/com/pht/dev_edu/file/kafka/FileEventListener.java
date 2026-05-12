@@ -16,6 +16,7 @@ import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -41,14 +42,15 @@ public class FileEventListener {
         ack.acknowledge();
     }
 
+    @Transactional
     @RetryableTopic(
             attempts = "5",
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
     @KafkaListener(topics = KafkaTopicConstant.VIDEO_DURATION_EVENT_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
-    public void handleVideoDurationEvent(String payload, Acknowledgment ack) {
-        var event = objectMapper.convertValue(payload, GetVideoDurationEvent.class);
+    public void handleVideoDurationEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
+        var event = objectMapper.readValue(payload, GetVideoDurationEvent.class);
         var duration = fileService.getVideoDuration(event.getObjectKey());
         log.info("Video duration for {}: {} seconds", event.getObjectKey(), duration);
 

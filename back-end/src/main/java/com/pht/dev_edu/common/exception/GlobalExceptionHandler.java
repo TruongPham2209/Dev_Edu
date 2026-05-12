@@ -34,15 +34,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse> handleAuthenticationErrors(AuthenticationException ex) {
         String message = switch (ex) {
-            case BadCredentialsException badCredentialsException -> "Thông tin đăng nhập không chính xác.";
-            case AccountExpiredException accountExpiredException -> "Tài khoản đã hết hạn.";
+            case BadCredentialsException badCredentialsException -> "Incorrect username or password.";
+            case AccountExpiredException accountExpiredException -> "Your account has expired.";
             case CredentialsExpiredException credentialsExpiredException ->
-                    "Thông tin xác thực đã hết hạn. Vui lòng đăng nhập lại.";
-            case DisabledException disabledException -> "Tài khoản của bạn đã bị vô hiệu hóa.";
-            case LockedException lockedException -> "Tài khoản của bạn đã bị khóa.";
+                    "Authentication credentials have expired. Please log in again.";
+            case DisabledException disabledException -> "Your account has been disabled.";
+            case LockedException lockedException -> "Your account has been locked.";
             case InsufficientAuthenticationException insufficientAuthenticationException ->
-                    "Yêu cầu xác thực không hợp lệ hoặc thiếu thông tin xác thực.";
-            case null, default -> "Xác thực không thành công. Vui lòng thử lại.";
+                    "Authentication required or missing credentials.";
+            case null, default -> "Authentication failed. Please try again.";
         };
 
         return ApiUtils.buildErrorResponse(message, ex, HttpStatus.UNAUTHORIZED);
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
     public ResponseEntity<ApiResponse> handleAccessDenied(Exception ex) {
-        String message = "Bạn không có quyền truy cập vào tài nguyên này.";
+        String message = "Access denied.";
         return ApiUtils.buildErrorResponse(message, ex, HttpStatus.FORBIDDEN);
     }
 
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({TimeoutException.class})
     public ResponseEntity<ApiResponse> handleTimeoutAndIOErrors(Exception ex) {
-        String message = "Yêu cầu đã hết hạn. Vui lòng thử lại sau.";
+        String message = "This request has expired.";
         return ApiUtils.buildErrorResponse(message, ex, HttpStatus.REQUEST_TIMEOUT);
     }
 
@@ -86,9 +86,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse> handleServerErrors(Exception ex) {
         String message;
         if (ex instanceof TransactionSystemException) {
-            message = "Đã xảy ra lỗi giao dịch khi xử lý yêu cầu.";
+            message = "A transaction error occurred while processing the request.";
         } else if (ex instanceof DataAccessResourceFailureException) {
-            message = "Không thể kết nối đến cơ sở dữ liệu. Vui lòng thử lại sau.";
+            message = "Unable to connect to the database.";
         } else {
             message = ExceptionUtils.getServerErrorMessage(ex);
         }
@@ -103,6 +103,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleUndefineException(Exception ex) {
         log.error("Lỗi không xác định từ phía server: {}", ex.getMessage(), ex);
-        return ApiUtils.buildErrorResponse("Lỗi không xác định.", ex, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ApiUtils.buildErrorResponse("Undefined exception.", ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -21,7 +21,7 @@ public class RedisUtils {
         RedisUtils.objectMapper = objectMapper;
     }
 
-    public static <T> T getDataFromCacheOrDb(
+    public static <T> T getOptionalDataFromCacheOrDb(
             String cacheKey,
             Class<T> clazz,
             Supplier<Optional<T>> dbCall,
@@ -37,6 +37,28 @@ public class RedisUtils {
 
         if (optionalData.isPresent()) {
             T data = optionalData.get();
+            redisTemplate.opsForValue().set(cacheKey, data, ttl);
+            return data;
+        }
+
+        return null;
+    }
+
+    public static <T> T getDataFromCacheOrDb(
+            String cacheKey,
+            Class<T> clazz,
+            Supplier<T> dbCall,
+            Duration ttl
+    ) {
+        Object cached = redisTemplate.opsForValue().get(cacheKey);
+
+        if (cached != null) {
+            return objectMapper.convertValue(cached, clazz);
+        }
+
+        T data = dbCall.get();
+
+        if (data != null) {
             redisTemplate.opsForValue().set(cacheKey, data, ttl);
             return data;
         }

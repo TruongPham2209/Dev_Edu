@@ -1,5 +1,6 @@
 package com.pht.dev_edu.file.service;
 
+import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.server.ServerInternalException;
 import com.pht.dev_edu.common.util.FileContentTypeUtils;
@@ -62,7 +63,7 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public FileUploadResponse generatePreSignedUrl(FilePreSignUploadRequest request) {
         String objectKey = generateObjectKey(request.getFileName());
-        var bucketName = request.isPublic() ? publicBucketName : privateBucketName;
+        var bucketName = request.getIsPublic() ? publicBucketName : privateBucketName;
         String fullObjectKey = bucketName + "/" + objectKey;
 
         var fileUpload = FileUploadEntity.builder()
@@ -82,7 +83,7 @@ public class FileServiceImpl implements FileService {
                 .contentType(request.getContentType())
                 .build();
 
-        Duration signatureDuration = request.isPublic() ? PUBLIC_FILE_PRESIGNED_DURATION : PRIVATE_FILE_PRESIGNED_DURATION;
+        Duration signatureDuration = request.getIsPublic() ? PUBLIC_FILE_PRESIGNED_DURATION : PRIVATE_FILE_PRESIGNED_DURATION;
         PutObjectPresignRequest preSignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(signatureDuration)
                 .putObjectRequest(putObjectRequest)
@@ -92,7 +93,7 @@ public class FileServiceImpl implements FileService {
                 .url()
                 .toString();
 
-        String publicUrl = request.isPublic()
+        String publicUrl = request.getIsPublic()
                 ? resolvePublicUrl(objectKey)
                 : null;
 
@@ -139,7 +140,7 @@ public class FileServiceImpl implements FileService {
                 .orElseThrow(() -> new DataNotFoundException("File not found."));
 
         if (!fileUpload.getCreatedBy().equals(username)) {
-            throw new IllegalArgumentException("File not found.");
+            throw new BadRequestException("File not found.");
         }
 
         if (fileUpload.getStatus() == UploadStatus.FAILED) {
@@ -203,7 +204,7 @@ public class FileServiceImpl implements FileService {
                 .orElseThrow(() -> new DataNotFoundException("File not found."));
 
         if (!fileUpload.getCreatedBy().equals(username)) {
-            throw new IllegalArgumentException("File not found.");
+            throw new BadRequestException("File not found.");
         }
 
         if (fileUpload.getStatus() == UploadStatus.FAILED) {
@@ -222,7 +223,7 @@ public class FileServiceImpl implements FileService {
                 FileContentTypeUtils.FileType.IMAGE
         );
         if (!isImage) {
-            throw new IllegalArgumentException("File is not an image.");
+            throw new BadRequestException("File is not an image.");
         }
 
         var fileInfo = getFileInfo(fullObjectKey);
@@ -270,7 +271,7 @@ public class FileServiceImpl implements FileService {
         }
 
         if (!fileInfo.getContentType().startsWith("video/")) {
-            throw new IllegalArgumentException("File is not a video.");
+            throw new BadRequestException("File is not a video.");
         }
 
         try {
@@ -358,7 +359,7 @@ public class FileServiceImpl implements FileService {
         int idx = fullObjectKey.indexOf("/");
         if (idx == -1) {
             log.error("Invalid fullObjectKey: {}", fullObjectKey);
-            throw new IllegalArgumentException("File not found.");
+            throw new BadRequestException("File not found.");
         }
         return Pair.of(
                 fullObjectKey.substring(0, idx),
@@ -370,8 +371,8 @@ public class FileServiceImpl implements FileService {
 
         // content-type (flexible)
         if (fileUpload.getContentType() != null &&
-            (head.contentType() == null ||
-             !head.contentType().startsWith(fileUpload.getContentType()))) {
+                (head.contentType() == null ||
+                        !head.contentType().startsWith(fileUpload.getContentType()))) {
 
             log.error("Content type mismatch: expected={}, actual={}",
                     fileUpload.getContentType(), head.contentType());

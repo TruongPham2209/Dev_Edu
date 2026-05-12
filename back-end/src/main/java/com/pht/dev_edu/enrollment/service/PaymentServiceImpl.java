@@ -211,8 +211,12 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        var globalDiscount = courseDiscountRepository.getGlobalActiveDiscount(now)
-                .orElse(BigDecimal.ZERO);
+        var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(now)
+                .orElse(null);
+        var globalDiscount = globalDiscountEntity == null
+                ? BigDecimal.ZERO
+                : globalDiscountEntity.getDiscountPercentage();
+
         var courseItems = courseDiscountRepository.findDiscountedCoursesForUser(username, courseIds, now)
                 .stream()
                 .map(c -> {

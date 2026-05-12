@@ -13,10 +13,7 @@ import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.service.FileService;
-import com.pht.dev_edu.forum.dto.PostRequest;
-import com.pht.dev_edu.forum.dto.PostStatus;
-import com.pht.dev_edu.forum.dto.PostVersionResponse;
-import com.pht.dev_edu.forum.dto.UpdatePostVersionResult;
+import com.pht.dev_edu.forum.dto.*;
 import com.pht.dev_edu.forum.entity.PostEntity;
 import com.pht.dev_edu.forum.entity.PostVersionEntity;
 import com.pht.dev_edu.forum.mapper.PostVersionMapper;
@@ -135,6 +132,10 @@ public class PostServiceImpl implements PostService {
         var postVersion = postVersionMapper.reqToEntity(postRequest);
         postVersion.setPostId(post.getId());
         postVersion.setThumbUrl(thumbUrl);
+
+        var nextVersion = postVersionRepository.getNextVersionNumberByPostId(post.getId());
+        postVersion.setVersionNumber(nextVersion);
+
         postVersionRepository.save(postVersion);
 
         return postVersionMapper.entityToRes(postVersion);
@@ -148,8 +149,8 @@ public class PostServiceImpl implements PostService {
             throw new DataNotFoundException("Post version not found");
         }
 
-        int deletedCount = postVersionRepository.deleteByIdAndStatus(postVersionId, PostStatus.PENDING.name());
-        if (deletedCount == 0) {
+        var invalidThumbnailObjectKeys = postVersionRepository.deleteByIdAndStatusThenReturnObjectKeys(postVersionId, PostStatus.PENDING.name());
+        if (invalidThumbnailObjectKeys.isEmpty()) {
             log.warn("Post version {} not found or not in pending status, cannot delete for author {}", postVersionId, author);
             return;
         }
@@ -162,6 +163,10 @@ public class PostServiceImpl implements PostService {
                     .details(String.format("Deleted post version %s", postVersionId))
                     .build();
             KafkaUtils.sendTrackingEvent(trackingEvent);
+
+            for (String key : invalidThumbnailObjectKeys) {
+                KafkaUtils.sendDeleteFileEvent(key);
+            }
         }, executor);
     }
 
@@ -223,7 +228,7 @@ public class PostServiceImpl implements PostService {
         }
 
         // Update older version to SUPERSEDED
-        var updatedIds = postVersionRepository.supersededOldVersionByPostId(post.getId(), postVersion.getVersionNumber());
+        var supersededVersions = postVersionRepository.supersededOldVersionByPostId(post.getId(), postVersion.getVersionNumber());
 
         if (post.getDeletedAt() != null) {
             log.warn("Post {} is deleted, cannot update post version {}", post.getId(), postVersionId);
@@ -251,10 +256,18 @@ public class PostServiceImpl implements PostService {
                     .details(String.format("Updated post version %s to status %s", postVersionId, postStatus))
                     .build();
             KafkaUtils.sendTrackingEvent(trackingEvent);
+
+            supersededVersions.forEach(
+                    v -> KafkaUtils.sendDeleteFileEvent(v.getThumbnailObjectKey())
+            );
+
+            if (postStatus == PostStatus.REJECTED) {
+                KafkaUtils.sendDeleteFileEvent(postVersion.getThumbObjectKey());
+            }
         }, executor);
 
         return new UpdatePostVersionResult(
-                updatedIds,
+                supersededVersions.stream().map(SupersededVersionProjection::getId).toList(),
                 postStatus,
                 post.getCurrentVersionId()
         );
@@ -262,7 +275,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostEntity getPostById(UUID postId) {
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 RedisPrefixConstant.POST_PREFIX + postId,
                 PostEntity.class,
                 () -> postRepository.findById(postId),
@@ -271,7 +284,7 @@ public class PostServiceImpl implements PostService {
     }
 
     private String validateAndGetThumbUrl(String objectKey, String author) {
-        var fileInfo = fileService.getFileInfo(objectKey, author);
+        var fileInfo = fileService.getFileInfo(author, objectKey);
         if (fileInfo == null) {
             log.warn("File with object key {} not found for author {}", objectKey, author);
             throw new DataNotFoundException("File not found for thumbnail");

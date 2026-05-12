@@ -5,10 +5,12 @@ import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface CourseService {
+    CourseResponse getCourseDetails(UUID courseId);
+
+    // For cache and validate
     CourseResponse getCourseById(UUID courseId);
 
     CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest pageRequest);
@@ -18,6 +20,4 @@ public interface CourseService {
     CourseResponse updateCourse(String username, CourseRequest course);
 
     void deleteCourse(String actor, UUID courseId);
-
-    List<String> getLecturersForCourse(UUID courseId);
 }

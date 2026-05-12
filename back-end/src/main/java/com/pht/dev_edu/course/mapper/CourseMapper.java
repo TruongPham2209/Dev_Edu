@@ -1,5 +1,6 @@
 package com.pht.dev_edu.course.mapper;
 
+import com.pht.dev_edu.course.dto.CourseDetailProjection;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
 import com.pht.dev_edu.course.entity.CourseEntity;
@@ -16,4 +17,7 @@ public interface CourseMapper {
 
     @Mapping(target = "lecturers", expression = "java(new java.util.ArrayList<>())")
     CourseResponse entityToRes(CourseEntity entity);
+
+    @Mapping(target = "lecturers", expression = "java(new java.util.ArrayList<>())")
+    CourseResponse projectionToRes(CourseDetailProjection projection);
 }

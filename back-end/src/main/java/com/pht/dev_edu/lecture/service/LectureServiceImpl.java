@@ -12,6 +12,8 @@ import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.course.entity.CourseLecturerId;
+import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.lecture.dto.LectureRequest;
 import com.pht.dev_edu.lecture.dto.LectureResponse;
@@ -43,6 +45,7 @@ import java.util.concurrent.Executor;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class LectureServiceImpl implements LectureService {
     LectureRepository lectureRepository;
+    CourseLecturerRepository courseLecturerRepository;
     LectureMaterialRepository lectureMaterialRepository;
     LectureProgressRepository lectureProgressRepository;
     LectureCommentRepository lectureCommentRepository;
@@ -56,10 +59,19 @@ public class LectureServiceImpl implements LectureService {
     KafkaTemplate<String, Object> kafkaTemplate;
     LectureMapper lectureMapper;
 
-    // TODO: update check permission to validate whether lecturer can see details
     @Override
     public List<LectureResponse> getLecturesByCourse(Set<String> authorities, String actor, UUID courseId) {
-        var lectures = authorities.stream().anyMatch(a -> List.of(RoleEnum.LECTURER.name(), RoleEnum.ADMIN.name()).contains(a))
+        var canSeeDetail = authorities.contains(RoleEnum.ADMIN.name());
+
+        if (!canSeeDetail && authorities.contains(RoleEnum.LECTURER.name())) {
+            var id = CourseLecturerId.builder()
+                    .courseId(courseId)
+                    .lecturerUsername(actor)
+                    .build();
+            canSeeDetail = courseLecturerRepository.existsById(id);
+        }
+
+        var lectures = canSeeDetail
                 ? lectureRepository.findLectureDetailsByCourseId(courseId)
                 : lectureRepository.findLectureDetailsByCourseIdAndUsername(courseId, actor);
         return lectures.stream()
@@ -73,12 +85,17 @@ public class LectureServiceImpl implements LectureService {
         var lecture = lectureRepository.findLectureDetailByIdAndUsername(lectureId, actor).orElseThrow(
                 () -> new RuntimeException("Lecture not found or you don't have permission to view it")
         );
+
+        if (authorities.contains(RoleEnum.STUDENT.name()) && !lectureRepository.hasCompletedAllPreviousLectures(lecture.getCourseId(), lecture.getLectureOrder(), actor)) {
+            throw new BadRequestException("You must complete all previous lectures to access this lecture.");
+        }
+
         return lectureMapper.projectionToResponse(lecture);
     }
 
     @Override
     public LectureEntity getLectureById(UUID lectureId) {
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_PREFIX + lectureId,
                 LectureEntity.class,
                 () -> lectureRepository.findById(lectureId),
@@ -193,9 +210,9 @@ public class LectureServiceImpl implements LectureService {
         var assignmentIds = assignmentRepository.findIdsByLectureId(lectureId);
         assignmentService.deleteByIds(assignmentIds);
 
-        TransactionUtils.runAfterCommitAsync(() -> {
-            objectKeys.forEach(KafkaUtils::sendDeleteFileEvent);
-        }, executor);
+        TransactionUtils.runAfterCommitAsync(
+                () -> objectKeys.forEach(KafkaUtils::sendDeleteFileEvent), executor
+        );
     }
 
     private void validateVideoObjectKey(String author, String videoObjectKey) {

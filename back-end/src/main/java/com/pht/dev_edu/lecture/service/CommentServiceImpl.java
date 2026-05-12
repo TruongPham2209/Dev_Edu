@@ -172,7 +172,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private LectureCommentEntity findCommentById(UUID commentId) {
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_COMMENT_PREFIX + commentId,
                 LectureCommentEntity.class,
                 () -> lectureCommentRepository.findById(commentId),

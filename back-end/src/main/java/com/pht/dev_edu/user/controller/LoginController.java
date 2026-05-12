@@ -2,6 +2,7 @@ package com.pht.dev_edu.user.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.dto.RoleEnum;
+import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.user.dto.RegisterUser;
@@ -30,12 +31,12 @@ public class LoginController {
         String newPassword = request.get("newPassword");
 
         if (!StringUtils.hasText(oldPassword) || !StringUtils.hasText(newPassword)) {
-            throw new IllegalArgumentException("Mật khẩu cũ và mật khẩu mới không được để trống.");
+            throw new BadRequestException("New password cannot match old password.");
         }
 
         String username = SecurityContextUtils.getCurrentUsernameForController();
         userService.changePassword(username, oldPassword, newPassword);
-        return ApiUtils.buildSuccessResponse("Mật khẩu đã được thay đổi thành công.");
+        return ApiUtils.buildSuccessResponse("Change password successful.");
     }
 
     @PreAuthorize("permitAll()")
@@ -43,21 +44,21 @@ public class LoginController {
     public ResponseEntity<ApiResponse> registerUser(@Valid @RequestBody RegisterUser registerUser) {
         registerUser.setRole(RoleEnum.STUDENT);
         userService.registerUser(registerUser);
-        return ApiUtils.buildSuccessResponse("Đăng ký thành công.");
+        return ApiUtils.buildSuccessResponse("Register successful. Please login to continue.");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users/batch-users")
     public ResponseEntity<ApiResponse> batchCreateUsers(@RequestBody List<@Valid RegisterUser> registerUsers) {
         userService.batchRegisterUsers(registerUsers);
-        return ApiUtils.buildSuccessResponse("Tạo người dùng hàng loạt thành công.");
+        return ApiUtils.buildSuccessResponse("Create users successful.");
     }
 
     @PutMapping("/users/avatar")
     public ResponseEntity<ApiResponse> updateAvatar(@RequestBody Map<String, String> request) {
         String avatarObjectKey = request.get("avatarObjectKey");
         if (!StringUtils.hasText(avatarObjectKey)) {
-            throw new IllegalArgumentException("avatarObjectKey không được để trống.");
+            throw new BadRequestException("Missing required field.");
         }
 
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -72,7 +73,7 @@ public class LoginController {
         String username = request.get("username");
 
         if (!StringUtils.hasText(email) || !StringUtils.hasText(username)) {
-            throw new IllegalArgumentException("Email và username không được để trống.");
+            throw new BadRequestException("Email or username missing.");
         }
 
         userService.setUsernameForGoogleLogin(email, username);

@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +20,7 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
                         c.price                     AS originalPrice,
                         c.description               AS courseDescription,
                         c.thumbnail_url             AS courseThumbnailUrl,
-
+            
                         cd.id                       AS id,
                         cd.description              AS discountDescription,
                         cd.discount_percentage      AS discountPercentage,
@@ -50,7 +49,7 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
                         c.description               AS courseDescription,
                         c.thumbnail_url             AS courseThumbnailUrl,
                         c.price                     AS originalPrice,
-
+            
                         cd.id                       AS id,
                         cd.description              AS discountDescription,
                         cd.discount_percentage      AS discountPercentage,
@@ -67,8 +66,8 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
             """, nativeQuery = true)
     List<CourseDiscountProjection> getAllScheduledDiscountsByCourseId(UUID courseId);
 
-    @Query("SELECT discountPercentage FROM CourseDiscountEntity WHERE courseId IS NULL AND validFrom <= :now AND validTo >= :now ORDER BY discountPercentage DESC")
-    Optional<BigDecimal> getGlobalActiveDiscount(LocalDateTime now);
+    @Query("SELECT cd FROM CourseDiscountEntity cd WHERE cd.courseId IS NULL AND  (:now BETWEEN cd.validFrom AND cd.validTo) ORDER BY cd.discountPercentage DESC")
+    Optional<CourseDiscountEntity> getGlobalActiveDiscount(LocalDateTime now);
 
     @Query(value = """
                 SELECT EXISTS (

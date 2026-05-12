@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryEntity getCategoryById(UUID categoryId) {
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 RedisPrefixConstant.CATEGORY_PREFIX + categoryId,
                 CategoryEntity.class,
                 () -> categoryRepository.findById(categoryId),

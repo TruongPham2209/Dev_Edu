@@ -19,5 +19,5 @@ public class FilePreSignUploadRequest {
     @NotNull(message = "fileSize must not be null")
     Long fileSize;
 
-    boolean isPublic;
+    Boolean isPublic;
 }

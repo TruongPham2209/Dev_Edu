@@ -32,6 +32,7 @@ public class OAuth2PasswordGrantAuthenticationConverter  implements Authenticati
         MultiValueMap<String, String> parameters = getParameters(request);
 
         String scope = parameters.getFirst(OAuth2ParameterNames.SCOPE);
+        assert scope != null;
         Set<String> scopes = Set.of(scope.split(" "));
 
         return new OAuth2PasswordGrantAuthenticationToken(parameters.getFirst("username"),

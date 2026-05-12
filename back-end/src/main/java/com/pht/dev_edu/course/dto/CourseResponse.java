@@ -21,7 +21,12 @@ public class CourseResponse {
     String thumbnailObjectKey;
     String thumbnailUrl;
     String description;
-    BigDecimal price;
     LocalDateTime createdAt;
+
+    BigDecimal originalPrice;
+    BigDecimal discountedPercentage;
+    BigDecimal discountedPrice;
+    LocalDateTime validTo;
+
     List<String> lecturers;
 }

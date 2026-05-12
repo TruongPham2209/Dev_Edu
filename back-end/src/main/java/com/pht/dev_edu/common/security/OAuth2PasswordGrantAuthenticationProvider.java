@@ -78,29 +78,29 @@ public class OAuth2PasswordGrantAuthenticationProvider implements Authentication
         try {
             userDetails = this.userDetailsService.loadUserByUsername(providedUsername);
         } catch (Exception ex) {
-            OAuth2Error error = new OAuth2Error("bad_credentials", "Sai tên đăng nhập hoặc mật khẩu", null);
+            OAuth2Error error = new OAuth2Error("bad_credentials", "Invalid username or password.", null);
             throw new OAuth2AuthenticationException(error);
         }
 
         if (!userDetails.isAccountNonLocked()) {
-            OAuth2Error error = new OAuth2Error("account_locked", "Tài khoản đã bị khóa", null);
+            OAuth2Error error = new OAuth2Error("account_locked", "Account is locked.", null);
             throw new OAuth2AuthenticationException(error);
         }
         if (!userDetails.isEnabled()) {
-            OAuth2Error error = new OAuth2Error("account_disabled", "Tài khoản đã bị vô hiệu hóa", null);
+            OAuth2Error error = new OAuth2Error("account_disabled", "Account is disabled.", null);
             throw new OAuth2AuthenticationException(error);
         }
         if (!userDetails.isAccountNonExpired()) {
-            OAuth2Error error = new OAuth2Error("account_expired", "Tài khoản đã hết hạn", null);
+            OAuth2Error error = new OAuth2Error("account_expired", "Account expired.", null);
             throw new OAuth2AuthenticationException(error);
         }
         if (!userDetails.isCredentialsNonExpired()) {
-            OAuth2Error error = new OAuth2Error("credentials_expired", "Thông tin đăng nhập đã hết hạn", null);
+            OAuth2Error error = new OAuth2Error("credentials_expired", "Credentials expired.", null);
             throw new OAuth2AuthenticationException(error);
         }
 
         if (!this.passwordEncoder.matches(providedPassword, userDetails.getPassword())) {
-            OAuth2Error error = new OAuth2Error("bad_credentials", "Sai tên đăng nhập hoặc mật khẩu", null);
+            OAuth2Error error = new OAuth2Error("bad_credentials", "Invalid username or password.", null);
             throw new OAuth2AuthenticationException(error);
         }
 

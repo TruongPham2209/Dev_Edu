@@ -66,7 +66,10 @@ public class OrderServiceImpl implements OrderService {
         var pageable = PageRequest.of(0, 10);
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
-        var globalDiscountPercentage = courseDiscountRepository.getGlobalActiveDiscount(LocalDateTime.now()).orElse(BigDecimal.ZERO);
+        var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(LocalDateTime.now()).orElse(null);
+        var globalDiscountPercentage = globalDiscountEntity == null
+                ? BigDecimal.ZERO
+                : globalDiscountEntity.getDiscountPercentage();
         var cartItemPage = cartItemRepository.findCoursesInCartByStudentUsernameAndCursor(username, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
         return PagingUtils.getPagedWithCursor(
                 cartItemPage,
@@ -75,10 +78,10 @@ public class OrderServiceImpl implements OrderService {
                     var discountedPrice = discountPercentage.compareTo(BigDecimal.ZERO) == 0
                             ? ci.getOriginalPrice()
                             : ci.getOriginalPrice()
-                            .multiply(BigDecimal.ONE.subtract(
-                                    discountPercentage.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
-                            ))
-                            .setScale(2, RoundingMode.HALF_UP);
+                              .multiply(BigDecimal.ONE.subtract(
+                                      discountPercentage.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
+                              ))
+                              .setScale(2, RoundingMode.HALF_UP);
 
                     return EnrolledCourseResponse.builder()
                             .id(ci.getId())

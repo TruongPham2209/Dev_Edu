@@ -95,7 +95,7 @@ public class LecturePermissionServiceImpl implements LecturePermissionService {
     }
 
     private LectureEntity getLectureById(UUID lectureId) {
-        var lecture = RedisUtils.getDataFromCacheOrDb(
+        var lecture = RedisUtils.getOptionalDataFromCacheOrDb(
                 RedisPrefixConstant.LECTURE_PREFIX + lectureId,
                 LectureEntity.class,
                 () -> lectureRepository.findById(lectureId),

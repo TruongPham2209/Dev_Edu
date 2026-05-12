@@ -4,10 +4,12 @@ import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.*;
+import com.pht.dev_edu.course.dto.CourseDetailProjection;
 import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
@@ -17,9 +19,11 @@ import com.pht.dev_edu.course.entity.CourseLecturerId;
 import com.pht.dev_edu.course.mapper.CourseMapper;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.CourseRepository;
+import com.pht.dev_edu.enrollment.repo.CourseDiscountRepository;
 import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
+import com.pht.dev_edu.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +48,8 @@ public class CourseServiceImpl implements CourseService {
     CourseRepository courseRepository;
     CourseLecturerRepository courseLecturerRepository;
     EnrollmentRepository enrollmentRepository;
+    UserRepository userRepository;
+    CourseDiscountRepository courseDiscountRepository;
 
     FileService fileService;
     CategoryService categoryService;
@@ -49,7 +57,24 @@ public class CourseServiceImpl implements CourseService {
     CourseMapper courseMapper;
     Executor executor;
 
-    // TODO: update get course with discount
+    @Override
+    public CourseResponse getCourseDetails(UUID courseId) {
+        var courseDetail = courseRepository.findCourseDetail(courseId);
+        if (courseDetail == null) {
+            throw new DataNotFoundException("Course not found");
+        }
+
+        var globalDiscount = getGlobalDiscountPercentage();
+        var res = convertProjectionToRes(courseDetail, globalDiscount);
+
+        var lecturers = courseLecturerRepository.findAllByIdCourseId(courseId).stream()
+                .map(cl -> cl.getId().getLecturerUsername())
+                .toList();
+        res.setLecturers(lecturers);
+
+        return res;
+    }
+
     @Override
     public CourseResponse getCourseById(UUID courseId) {
         var courseEntity = getCourseEntityById(courseId);
@@ -68,7 +93,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest req) {
-        Function<TimeStampCursor, Page<CourseEntity>> queryFn;
+        Function<TimeStampCursor, Page<CourseDetailProjection>> queryFn;
         if (categoryId != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
@@ -103,17 +128,18 @@ public class CourseServiceImpl implements CourseService {
 
     private CustomPaging<CourseResponse> executeCoursePaging(
             CoursePageRequest pageRequest,
-            Function<TimeStampCursor, Page<CourseEntity>> queryFn
+            Function<TimeStampCursor, Page<CourseDetailProjection>> queryFn
     ) {
         var cursor = resolveCursor(pageRequest.getNextCursor());
-
         var coursePage = queryFn.apply(cursor);
+
+        var globalDiscount = getGlobalDiscountPercentage();
 
         var pageResult = PagingUtils.getPagedWithCursor(
                 coursePage,
-                courseMapper::entityToRes,
-                CourseEntity::getCreatedAt,
-                CourseEntity::getId
+                c -> convertProjectionToRes(c, globalDiscount),
+                CourseDetailProjection::getCreatedAt,
+                CourseDetailProjection::getId
         );
 
         if (StringUtils.hasText(pageRequest.getNextCursor())) {
@@ -142,6 +168,8 @@ public class CourseServiceImpl implements CourseService {
             throw new DataNotFoundException("Category not found.");
         }
 
+        validateLecturerUsername(course.getLecturerUsernames());
+
         // Convert course here
         var courseEntity = courseMapper.reqToEntity(course);
         var thumbnailUrl = getThumbnailUrl(author, course.getThumbnailObjectKey());
@@ -166,7 +194,6 @@ public class CourseServiceImpl implements CourseService {
         return courseMapper.entityToRes(courseEntity);
     }
 
-    // TODO: check whether valid lecturer
     @Override
     @Transactional
     public CourseResponse updateCourse(String author, CourseRequest course) {
@@ -180,6 +207,8 @@ public class CourseServiceImpl implements CourseService {
             log.error("Category with ID {} not found.", course.getCategoryId());
             throw new DataNotFoundException("Category not found.");
         }
+
+        validateLecturerUsername(course.getLecturerUsernames());
 
         var updatedCourse = courseMapper.reqToEntity(course);
         boolean isNewThumbnail = existingCourse.getThumbnailObjectKey().equals(course.getThumbnailObjectKey());
@@ -258,16 +287,9 @@ public class CourseServiceImpl implements CourseService {
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + courseId);
     }
 
-    @Override
-    public List<String> getLecturersForCourse(UUID courseId) {
-        return courseLecturerRepository.findAllByIdCourseId(courseId).stream()
-                .map(cl -> cl.getId().getLecturerUsername())
-                .toList();
-    }
-
     private CourseEntity getCourseEntityById(UUID courseId) {
         String cachedKey = RedisPrefixConstant.COURSE_PREFIX + courseId;
-        return RedisUtils.getDataFromCacheOrDb(
+        return RedisUtils.getOptionalDataFromCacheOrDb(
                 cachedKey,
                 CourseEntity.class,
                 () -> courseRepository.findById(courseId),
@@ -284,5 +306,48 @@ public class CourseServiceImpl implements CourseService {
             throw new BadRequestException("Thumbnail is not accessible.");
         }
         return thumbnailInfo.getPublicUrl();
+    }
+
+    private void validateLecturerUsername(List<String> lecturerUsernames) {
+        var totalValidLecturer = userRepository.countByUsernamesAndRole(lecturerUsernames, RoleEnum.LECTURER.name());
+        if (totalValidLecturer != lecturerUsernames.size()) {
+            log.error("One or more lecturer usernames are invalid: {}", lecturerUsernames);
+            throw new BadRequestException("One or more lecturer usernames are invalid.");
+        }
+    }
+
+    private CourseResponse convertProjectionToRes(CourseDetailProjection projection, BigDecimal globalDiscount) {
+        if (projection.getOriginalPrice().compareTo(BigDecimal.ZERO) == 0) {
+            var res = courseMapper.projectionToRes(projection);
+            res.setDiscountedPercentage(BigDecimal.ZERO);
+            res.setDiscountedPrice(BigDecimal.ZERO);
+            return res;
+        }
+
+        var courseDiscountPercentage = projection.getDiscountedPercentage() == null
+                ? BigDecimal.ZERO
+                : projection.getDiscountedPercentage();
+        var discountPercentage = globalDiscount.max(courseDiscountPercentage);
+        var discountRate = discountPercentage
+                .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+
+        var discountedPrice = projection.getOriginalPrice()
+                .multiply(BigDecimal.ONE.subtract(discountRate))
+                .setScale(2, RoundingMode.HALF_UP);
+        var res = courseMapper.projectionToRes(projection);
+        res.setDiscountedPercentage(discountPercentage);
+        res.setDiscountedPrice(discountedPrice);
+
+        return res;
+    }
+
+    private BigDecimal getGlobalDiscountPercentage() {
+        LocalDateTime now = LocalDateTime.now();
+
+        var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(now)
+                .orElse(null);
+        return globalDiscountEntity == null
+                ? BigDecimal.ZERO
+                : globalDiscountEntity.getDiscountPercentage();
     }
 }

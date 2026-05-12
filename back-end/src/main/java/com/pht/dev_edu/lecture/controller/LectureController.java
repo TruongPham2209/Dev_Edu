@@ -105,7 +105,7 @@ public class LectureController {
     @PutMapping("/progress")
     public ResponseEntity<ApiResponse> updateProgress(@RequestBody ProgressSegmentRequest req) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
-        progressService.updateProgress(username, req);
-        return ApiUtils.buildSuccessResponse("Progress updated successfully");
+        var progressUpdated = progressService.updateProgress(username, req);
+        return ApiUtils.buildSuccessResponse(progressUpdated);
     }
 }

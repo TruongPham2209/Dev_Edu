@@ -12,13 +12,14 @@ import java.util.UUID;
 
 public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
     @Query(value = """
-                SELECT  l.id AS id,
-                        l.title AS title,
-                        l.summary AS summary,
-                        l.content AS content,
-                        l.video_object_key AS videoObjectKey,
-                        l.lecture_order AS lectureOrder,
-                        l.uploaded_at AS uploadedAt,
+                SELECT  l.id                AS id,
+                        l.course_id         AS courseId,
+                        l.title             AS title,
+                        l.summary           AS summary,
+                        l.content           AS content,
+                        l.video_object_key  AS videoObjectKey,
+                        l.lecture_order     AS lectureOrder,
+                        l.uploaded_at       AS uploadedAt,
                         CASE
                             WHEN lp.lecture_id IS NOT NULL THEN TRUE
                             ELSE FALSE
@@ -27,12 +28,29 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                 LEFT JOIN lecture_progress lp
                     ON  l.id        = lp.lecture_id
                     AND lp.student  = :username
-                WHERE   l.id = :lectureId
+                WHERE   l.id            = :lectureId
+                AND     l.deleted_at    IS NULL
             """, nativeQuery = true)
     Optional<LectureProjection> findLectureDetailByIdAndUsername(UUID lectureId, String username);
 
     @Query(value = """
+                SELECT NOT EXISTS (
+                    SELECT 1
+                    FROM lecture l
+                    LEFT JOIN lecture_progress lp
+                        ON  l.id        = lp.lecture_id
+                        AND lp.student  = :username
+                    WHERE   l.course_id     = :courseId
+                    AND     l.deleted_at    IS NULL
+                    AND     l.lecture_order < :lectureOrder
+                    AND     lp.student      IS NULL
+                )
+            """, nativeQuery = true)
+    boolean hasCompletedAllPreviousLectures(UUID courseId, int lectureOrder, String username);
+
+    @Query(value = """
                 SELECT  l.id                    AS id,
+                        l.course_id             AS courseId,
                         l.title                 AS title,
                         l.summary               AS summary,
                         CASE
@@ -59,6 +77,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
 
     @Query(value = """
                 SELECT  l.id                    AS id,
+                        l.course_id             AS courseId,
                         l.title                 AS title,
                         l.summary               AS summary,
                         l.content               AS content,

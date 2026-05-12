@@ -21,42 +21,64 @@ public class ExceptionUtils {
         String logMessage = "";
         switch (ex) {
             case MethodArgumentTypeMismatchException exType -> {
-                logMessage = String.format("Tham số không đúng: %s. Giá trị %s không thể chuyển thành dạng %s",
-                        exType.getName(), exType.getValue(), exType.getRequiredType() != null ? exType.getRequiredType().getSimpleName() : null);
-                message = "Tham số đầu vào không hợp lệ.";
+                logMessage = String.format(
+                        "Invalid parameter: %s. Value '%s' cannot be converted to type %s",
+                        exType.getName(),
+                        exType.getValue(),
+                        exType.getRequiredType() != null
+                                ? exType.getRequiredType().getSimpleName()
+                                : null
+                );
+                message = "Invalid input params.";
             }
             case MethodArgumentNotValidException methodArgumentNotValidException -> {
-                List<String> errorMessages = methodArgumentNotValidException.getBindingResult().getFieldErrors().stream()
+                List<String> errorMessages = methodArgumentNotValidException
+                        .getBindingResult().getFieldErrors().stream()
                         .map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
-                logMessage = "Xác thực không thành công cho các tham số: " + String.join("; ", errorMessages);
-                message = "Dữ liệu đầu vào không hợp lệ.";
+                logMessage = "Validation failed for request parameters: "
+                        + String.join("; ", errorMessages);
+
+                message = "Invalid input data.";
             }
-            case MissingServletRequestPartException missingServletRequestPartException ->
-                    message = "Request body bị thiếu.";
+            case MissingServletRequestPartException missingServletRequestPartException -> {
+                logMessage = "Missing required request part (request body or multipart part).";
+                message = "Request body is missing.";
+            }
             case MissingServletRequestParameterException exParam -> {
-                logMessage = String.format("Sai tham số bắt buộc: '%s'. Dạng mong đợi: '%s'.", exParam.getParameterName(),
-                        exParam.getParameterType());
-                message = "Yêu cầu thiếu tham số bắt buộc.";
+                logMessage = String.format(
+                        "Missing required parameter: '%s'. Expected type: '%s'.",
+                        exParam.getParameterName(),
+                        exParam.getParameterType()
+                );
+                message = "Missing required request parameter.";
             }
             case ConstraintViolationException constraintViolationException -> {
 
                 List<String> violationMessages = constraintViolationException.getConstraintViolations().stream()
-                        .map(violation -> String.format("Thuộc tính '%s' %s: %s", violation.getPropertyPath(),
-                                violation.getMessage(), violation.getInvalidValue()))
+                        .map(violation -> String.format(
+                                        "Property '%s' %s: %s",
+                                        violation.getPropertyPath(),
+                                        violation.getMessage(),
+                                        violation.getInvalidValue()
+                        ))
                         .toList();
 
-                logMessage = "Lỗi vi phạm ràng buộc: " + String.join("; ", violationMessages);
-                message = "Lỗi dữ liệu đầu vào không hợp lệ.";
+                logMessage = "Constraint violation: " + String.join("; ", violationMessages);
+                message = "Invalid input data.";
             }
             case BindException bindException -> {
                 List<String> bindErrorMessages = bindException.getBindingResult().getFieldErrors().stream()
-                        .map(error -> String.format("Trường '%s' %s", error.getField(), error.getDefaultMessage()))
+                        .map(error -> String.format(
+                                "Field '%s' %s",
+                                error.getField(),
+                                error.getDefaultMessage()
+                        ))
                         .toList();
-                logMessage = "Lỗi binding: " + String.join("; ", bindErrorMessages);
-                message = "Lỗi dữ liệu đầu vào không hợp lệ.";
+                logMessage = "Binding error: " + String.join("; ", bindErrorMessages);
+                message = "Invalid input data.";
             }
             case null, default -> {
-                message = "Yêu cầu không hợp lệ.";
+                message = "Bad request.";
                 logMessage = message;
             }
         }
@@ -69,17 +91,19 @@ public class ExceptionUtils {
         String message;
         String logMessage;
         if (ex instanceof UnsupportedOperationException) {
-            logMessage = message = "Thao tác này không được hỗ trợ.";
+            logMessage = message = "This operation is not supported.";
         } else if (ex instanceof HttpRequestMethodNotSupportedException exMethod) {
             String supportedMethods = exMethod.getSupportedHttpMethods() != null
                     ? String.join(", ", exMethod.getSupportedHttpMethods().toString())
-                    : "không có phương thức nào được hỗ trợ";
+                    : "no supported methods";
             logMessage = String.format(
-                    "Phương thức '%s' không được hỗ trợ cho yêu cầu này. Các phương thức hợp lệ là: %s.",
-                    exMethod.getMethod(), String.join(", ", supportedMethods));
-            message = "Phương thức không được phép.";
+                    "HTTP method '%s' is not supported for this request. Allowed methods are: %s.",
+                    exMethod.getMethod(),
+                    supportedMethods
+            );
+            message = "Method not allowed.";
         } else {
-            logMessage = message = "Phương thức không được phép.";
+            logMessage = message = "Method not allowed.";
         }
 
         log.error("Error processing method not allowed: {}. Exception detail: {}", logMessage, ex != null ? ex.getMessage() : "Null", ex);
@@ -89,11 +113,11 @@ public class ExceptionUtils {
     public static String getServerErrorMessage(Exception ex) {
         String message;
         if (ex instanceof IOException) {
-            message = "Đã xảy ra lỗi I/O khi xử lý yêu cầu.";
+            message = "An I/O error occurred while processing the request.";
         } else if (ex instanceof IllegalStateException) {
-            message = "Hệ thống đang ở trạng thái không hợp lệ để xử lý yêu cầu.";
+            message = "The system is in an invalid state to process the request.";
         } else {
-            message = "Lỗi máy chủ.";
+            message = "Internal server error.";
         }
 
         return message;
@@ -102,9 +126,9 @@ public class ExceptionUtils {
     public static String getConflictErrorMessage(Exception ex) {
         String message;
         if (ex instanceof DataIntegrityViolationException) {
-            message = "Vi phạm ràng buộc dữ liệu.";
+            message = "Data constraint violation.";
         } else {
-            message = "Lỗi xung đột.";
+            message = "Conflict error.";
         }
 
         return message;

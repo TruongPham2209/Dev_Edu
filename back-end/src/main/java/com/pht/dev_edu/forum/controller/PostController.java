@@ -70,7 +70,7 @@ public class PostController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
-    @DeleteMapping("/versions/")
+    @DeleteMapping("/versions")
     public ResponseEntity<?> deletePostVersion(
             @RequestParam UUID postVersionId
     ) {
