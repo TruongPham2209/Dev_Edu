@@ -66,10 +66,16 @@
             <version>${flying.saucer.version}</version>
         </dependency>
 
+        <!-- UUIDv7 -->
         <dependency>
             <groupId>com.github.f4b6a3</groupId>
             <artifactId>uuid-creator</artifactId>
             <version>${uuid-creator.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
 
         <!-- Security Dependencies -->
