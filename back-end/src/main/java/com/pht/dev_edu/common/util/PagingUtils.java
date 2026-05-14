@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -94,12 +95,29 @@ public class PagingUtils {
             Page<T> page,
             Function<T, R> mapper,
             Function<T, LocalDateTime> getTime,
-            Function<T, UUID> getId
+            Function<T, UUID> getId,
+            int requestedPageSize // Truyền vào số lượng item thực tế user muốn (n)
     ) {
-        var result = new CustomPaging<>(page, mapper);
+        List<T> content = page.getContent();
+        boolean hasNext = content.size() > requestedPageSize;
+        List<T> finalContent = hasNext
+                ? content.subList(0, requestedPageSize)
+                : content;
 
-        var nextCursor = PagingUtils.getNextTimeCursor(page, getTime, getId);
-        result.setNextCursor(nextCursor);
+        Pageable newPageable = PageRequest.of(
+                page.getNumber(),
+                requestedPageSize,
+                page.getSort()
+        );
+
+        var result = new CustomPaging<>(finalContent, mapper, newPageable);
+        result.setTotalPages(page.getTotalPages());
+        result.setTotalElements(page.getTotalElements());
+
+        if (hasNext) {
+            var nextCursor = PagingUtils.getNextTimeCursor(page, getTime, getId);
+            result.setNextCursor(nextCursor);
+        }
 
         return result;
     }

@@ -45,7 +45,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 enrollmentPage,
                 enrollmentMapper::toEnrolledCourseResponse,
                 EnrolledCourseProjection::getEnrolledAt,
-                EnrolledCourseProjection::getId
+                EnrolledCourseProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 
@@ -60,12 +61,13 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 enrollmentPage,
                 enrollmentMapper::toEnrolledCourseResponse,
                 EnrolledCourseProjection::getEnrolledAt,
-                EnrolledCourseProjection::getId
+                EnrolledCourseProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 
     private Pageable buildCoursePageable() {
-        return PageRequest.of(0, 15);
+        return PageRequest.of(0, 16);
     }
 
     private TimeStampCursor resolveTimeStampCursor(String nextCursor) {
@@ -87,7 +89,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 enrollmentPage,
                 enrollmentMapper::toEnrollmentUserResponse,
                 EnrollmentUserProjection::getEnrolledAt,
-                EnrollmentUserProjection::getId
+                EnrollmentUserProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 

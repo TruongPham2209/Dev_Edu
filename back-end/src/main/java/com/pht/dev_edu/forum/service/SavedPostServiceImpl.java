@@ -55,14 +55,15 @@ public class SavedPostServiceImpl implements SavedPostService {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 10);
+        var pageable = PageRequest.of(0, 11);
 
         var savedPostsPage = savedPostRepository.findByUsernameAndCursor(username, cursor.getId(), cursor.getTimeStamp(), pageable);
         return PagingUtils.getPagedWithCursor(
                 savedPostsPage,
                 savedPostMapper::projectionToRes,
                 SavedPostProjection::getSavedAt,
-                SavedPostProjection::getId
+                SavedPostProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 }

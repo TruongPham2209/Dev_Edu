@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
     // TODO: update dto to see original and discounted price
     @Override
     public CustomPaging<EnrolledCourseResponse> getCoursesInCart(String username, String nextCursor) {
-        var pageable = PageRequest.of(0, 10);
+        var pageable = PageRequest.of(0, 11);
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
         var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(LocalDateTime.now()).orElse(null);
@@ -93,7 +93,8 @@ public class OrderServiceImpl implements OrderService {
                             .build();
                 },
                 CourseDiscountProjection::getCreatedAt,
-                CourseDiscountProjection::getId
+                CourseDiscountProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 

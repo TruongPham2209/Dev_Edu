@@ -49,7 +49,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor) {
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "updated_at").and(Sort.by(Sort.Direction.DESC, "id")));
+        var pageable = PageRequest.of(0, 11, Sort.by(Sort.Direction.DESC, "updated_at").and(Sort.by(Sort.Direction.DESC, "id")));
         TimeStampCursor cursor = !StringUtils.hasText(lastCursor)
                 ? TimeStampCursor.getDefaultCursor(true)
                 : PagingUtils.decodeTimeStampCursor(lastCursor);
@@ -59,7 +59,8 @@ public class PostServiceImpl implements PostService {
                 postVersionPage,
                 postVersionMapper::entityToRes,
                 PostVersionEntity::getUpdatedAt,
-                PostVersionEntity::getId
+                PostVersionEntity::getId,
+                pageable.getPageSize() - 1
         );
     }
 

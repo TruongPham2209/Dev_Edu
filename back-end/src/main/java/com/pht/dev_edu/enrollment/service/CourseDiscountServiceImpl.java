@@ -42,7 +42,7 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 20);
+        var pageable = PageRequest.of(0, 21);
 
         var discountPage = discountRepository.getAllScheduledDiscountsWithCursor(cursor.getId(), cursor.getTimeStamp(), pageable);
 
@@ -50,7 +50,8 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
                 discountPage,
                 discountMapper::projectionToRes,
                 CourseDiscountProjection::getCreatedAt,
-                CourseDiscountProjection::getId
+                CourseDiscountProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 

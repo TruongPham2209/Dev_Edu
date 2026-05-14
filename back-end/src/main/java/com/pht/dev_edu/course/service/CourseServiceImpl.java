@@ -139,7 +139,8 @@ public class CourseServiceImpl implements CourseService {
                 coursePage,
                 c -> convertProjectionToRes(c, globalDiscount),
                 CourseDetailProjection::getCreatedAt,
-                CourseDetailProjection::getId
+                CourseDetailProjection::getId,
+                pageRequest.getSize()
         );
 
         if (StringUtils.hasText(pageRequest.getNextCursor())) {

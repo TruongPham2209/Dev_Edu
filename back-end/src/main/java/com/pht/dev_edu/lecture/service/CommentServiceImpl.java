@@ -49,18 +49,21 @@ public class CommentServiceImpl implements CommentService {
         var cursor = StringUtils.hasText(req.getNextCursor()) ? PagingUtils.decodeTimeStampCursor(req.getNextCursor()) : TimeStampCursor.getDefaultCursor(true);
         lecturePermissionService.checkViewPermissionByLecture(authorities, actor, req.getLectureId());
 
+        var pageable = req.toPageable();
+
         if (req.getParentCommentId() == null) {
             var pageComments = lectureCommentRepository.findRootCommentsByLectureId(
                     req.getLectureId(),
                     cursor.getId(),
                     cursor.getTimeStamp(),
-                    req.toPageable()
+                    pageable
             );
             return PagingUtils.getPagedWithCursor(
                     pageComments,
                     c -> convertProjectionToResponse(c, actor),
                     CommentProjection::getCreatedAt,
-                    CommentProjection::getId
+                    CommentProjection::getId,
+                    pageable.getPageSize() - 1
             );
         }
 
@@ -79,13 +82,13 @@ public class CommentServiceImpl implements CommentService {
                     parentComment.getId(),
                     cursor.getId(),
                     cursor.getTimeStamp(),
-                    req.toPageable()
+                    pageable
             );
             case 1 -> lectureCommentRepository.findSecondLevelRepliesByParentCommentId(
                     parentComment.getId(),
                     cursor.getId(),
                     cursor.getTimeStamp(),
-                    req.toPageable()
+                    pageable
             );
             default -> throw new IllegalStateException("Unexpected comment depth: " + parentComment.getDepth());
         };
@@ -94,7 +97,8 @@ public class CommentServiceImpl implements CommentService {
                 pageComments,
                 c -> convertProjectionToResponse(c, actor),
                 CommentProjection::getCreatedAt,
-                CommentProjection::getId
+                CommentProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 

@@ -35,19 +35,20 @@ public class CourseCategoryController {
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam ItemStatus status
+            @RequestParam(required = false) ItemStatus status
     ) {
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+        int size;
         if (authorities.contains(RoleEnum.ADMIN.name())) {
-            page = 10;
+            size = 10;
         } else {
-            page = 12;
+            size = 12;
             status = ItemStatus.ACTIVE;
         }
 
         CoursePageRequest pageRequest = CoursePageRequest.builder()
                 .status(status)
-                .size(12)
+                .size(size)
                 .page(page)
                 .nextCursor(nextCursor)
                 .sortBy(sortBy)

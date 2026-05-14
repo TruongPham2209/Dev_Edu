@@ -76,7 +76,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CustomPaging<CommentResponse> getCommentsByPostId(String username, UUID postId, String nextCursor) {
         var cursor = resolveCursor(nextCursor);
-        var pageable = PageRequest.of(0, 10);
+        var pageable = PageRequest.of(0, 11);
 
         var commentPage = commentRepository.findRootCommentsByPostIdAndCursor(
                 postId,
@@ -89,14 +89,15 @@ public class CommentServiceImpl implements CommentService {
                 commentPage,
                 c -> convertProjectionToRes(c, username),
                 CommentProjection::getCreatedAt,
-                CommentProjection::getId
+                CommentProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 
     @Override
     public CustomPaging<CommentResponse> getRepliedComments(String username, UUID parentCommentId, String nextCursor) {
         var cursor = resolveCursor(nextCursor);
-        var pageable = PageRequest.of(0, 10);
+        var pageable = PageRequest.of(0, 11);
 
         var commentPage = commentRepository.findReplyCommentsByRootCommentIdAndCursor(
                 parentCommentId,
@@ -109,7 +110,8 @@ public class CommentServiceImpl implements CommentService {
                 commentPage,
                 c ->  convertProjectionToRes(c, username),
                 CommentProjection::getCreatedAt,
-                CommentProjection::getId
+                CommentProjection::getId,
+                pageable.getPageSize() - 1
         );
     }
 

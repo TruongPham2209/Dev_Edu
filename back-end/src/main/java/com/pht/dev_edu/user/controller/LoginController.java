@@ -6,6 +6,8 @@ import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.user.dto.RegisterUser;
+import com.pht.dev_edu.user.dto.UserInfoResponse;
+import com.pht.dev_edu.user.entity.RoleEntity;
 import com.pht.dev_edu.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -78,5 +80,22 @@ public class LoginController {
 
         userService.setUsernameForGoogleLogin(email, username);
         return ApiUtils.buildSuccessResponse("Username đã được cập nhật thành công.");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse> getCurrentUser() {
+        String username = SecurityContextUtils.getCurrentUsername();
+        var userInfo = userService.findByUsername(username);
+
+        var info = UserInfoResponse.builder()
+                .userId(userInfo.getId())
+                .username(userInfo.getUsername())
+                .email(userInfo.getEmail())
+                .fullName(userInfo.getFullName())
+                .avatarUrl(userInfo.getAvatarUrl())
+                .role(userInfo.getRoles().stream().findFirst().map(RoleEntity::getName).orElse(RoleEnum.STUDENT))
+                .build();
+
+        return ApiUtils.buildSuccessResponse(info);
     }
 }

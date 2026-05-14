@@ -25,7 +25,7 @@ public abstract class AbstractPageRequest {
 
     public final Pageable toPageable() {
         if (StringUtils.hasText(nextCursor)) {
-            return PagingUtils.getPageable(size, toSort());
+            return PagingUtils.getPageable(size + 1, toSort());
         }
 
         return PagingUtils.getPageable(page, size, toSort());

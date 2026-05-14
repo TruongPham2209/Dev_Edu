@@ -95,7 +95,7 @@ public class ReviewServiceImpl implements ReviewService {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "created_at", "id"));
+        var pageable = PageRequest.of(0, 11, Sort.by(Sort.Direction.DESC, "created_at", "id"));
 
         var pageResult = reviewRepository.findByCourseIdAndCursor(courseId, cursor.getId(), cursor.getTimeStamp(), pageable);
 
@@ -118,7 +118,8 @@ public class ReviewServiceImpl implements ReviewService {
                 pageResult,
                 reviewMapper::entityToResponse,
                 CourseReviewEntity::getCreatedAt,
-                CourseReviewEntity::getId
+                CourseReviewEntity::getId,
+                pageable.getPageSize() - 1 // Truyền vào số lượng item thực tế user muốn (n)
         );
     }
 }

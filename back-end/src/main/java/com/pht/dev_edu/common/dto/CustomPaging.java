@@ -14,9 +14,15 @@ import java.util.function.Function;
 @ToString
 public class CustomPaging<T> {
     private final Collection<T> contents;
-    private final long totalPages;
+
+    @Setter
+    private long totalPages;
+
+    @Setter
     private long pageSize;
-    private final long totalElements;
+
+    @Setter
+    private long totalElements;
 
     @Setter
     private long currentPage;
