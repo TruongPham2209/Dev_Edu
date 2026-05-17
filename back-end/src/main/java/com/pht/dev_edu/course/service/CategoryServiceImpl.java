@@ -40,13 +40,17 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponse> getAllCategories(ItemStatus status) {
+        if (status == null) {
+            status = ItemStatus.ACTIVE;
+        }
+
         var categories = switch (status) {
-            case ALL -> categoryRepository.findAll();
+            case ALL -> categoryRepository.findAllCategories();
             case ACTIVE -> categoryRepository.findAllByDeletedAtIsNull();
             case DELETED -> categoryRepository.findAllByDeletedAtIsNotNull();
         };
         return categories.stream()
-                .map(categoryMapper::entityToRes)
+                .map(categoryMapper::projectionToRes)
                 .toList();
     }
 

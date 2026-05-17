@@ -63,7 +63,8 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public FileUploadResponse generatePreSignedUrl(FilePreSignUploadRequest request) {
         String objectKey = generateObjectKey(request.getFileName());
-        var bucketName = request.getIsPublic() ? publicBucketName : privateBucketName;
+        boolean isPublic = Boolean.TRUE.equals(request.getIsPublic());
+        var bucketName = isPublic ? publicBucketName : privateBucketName;
         String fullObjectKey = bucketName + "/" + objectKey;
 
         var fileUpload = FileUploadEntity.builder()
@@ -83,7 +84,7 @@ public class FileServiceImpl implements FileService {
                 .contentType(request.getContentType())
                 .build();
 
-        Duration signatureDuration = request.getIsPublic() ? PUBLIC_FILE_PRESIGNED_DURATION : PRIVATE_FILE_PRESIGNED_DURATION;
+        Duration signatureDuration = isPublic ? PUBLIC_FILE_PRESIGNED_DURATION : PRIVATE_FILE_PRESIGNED_DURATION;
         PutObjectPresignRequest preSignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(signatureDuration)
                 .putObjectRequest(putObjectRequest)
@@ -93,7 +94,7 @@ public class FileServiceImpl implements FileService {
                 .url()
                 .toString();
 
-        String publicUrl = request.getIsPublic()
+        String publicUrl = isPublic
                 ? resolvePublicUrl(objectKey)
                 : null;
 
@@ -129,6 +130,24 @@ public class FileServiceImpl implements FileService {
                 .fileSize(head.contentLength())
                 .objectKey(fullObjectKey)
                 .downloadUrl(downloadUrl)
+                .publicUrl(bucket.equals(publicBucketName) ? resolvePublicUrl(key) : null)
+                .build();
+    }
+
+    @Override
+    public FileUploadResponse getFileInfoDetail(String fullObjectKey) {
+        var fileUpload = fileUploadRepository.findByObjectKey(fullObjectKey)
+                .orElseThrow(() -> new DataNotFoundException("File not found."));
+        Pair<String, String> pair = parseFullObjectKey(fullObjectKey);
+        String bucket = pair.getLeft();
+        String key = pair.getRight();
+
+        HeadObjectResponse head = headObject(bucket, key);
+        return FileUploadResponse.builder()
+                .originalFileName(fileUpload.getFileName())
+                .contentType(head.contentType())
+                .fileSize(head.contentLength())
+                .objectKey(fullObjectKey)
                 .publicUrl(bucket.equals(publicBucketName) ? resolvePublicUrl(key) : null)
                 .build();
     }

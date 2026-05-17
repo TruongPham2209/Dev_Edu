@@ -16,7 +16,17 @@ import java.util.UUID;
 public class PostResponse {
     UUID id;
     String title;
+    String shortDescription;
+    String thumbUrl;
     String content;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+
+    Boolean isMine;
+    String authorUsername;
+    String authorFullName;
+    String authorAvatarUrl;
+
+    Integer views;
+    Integer comments;
 }

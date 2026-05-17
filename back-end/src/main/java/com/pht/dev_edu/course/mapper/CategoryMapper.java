@@ -1,5 +1,6 @@
 package com.pht.dev_edu.course.mapper;
 
+import com.pht.dev_edu.course.dto.CategoryDetailProjection;
 import com.pht.dev_edu.course.dto.CategoryRequest;
 import com.pht.dev_edu.course.dto.CategoryResponse;
 import com.pht.dev_edu.course.entity.CategoryEntity;
@@ -14,4 +15,6 @@ public interface CategoryMapper {
     CategoryEntity reqToEntity(CategoryRequest req);
 
     CategoryResponse entityToRes(CategoryEntity entity);
+
+    CategoryResponse projectionToRes(CategoryDetailProjection projection);
 }

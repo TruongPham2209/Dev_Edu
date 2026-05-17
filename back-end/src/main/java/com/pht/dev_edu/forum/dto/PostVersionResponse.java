@@ -16,6 +16,7 @@ import java.util.UUID;
 public class PostVersionResponse {
     UUID id;
     String title;
+    String shortDescription;
     PostStatus status;
     String content;
     LocalDateTime updatedAt;

@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface FeedbackService {
-    List<FeedbackResponse> getFeedbacksBySubmission(Set<String> authorities, String actor, UUID submissionId);
+    List<FeedbackResponse> getFeedbacksByAssignment(Set<String> authorities, String actor, UUID assignmentId, String studentUsername);
 
     FeedbackResponse create(Set<String> authorities, String author, FeedbackRequest req);
 

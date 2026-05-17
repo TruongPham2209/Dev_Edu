@@ -26,8 +26,11 @@ public class FeedbackEntity {
     @Column(nullable = false, updatable = false)
     UUID id;
 
-    @Column(name = "submission_id", nullable = false)
-    UUID submissionId;
+    @Column(name = "assignment_id", nullable = false)
+    UUID assignmentId;
+
+    @Column(name = "student_username", nullable = false)
+    String studentUsername;
 
     @Column(name = "lecturer", nullable = false)
     String lecturer;

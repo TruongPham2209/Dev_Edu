@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface AssignmentService {
+    AssignmentResponse getAssignmentDetail(Set<String> authorities, String actor, UUID assignmentId);
+
     List<AssignmentResponse> getAssignments(Set<String> authorities, String actor, UUID lectureId);
 
     AssignmentResponse create(Set<String> authorities, String author, AssignmentRequest req);

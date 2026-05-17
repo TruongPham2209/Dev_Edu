@@ -29,8 +29,10 @@ public class WebEndpointConstant {
                 "/api/v1/lectures",
                 "/api/v1/courses/reviews",
                 "/api/v1/users/register",
+                "/api/v1/forum/posts",
+                "/api/v1/forum/posts/**",
                 "/api/v1/forum/comments",
-                "//api/v1/forum/comments/replies"
+                "/api/v1/forum/comments/replies"
         ));
     }
 }

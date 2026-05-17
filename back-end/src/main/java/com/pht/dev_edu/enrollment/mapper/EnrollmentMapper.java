@@ -1,7 +1,7 @@
 package com.pht.dev_edu.enrollment.mapper;
 
 import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
-import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 import org.mapstruct.Mapper;
@@ -13,5 +13,6 @@ public interface EnrollmentMapper {
     @Mapping(target = "fullName", source = "studentFullName")
     EnrollmentUserResponse toEnrollmentUserResponse(EnrollmentUserProjection projection);
 
-    EnrolledCourseResponse toEnrolledCourseResponse(EnrolledCourseProjection projection);
+    @Mapping(target = "timestamp", source = "enrolledAt")
+    CourseItemDetailResponse toEnrolledCourseResponse(EnrolledCourseProjection projection);
 }

@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -37,6 +38,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -60,6 +62,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -85,6 +88,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -110,6 +114,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -135,6 +140,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -162,6 +168,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -189,6 +196,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -214,6 +222,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,
@@ -241,6 +250,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
 
     @Query(value = """
             SELECT  c.id                        AS id,
+                    c.category_id               AS categoryId,
                     c.title                     AS title,
                     c.description               AS description,
                     c.thumbnail_url             AS thumbnailUrl,

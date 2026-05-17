@@ -18,4 +18,5 @@ public class CategoryResponse {
     String description;
     String thumbnailObjectKey;
     String thumbnailUrl;
+    Integer totalCourses;
 }

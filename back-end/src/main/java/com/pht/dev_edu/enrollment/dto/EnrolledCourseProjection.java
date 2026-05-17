@@ -14,11 +14,9 @@ public interface EnrolledCourseProjection {
 
     String getTitle();
 
-    String getDescription();
-
     String getThumbnailUrl();
 
     LocalDateTime getEnrolledAt();
 
-    BigDecimal getAmount();
+    BigDecimal getDiscountedPrice();
 }

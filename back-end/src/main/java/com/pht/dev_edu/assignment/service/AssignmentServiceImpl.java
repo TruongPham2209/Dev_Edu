@@ -38,6 +38,18 @@ public class AssignmentServiceImpl implements AssignmentService {
     AssignmentMapper assignmentMapper;
 
     @Override
+    public AssignmentResponse getAssignmentDetail(Set<String> authorities, String actor, UUID assignmentId) {
+        assignmentPermissionService.checkViewAssignmentPermissionByAssignment(authorities, actor, assignmentId);
+        var assignment = assignmentRepository.findById(assignmentId).orElseThrow(() -> new DataNotFoundException("Assignment not found."));
+        if (assignment.getDeletedAt() != null) {
+            log.info("Assignment deleted at: {}", assignment.getDeletedAt());
+            throw new DataNotFoundException("Assignment not found.");
+        }
+
+        return assignmentMapper.entityToRes(assignment);
+    }
+
+    @Override
     public List<AssignmentResponse> getAssignments(Set<String> authorities, String actor, UUID lectureId) {
         assignmentPermissionService.checkViewAssignmentPermissionByLecture(authorities, actor, lectureId);
 

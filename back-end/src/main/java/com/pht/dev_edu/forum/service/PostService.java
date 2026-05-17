@@ -1,10 +1,7 @@
 package com.pht.dev_edu.forum.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.forum.dto.PostRequest;
-import com.pht.dev_edu.forum.dto.PostStatus;
-import com.pht.dev_edu.forum.dto.PostVersionResponse;
-import com.pht.dev_edu.forum.dto.UpdatePostVersionResult;
+import com.pht.dev_edu.forum.dto.*;
 import com.pht.dev_edu.forum.entity.PostEntity;
 
 import java.util.List;
@@ -15,6 +12,8 @@ public interface PostService {
     CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor);
 
     List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status);
+
+    PostResponse getPostDetail(String actor, UUID postId);
 
     PostVersionResponse create(String author, PostRequest postRequest);
 

@@ -28,6 +28,6 @@ public class LectureRequest {
 
     String content;
 
-    @Null(message = "Video object key must be null when creating a new lecture", groups = {UpdateValidation.class})
+    @Null(message = "Video object key must be null when updating a new lecture", groups = {UpdateValidation.class})
     String videoObjectKey;
 }

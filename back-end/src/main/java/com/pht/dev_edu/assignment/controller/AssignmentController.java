@@ -7,6 +7,8 @@ import com.pht.dev_edu.assignment.service.AssignmentService;
 import com.pht.dev_edu.assignment.service.FeedbackService;
 import com.pht.dev_edu.assignment.service.SubmissionService;
 import com.pht.dev_edu.common.dto.ApiResponse;
+import com.pht.dev_edu.common.dto.RoleEnum;
+import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import jakarta.validation.Valid;
@@ -28,9 +30,22 @@ public class AssignmentController {
     SubmissionService submissionService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAssignments(@RequestParam UUID lectureId) {
+    public ResponseEntity<ApiResponse> getAssignments(
+            @RequestParam(required = false) UUID lectureId,
+            @RequestParam(required = false) UUID assignmentId
+    ) {
+        if (lectureId == null && assignmentId == null) {
+            throw new BadRequestException("Either lectureId or assignmentId must be provided");
+        }
+
         var username = SecurityContextUtils.getCurrentUsernameForController();
         var authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        if (assignmentId != null) {
+            var assignmentDetail = assignmentService.getAssignmentDetail(authorities, username, assignmentId);
+            return ApiUtils.buildSuccessResponse(assignmentDetail);
+        }
+
         var assignments = assignmentService.getAssignments(authorities, username, lectureId);
         return ApiUtils.buildSuccessResponse(assignments);
     }
@@ -54,10 +69,18 @@ public class AssignmentController {
     }
 
     @GetMapping("/feedbacks")
-    public ResponseEntity<ApiResponse> getFeedbacks(@RequestParam UUID submissionId) {
+    public ResponseEntity<ApiResponse> getFeedbacks(
+            @RequestParam UUID assignmentId,
+            @RequestParam (required = false) String studentUsername
+    ) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
         var authorities = SecurityContextUtils.getCurrentUserAuthorities();
-        var feedbacks = feedbackService.getFeedbacksBySubmission(authorities, username, submissionId);
+
+        if (authorities.contains(RoleEnum.STUDENT.name())) {
+            studentUsername = username;
+        }
+
+        var feedbacks = feedbackService.getFeedbacksByAssignment(authorities, username, assignmentId, studentUsername);
         return ApiUtils.buildSuccessResponse(feedbacks);
     }
 

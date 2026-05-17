@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface FeedbackRepository extends JpaRepository<FeedbackEntity, UUID> {
-    List<FeedbackEntity> findBySubmissionIdOrderByCreatedAtDesc(UUID submissionId);
+    List<FeedbackEntity> findByAssignmentIdAndStudentUsernameOrderByCreatedAtDesc(UUID assignmentId, String studentUsername);
 
     @Modifying
     @Query(value = """

@@ -17,6 +17,8 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class CourseResponse {
     UUID id;
+    UUID categoryId;
+
     String title;
     String thumbnailObjectKey;
     String thumbnailUrl;

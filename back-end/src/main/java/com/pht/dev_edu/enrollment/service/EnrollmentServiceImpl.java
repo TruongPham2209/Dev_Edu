@@ -7,7 +7,7 @@ import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.course.repo.CourseRepository;
 import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
-import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 import com.pht.dev_edu.enrollment.mapper.EnrollmentMapper;
@@ -34,7 +34,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     EnrollmentMapper enrollmentMapper;
 
     @Override
-    public CustomPaging<EnrolledCourseResponse> getEnrolledCourses(String username, String nextCursor) {
+    public CustomPaging<CourseItemDetailResponse> getEnrolledCourses(String username, String nextCursor) {
         var pageable = buildCoursePageable();
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
@@ -51,7 +51,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public CustomPaging<EnrolledCourseResponse> findCoursesAssignedToLecturer(String lecturerUsername, String nextCursor) {
+    public CustomPaging<CourseItemDetailResponse> findCoursesAssignedToLecturer(String lecturerUsername, String nextCursor) {
         var pageable = buildCoursePageable();
         var timeCursor = resolveTimeStampCursor(nextCursor);
 

@@ -5,7 +5,7 @@ import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.enrollment.dto.CourseDiscountProjection;
-import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.enrollment.dto.PurchaseEntityType;
 import com.pht.dev_edu.enrollment.repo.CartItemRepository;
 import com.pht.dev_edu.enrollment.repo.CourseDiscountRepository;
@@ -62,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
 
     // TODO: update dto to see original and discounted price
     @Override
-    public CustomPaging<EnrolledCourseResponse> getCoursesInCart(String username, String nextCursor) {
+    public CustomPaging<CourseItemDetailResponse> getCoursesInCart(String username, String nextCursor) {
         var pageable = PageRequest.of(0, 11);
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
@@ -83,13 +83,13 @@ public class OrderServiceImpl implements OrderService {
                               ))
                               .setScale(2, RoundingMode.HALF_UP);
 
-                    return EnrolledCourseResponse.builder()
+                    return CourseItemDetailResponse.builder()
                             .id(ci.getId())
                             .courseId(ci.getCourseId())
                             .title(ci.getCourseTitle())
-                            .description(ci.getCourseDescription())
                             .thumbnailUrl(ci.getCourseThumbnailUrl())
-                            .amount(discountedPrice)
+                            .originalPrice(ci.getOriginalPrice())
+                            .discountedPrice(discountedPrice)
                             .build();
                 },
                 CourseDiscountProjection::getCreatedAt,

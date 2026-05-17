@@ -17,10 +17,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         SELECT  e.id                    AS id,
                                 c.id                    AS courseId,
                                 c.title                 AS title,
-                                c.description           AS description,
                                 c.thumbnail_url         AS thumbnailUrl,
                                 e.enrolled_at           AS enrolledAt,
-                                oi.price                AS amount
+                                oi.price                AS discountedPrice
                         FROM enrollment e
                         LEFT JOIN course c
                             ON e.course_id = c.id
@@ -44,10 +43,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         SELECT  c.id                    AS id,
                                 c.id                    AS courseId,
                                 c.title                 AS title,
-                                c.description           AS description,
                                 c.thumbnail_url         AS thumbnailUrl,
                                 c.created_at            AS enrolledAt,
-                                c.price                 AS amount
+                                c.price                 AS discountedPrice
                         FROM course_lecturer cl
                         LEFT JOIN course c
                             ON cl.course_id = c.id

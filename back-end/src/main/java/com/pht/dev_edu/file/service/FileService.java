@@ -9,6 +9,8 @@ public interface FileService {
     // For download, we can generate a pre-signed URL for private files, but for public files, we can directly return the URL.
     FileUploadResponse getFileInfo(String fullObjectKey);
 
+    FileUploadResponse getFileInfoDetail(String fullObjectKey);
+
     // For validate file
     FileUploadResponse getFileInfo(String username, String fullObjectKey);
 

@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
-public class OrderController {
+public class CartItemController {
     OrderService orderService;
 
     @PreAuthorize("hasAuthority('STUDENT')")

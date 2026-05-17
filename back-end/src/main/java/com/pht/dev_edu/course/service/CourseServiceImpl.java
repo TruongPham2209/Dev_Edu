@@ -4,6 +4,7 @@ import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.common.dto.ItemStatus;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
@@ -93,6 +94,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest req) {
+        if(req.getStatus() == null) {
+            req.setStatus(ItemStatus.ACTIVE);
+        }
+
         Function<TimeStampCursor, Page<CourseDetailProjection>> queryFn;
         if (categoryId != null) {
             queryFn = cursor -> switch (req.getStatus()) {

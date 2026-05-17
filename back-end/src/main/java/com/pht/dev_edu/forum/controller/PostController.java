@@ -81,6 +81,15 @@ public class PostController {
         return ApiUtils.buildSuccessResponse("Post version deleted successfully");
     }
 
+    @GetMapping
+    public ResponseEntity<?> getPostDetail(
+            @RequestParam UUID id
+    ) {
+        var username = SecurityContextUtils.getCurrentUsername();
+        var postDetail = postService.getPostDetail(username, id);
+        return  ApiUtils.buildSuccessResponse(postDetail);
+    }
+
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody @Validated({CreateValidation.class}) PostRequest postRequest

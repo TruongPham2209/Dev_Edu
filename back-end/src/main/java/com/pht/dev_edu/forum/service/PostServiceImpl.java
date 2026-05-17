@@ -16,6 +16,7 @@ import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.forum.dto.*;
 import com.pht.dev_edu.forum.entity.PostEntity;
 import com.pht.dev_edu.forum.entity.PostVersionEntity;
+import com.pht.dev_edu.forum.mapper.PostMapper;
 import com.pht.dev_edu.forum.mapper.PostVersionMapper;
 import com.pht.dev_edu.forum.repo.PostRepository;
 import com.pht.dev_edu.forum.repo.PostVersionRepository;
@@ -44,6 +45,7 @@ public class PostServiceImpl implements PostService {
     PostRepository postRepository;
 
     FileService fileService;
+    PostMapper postMapper;
     PostVersionMapper postVersionMapper;
     Executor executor;
 
@@ -83,6 +85,19 @@ public class PostServiceImpl implements PostService {
         return postVersions.stream()
                 .map(postVersionMapper::entityToRes)
                 .toList();
+    }
+
+    @Override
+    public PostResponse getPostDetail(String actor, UUID postId) {
+        var post = postRepository.getPostDetailById(postId)
+                .orElseThrow(() -> {
+                    log.warn("Post {} not found for detail view by actor {}", postId, actor);
+                    return new DataNotFoundException("Post not found");
+                });
+
+        var detailResponse = postMapper.projectionToRes(post);
+        detailResponse.setIsMine(post.getAuthorUsername().equals(actor));
+        return detailResponse;
     }
 
     @Override

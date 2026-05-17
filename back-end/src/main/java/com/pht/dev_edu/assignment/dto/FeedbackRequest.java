@@ -10,8 +10,11 @@ import java.util.UUID;
 @Data
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class FeedbackRequest {
-    @NotNull(message = "Submission is required")
-    UUID submissionId;
+    @NotNull(message = "Assignment is required")
+    UUID assignmentId;
+
+    @NotBlank(message = "Student username is required")
+    String studentUsername;
 
     @NotBlank(message = "Feedback is required")
     String feedback;

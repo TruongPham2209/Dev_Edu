@@ -15,12 +15,16 @@ import java.util.UUID;
 @Data
 @Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class EnrolledCourseResponse {
+public class CourseItemDetailResponse {
     UUID id;
+
     UUID courseId;
     String title;
-    String description;
     String thumbnailUrl;
-    LocalDateTime enrolledAt;
-    BigDecimal amount;
+
+    LocalDateTime timestamp; // enrolledAt or createdAt
+    PaymentStatus status; // order status
+
+    BigDecimal originalPrice; // Null if item is not cart item
+    BigDecimal discountedPrice;
 }

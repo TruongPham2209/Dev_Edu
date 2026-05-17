@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface CourseDetailProjection {
     UUID getId();
 
+    UUID getCourseId();
+
     String getTitle();
 
     String getDescription();

@@ -1,7 +1,7 @@
 package com.pht.dev_edu.enrollment.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.enrollment.dto.EnrolledCourseResponse;
+import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
 
 import java.util.UUID;
 
@@ -10,5 +10,5 @@ public interface OrderService {
 
     void removeCourseFromCart(String username, UUID courseId);
 
-    CustomPaging<EnrolledCourseResponse> getCoursesInCart(String username, String nextCursor);
+    CustomPaging<CourseItemDetailResponse> getCoursesInCart(String username, String nextCursor);
 }

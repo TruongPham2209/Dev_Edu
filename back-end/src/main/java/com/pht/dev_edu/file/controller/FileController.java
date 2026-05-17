@@ -27,6 +27,12 @@ public class FileController {
         return ApiUtils.buildSuccessResponse(fileInfo);
     }
 
+    @GetMapping("/metadata")
+    public ResponseEntity<ApiResponse> getFileInfo(@RequestParam String fullObjectKey) {
+        var fileInfo = fileController.getFileInfoDetail(fullObjectKey);
+        return ApiUtils.buildSuccessResponse(fileInfo);
+    }
+
     @GetMapping("/download")
     public ResponseEntity<ApiResponse> getDownloadInfo(@RequestParam String fullObjectKey) {
         var fileInfo = fileController.getFileInfo(fullObjectKey);
