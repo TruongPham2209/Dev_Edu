@@ -11,26 +11,32 @@ export function StudentLayout({ children }: Readonly<StudentLayoutProps>) {
     <Box
       sx={{
         minHeight: "100vh",
-        position: "relative",
+        display: "flex",
+        flexDirection: "column",
         bgcolor: "#f8fafc",
         color: "#0f172a",
       }}
     >
-      <Box sx={{ position: "relative" }}>
-        <StudentHeader />
-        <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
-          <Box
-            sx={{
-              p: { xs: 2, md: 4 },
-              borderRadius: 3,
-              backgroundColor: "#ffffff",
-              boxShadow:
-                "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            {children}
-          </Box>
+      <StudentHeader />
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          py: { xs: 2, md: 4 }, // Maintain a consistent, professional vertical spacing
+        }}
+      >
+        <Container
+          maxWidth="xl"
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            px: { xs: 2, sm: 3, md: 4, lg: 6 }, // Proper responsive horizontal spacing
+          }}
+        >
+          {children}
         </Container>
       </Box>
     </Box>

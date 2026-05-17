@@ -15,6 +15,8 @@ export type PostStatus = "PENDING" | "SUPERSEDED" | "APPROVED" | "REJECTED";
 
 export type SubmissionLogStatus = "SUBMITTED" | "UNSUBMITTED";
 
+export type PaymentStatus = "COMPLETED" | "FAILED" | "CANCELLED";
+
 // --- Pagination ---
 
 export type CustomPaging<T> = {
@@ -57,6 +59,7 @@ export type CategoryRequest = {
 
 export type CourseResponse = {
   id: string;
+  categoryId: string;
   title: string;
   thumbnailObjectKey: string;
   thumbnailUrl: string | null;
@@ -69,19 +72,6 @@ export type CourseResponse = {
   lecturers: string[] | null;
 };
 
-export type CourseDetailProjection = {
-  id: string;
-  title: string;
-  description: string;
-  thumbnailUrl: string | null;
-  thumbnailObjectKey: string;
-  originalPrice: number | null;
-  discountedPercentage: number | null;
-  validTo: string | null;
-  createdBy: string;
-  createdAt: string;
-};
-
 export type CourseRequest = {
   id?: string | null;
   categoryId: string;
@@ -91,6 +81,8 @@ export type CourseRequest = {
   thumbnailObjectKey: string;
   lecturerUsernames: string[];
 };
+
+export type CourseDetailProjection = any;
 
 // --- Review ---
 
@@ -226,11 +218,13 @@ export type FeedbackResponse = {
   id: string;
   feedback: string;
   lecturer: string;
+  isMine: boolean;
   createdAt: string;
 };
 
 export type FeedbackRequest = {
-  submissionId: string;
+  assignmentId: string;
+  studentUsername: string;
   feedback: string;
 };
 
@@ -239,7 +233,14 @@ export type FeedbackRequest = {
 export type PostResponse = {
   id: string;
   title: string;
+  authorUsername: string;
+  authorFullName: string;
+  authorAvatarUrl: string | null;
+  thumbUrl: string | null;
+  shortDescription: string;
   content: string;
+  views: number;
+  comments: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -289,6 +290,21 @@ export type ForumCommentRequest = {
 
 // --- Enrollment / Payment / Cart ---
 
+export type CourseItemDetailResponse = {
+  id: string;
+
+  courseId: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+
+  originalPrice?: number;
+  discountedPrice: number;
+
+  timestamp: string;
+  status?: PaymentStatus;
+};
+
 export type PurchaseRequest = {
   entityIds: string[];
   entityType: EntityType;
@@ -301,7 +317,7 @@ export type PurchaseDetailResponse = {
   paymentUrl: string | null;
   totalAmount: number;
   entityType: string;
-  items: unknown[] | null;
+  items: CourseItemResponse[] | null; // TODO: Update if implements subscription
 };
 
 export type CourseItemResponse = {
@@ -333,13 +349,13 @@ export type FilePreSignUploadRequest = {
 };
 
 export type FileUploadResponse = {
-  originalFileName: string | null;
-  contentType: string | null;
-  fileSize: number | null;
-  uploadUrl: string;
+  originalFileName: string;
+  contentType: string;
+  fileSize?: number;
+  uploadUrl?: string;
   objectKey: string;
-  publicUrl: string | null;
-  downloadUrl: string | null;
+  publicUrl?: string;
+  downloadUrl?: string;
 };
 
 // --- User ---
@@ -350,4 +366,11 @@ export type RegisterUser = {
   password: string;
   fullName: string;
   role?: RoleEnum | null;
+};
+
+export type EnrollmentUserResponse = {
+  id: string;
+  username: string;
+  fullName: string;
+  enrolledAt: string | null;
 };

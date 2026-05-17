@@ -27,17 +27,21 @@ export function CourseCard({ course }: { course: CourseResponse }) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          border: "1px solid #e2e8f0",
-          borderRadius: 3,
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.04)",
-          transition: "all 0.2s ease-in-out",
+          border: "1px solid rgba(0,0,0,0.04)",
+          borderRadius: 4,
+          boxShadow: "0 4px 20px -5px rgba(0, 0, 0, 0.05)",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          overflow: "hidden",
           "&:hover": {
-            transform: "translateY(-4px)",
-            boxShadow: "0 12px 24px rgba(0, 0, 0, 0.1)",
+            transform: "translateY(-6px)",
+            boxShadow: "0 16px 32px -5px rgba(0, 0, 0, 0.1)",
+            "& .MuiCardMedia-root": {
+              transform: "scale(1.05)",
+            }
           },
         }}
       >
-        <Box sx={{ position: "relative", paddingTop: "56.25%" }}>
+        <Box sx={{ position: "relative", paddingTop: "56.25%", overflow: "hidden" }}>
         {course.thumbnailUrl || course.thumbnailObjectKey ? (
           <CardMedia
             component="img"
@@ -50,6 +54,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
               width: "100%",
               height: "100%",
               objectFit: "cover",
+              transition: "transform 0.5s ease",
             }}
           />
         ) : (
@@ -60,10 +65,11 @@ export function CourseCard({ course }: { course: CourseResponse }) {
               left: 0,
               width: "100%",
               height: "100%",
-              bgcolor: "#f1f5f9",
+              bgcolor: "#f8fafc",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              transition: "transform 0.5s ease",
             }}
           >
             <Typography variant="body2" color="text.secondary">
@@ -78,8 +84,8 @@ export function CourseCard({ course }: { course: CourseResponse }) {
           display: "flex",
           flexDirection: "column",
           flex: 1,
-          p: 2,
-          pb: "16px !important",
+          p: 2.5,
+          pb: "20px !important",
         }}
       >
         <Typography
@@ -88,6 +94,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
             fontWeight: 700,
             lineHeight: 1.4,
             mb: 1,
+            color: "#0f172a",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -101,35 +108,37 @@ export function CourseCard({ course }: { course: CourseResponse }) {
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
-            mb: 2,
+            color: "#64748b",
+            mb: 2.5,
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
             textOverflow: "ellipsis",
             fontSize: "0.875rem",
+            lineHeight: 1.5,
           }}
         >
           {course.description}
         </Typography>
 
         {course.lecturers && course.lecturers.length > 0 && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
             <Avatar
               sx={{
-                width: 24,
-                height: 24,
-                fontSize: "0.75rem",
-                bgcolor: "#e2e8f0",
-                color: "#64748b",
+                width: 28,
+                height: 28,
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                bgcolor: "#f1f5f9",
+                color: "#475569",
               }}
             >
               {course.lecturers[0].charAt(0)}
             </Avatar>
             <Typography
               variant="caption"
-              sx={{ color: "text.secondary", fontWeight: 500 }}
+              sx={{ color: "#475569", fontWeight: 600, fontSize: "0.8rem" }}
             >
               {course.lecturers.join(", ")}
             </Typography>
@@ -137,7 +146,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
         )}
 
         <Box sx={{ mt: "auto" }}>
-          <Divider sx={{ my: 1.5 }} />
+          <Divider sx={{ my: 2, borderColor: "#f1f5f9" }} />
           <Box
             sx={{
               display: "flex",
@@ -146,10 +155,10 @@ export function CourseCard({ course }: { course: CourseResponse }) {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Users size={16} color="#64748b" />
+              <Users size={16} color="#94a3b8" />
               <Typography
                 variant="caption"
-                sx={{ color: "text.secondary", fontWeight: 500 }}
+                sx={{ color: "#64748b", fontWeight: 600 }}
               >
                 1.2k
               </Typography>
@@ -160,7 +169,8 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                   variant="caption"
                   sx={{
                     textDecoration: "line-through",
-                    color: "text.disabled",
+                    color: "#94a3b8",
+                    fontWeight: 500,
                   }}
                 >
                   {course.originalPrice!.toLocaleString()}đ
@@ -170,7 +180,8 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                 variant="subtitle2"
                 sx={{
                   fontWeight: 800,
-                  color: isFree ? "#16a34a" : "#ef4444",
+                  color: isFree ? "#059669" : "#e11d48",
+                  fontSize: "1rem",
                 }}
               >
                 {isFree ? "Free" : `${displayPrice?.toLocaleString()}đ`}

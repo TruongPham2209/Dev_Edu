@@ -20,6 +20,14 @@ export async function getAssignments(
   );
 }
 
+export async function getAssignmentById(
+  assignmentId: string,
+): Promise<AssignmentResponse> {
+  return apiGet<AssignmentResponse>(
+    `/api/v1/assignments?assignmentId=${assignmentId}`,
+  );
+}
+
 export async function createAssignment(
   assignment: AssignmentRequest,
 ): Promise<AssignmentResponse> {
@@ -27,9 +35,7 @@ export async function createAssignment(
 }
 
 export async function deleteAssignment(assignmentId: string): Promise<void> {
-  return apiDelete<void>(
-    `/api/v1/assignments?assignmentId=${assignmentId}`,
-  );
+  return apiDelete<void>(`/api/v1/assignments?assignmentId=${assignmentId}`);
 }
 
 // --- Submissions ---
@@ -80,20 +86,22 @@ export async function getSubmissionTracking(
 // --- Feedbacks ---
 
 export async function getFeedbacks(
-  submissionId: string,
+  assignmentId: string,
+  studentUsername?: string,
 ): Promise<FeedbackResponse[]> {
+  const query = new URLSearchParams();
+  query.append("assignmentId", assignmentId);
+  if (studentUsername) query.append("studentUsername", studentUsername);
+
   return apiGet<FeedbackResponse[]>(
-    `/api/v1/assignments/feedbacks?submissionId=${submissionId}`,
+    `/api/v1/assignments/feedbacks?${query.toString()}`,
   );
 }
 
 export async function createFeedback(
   feedback: FeedbackRequest,
 ): Promise<FeedbackResponse> {
-  return apiPost<FeedbackResponse>(
-    "/api/v1/assignments/feedbacks",
-    feedback,
-  );
+  return apiPost<FeedbackResponse>("/api/v1/assignments/feedbacks", feedback);
 }
 
 export async function deleteFeedback(feedbackId: string): Promise<void> {

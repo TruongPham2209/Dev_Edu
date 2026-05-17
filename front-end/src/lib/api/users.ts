@@ -1,10 +1,5 @@
 import { apiPost, apiPut, apiGet } from "./client";
-import type {
-  RegisterUser,
-  FileUploadResponse,
-  FilePreSignUploadRequest,
-  UserResponse
-} from "./types";
+import type { RegisterUser, UserResponse } from "./types";
 
 // --- Users ---
 
@@ -26,9 +21,7 @@ export async function changePassword(
   });
 }
 
-export async function batchCreateUsers(
-  users: RegisterUser[],
-): Promise<string> {
+export async function batchCreateUsers(users: RegisterUser[]): Promise<string> {
   return apiPost<string>("/api/v1/users/batch-users", users);
 }
 
@@ -41,29 +34,4 @@ export async function setUsernameFromGoogle(
   username: string,
 ): Promise<string> {
   return apiPut<string>("/api/v1/users/username", { email, username });
-}
-
-// --- Files ---
-
-export async function getPreSignedUploadUrl(
-  request: FilePreSignUploadRequest,
-): Promise<FileUploadResponse> {
-  return apiPost<FileUploadResponse>("/api/v1/files/pre-signed-url", request);
-}
-
-export async function confirmImageUpload(
-  fullObjectKey: string,
-): Promise<string> {
-  return apiPost<string>(
-    `/api/v1/files/confirm-image-upload?fullObjectKey=${encodeURIComponent(fullObjectKey)}`,
-    {},
-  );
-}
-
-export async function getDownloadUrl(
-  fullObjectKey: string,
-): Promise<unknown> {
-  return apiGet<unknown>(
-    `/api/v1/files/download?fullObjectKey=${encodeURIComponent(fullObjectKey)}`,
-  );
 }

@@ -27,6 +27,10 @@ export async function deleteForumPost(postId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/forum/posts?postId=${postId}`);
 }
 
+export async function getForumPostById(postId: string): Promise<PostResponse> {
+  return apiGet<PostResponse>(`/api/v1/forum/posts?id=${postId}`);
+}
+
 // --- Feed / Search / Related ---
 
 export async function getForumFeed(
@@ -54,9 +58,7 @@ export async function searchForumPosts(
   );
 }
 
-export async function getRelatedPosts(
-  postId: string,
-): Promise<PostResponse[]> {
+export async function getRelatedPosts(postId: string): Promise<PostResponse[]> {
   return apiGet<PostResponse[]>(`/api/v1/forum/posts/${postId}/related`);
 }
 
@@ -80,9 +82,7 @@ export async function getPostVersionsByPostId(
   status?: string,
 ): Promise<unknown> {
   const query = status ? `?status=${status}` : "";
-  return apiGet<unknown>(
-    `/api/v1/forum/posts/versions/${postId}${query}`,
-  );
+  return apiGet<unknown>(`/api/v1/forum/posts/versions/${postId}${query}`);
 }
 
 export async function updatePostVersion(
@@ -91,9 +91,7 @@ export async function updatePostVersion(
   return apiPut<unknown>("/api/v1/forum/posts/versions", request);
 }
 
-export async function deletePostVersion(
-  postVersionId: string,
-): Promise<void> {
+export async function deletePostVersion(postVersionId: string): Promise<void> {
   return apiDelete<void>(
     `/api/v1/forum/posts/versions?postVersionId=${postVersionId}`,
   );
@@ -156,7 +154,5 @@ export async function createForumComment(
 }
 
 export async function deleteForumComment(commentId: string): Promise<void> {
-  return apiDelete<void>(
-    `/api/v1/forum/comments?commentId=${commentId}`,
-  );
+  return apiDelete<void>(`/api/v1/forum/comments?commentId=${commentId}`);
 }

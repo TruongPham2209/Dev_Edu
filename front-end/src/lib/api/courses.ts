@@ -48,6 +48,32 @@ export async function getCourses(params?: {
   return response;
 }
 
+/** Lecturer assigned courses (cursor-paginated) */
+export async function getAssignedCourses(
+  nextCursor?: string,
+): Promise<CustomPaging<CourseResponse>> {
+  const query = new URLSearchParams();
+  if (nextCursor) query.append("nextCursor", nextCursor);
+
+  const qs = query.toString();
+  const response = await apiGet<CustomPaging<CourseResponse> | null>(
+    `/api/v1/enrollments/assigned-courses${qs ? "?" + qs : ""}`,
+  );
+
+  if (!response || !Array.isArray(response.contents)) {
+    return {
+      contents: [],
+      totalPages: 0,
+      pageSize: 10,
+      totalElements: 0,
+      currentPage: 0,
+      nextCursor: null,
+    };
+  }
+
+  return response;
+}
+
 export async function getCourseById(
   courseId: string,
 ): Promise<CourseDetailProjection> {
@@ -126,9 +152,7 @@ export async function getCategories(
   if (status) query.append("status", status);
 
   const qs = query.toString();
-  return apiGet<CategoryResponse[]>(
-    `/api/v1/categories${qs ? "?" + qs : ""}`,
-  );
+  return apiGet<CategoryResponse[]>(`/api/v1/categories${qs ? "?" + qs : ""}`);
 }
 
 export async function createCategory(

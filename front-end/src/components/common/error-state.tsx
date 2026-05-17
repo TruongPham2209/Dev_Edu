@@ -3,10 +3,12 @@ import { AlertTriangle, RefreshCcw } from "lucide-react";
 
 export function ErrorState({
   title,
+  subtitle,
   onRetry,
   actionLabel,
 }: {
   title: string;
+  subtitle?: string;
   onRetry?: () => void;
   actionLabel?: string;
 }) {
@@ -27,14 +29,19 @@ export function ErrorState({
       <Typography variant="h6" sx={{ fontWeight: 700, color: "error.main" }}>
         {title}
       </Typography>
+      {subtitle && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 400, mx: "auto" }}>
+          {subtitle}
+        </Typography>
+      )}
       {onRetry && (
         <Button
           onClick={onRetry}
           variant="outlined"
           startIcon={<RefreshCcw size={18} />}
-          sx={{ mt: 2, borderRadius: 999 }}
+          sx={{ mt: 3, borderRadius: 999 }}
         >
-          {actionLabel || "Try again"}
+          {actionLabel || "Thử lại"}
         </Button>
       )}
     </Box>

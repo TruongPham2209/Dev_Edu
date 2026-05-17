@@ -4,11 +4,13 @@ import { Inbox, PlusCircle } from "lucide-react";
 export function EmptyState({
   title,
   subtitle,
+  icon,
   actionLabel,
   onAction,
 }: {
   title: string;
   subtitle?: string;
+  icon?: React.ReactNode;
   actionLabel?: string;
   onAction?: () => void;
 }) {
@@ -27,9 +29,12 @@ export function EmptyState({
             borderRadius: "50%",
             bgcolor: "rgba(37, 99, 235, 0.08)",
             color: "#2563eb",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Inbox size={24} />
+          {icon || <Inbox size={24} />}
         </Box>
       </Box>
       <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary" }}>
