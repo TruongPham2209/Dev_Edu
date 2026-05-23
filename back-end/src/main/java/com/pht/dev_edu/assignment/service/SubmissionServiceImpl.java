@@ -13,12 +13,12 @@ import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.FileContentTypeUtils;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,16 +44,16 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Override
     public CustomPaging<SubmissionResponse> getSubmissionsByAssignment(Set<String> authorities, String actor, UUID assignmentId, int page, int size) {
         assignmentPermissionService.checkModifyAssignmentPermission(authorities, actor, assignmentId);
-        var pageable = PageRequest.of(page, size, Sort.by("submittedAt").descending());
-        var submissionPage = submissionRepository.findByAssignmentIdOrderBySubmittedAtDesc(assignmentId, pageable);
-        return new CustomPaging<>(submissionPage, submissionMapper::entityToResponse);
+        var pageable = PageRequest.of(page, size);
+        var submissionPage = submissionRepository.findByAssignmentId(assignmentId, pageable);
+        return new CustomPaging<>(submissionPage, submissionMapper::projectionToRes);
     }
 
     @Override
     @Transactional
     public SubmissionResponse submit(String studentUsername, SubmissionRequest req) {
         assignmentPermissionService.checkViewAssignmentPermissionByAssignment(Set.of(RoleEnum.STUDENT.name()), studentUsername, req.getAssignmentId());
-        validateSubmissionFile(studentUsername, req.getFileObjectKey());
+        var fileInfo = getAndValidateSubmissionFile(studentUsername, req.getFileObjectKey());
 
         var submission = submissionMapper.reqToEntity(req);
         submission.setStudentUsername(studentUsername);
@@ -69,7 +69,11 @@ public class SubmissionServiceImpl implements SubmissionService {
             kafkaTemplate.send(KafkaTopicConstant.SUBMISSION_EVENT_TOPIC, submissionEvent);
         }, executor);
 
-        return submissionMapper.entityToResponse(submission);
+        var res = submissionMapper.entityToResponse(submission);
+        res.setFileName(fileInfo.getOriginalFileName());
+        res.setFileSize(fileInfo.getFileSize());
+        res.setContentType(fileInfo.getContentType());
+        return res;
     }
 
     @Override
@@ -92,12 +96,12 @@ public class SubmissionServiceImpl implements SubmissionService {
         }, executor);
     }
 
-    private void validateSubmissionFile(String author, String objectKey) {
+    private FileUploadResponse getAndValidateSubmissionFile(String author, String objectKey) {
         var fileInfo = fileService.getFileInfo(author, objectKey);
         boolean isValidContentType = FileContentTypeUtils.isValidContentType(fileInfo.getContentType(), FileContentTypeUtils.FileType.DOCUMENT, FileContentTypeUtils.FileType.ARCHIVE);
 
         if (isValidContentType) {
-            return;
+            return fileInfo;
         }
 
         KafkaUtils.sendDeleteFileEvent(objectKey);

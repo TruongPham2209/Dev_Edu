@@ -18,4 +18,7 @@ public class SubmissionResponse {
     String studentUsername;
     String fileObjectKey;
     LocalDateTime submittedAt;
+    String fileName;
+    String contentType;
+    Long fileSize;
 }

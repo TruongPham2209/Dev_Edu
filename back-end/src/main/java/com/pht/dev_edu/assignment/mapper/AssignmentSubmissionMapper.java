@@ -1,5 +1,6 @@
 package com.pht.dev_edu.assignment.mapper;
 
+import com.pht.dev_edu.assignment.dto.SubmissionProjection;
 import com.pht.dev_edu.assignment.dto.SubmissionRequest;
 import com.pht.dev_edu.assignment.dto.SubmissionResponse;
 import com.pht.dev_edu.assignment.entity.SubmissionEntity;
@@ -14,4 +15,6 @@ public interface AssignmentSubmissionMapper {
     @Mapping(target = "studentUsername", ignore = true)
     @Mapping(target = "id", ignore = true)
     SubmissionEntity reqToEntity(SubmissionRequest submission);
+
+    SubmissionResponse projectionToRes(SubmissionProjection projection);
 }

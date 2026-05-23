@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class UserInfoResponse {
-    UUID  userId;
+    UUID id;
 
     String username;
 
@@ -24,6 +24,10 @@ public class UserInfoResponse {
     String fullName;
 
     String avatarUrl;
+
+    Integer courseCount; // enrolledCourses for user, assignedCourses for lecturer, admin is null
+
+    Integer postedPosts;
 
     RoleEnum role;
 }
