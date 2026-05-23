@@ -211,12 +211,12 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             LEFT JOIN course_discount cd
                 ON c.id = cd.course_id
                 AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   unaccent(c.title)       ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+            AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
             """, countQuery = """
             SELECT  COUNT(*)
             FROM    course c
-            WHERE   unaccent(c.title) ILIKE unaccent(CONCAT('%', :keyword, '%'))
+            WHERE   immutable_unaccent(c.title) ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
             """, nativeQuery = true)
     Page<CourseDetailProjection> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
@@ -237,14 +237,14 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             LEFT JOIN course_discount cd
                 ON c.id = cd.course_id
                 AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   unaccent(c.title)       ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
-            AND     c.deleted_at            IS NULL
+            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+            AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+            AND     c.deleted_at                    IS NULL
             """, countQuery = """
             SELECT  COUNT(*)
             FROM    course c
-            WHERE   unaccent(c.title)   ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.deleted_at        IS NULL
+            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+            AND     c.deleted_at                    IS NULL
             """, nativeQuery = true)
     Page<CourseDetailProjection> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
@@ -265,14 +265,14 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             LEFT JOIN course_discount cd
                 ON c.id = cd.course_id
                 AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   unaccent(c.title)       ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
-            AND     c.deleted_at            IS NOT NULL
+            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+            AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+            AND     c.deleted_at                    IS NOT NULL
             """, countQuery = """
             SELECT  COUNT(*)
             FROM    course c
-            WHERE   unaccent(c.title)   ILIKE unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.deleted_at        IS NOT NULL
+            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+            AND     c.deleted_at                    IS NOT NULL
             """, nativeQuery = true)
     Page<CourseDetailProjection> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 

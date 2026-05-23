@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -31,7 +32,6 @@ import java.util.concurrent.Executor;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CourseDiscountServiceImpl implements CourseDiscountService {
     CourseDiscountRepository discountRepository;
-    CourseDiscountRepository courseDiscountRepository;
 
     Executor executor;
     CourseDiscountMapper discountMapper;
@@ -44,7 +44,8 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
                 : TimeStampCursor.getDefaultCursor(true);
         var pageable = PageRequest.of(0, 21);
 
-        var discountPage = discountRepository.getAllScheduledDiscountsWithCursor(cursor.getId(), cursor.getTimeStamp(), pageable);
+        var validStartTime = LocalDate.now().atStartOfDay();
+        var discountPage = discountRepository.getAllScheduledDiscountsWithCursor(validStartTime, cursor.getId(), cursor.getTimeStamp(), pageable);
 
         return PagingUtils.getPagedWithCursor(
                 discountPage,
@@ -57,7 +58,8 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
 
     @Override
     public List<CourseDiscountResponse> getScheduledDiscountsByCourse(UUID courseId) {
-        var discounts = discountRepository.getAllScheduledDiscountsByCourseId(courseId);
+        var validStartTime = LocalDate.now().atStartOfDay();
+        var discounts = discountRepository.getAllScheduledDiscountsByCourseId(validStartTime, courseId);
         if (discounts.isEmpty()) {
             log.info("No scheduled discounts found for courseId: {}", courseId);
             return List.of();
@@ -81,7 +83,7 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
         var validTo = (couponRequest.getValidTo().plusDays(1).atStartOfDay()).minusSeconds(1);
 
         if (couponRequest.getCourseId() != null
-                && courseDiscountRepository.existsOverlappingDiscount(
+                && discountRepository.existsOverlappingDiscount(
                 couponRequest.getCourseId(),
                 validFrom,
                 validTo
@@ -92,7 +94,7 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
         }
 
         if (couponRequest.getCourseId() == null
-                && courseDiscountRepository.existsOverlappingDiscount(
+                && discountRepository.existsOverlappingDiscount(
                 validFrom,
                 validTo
         )) {

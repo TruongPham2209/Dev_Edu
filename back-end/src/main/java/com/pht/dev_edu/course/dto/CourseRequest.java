@@ -13,6 +13,7 @@ import java.util.UUID;
 @Data
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class CourseRequest {
+    @Null( message = "ID must be null", groups = {CreateValidation.class})
     @NotNull(message = "ID cannot be null", groups = {UpdateValidation.class})
     UUID id;
 

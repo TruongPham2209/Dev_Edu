@@ -164,11 +164,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public CourseResponse createCourse(String author, CourseRequest course) {
-        if (getCourseEntityById(course.getId()) != null) {
-            log.error("Course with ID {} already exists.", course.getId());
-            throw new BadRequestException("Course already exists.");
-        }
-
         if (categoryService.getCategoryById(course.getCategoryId()) == null) {
             log.error("Category with ID {} not found.", course.getCategoryId());
             throw new DataNotFoundException("Category not found.");
@@ -188,7 +183,7 @@ public class CourseServiceImpl implements CourseService {
                 .map(lecturerUsername -> CourseLecturerEntity.builder()
                         .id(
                                 CourseLecturerId.builder()
-                                        .courseId(course.getId())
+                                        .courseId(courseEntity.getId())
                                         .lecturerUsername(lecturerUsername)
                                         .build()
                         )
@@ -223,6 +218,7 @@ public class CourseServiceImpl implements CourseService {
                 : getThumbnailUrl(author, course.getThumbnailObjectKey());
         updatedCourse.setThumbnailUrl(thumbnailUrl);
         updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
+        updatedCourse.setCreatedAt(existingCourse.getCreatedAt());
         courseRepository.save(updatedCourse);
 
         courseLecturerRepository.deleteByIdCourseId(course.getId());
@@ -231,7 +227,7 @@ public class CourseServiceImpl implements CourseService {
                 .map(lecturerUsername -> CourseLecturerEntity.builder()
                         .id(
                                 CourseLecturerId.builder()
-                                        .courseId(course.getId())
+                                        .courseId(updatedCourse.getId())
                                         .lecturerUsername(lecturerUsername)
                                         .build()
                         )
