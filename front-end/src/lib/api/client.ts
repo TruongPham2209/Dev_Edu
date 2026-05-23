@@ -51,7 +51,9 @@ export async function apiCall<T>(
 ): Promise<ApiResponse<T>> {
   const url = `${BASE_URL}${endpoint}`;
   // const token = await getAuthToken();
-  const token = `eyJraWQiOiJhZmRjYWI5NS1kODVhLTQwYzYtYTA1ZS02OTFkOGMwOTFiOWIiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJsZWN0dXJlciIsImF1ZCI6IndlYl9jbGllbnQiLCJuYmYiOjE3NzkwMDE1MDksInNjb3BlIjpbInByb2ZpbGUiLCJvcGVuaWQiXSwicm9sZXMiOlsiTEVDVFVSRVIiXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDIwIiwiZXhwIjoxNzc5MDA1MTA5LCJ0b2tlbl90eXBlIjoiYWNjZXNzIHRva2VuIiwiaWF0IjoxNzc5MDAxNTA5LCJqdGkiOiIzNTdiMmUxZS05ZDdkLTRjODItYTJjYi0xODQyZjNjMzMzNzUifQ.o2bk4UI2UvL9DF9F4bGE69chiau-kN1An8IUflqVoREY_Y_iOcW5ikYI8XKMK9ZLFHNvlnK7UzpKOIcc50fdwPwPZ0rRT2wWXebW8znOGeoql6H1vYNSdovnCNNOFXi5KHn8dvYs79cQ2h1FeNKWPQdOUpH8z8Neq7yMTTeMjIGRkfqjIwWA-BuL0YxbumYmXOPEJwiMIlT_0HzWjVy3w1ZDCWXf_SQbbkZBEp05hvtU14Kx2FtJ1lNdBikUjg66w93_yn32au8LRRA6lQ6-5sRK3CS-jHk4fYRjat6P4j95_HXvVl_HaPZNMG6R2DE2ra4fYs7_osJxvZ_gM5psFu-YtIBFjy4Bwg1D4ddS7kTrU4pYXD-aZ-VJPyCLtPTyUtsEGvOpTtJt7dfOCQo7a_ay8j74npSaNWWH3eeCeaR7p4NId14WVkdW01KWHBAT4VF4WQ4GgnieNQxjcXa5DtHQFCB6_u6DTg0tQisZEPOgQzuJ0M_ciQsrIVUaykIc`;
+  const token = `
+  eyJraWQiOiIwZjM5ZmU0NC1kOTNjLTRlZjUtODg2NC01NGUwY2FkMTJhN2IiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYl9jbGllbnQiLCJuYmYiOjE3Nzk1MzU5OTYsInNjb3BlIjpbInByb2ZpbGUiLCJvcGVuaWQiXSwicm9sZXMiOlsiQURNSU4iXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDIwIiwiZXhwIjoxNzc5NTM5NTk2LCJ0b2tlbl90eXBlIjoiYWNjZXNzIHRva2VuIiwiaWF0IjoxNzc5NTM1OTk2LCJqdGkiOiJiNzE0NmNmZS1hNWE1LTQxMDktYTVjOS1hNjhiNzAyMDQ3OGEifQ.ma1AJ6ldbxz198_lWZRsrdZwgj3W8UsNkccJb7o_cvIxkOnWuj8qlDfuLwCh-QUa2omcnCBcFyPY-2V_1B2TLTiSAU9XgN-X43caJ8nLq5SUECh8Wxhhc5Ic3cpIBcoZWDklKAbvDMGgpQeKaBohitxLkP2s7nI-PUIQopcMVntDPx_lpIj8FQkFqRPF9cUZXjYnEKo79SpB8disApAdcYmO9UtFmqfR9Qz7CLMKzvxX-T9njH4J5PUFiSP4ScPxSDPh8sO7UFCuiHp_vUYx43b8cvUKUGZiWi6FuTwKS2sqOuIoY0Ddrmq74GeqoVOmcUaHGR7GJ9gONzoCEZVW4lDlF6FPnE3rNjOL3PhiaW_Qexq1C_h0HBCwXFbjIwuD1PF6EoqYnnEh5ooMM44EWfYjUt_iK9X1CnsyB3n-jk-jTxCMIZDWGjWgWvsutoGAvqpBw0xpbXvEhHR0kWG5gQdShGN2JYUJBDnuSG6VRPfKDwDt0FacmxxvLI9v7gX0
+  `;
 
   const headers: Record<string, string> = {};
 
@@ -74,7 +76,7 @@ export async function apiCall<T>(
   }
 
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token.trim()}`;
   }
 
   const response = await fetch(url, {
@@ -118,9 +120,7 @@ function hasContentType(headers: HeadersInit): boolean {
 }
 
 export async function apiGet<T>(endpoint: string): Promise<T> {
-  console.log("[END POINT]", endpoint);
   const response = await apiCall<T>(endpoint, { method: "GET" });
-  console.log("[RESPONSE]", response);
   return response.data;
 }
 

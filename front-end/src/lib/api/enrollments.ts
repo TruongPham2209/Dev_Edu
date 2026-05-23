@@ -1,12 +1,12 @@
-import { apiGet, apiPost, apiDelete } from "./client";
+import { apiDelete, apiGet, apiPost } from "./client";
 import type {
-  CourseItemResponse,
-  PurchaseRequest,
-  PurchaseDetailResponse,
   CourseDiscountRequest,
-  CustomPaging,
+  CourseDiscountResponse,
   CourseItemDetailResponse,
+  CustomPaging,
   EnrollmentUserResponse,
+  PurchaseDetailResponse,
+  PurchaseRequest,
 } from "./types";
 
 // --- Cart ---
@@ -72,24 +72,30 @@ export async function getEnrolledUsers(
 
 // --- Course Discounts ---
 
-export async function getCourseDiscounts(
-  courseId?: string,
+export async function getCourseDiscountsByCourse(
+  courseId: string,
+): Promise<CourseDiscountResponse[]> {
+  return apiGet<CourseDiscountResponse[]>(
+    `/api/v1/course-discounts?courseId=${courseId}`,
+  );
+}
+
+export async function getGlobalCourseDiscounts(
   nextCursor?: string,
-): Promise<CustomPaging<unknown>> {
+): Promise<CustomPaging<CourseDiscountResponse>> {
   const query = new URLSearchParams();
-  if (courseId) query.append("courseId", courseId);
   if (nextCursor) query.append("nextCursor", nextCursor);
 
   const qs = query.toString();
-  return apiGet<CustomPaging<unknown>>(
+  return apiGet<CustomPaging<CourseDiscountResponse>>(
     `/api/v1/course-discounts${qs ? "?" + qs : ""}`,
   );
 }
 
 export async function createCourseDiscount(
   discount: CourseDiscountRequest,
-): Promise<unknown> {
-  return apiPost<unknown>("/api/v1/course-discounts", discount);
+): Promise<CourseDiscountResponse> {
+  return apiPost<CourseDiscountResponse>("/api/v1/course-discounts", discount);
 }
 
 export async function deleteCourseDiscount(discountId: string): Promise<void> {

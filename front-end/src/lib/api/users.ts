@@ -1,5 +1,10 @@
-import { apiPost, apiPut, apiGet } from "./client";
-import type { RegisterUser, UserResponse } from "./types";
+import { apiGet, apiPost, apiPut } from "./client";
+import type {
+  CustomPaging,
+  RegisterUser,
+  RoleEnum,
+  UserResponse,
+} from "./types";
 
 // --- Users ---
 
@@ -34,4 +39,19 @@ export async function setUsernameFromGoogle(
   username: string,
 ): Promise<string> {
   return apiPut<string>("/api/v1/users/username", { email, username });
+}
+
+export async function searchUsers(
+  page: number,
+  keyword: string,
+  role: RoleEnum,
+): Promise<CustomPaging<UserResponse>> {
+  const query = new URLSearchParams();
+  query.append("page", page.toString());
+  query.append("role", role);
+  query.append("keyword", keyword?.trim() || "");
+
+  return apiGet<CustomPaging<UserResponse>>(
+    `/api/v1/users?${query.toString()}`,
+  );
 }
