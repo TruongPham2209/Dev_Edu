@@ -37,8 +37,8 @@ export function FormDialog({
   headerIcon,
   cancelIcon = <X size={18} />,
   submitIcon,
-  submitText = "Xác nhận",
-  cancelText = "Hủy",
+  submitText = "Confirm",
+  cancelText = "Cancel",
   isSubmitDisabled = false,
   children,
   maxWidth = "md",
@@ -219,7 +219,7 @@ export function FormDialog({
                   fontWeight: 500,
                 }}
               >
-                Vui lòng kiểm tra thông tin trước khi xác nhận
+                Please check the information before confirming
               </Typography>
             </Box>
           </Box>
@@ -332,7 +332,7 @@ export function FormDialog({
             },
           }}
         >
-          {isSubmitting ? "Đang xử lý..." : submitText}
+          {isSubmitting ? "Processing..." : submitText}
         </Button>
       </DialogActions>
     </Dialog>

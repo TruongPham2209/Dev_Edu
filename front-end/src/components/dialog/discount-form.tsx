@@ -111,13 +111,13 @@ export function DiscountFormDialog({
       const newDiscount = await createCourseDiscount(requestPayload);
       showSuccess(
         courseId
-          ? "Đã tạo lịch giảm giá cho khóa học thành công!"
-          : "Đã tạo giảm giá chung thành công!",
+          ? "Successfully created course discount!"
+          : "Successfully created global discount!",
       );
       onSaved(newDiscount);
       onClose();
     } catch (err) {
-      handleError(err, "Không thể tạo lịch giảm giá");
+      handleError(err, "Failed to create discount");
     } finally {
       setLoading(false);
     }
@@ -128,9 +128,9 @@ export function DiscountFormDialog({
       open={open}
       onClose={onClose}
       onSubmit={handleSave}
-      title={courseId ? "Tạo Lịch Giảm Giá Khóa Học" : "Tạo Giảm Giá Chung"}
+      title={courseId ? "Create Course Discount" : "Create Global Discount"}
       headerIcon={<Tag size={20} />}
-      submitText="Lưu giảm giá"
+      submitText="Save Discount"
       isSubmitDisabled={loading || !isFormValid}
       maxWidth="sm"
     >
@@ -178,7 +178,7 @@ export function DiscountFormDialog({
         )}
 
         <FormInput
-          label="Mô tả chiến dịch giảm giá *"
+          label="Discount campaign description *"
           value={form.description}
           onChange={(e) =>
             setForm((prev) => ({ ...prev, description: e.target.value }))
@@ -187,14 +187,14 @@ export function DiscountFormDialog({
           disabled={loading}
           required
           error={touched.description && isDescriptionInvalid}
-          helperText="Mô tả chiến dịch là bắt buộc"
-          placeholder="Giảm giá 5/5"
+          helperText="Description is required"
+          placeholder="Discount for course 5/5"
           icon={<Tag size={18} />}
           iconPosition="start"
         />
 
         <FormInput
-          label="Phần trăm giảm giá (1-100) *"
+          label="Discount percentage (1-100) *"
           placeholder="10%"
           value={form.discountPercentage}
           type="number"
@@ -207,7 +207,7 @@ export function DiscountFormDialog({
           disabled={loading}
           required
           error={touched.discountPercentage && isPercentageInvalid}
-          helperText="Phần trăm giảm giá phải là số nguyên từ 1 đến 100"
+          helperText="Discount percentage must be an integer between 1 and 100"
           icon={<Percent size={18} />}
           iconPosition="start"
           slotProps={{
@@ -218,7 +218,7 @@ export function DiscountFormDialog({
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <FormInput
-              label="Thời gian bắt đầu *"
+              label="Start time *"
               type="date"
               value={form.validFrom}
               onChange={(e) =>
@@ -230,14 +230,14 @@ export function DiscountFormDialog({
               disabled={loading}
               required
               error={touched.validFrom && isValidFromInvalid}
-              helperText="Thời gian bắt đầu là bắt buộc"
+              helperText="Start time is required"
               icon={<Calendar size={18} />}
               iconPosition="start"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <FormInput
-              label="Thời gian kết thúc *"
+              label="End time *"
               type="date"
               value={form.validTo}
               onChange={(e) =>
@@ -252,9 +252,9 @@ export function DiscountFormDialog({
               }
               helperText={
                 touched.validTo && isValidToInvalid
-                  ? "Thời gian kết thúc là bắt buộc"
+                  ? "End time is required"
                   : touched.validTo && isDateOrderInvalid
-                    ? "Thời gian kết thúc phải sau thời gian bắt đầu"
+                    ? "End time must be after start time"
                     : ""
               }
               icon={<Calendar size={18} />}

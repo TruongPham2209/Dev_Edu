@@ -4,7 +4,14 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
-import { Box, IconButton, Paper, Stack, CircularProgress, Tooltip } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Paper,
+  Stack,
+  CircularProgress,
+  Tooltip,
+} from "@mui/material";
 import {
   Bold,
   Italic,
@@ -54,6 +61,7 @@ export const RichTextEditor = ({
   const editor = useEditor({
     extensions,
     content: value,
+    immediatelyRender: false,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -301,7 +309,11 @@ export const RichTextEditor = ({
             "& h1": { fontSize: "1.8rem" },
             "& h2": { fontSize: "1.4rem" },
             "& ul": { paddingLeft: "1.8em", listStyleType: "disc", mb: "1em" },
-            "& ol": { paddingLeft: "1.8em", listStyleType: "decimal", mb: "1em" },
+            "& ol": {
+              paddingLeft: "1.8em",
+              listStyleType: "decimal",
+              mb: "1em",
+            },
             "& li": { mb: "0.4em" },
             "& blockquote": {
               borderLeft: "4px solid",

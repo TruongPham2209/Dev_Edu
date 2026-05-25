@@ -32,7 +32,6 @@ export function LectureFormDialog({
 }: LectureFormDialogProps) {
   const { handleError, showSuccess } = useApiWithToast();
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [form, setForm] = useState<LectureRequest>({
     courseId,
@@ -103,7 +102,6 @@ export function LectureFormDialog({
         setForm({ courseId, title: "", summary: "", content: "" });
         setVideoPreviewUrl(null);
       }
-      setUploadProgress(0);
     }
   }, [open, initialData, courseId]);
 
@@ -236,7 +234,6 @@ export function LectureFormDialog({
 
       // 2. Upload video ONLY in CREATE mode or if not locked
       if (videoFile && !isVideoLocked) {
-        setUploadProgress(10);
         const preSignRes = await getPreSignedUploadUrl({
           fileName: videoFile.name,
           contentType: videoFile.type,
@@ -248,8 +245,6 @@ export function LectureFormDialog({
           throw new Error("Failed to get upload URL");
         }
 
-        setUploadProgress(30);
-
         // Custom upload with progress tracking
         await new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
@@ -260,7 +255,6 @@ export function LectureFormDialog({
             if (e.lengthComputable) {
               const percentComplete =
                 Math.round((e.loaded / e.total) * 60) + 30; // 30% to 90%
-              setUploadProgress(percentComplete);
             }
           };
 
@@ -277,26 +271,23 @@ export function LectureFormDialog({
         });
 
         payload.videoObjectKey = preSignRes.objectKey;
-        setUploadProgress(90);
       }
 
       // 3. Save lecture
       if (payload.id) {
         await updateLecture(payload);
-        showSuccess("Bài giảng đã được cập nhật thành công!");
+        showSuccess("Lecture updated successfully!");
       } else {
         await createLecture(payload);
-        showSuccess("Bài giảng đã được tạo thành công!");
+        showSuccess("Lecture created successfully!");
       }
 
-      setUploadProgress(100);
       onSaved();
       onClose();
     } catch (err) {
-      handleError(err, "Không thể lưu bài giảng");
+      handleError(err, "Failed to save lecture");
     } finally {
       setLoading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -305,17 +296,17 @@ export function LectureFormDialog({
       open={open}
       onClose={onClose}
       onSubmit={handleSave}
-      title={initialData ? "Chỉnh sửa bài giảng" : "Tạo bài giảng mới"}
+      title={initialData ? "Edit lecture" : "Create new lecture"}
       headerIcon={<AlignLeft size={20} />}
-      submitText={initialData ? "Cập nhật bài giảng" : "Tạo bài giảng"}
+      submitText={initialData ? "Update lecture" : "Create lecture"}
       isSubmitDisabled={loading || !isFormValid}
       maxWidth="md"
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
         <FormInput
-          label="Tiêu đề bài giảng *"
+          label="Lecture title *"
           value={form.title}
-          placeholder="Buổi 1: Thiết lập môi trường"
+          placeholder="Lecture 1: Setting up the environment"
           onChange={(e) =>
             setForm((prev) => ({ ...prev, title: e.target.value }))
           }
@@ -323,13 +314,13 @@ export function LectureFormDialog({
           disabled={loading}
           required
           error={touched.title && isTitleInvalid}
-          helperText="Tiêu đề là bắt buộc và không được rỗng"
+          helperText="Title is required"
           icon={<Type size={18} />}
           iconPosition="start"
         />
         <FormInput
-          label="Tóm tắt bài giảng *"
-          placeholder="Tìm hiểu và cài đặt các công cụ lập trình ..."
+          label="Lecture summary *"
+          placeholder="Learn and install programming tools ..."
           value={form.summary}
           onChange={(e) =>
             setForm((prev) => ({ ...prev, summary: e.target.value }))
@@ -338,14 +329,14 @@ export function LectureFormDialog({
           disabled={loading}
           required
           error={touched.summary && isSummaryInvalid}
-          helperText="Tóm tắt là bắt buộc và không được rỗng"
+          helperText="Summary is required"
           icon={<AlignLeft size={18} />}
           iconPosition="start"
         />
 
         <Box>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Nội dung bài giảng *
+            Course content *
           </Typography>
           <Box
             sx={{
@@ -375,7 +366,7 @@ export function LectureFormDialog({
               color="error"
               sx={{ mt: 0.5, display: "block" }}
             >
-              Nội dung bài giảng là bắt buộc và không được rỗng
+              Course content is required
             </Typography>
           )}
         </Box>
@@ -396,7 +387,7 @@ export function LectureFormDialog({
           onDrop={handleDrop}
         >
           <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-            Video bài giảng {isVideoLocked && "(Đã khóa)"}
+            Video lecture {isVideoLocked && "(Locked)"}
           </Typography>
 
           {videoPreviewUrl ? (
@@ -451,7 +442,7 @@ export function LectureFormDialog({
                 >
                   <Lock size={14} />
                   <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                    Đã khóa
+                    Locked
                   </Typography>
                 </Box>
               )}
@@ -488,8 +479,8 @@ export function LectureFormDialog({
               </Box>
               <Typography variant="body1" sx={{ fontWeight: 600 }}>
                 {isVideoLocked
-                  ? "Không thể tải lên video"
-                  : "Kéo thả hoặc click để tải lên video"}
+                  ? "Cannot upload video"
+                  : "Drag and drop or click to upload video"}
               </Typography>
               <Typography
                 variant="body2"
@@ -501,8 +492,8 @@ export function LectureFormDialog({
                 }}
               >
                 {isVideoLocked
-                  ? "Không cho phép thêm video mới khi cập nhật bài giảng. Vui lòng tạo bài giảng mới nếu bạn muốn tải lên video."
-                  : "Dung lượng tối đa: 200MB. Định dạng hỗ trợ: MP4, WebM"}
+                  ? "Cannot add new video when updating a lecture. Please create a new lecture if you want to upload a video."
+                  : "Maximum file size: 200MB. Supported formats: MP4, WebM"}
               </Typography>
             </Box>
           )}
@@ -523,8 +514,7 @@ export function LectureFormDialog({
             >
               <Lock size={16} />
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Không thể thay đổi hoặc xóa video bài giảng hiện có ở chế độ cập
-                nhật.
+                Cannot change or delete the video at the moment
               </Typography>
             </Box>
           )}

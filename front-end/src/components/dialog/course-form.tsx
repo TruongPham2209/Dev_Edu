@@ -298,54 +298,56 @@ export function CourseFormDialog({
                   gap: 1,
                 }}
               >
-                <SearchInput
-                  value={lecturerSearchQuery}
-                  onChange={setLecturerSearchQuery}
-                  onSearch={(val) => {
-                    // Enter press or search click triggers this; typically we rely on dropdown selection.
-                  }}
-                  onClear={() => setLecturerSearchQuery("")}
-                  onFocus={() => setLecturerInputFocused(true)}
-                  placeholder="Search & Assign Lecturers..."
-                  showDropdown={
-                    lecturerInputFocused &&
-                    (lecturerSearchResults.length > 0 ||
-                      isSearchingLecturers ||
-                      lecturerSearchQuery.trim().length > 0)
-                  }
-                  loading={isSearchingLecturers}
-                  dropdownItems={lecturerSearchResults.map((u) => ({
-                    label: u.fullName,
-                    value: u.username,
-                    original: u,
-                  }))}
-                  renderDropdownItem={(item) => (
-                    <Stack spacing={0.5}>
-                      <Typography
-                        sx={{ fontWeight: 600, fontSize: "0.9rem" }}
-                        className="search-item-text"
-                      >
-                        {item.original.fullName}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        @{item.original.username} • {item.original.email}
-                      </Typography>
-                    </Stack>
-                  )}
-                  onDropdownItemSelect={(username) => {
-                    if (!form.lecturerUsernames.includes(username)) {
-                      setForm((prev) => ({
-                        ...prev,
-                        lecturerUsernames: [
-                          ...prev.lecturerUsernames,
-                          username,
-                        ],
-                      }));
+                <Box sx={{ position: "relative", zIndex: 50, height: 56 }}>
+                  <SearchInput
+                    value={lecturerSearchQuery}
+                    onChange={setLecturerSearchQuery}
+                    onSearch={(val) => {
+                      // Enter press or search click triggers this; typically we rely on dropdown selection.
+                    }}
+                    onClear={() => setLecturerSearchQuery("")}
+                    onFocus={() => setLecturerInputFocused(true)}
+                    placeholder="Search & Assign Lecturers..."
+                    showDropdown={
+                      lecturerInputFocused &&
+                      (lecturerSearchResults.length > 0 ||
+                        isSearchingLecturers ||
+                        lecturerSearchQuery.trim().length > 0)
                     }
-                    setLecturerSearchQuery("");
-                  }}
-                  maxWidth="100%"
-                />
+                    loading={isSearchingLecturers}
+                    dropdownItems={lecturerSearchResults.map((u) => ({
+                      label: u.fullName,
+                      value: u.username,
+                      original: u,
+                    }))}
+                    renderDropdownItem={(item) => (
+                      <Stack spacing={0.5}>
+                        <Typography
+                          sx={{ fontWeight: 600, fontSize: "0.9rem" }}
+                          className="search-item-text"
+                        >
+                          {item.original.fullName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          @{item.original.username} • {item.original.email}
+                        </Typography>
+                      </Stack>
+                    )}
+                    onDropdownItemSelect={(username) => {
+                      if (!form.lecturerUsernames.includes(username)) {
+                        setForm((prev) => ({
+                          ...prev,
+                          lecturerUsernames: [
+                            ...prev.lecturerUsernames,
+                            username,
+                          ],
+                        }));
+                      }
+                      setLecturerSearchQuery("");
+                    }}
+                    maxWidth="100%"
+                  />
+                </Box>
                 {touched && errors.lecturers && (
                   <FormHelperText error sx={{ mx: 1.5 }}>
                     At least one lecturer is required

@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import type { UserResponse } from "@/lib/api/types";
 import { Avatar, Box, Skeleton, Typography } from "@mui/material";
 import { BookOpen, FileText, Shield, User, UserCheck } from "lucide-react";
 import { DataTable, ColumnDef } from "@/components/common/data-table";
+import { ImagePreview } from "@/components/common/image-preview";
 
 interface UserTableProps {
   users: UserResponse[];
@@ -18,6 +20,8 @@ export function UserTable({
   errorState,
   emptyState,
 }: UserTableProps) {
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const getRoleChip = (role: string) => {
     let icon = <User size={14} />;
     let label = "Học viên";
@@ -84,11 +88,17 @@ export function UserTable({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Avatar
             src={user.avatarUrl}
+            onClick={() => {
+              if (user.avatarUrl) {
+                setPreviewImage(user.avatarUrl);
+              }
+            }}
             sx={{
               width: 40,
               height: 40,
               fontWeight: 700,
               fontSize: "0.875rem",
+              cursor: user.avatarUrl ? "pointer" : "default",
               bgcolor:
                 user.role === "ADMIN"
                   ? "error.light"
@@ -187,15 +197,23 @@ export function UserTable({
   ];
 
   return (
-    <DataTable
-      columns={columns}
-      data={users}
-      loading={loading}
-      mode="infinite"
-      skeletonRowCount={5}
-      keyExtractor={(user) => user.id}
-      errorState={errorState}
-      emptyState={emptyState}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={users}
+        loading={loading}
+        mode="infinite"
+        skeletonRowCount={5}
+        keyExtractor={(user) => user.id}
+        errorState={errorState}
+        emptyState={emptyState}
+      />
+      <ImagePreview
+        open={!!previewImage}
+        src={previewImage}
+        onClose={() => setPreviewImage(null)}
+        alt="User Avatar Preview"
+      />
+    </>
   );
 }
