@@ -11,7 +11,7 @@ import { ReactNode } from "react";
 type ButtonActionProps = {
   tooltip?: ReactNode;
   icon: ReactNode;
-  variant?: "contained" | "soft";
+  variant?: "contained" | "soft" | "soft-dark" | "outline";
   color?: "primary" | "error" | "success" | "warning" | "info" | "default";
 
   /**
@@ -115,6 +115,54 @@ export default function ButtonAction({
             boxShadow: `0 6px 14px ${alpha(c.main, 0.16)}`,
           },
     };
+  } else if (variant === "soft-dark") {
+    styles = {
+      color: disabled
+        ? "action.disabled"
+        : color === "error"
+          ? theme.palette.error.dark
+          : c.dark,
+      bgcolor: disabled ? "transparent" : alpha(c.main, 0.15),
+      "&:hover": disabled
+        ? {}
+        : {
+            bgcolor: alpha(c.main, 0.25),
+            color: color === "error" ? theme.palette.error.dark : c.dark,
+            transform: "translateY(-2px) scale(1.05)",
+            boxShadow: `0 6px 14px ${alpha(c.main, 0.2)}`,
+          },
+    };
+  } else if (variant === "outline") {
+    const isDefault = color === "default";
+    styles = {
+      color: disabled
+        ? "action.disabled"
+        : isDefault
+          ? theme.palette.grey[600]
+          : color === "error"
+            ? theme.palette.error.main
+            : c.main,
+      border: "1px solid",
+      borderColor: disabled
+        ? "transparent"
+        : isDefault
+          ? theme.palette.grey[200]
+          : alpha(c.main, 0.3),
+      bgcolor: "white",
+      "&:hover": disabled
+        ? {}
+        : {
+            bgcolor: isDefault ? "#f8fafc" : alpha(c.main, 0.04),
+            borderColor: isDefault ? theme.palette.primary.light : c.main,
+            color: isDefault
+              ? theme.palette.primary.main
+              : color === "error"
+                ? theme.palette.error.dark
+                : c.dark,
+            transform: "translateY(-2px) scale(1.04)",
+            boxShadow: `0 8px 18px ${alpha(isDefault ? theme.palette.primary.main : c.main, 0.14)}`,
+          },
+    };
   }
 
   const button = (
@@ -122,9 +170,12 @@ export default function ButtonAction({
       disabled={disabled}
       {...props}
       sx={{
-        width: variant === "soft" ? 34 : 36,
-        height: variant === "soft" ? 34 : 36,
-        borderRadius: variant === "soft" ? 2 : 3,
+        width:
+          variant === "outline" ? 38 : variant.startsWith("soft") ? 34 : 36,
+        height:
+          variant === "outline" ? 38 : variant.startsWith("soft") ? 34 : 36,
+        borderRadius:
+          variant === "outline" ? 2 : variant.startsWith("soft") ? 2 : 3,
         transition: "all 0.2s ease",
         "&:active": disabled
           ? {}

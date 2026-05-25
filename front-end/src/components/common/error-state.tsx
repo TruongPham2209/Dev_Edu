@@ -4,11 +4,13 @@ import { AlertTriangle, RefreshCcw } from "lucide-react";
 export function ErrorState({
   title,
   subtitle,
+  iconAction = <RefreshCcw size={18} />,
   onRetry,
   actionLabel,
 }: {
   title: string;
   subtitle?: string;
+  iconAction?: React.ReactNode;
   onRetry?: () => void;
   actionLabel?: string;
 }) {
@@ -30,7 +32,11 @@ export function ErrorState({
         {title}
       </Typography>
       {subtitle && (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 400, mx: "auto" }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 1, maxWidth: 400, mx: "auto" }}
+        >
           {subtitle}
         </Typography>
       )}
@@ -38,7 +44,7 @@ export function ErrorState({
         <Button
           onClick={onRetry}
           variant="outlined"
-          startIcon={<RefreshCcw size={18} />}
+          startIcon={iconAction}
           sx={{ mt: 3, borderRadius: 999 }}
         >
           {actionLabel || "Thử lại"}

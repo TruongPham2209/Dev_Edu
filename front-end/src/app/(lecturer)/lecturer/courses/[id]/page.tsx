@@ -1,27 +1,25 @@
 "use client";
 
-import {
-  Box,
-  Skeleton,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-  Container,
-  Card,
-  CardContent,
-} from "@mui/material";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { AnimatedTabs } from "@/components/common/animated-tabs";
+import { ErrorState } from "@/components/common/error-state";
 import { getCourseById } from "@/lib/api/courses";
-import type { CourseDetailProjection } from "@/lib/api/types";
-import { EmptyState } from "@/components/common/empty-state";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { BookOpen, LayoutDashboard, Users, FileText } from "lucide-react";
+import { Box, Card, CardContent, Container, Typography } from "@mui/material";
+import {
+  ArrowLeft,
+  BookOpen,
+  FileText,
+  LayoutDashboard,
+  Users,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { LecturerCourseDetailSkeleton } from "./course-detail-skeleton";
 
-import { CourseHero } from "./components/course-hero";
-import { LecturesTab } from "./components/lectures-tab";
-import { StudentsTab } from "./components/students-tab";
+import { CourseResponse } from "@/lib/api/types";
+import { CourseHero } from "./course-hero";
+import { LecturesTab } from "./lectures-tab";
+import { StudentsTab } from "./students-tab";
 
 export default function LecturerCourseDetailPage() {
   const params = useParams();
@@ -29,9 +27,17 @@ export default function LecturerCourseDetailPage() {
   const courseId = params.id as string;
   const { handleError } = useApiWithToast();
 
-  const [course, setCourse] = useState<CourseDetailProjection | null>(null);
+  const [course, setCourse] = useState<CourseResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("overview");
+  const [visitedTabs, setVisitedTabs] = useState<string[]>(["overview"]);
+
+  const handleTabChange = (newValue: string) => {
+    setTab(newValue);
+    if (!visitedTabs.includes(newValue)) {
+      setVisitedTabs((prev) => [...prev, newValue]);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,23 +56,18 @@ export default function LecturerCourseDetailPage() {
   }, [courseId, handleError, router]);
 
   if (loading) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Stack spacing={4}>
-          <Skeleton variant="rounded" height={260} sx={{ borderRadius: 4 }} />
-          <Skeleton variant="rounded" height={60} sx={{ borderRadius: 2 }} />
-          <Skeleton variant="rounded" height={400} sx={{ borderRadius: 4 }} />
-        </Stack>
-      </Container>
-    );
+    return <LecturerCourseDetailSkeleton />;
   }
 
   if (!course) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <EmptyState
-          title="Course not found"
+      <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
+        <ErrorState
+          title="Failed to load course details"
           subtitle="The course you are looking for does not exist or you don't have access to it."
+          onRetry={() => router.push("/lecturer")}
+          actionLabel="Back to Dashboard"
+          iconAction={<ArrowLeft size={18} />}
         />
       </Container>
     );
@@ -90,47 +91,35 @@ export default function LecturerCourseDetailPage() {
           pt: 1,
         }}
       >
-        <Tabs
+        <AnimatedTabs
           value={tab}
-          onChange={(_, value) => setTab(value)}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: "1rem",
-              minHeight: 56,
-              px: 3,
+          onChange={handleTabChange}
+          colorTheme="primary"
+          tabs={[
+            {
+              value: "overview",
+              label: "Overview",
+              icon: <FileText size={18} />,
             },
-          }}
-        >
-          <Tab
-            value="overview"
-            label="Overview"
-            icon={<FileText size={18} />}
-            iconPosition="start"
-          />
-          <Tab
-            value="lectures"
-            label="Curriculum"
-            icon={<BookOpen size={18} />}
-            iconPosition="start"
-          />
-          <Tab
-            value="students"
-            label="Students"
-            icon={<Users size={18} />}
-            iconPosition="start"
-          />
-        </Tabs>
+            {
+              value: "lectures",
+              label: "Curriculum",
+              icon: <BookOpen size={18} />,
+            },
+            {
+              value: "students",
+              label: "Students",
+              icon: <Users size={18} />,
+            },
+          ]}
+        />
       </Box>
 
       <Box sx={{ pb: 8 }}>
-        {tab === "overview" && (
+        <Box sx={{ display: tab === "overview" ? "block" : "none" }}>
           <Card
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               border: "1px solid",
               borderColor: "divider",
               boxShadow: "0 4px 24px rgba(0,0,0,0.02)",
@@ -165,10 +154,19 @@ export default function LecturerCourseDetailPage() {
               </Box>
             </CardContent>
           </Card>
+        </Box>
+
+        {visitedTabs.includes("lectures") && (
+          <Box sx={{ display: tab === "lectures" ? "block" : "none" }}>
+            <LecturesTab courseId={courseId} />
+          </Box>
         )}
 
-        {tab === "lectures" && <LecturesTab courseId={courseId} />}
-        {tab === "students" && <StudentsTab courseId={courseId} />}
+        {visitedTabs.includes("students") && (
+          <Box sx={{ display: tab === "students" ? "block" : "none" }}>
+            <StudentsTab courseId={courseId} />
+          </Box>
+        )}
       </Box>
     </Container>
   );

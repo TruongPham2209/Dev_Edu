@@ -1,65 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Box, Breadcrumbs, Container, Typography } from "@mui/material";
+import { ArrowLeft, ChevronRight, Home, Info, Users } from "lucide-react";
 import Link from "next/link";
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Skeleton,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-  useTheme,
-  alpha,
-  Breadcrumbs,
-} from "@mui/material";
-import {
-  ChevronRight,
-  Home,
-  ArrowLeft,
-  AlertCircle,
-  FileText,
-  Info,
-  Users,
-  FileCode,
-  Paperclip,
-} from "lucide-react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import {
-  getAssignmentById,
-  getSubmissions,
-  getSubmissionTracking,
-  getFeedbacks,
   createFeedback,
   deleteFeedback,
+  getAssignmentById,
+  getFeedbacks,
+  getSubmissions,
+  getSubmissionTracking,
 } from "@/lib/api/assignments";
-import { getDownloadUrl, getFileMetadata } from "@/lib/api/files";
-import { getLectureById } from "@/lib/api/lectures";
 import { getCourseById } from "@/lib/api/courses";
+import { getDownloadUrl } from "@/lib/api/files";
+import { getLectureById } from "@/lib/api/lectures";
 import type {
   AssignmentResponse,
-  SubmissionResponse,
-  SubmissionLogResponse,
   FeedbackResponse,
   LectureResponse,
-  FileUploadResponse,
+  SubmissionLogResponse,
+  SubmissionResponse,
 } from "@/lib/api/types";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/date-utils";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 
 // Modular Sub-components
-import { AssignmentHero } from "./components/assignment-hero";
-import { AssignmentOverview } from "./components/assignment-overview";
-import { SubmissionsTable } from "./components/submissions-table";
-import { SubmissionDetailsModal } from "./components/submission-details-modal";
+import { AnimatedTabs } from "@/components/common/animated-tabs";
+import { AssignmentHeroInfo } from "@/components/common/assignment-hero-info";
+import { ErrorState } from "@/components/common/error-state";
+import { SubmissionDetailsDialog } from "@/components/dialog/submission-datail/page";
+import { useRouter } from "next/navigation";
+import { AssignmentDetailSkeleton } from "./assignment-detail-skeleton";
+import { AssignmentOverview } from "./assignment-overview";
+import { SubmissionsTable } from "./submissions-table";
 
 export default function LecturerAssignmentDetailPage() {
   const params = useParams();
-  const theme = useTheme();
+  const router = useRouter();
   const { handleError, showSuccess } = useApiWithToast();
 
   const assignmentId = params.assignmentId as string;
@@ -90,10 +70,6 @@ export default function LecturerAssignmentDetailPage() {
     useState<SubmissionResponse | null>(null);
 
   // Modal Details fetched in parallel
-  const [fileMetadata, setFileMetadata] = useState<FileUploadResponse | null>(
-    null,
-  );
-  const [fileMetadataLoading, setFileMetadataLoading] = useState(false);
 
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
   const [feedbacksLoading, setFeedbacksLoading] = useState(false);
@@ -122,7 +98,7 @@ export default function LecturerAssignmentDetailPage() {
       setCourse(courseData);
     } catch (err) {
       setPageError(true);
-      handleError(err, "Không thể tải thông tin chi tiết bài tập");
+      handleError(err, "Failed to load assignment details");
     } finally {
       setPageLoading(false);
     }
@@ -151,7 +127,7 @@ export default function LecturerAssignmentDetailPage() {
       }
       setSubmissionsHasMore(response.currentPage < response.totalPages - 1);
     } catch (error) {
-      handleError(error, "Không thể tải danh sách bài nộp");
+      handleError(error, "Failed to load submissions");
     } finally {
       setSubmissionsLoading(false);
     }
@@ -171,17 +147,16 @@ export default function LecturerAssignmentDetailPage() {
       if (response?.downloadUrl) {
         window.open(response.downloadUrl, "_blank");
       } else {
-        showSuccess("Link tải tệp đang được mở");
+        showSuccess("Download link is opening");
       }
     } catch (error) {
-      handleError(error, "Không thể tạo link tải tệp tin");
+      handleError(error, "Failed to create download link");
     }
   };
 
   // --- Open Submission Modal & Fetch Detail APIs in Parallel ---
   const openSubmissionDetails = async (submission: SubmissionResponse) => {
     setSelectedSubmission(submission);
-    setFileMetadataLoading(true);
     setFeedbacksLoading(true);
     setHistoryLoading(true);
     setHistoryPage(0);
@@ -189,11 +164,7 @@ export default function LecturerAssignmentDetailPage() {
     setHistoryHasMore(true);
 
     try {
-      const [metadata, feedbackList, trackingList] = await Promise.all([
-        getFileMetadata(submission.fileObjectKey).catch((e) => {
-          console.error("Failed to load file metadata", e);
-          return null;
-        }),
+      const [feedbackList, trackingList] = await Promise.all([
         getFeedbacks(assignmentId, submission.studentUsername).catch((e) => {
           console.error("Failed to load feedbacks", e);
           return [];
@@ -208,7 +179,6 @@ export default function LecturerAssignmentDetailPage() {
         }),
       ]);
 
-      setFileMetadata(metadata);
       setFeedbacks(feedbackList);
       if (trackingList) {
         setHistory(trackingList.contents);
@@ -217,9 +187,8 @@ export default function LecturerAssignmentDetailPage() {
         );
       }
     } catch (err) {
-      handleError(err, "Không thể tải thông tin chi tiết bài nộp");
+      handleError(err, "Failed to load submission details");
     } finally {
-      setFileMetadataLoading(false);
       setFeedbacksLoading(false);
       setHistoryLoading(false);
     }
@@ -235,7 +204,7 @@ export default function LecturerAssignmentDetailPage() {
         feedback: text,
       });
       setFeedbacks((prev) => [...prev, created]);
-      showSuccess("Đã thêm phản hồi và nhận xét");
+      showSuccess("Successfully added feedback");
 
       // Refetch history tracking to capture feedback event
       const trackingList = await getSubmissionTracking(
@@ -251,7 +220,7 @@ export default function LecturerAssignmentDetailPage() {
         );
       }
     } catch (error) {
-      handleError(error, "Không thể thêm phản hồi");
+      handleError(error, "Failed to add feedback");
       throw error;
     }
   };
@@ -261,7 +230,7 @@ export default function LecturerAssignmentDetailPage() {
     try {
       await deleteFeedback(feedbackId);
       setFeedbacks((prev) => prev.filter((item) => item.id !== feedbackId));
-      showSuccess("Đã xóa phản hồi");
+      showSuccess("Successfully deleted feedback");
 
       // Refetch history tracking to log deletion
       if (selectedSubmission) {
@@ -279,7 +248,7 @@ export default function LecturerAssignmentDetailPage() {
         }
       }
     } catch (error) {
-      handleError(error, "Không thể xóa phản hồi");
+      handleError(error, "Failed to delete feedback");
       throw error;
     }
   };
@@ -299,178 +268,35 @@ export default function LecturerAssignmentDetailPage() {
       setHistoryPage(nextPage);
       setHistoryHasMore(response.currentPage < response.totalPages - 1);
     } catch (error) {
-      handleError(error, "Không thể tải thêm lịch sử");
+      handleError(error, "Failed to load more history");
     } finally {
       setHistoryLoading(false);
     }
   };
 
-  // --- Helpers for Formatting ---
-  const formatBytes = (bytes?: number) => {
-    if (bytes === undefined || bytes === null) return "0 B";
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
   const getFileNameFromKey = (key: string) => {
-    if (!key) return "Tệp đính kèm";
+    if (!key) return "Attachment";
     return key.split("/").pop() || key;
-  };
-
-  const getFileIcon = (fileName?: string) => {
-    if (!fileName) return <FileText size={22} />;
-    const ext = fileName.split(".").pop()?.toLowerCase();
-    switch (ext) {
-      case "pdf":
-        return <FileText size={22} style={{ color: "#ef4444" }} />;
-      case "zip":
-      case "rar":
-      case "7z":
-      case "tar":
-      case "gz":
-        return <FileCode size={22} style={{ color: "#d97706" }} />;
-      case "png":
-      case "jpg":
-      case "jpeg":
-      case "gif":
-      case "webp":
-      case "svg":
-        return <Paperclip size={22} style={{ color: "#16a34a" }} />;
-      case "doc":
-      case "docx":
-      case "odt":
-        return <FileText size={22} style={{ color: "#2563eb" }} />;
-      default:
-        return <FileText size={22} style={{ color: "#64748b" }} />;
-    }
   };
 
   // --- SKELETON LOADER STATE (Avoids Layout Shift) ---
   if (pageLoading) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        {/* Breadcrumbs Skeleton */}
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 3 }}>
-          <Skeleton variant="circular" width={16} height={16} />
-          <Skeleton variant="text" width={80} height={20} />
-          <Skeleton variant="text" width={120} height={20} />
-          <Skeleton variant="text" width={150} height={20} />
-        </Stack>
-
-        {/* Hero Banner Skeleton */}
-        <Box
-          sx={{
-            p: 4,
-            borderRadius: 1,
-            bgcolor: "grey.100",
-            mb: 4,
-            height: 200,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
-        >
-          <Box>
-            <Skeleton variant="text" width="15%" height={24} sx={{ mb: 1 }} />
-            <Skeleton variant="text" width="50%" height={38} sx={{ mb: 1.5 }} />
-            <Skeleton variant="text" width="70%" height={24} />
-          </Box>
-          <Stack direction="row" spacing={3}>
-            <Skeleton variant="text" width={110} height={24} />
-            <Skeleton variant="text" width={90} height={24} />
-          </Stack>
-        </Box>
-
-        {/* Tabs Skeleton */}
-        <Stack
-          direction="row"
-          spacing={2}
-          sx={{ mb: 4, borderBottom: 1, borderColor: "divider", pb: 1 }}
-        >
-          <Skeleton
-            variant="rectangular"
-            width={140}
-            height={36}
-            sx={{ borderRadius: 1.5 }}
-          />
-          <Skeleton
-            variant="rectangular"
-            width={140}
-            height={36}
-            sx={{ borderRadius: 1.5 }}
-          />
-        </Stack>
-
-        {/* Content Skeleton */}
-        <Card
-          variant="outlined"
-          sx={{
-            borderRadius: 3,
-            p: 3,
-            border: "1px solid rgba(148, 163, 184, 0.14)",
-          }}
-        >
-          <Skeleton variant="text" width="25%" height={28} sx={{ mb: 2 }} />
-          <Skeleton variant="text" width="100%" height={20} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width="98%" height={20} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width="95%" height={20} sx={{ mb: 1 }} />
-          <Skeleton variant="text" width="60%" height={20} />
-        </Card>
-      </Container>
-    );
+    return <AssignmentDetailSkeleton />;
   }
 
   // --- ERROR FALLBACK STATE ---
   if (pageError || !assignment) {
     return (
       <Container maxWidth="md" sx={{ py: 10, textAlign: "center" }}>
-        <Stack spacing={3} sx={{ alignItems: "center" }}>
-          <Box
-            sx={{
-              width: 72,
-              height: 72,
-              borderRadius: "50%",
-              bgcolor: alpha(theme.palette.error.main, 0.1),
-              color: "error.main",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              mb: 1,
-            }}
-          >
-            <AlertCircle size={38} />
-          </Box>
-          <Box>
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 800, mb: 1, color: "#0f172a" }}
-            >
-              Không thể tải thông tin bài tập
-            </Typography>
-            <Typography variant="body1" sx={{ color: "text.secondary" }}>
-              Tài nguyên này có thể không tồn tại, đã bị xóa hoặc tài khoản của
-              bạn không có quyền truy cập.
-            </Typography>
-          </Box>
-          <Button
-            component={Link}
-            href="/lecturer"
-            variant="contained"
-            startIcon={<ArrowLeft size={16} />}
-            sx={{
-              borderRadius: 2.5,
-              textTransform: "none",
-              fontWeight: 700,
-              px: 3,
-              py: 1,
-            }}
-          >
-            Quay lại Dashboard
-          </Button>
-        </Stack>
+        <ErrorState
+          title="Failed to load assignment details"
+          subtitle="The resource may not exist, has been deleted, or your account does not have permission to access it."
+          onRetry={() =>
+            router.push(`/lecturer/courses/${courseId}/lectures/${lectureId}`)
+          }
+          actionLabel="Back to Lecture"
+          iconAction={<ArrowLeft size={16} />}
+        />
       </Container>
     );
   }
@@ -523,11 +349,10 @@ export default function LecturerAssignmentDetailPage() {
       </Breadcrumbs>
 
       {/* 2. Premium Hero Banner */}
-      <AssignmentHero
+      <AssignmentHeroInfo
         assignment={assignment}
         lectureTitle={lectureTitle}
         submissionsTotal={submissionsTotal}
-        formatServerDate={formatServerDate}
       />
 
       {/* 3. Sticky Navigation Tabs (Modern Pill/Slide Styling) */}
@@ -543,65 +368,30 @@ export default function LecturerAssignmentDetailPage() {
           pt: 1,
         }}
       >
-        <Tabs
+        <AnimatedTabs
           value={activeTab}
-          onChange={(_, val) => setActiveTab(val)}
-          sx={{
-            minHeight: 48,
-            "& .MuiTabs-indicator": {
-              height: 3,
-              borderRadius: "3px 3px 0 0",
-              bgcolor: "success.main",
+          onChange={setActiveTab}
+          colorTheme="success"
+          tabs={[
+            {
+              value: "overview",
+              label: "Overview",
+              icon: <Info size={16} />,
             },
-          }}
-        >
-          <Tab
-            value="overview"
-            icon={<Info size={16} />}
-            iconPosition="start"
-            label="Tổng quan"
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.95rem",
-              px: 3,
-              minHeight: 48,
-              transition: "all 0.2s",
-              color: "text.secondary",
-              "&.Mui-selected": {
-                color: "success.main",
-              },
-            }}
-          />
-          <Tab
-            value="submissions"
-            icon={<Users size={16} />}
-            iconPosition="start"
-            label={`Bài nộp`}
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.95rem",
-              px: 3,
-              minHeight: 48,
-              transition: "all 0.2s",
-              color: "text.secondary",
-              "&.Mui-selected": {
-                color: "success.main",
-              },
-            }}
-          />
-        </Tabs>
+            {
+              value: "submissions",
+              label: "Submissions",
+              icon: <Users size={16} />,
+            },
+          ]}
+        />
       </Box>
 
       {/* 4. Tab Context Area */}
       <Box sx={{ pb: 6 }}>
         {/* OVERVIEW TAB */}
         {activeTab === "overview" && (
-          <AssignmentOverview
-            assignment={assignment}
-            triggerDownload={triggerDownload}
-          />
+          <AssignmentOverview assignment={assignment} />
         )}
 
         {/* SUBMISSIONS TAB */}
@@ -620,13 +410,10 @@ export default function LecturerAssignmentDetailPage() {
       </Box>
 
       {/* --- SUBMISSION DETAILS MODAL OVERLAY --- */}
-      <SubmissionDetailsModal
+      <SubmissionDetailsDialog
         open={Boolean(selectedSubmission)}
         onClose={() => setSelectedSubmission(null)}
         selectedSubmission={selectedSubmission}
-        assignmentId={assignmentId}
-        fileMetadata={fileMetadata}
-        fileMetadataLoading={fileMetadataLoading}
         feedbacks={feedbacks}
         feedbacksLoading={feedbacksLoading}
         onAddFeedback={handleAddFeedback}
@@ -636,10 +423,6 @@ export default function LecturerAssignmentDetailPage() {
         historyHasMore={historyHasMore}
         onLoadMoreHistory={loadMoreHistory}
         triggerDownload={triggerDownload}
-        formatServerDate={formatServerDate}
-        getFileNameFromKey={getFileNameFromKey}
-        getFileIcon={getFileIcon}
-        formatBytes={formatBytes}
       />
     </Container>
   );

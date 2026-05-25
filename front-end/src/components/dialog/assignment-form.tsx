@@ -77,11 +77,11 @@ export function AssignmentFormDialog({
         description: description, // Pass the HTML formatted content
       });
 
-      showSuccess("Đã thêm bài tập thành công");
+      showSuccess("Added assignment successfully");
       onSuccess(newAssignment);
       onClose();
     } catch (err) {
-      handleError(err, "Không thể tạo bài tập");
+      handleError(err, "Cannot add assignment");
     } finally {
       setSubmitting(false);
     }
@@ -93,12 +93,12 @@ export function AssignmentFormDialog({
       onClose={handleCloseDialog}
       onSubmit={handleSubmit}
       headerIcon={<FolderPlus size={20} />}
-      title="Tạo bài tập mới"
-      submitText="Tạo bài tập"
+      title="Create assignment"
+      submitText="Create assignment"
       isSubmitDisabled={!isFormValid}
     >
       <FormInput
-        label="Tiêu đề bài tập *"
+        label="Assignment title *"
         value={title}
         onChange={(e) => {
           setTitle(e.target.value);
@@ -108,11 +108,11 @@ export function AssignmentFormDialog({
         }}
         onBlur={() => setTouched((prev) => ({ ...prev, title: true }))}
         error={touched.title && isTitleEmpty}
-        helperText="Vui lòng nhập tiêu đề bài tập"
+        helperText="Please enter assignment title"
         disabled={submitting}
         icon={<Type size={18} />}
         iconPosition="start"
-        placeholder="Bài tập tuần 1"
+        placeholder="Assignment for ..."
       />
 
       <Box>
@@ -120,7 +120,7 @@ export function AssignmentFormDialog({
           variant="subtitle2"
           sx={{ mb: 1, fontWeight: 700, color: "#1e293b" }}
         >
-          Hướng dẫn làm bài *
+          Instructions *
         </Typography>
         <Box
           sx={{
@@ -161,7 +161,7 @@ export function AssignmentFormDialog({
                 color="error"
                 sx={{ fontWeight: 500 }}
               >
-                Vui lòng nhập nội dung hướng dẫn làm bài
+                Please enter assignment instructions
               </Typography>
             )}
             {touched.description && isDescriptionOverLimit && (
@@ -170,7 +170,7 @@ export function AssignmentFormDialog({
                 color="error"
                 sx={{ fontWeight: 500 }}
               >
-                Nội dung vượt quá giới hạn 500 ký tự cho phép
+                Instructions exceed 500 characters
               </Typography>
             )}
           </Box>
@@ -181,7 +181,7 @@ export function AssignmentFormDialog({
               color: isDescriptionOverLimit ? "error.main" : "text.secondary",
             }}
           >
-            {plainTextLength} / 500 ký tự
+            {plainTextLength} / 500 characters
           </Typography>
         </Box>
       </Box>

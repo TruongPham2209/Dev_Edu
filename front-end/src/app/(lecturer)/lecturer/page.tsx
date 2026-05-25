@@ -1,16 +1,20 @@
 "use client";
 
+import { CourseManageCard } from "@/components/card/course-manage-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { CourseManageCard } from "@/components/course/course-manage-card";
 import { getAssignedCourses } from "@/lib/api/courses";
-import { getEnrollments } from "@/lib/api/enrollments";
 import { getLecturesByCourse } from "@/lib/api/lectures";
 import type { CourseResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { Box, Button, Container, Stack, Typography } from "@mui/material";
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { LayoutGrid, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CourseManageGridSkeleton } from "./course-manage-grid-skeleton";
+
+// The rest of the component definition remains same...
+// Let's make sure the target range covers the imports and the inline loading skeleton.
+// We'll replace the loading block in the page content.
 
 type CourseStats = {
   students: number;
@@ -29,7 +33,6 @@ export default function LecturerDashboardPage() {
 
   // Stats state
   const [stats, setStats] = useState<Record<string, CourseStats>>({});
-  const [loadingStats, setLoadingStats] = useState(false);
 
   // Ref for intersection observer
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -77,7 +80,6 @@ export default function LecturerDashboardPage() {
       const missingStats = courses.filter((c) => !stats[c.id]);
       if (missingStats.length === 0) return;
 
-      setLoadingStats(true);
       try {
         const lectureCounts = await Promise.all(
           missingStats.map(async (course) => {
@@ -102,7 +104,6 @@ export default function LecturerDashboardPage() {
         });
         setStats(nextStats);
       } finally {
-        setLoadingStats(false);
       }
     };
 
@@ -158,7 +159,7 @@ export default function LecturerDashboardPage() {
               variant="caption"
               sx={{ color: "#94a3b8", fontWeight: 600 }}
             >
-              Giảng viên
+              Lecturer
             </Typography>
             <Typography variant="caption" sx={{ color: "#cbd5e1" }}>
               /
@@ -167,7 +168,7 @@ export default function LecturerDashboardPage() {
               variant="caption"
               sx={{ color: "primary.main", fontWeight: 700 }}
             >
-              Quản lý Khóa học
+              Assigned Courses
             </Typography>
           </Stack>
 
@@ -206,7 +207,7 @@ export default function LecturerDashboardPage() {
                     fontSize: { xs: "1.5rem", md: "1.875rem" },
                   }}
                 >
-                  Quản lý Khóa học
+                  Assigned Courses
                 </Typography>
               </Stack>
               <Typography
@@ -217,9 +218,9 @@ export default function LecturerDashboardPage() {
                   maxWidth: 600,
                 }}
               >
-                Hệ thống điều phối và quản lý nội dung giảng dạy. Tại đây bạn có
-                thể theo dõi danh sách, cập nhật bài giảng và giám sát hoạt động
-                của học viên.
+                The teaching content coordination and management system. Here
+                you can track the list, update lectures and monitor the
+                activities of students.
               </Typography>
             </Box>
 
@@ -243,7 +244,7 @@ export default function LecturerDashboardPage() {
                       display: "block",
                     }}
                   >
-                    Đang quản lý
+                    Total Courses
                   </Typography>
                   <Typography
                     variant="h5"
@@ -252,43 +253,7 @@ export default function LecturerDashboardPage() {
                     {loading ? "..." : courses.length}
                   </Typography>
                 </Box>
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "#94a3b8",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      display: "block",
-                    }}
-                  >
-                    Active
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    sx={{ fontWeight: 800, color: "#10b981" }}
-                  >
-                    {loading ? "..." : courses.length}
-                  </Typography>
-                </Box>
               </Stack>
-
-              <Button
-                variant="contained"
-                disableElevation
-                sx={{
-                  borderRadius: 2.5,
-                  px: 3,
-                  py: 1,
-                  fontWeight: 700,
-                  textTransform: "none",
-                  fontSize: "0.875rem",
-                  bgcolor: "#0f172a",
-                  "&:hover": { bgcolor: "#1e293b" },
-                }}
-              >
-                Tạo khóa học mới
-              </Button>
             </Stack>
           </Box>
         </Box>
@@ -296,37 +261,16 @@ export default function LecturerDashboardPage() {
         {/* Content Section */}
         {error ? (
           <ErrorState
-            title="Đã có lỗi xảy ra"
-            subtitle="Không thể kết nối với máy chủ. Vui lòng kiểm tra lại đường truyền."
+            title="An error occurred"
+            subtitle="Could not connect to the server. Please check your connection."
             onRetry={handleRetry}
           />
         ) : loading && courses.length === 0 ? (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-                lg: "repeat(5, 1fr)",
-              },
-              gap: 2.5,
-            }}
-          >
-            {Array.from({ length: 10 }).map((_, index) => (
-              <CourseManageCard
-                key={index}
-                id=""
-                title=""
-                description=""
-                href=""
-                loading
-              />
-            ))}
-          </Box>
+          <CourseManageGridSkeleton />
         ) : courses.length === 0 ? (
           <EmptyState
-            title="Chưa có khóa học nào được phân công"
-            subtitle="Bạn hiện chưa có khóa học nào trong danh sách quản lý. Khi có khóa học mới, chúng sẽ xuất hiện tại đây."
+            title="No courses assigned"
+            subtitle="You don't have any courses assigned yet. When new courses are assigned, they will appear here."
             icon={<LayoutGrid size={48} />}
           />
         ) : (
@@ -343,23 +287,14 @@ export default function LecturerDashboardPage() {
               }}
             >
               {courses.map((course) => {
-                const courseStats = stats[course.id] || {
-                  students: 0,
-                  lectures: 0,
-                };
+                console.log("co: ", course);
                 return (
                   <CourseManageCard
                     key={course.id}
-                    id={course.id}
                     title={course.title}
                     description={course.description}
-                    thumbnailUrl={
-                      course.thumbnailUrl || course.thumbnailObjectKey
-                    }
-                    status={course.validTo ? "INACTIVE" : "ACTIVE"} // Simple logic for status if not provided
-                    studentCount={courseStats.students}
-                    lectureCount={courseStats.lectures}
-                    updatedAt={course.createdAt}
+                    thumbnailUrl={course.thumbnailUrl || ""}
+                    createdAt={course.createdAt}
                     href={`/lecturer/courses/${course.id}`}
                   />
                 );
@@ -389,7 +324,7 @@ export default function LecturerDashboardPage() {
                     color="text.secondary"
                     sx={{ fontWeight: 600 }}
                   >
-                    Đang tải thêm khóa học...
+                    Loading courses ...
                   </Typography>
                 </Stack>
               )}

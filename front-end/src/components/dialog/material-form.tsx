@@ -136,7 +136,7 @@ export function MaterialFormDialog({
   const handleFileSelection = (selectedFile: File) => {
     // Limit file size to 100MB for materials
     if (selectedFile.size > 100 * 1024 * 1024) {
-      setFileError("Dung lượng tệp không được vượt quá 100MB");
+      setFileError("File size exceeds 100MB");
       return;
     }
 
@@ -168,14 +168,14 @@ export function MaterialFormDialog({
     let hasError = false;
 
     if (!title.trim()) {
-      setTitleError("Vui lòng nhập tiêu đề tài liệu");
+      setTitleError("Please enter title");
       hasError = true;
     } else {
       setTitleError("");
     }
 
     if (!file) {
-      setFileError("Vui lòng chọn hoặc kéo thả tệp tài liệu");
+      setFileError("Please upload material");
       hasError = true;
     } else {
       setFileError("");
@@ -196,7 +196,7 @@ export function MaterialFormDialog({
       });
 
       if (!preSignRes.uploadUrl || !preSignRes.objectKey) {
-        throw new Error("Không thể tạo đường dẫn tải lên");
+        throw new Error("Could not generate upload URL");
       }
 
       setUploadProgress(20);
@@ -222,12 +222,11 @@ export function MaterialFormDialog({
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve();
           } else {
-            reject(new Error(`Tải lên thất bại: ${xhr.statusText}`));
+            reject(new Error(`Failed to upload: ${xhr.statusText}`));
           }
         };
 
-        xhr.onerror = () =>
-          reject(new Error("Lỗi kết nối trong quá trình tải lên"));
+        xhr.onerror = () => reject(new Error("Error connecting during upload"));
         xhr.send(file);
       });
 
@@ -241,12 +240,12 @@ export function MaterialFormDialog({
       });
 
       setUploadProgress(100);
-      showSuccess("Đã thêm tài liệu thành công");
+      showSuccess("Added material successfully");
 
       onSuccess(newMaterial);
       onClose();
     } catch (err) {
-      handleError(err, "Không thể tải lên tài liệu");
+      handleError(err, "Failed to upload material");
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -258,16 +257,16 @@ export function MaterialFormDialog({
       open={open}
       onClose={onClose}
       onSubmit={handleSubmit}
-      title="Tải lên tài liệu"
+      title="Upload Material"
       headerIcon={<UploadCloud size={20} />}
-      submitText="Tải lên tài liệu"
+      submitText="Upload"
       isSubmitDisabled={uploading || !file || !title.trim()}
       maxWidth="sm"
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
         <FormInput
-          label="Tiêu đề tài liệu *"
-          placeholder="Slide bài giảng buổi 1"
+          label="Material title *"
+          placeholder="Leture slide ..."
           value={title}
           onChange={(e) => {
             setTitle(e.target.value);
@@ -334,7 +333,7 @@ export function MaterialFormDialog({
                     sx={{ color: "text.secondary" }}
                   >
                     {(file.size / (1024 * 1024)).toFixed(2)} MB •{" "}
-                    {file.type || "Tệp tài liệu"}
+                    {file.type || "Document file"}
                   </Typography>
                 </Box>
               </Stack>
@@ -399,14 +398,14 @@ export function MaterialFormDialog({
                   variant="body1"
                   sx={{ fontWeight: 700, color: "#1e293b" }}
                 >
-                  Kéo thả tài liệu vào đây hoặc nhấp để chọn
+                  Drag and drop files here or click to upload
                 </Typography>
                 <Typography
                   variant="caption"
                   sx={{ color: "text.secondary", mt: 0.5, display: "block" }}
                 >
-                  Hỗ trợ các định dạng PDF, Docx, Xlsx, Pptx, Zip, Video, Ảnh...
-                  Tối đa 100MB.
+                  Support PDF, Docx, Xlsx, Pptx, Zip, Video, Image... up to
+                  100MB.
                 </Typography>
               </Box>
             </Stack>
@@ -439,7 +438,7 @@ export function MaterialFormDialog({
                 variant="caption"
                 sx={{ fontWeight: 700, color: "primary.main" }}
               >
-                Đang tải tài liệu lên đám mây...
+                Uploading material...
               </Typography>
               <Typography
                 variant="caption"
