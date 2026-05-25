@@ -19,6 +19,8 @@ public interface LectureProjection {
 
     String getVideoObjectKey();
 
+    Long getDuration();
+
     Integer getLectureOrder();
 
     LocalDateTime getUploadedAt();

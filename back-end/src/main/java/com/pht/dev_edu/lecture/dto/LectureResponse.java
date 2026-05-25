@@ -27,4 +27,6 @@ public class LectureResponse {
     LocalDateTime uploadedAt;
 
     Boolean isCompleted; // Only for student in course detail page
+
+    Long duration;
 }

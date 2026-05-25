@@ -43,6 +43,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         SELECT  c.id                    AS id,
                                 c.id                    AS courseId,
                                 c.title                 AS title,
+                                c.description           AS description,
                                 c.thumbnail_url         AS thumbnailUrl,
                                 c.created_at            AS enrolledAt,
                                 c.price                 AS discountedPrice

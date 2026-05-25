@@ -21,6 +21,7 @@ public class CourseItemDetailResponse {
     UUID courseId;
     String title;
     String thumbnailUrl;
+    String description;
 
     LocalDateTime timestamp; // enrolledAt or createdAt
     PaymentStatus status; // order status

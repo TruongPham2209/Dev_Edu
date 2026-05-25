@@ -18,6 +18,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                         l.summary           AS summary,
                         l.content           AS content,
                         l.video_object_key  AS videoObjectKey,
+                        l.duration          AS duration,
                         l.lecture_order     AS lectureOrder,
                         l.uploaded_at       AS uploadedAt,
                         CASE
@@ -60,6 +61,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                             WHEN lp.lecture_id IS NOT NULL THEN l.video_object_key
                         END                     AS video_object_key,
                         l.lecture_order         AS lectureOrder,
+                        l.duration              AS duration,
                         l.uploaded_at           AS uploadedAt,
                         CASE
                             WHEN lp.lecture_id IS NOT NULL THEN TRUE
@@ -82,6 +84,7 @@ public interface LectureRepository extends JpaRepository<LectureEntity, UUID> {
                         l.summary               AS summary,
                         l.content               AS content,
                         l.video_object_key      AS video_object_key,
+                        l.duration              AS duration,
                         l.lecture_order         AS lectureOrder,
                         l.uploaded_at           AS uploadedAt,
                         FALSE                   AS completed
