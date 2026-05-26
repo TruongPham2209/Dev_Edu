@@ -15,266 +15,511 @@ import java.util.UUID;
 
 public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            SELECT  c.id                                AS id,
+                    c.category_id                       AS categoryId,
+                    c.title                             AS title,
+                    c.description                       AS description,
+                    c.thumbnail_url                     AS thumbnailUrl,
+                    c.thumbnail_object_key              AS thumbnailObjectKey,
+                    c.created_at                        AS createdAt,
+                    c.created_by                        AS createdBy,
+                    c.price                             AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
+                    cd.discount_percentage              AS discountedPercentage,
+                    cd.valid_to                         AS validTo,
+            
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
             FROM    course c
             LEFT JOIN course_discount cd
                 ON c.id = cd.course_id
                 AND now() BETWEEN cd.valid_from AND cd.valid_to
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = c.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = c.id
+            ) r ON true
             WHERE   c.id            = :id
             AND     c.deleted_at    IS NULL
             """, nativeQuery = true)
     CourseDetailProjection findCourseDetail(UUID id);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            SELECT  c.id                                            AS id,
+                    c.category_id                                   AS categoryId,
+                    c.title                                         AS title,
+                    c.description                                   AS description,
+                    c.thumbnail_url                                 AS thumbnailUrl,
+                    c.thumbnail_object_key                          AS thumbnailObjectKey,
+                    c.created_at                                    AS createdAt,
+                    c.created_by                                    AS createdBy,
+                    c.price                                         AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
+                    cd.discount_percentage                          AS discountedPercentage,
+                    cd.valid_to                                     AS validTo,
+            
+                    COALESCE(e.total_enrollment, 0)                 AS totalEnrollment,
+                    COALESCE(r.total_review, 0)                     AS totalReview,
+                    COALESCE(r.avg_review, 0)                       AS avgReview,
+            
+                    (
+                        COALESCE(r.avg_review, 0)
+                        * LN(COALESCE(r.total_review, 0) + 1)
+                    )
+                    +
+                    LN(COALESCE(e.total_enrollment, 0) + 1)         AS score
+            
+            FROM course c
+            
             LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
+                ON  c.id = cd.course_id
                 AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
+            
+            LEFT JOIN LATERAL (
+                SELECT COUNT(*) AS total_enrollment
+                FROM enrollment e
+                WHERE e.course_id = c.id
+            ) e ON true
+            
+            LEFT JOIN LATERAL (
+                SELECT COUNT(*)        AS total_review,
+                       AVG(r.rating)   AS avg_review
+                FROM course_review r
+                WHERE r.course_id = c.id
+            ) r ON true
+            
+            WHERE c.deleted_at IS NULL
+            ORDER BY score DESC, c.created_at DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<CourseDetailProjection> findHighlightedCourses(int limit);
+
+    @Query(value = """
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
+            
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   (c.created_at, c.id) < (:lastCreatedAt, :lastId)
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(id)
             FROM    course
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
-            AND     deleted_at              IS NULL
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                AND     c.deleted_at            IS NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(c.id)
             FROM    course c
             WHERE   c.deleted_at IS NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
-            AND     deleted_at              IS NOT NULL
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                AND     deleted_at              IS NOT NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(id)
             FROM    course
             WHERE   deleted_at IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   c.category_id           = :categoryId
-            AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   c.category_id           = :categoryId
+                AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(id)
             FROM    course c
             WHERE   c.category_id = :categoryId
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
-            AND     c.category_id           = :categoryId
-            AND     c.deleted_at            IS NULL
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                AND     c.category_id           = :categoryId
+                AND     c.deleted_at            IS NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(id)
             FROM    course c
             WHERE   c.category_id   = :categoryId
             AND     c.deleted_at    IS NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
-            AND     c.category_id           = :categoryId
-            AND     c.deleted_at            IS NOT NULL
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                AND     c.category_id           = :categoryId
+                AND     c.deleted_at            IS NOT NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(id)
             FROM    course c
             WHERE   c.category_id   = :categoryId
             AND     c.deleted_at    IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-            AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+                AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(*)
             FROM    course c
             WHERE   immutable_unaccent(c.title) ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
             """, nativeQuery = true)
-    Page<CourseDetailProjection> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-            AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
-            AND     c.deleted_at                    IS NULL
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+                AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                AND     c.deleted_at                    IS NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(*)
             FROM    course c
             WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at                    IS NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     @Query(value = """
-            SELECT  c.id                        AS id,
-                    c.category_id               AS categoryId,
-                    c.title                     AS title,
-                    c.description               AS description,
-                    c.thumbnail_url             AS thumbnailUrl,
-                    c.thumbnail_object_key      AS thumbnailObjectKey,
-                    c.created_at                AS createdAt,
-                    c.created_by                AS createdBy,
-                    c.price                     AS originalPrice,
+            WITH valid_courses AS (
+                SELECT  c.id                        AS id,
+                        c.category_id               AS categoryId,
+                        c.title                     AS title,
+                        c.description               AS description,
+                        c.thumbnail_url             AS thumbnailUrl,
+                        c.thumbnail_object_key      AS thumbnailObjectKey,
+                        c.created_at                AS createdAt,
+                        c.created_by                AS createdBy,
+                        c.price                     AS originalPrice,
             
-                    cd.discount_percentage      AS discountedPercentage,
-                    cd.valid_to                 AS validTo
-            FROM    course c
-            LEFT JOIN course_discount cd
-                ON c.id = cd.course_id
-                AND now() BETWEEN cd.valid_from AND cd.valid_to
-            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-            AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
-            AND     c.deleted_at                    IS NOT NULL
+                        cd.discount_percentage      AS discountedPercentage,
+                        cd.valid_to                 AS validTo
+                FROM    course c
+                LEFT JOIN course_discount cd
+                    ON c.id = cd.course_id
+                    AND now() BETWEEN cd.valid_from AND cd.valid_to
+                WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+                AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                AND     c.deleted_at                    IS NOT NULL
+                ORDER BY c.created_at DESC, c.id DESC
+                LIMIT :limit
+            )
+            SELECT  vc.*,
+                    COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
+                    COALESCE(r.total_review, 0)         AS totalReview,
+                    COALESCE(r.avg_review, 0)           AS avgReview
+            FROM valid_courses vc
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)    AS total_enrollment
+                FROM    enrollment e
+                WHERE   e.course_id = vc.id
+            ) e ON true
+            LEFT JOIN LATERAL (
+                SELECT  COUNT(*)        AS total_review,
+                        AVG(r.rating)   AS avg_review
+                FROM    course_review r
+                WHERE   r.course_id = vc.id
+            ) r ON true
             """, countQuery = """
             SELECT  COUNT(*)
             FROM    course c
             WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
             AND     c.deleted_at                    IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+    Page<CourseDetailProjection> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
 
     boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
 

@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.domain.Sort;
-import org.springframework.util.StringUtils;
 
 @Data
 @NoArgsConstructor
@@ -22,11 +21,6 @@ public class CoursePageRequest extends AbstractPageRequest {
 
     @Override
     public Sort[] toSort() {
-        String sortBy = getSortBy();
-        if (!StringUtils.hasText(sortBy)) {
-            return new Sort[]{Sort.by(Sort.Direction.DESC, "created_at", "id")};
-        }
-
         return new Sort[0];
     }
 }

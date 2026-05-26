@@ -1,5 +1,7 @@
 package com.pht.dev_edu.course.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -55,6 +58,8 @@ public class CourseServiceImpl implements CourseService {
     FileService fileService;
     CategoryService categoryService;
 
+    RedisTemplate<String, Object> redisTemplate;
+    ObjectMapper objectMapper;
     CourseMapper courseMapper;
     Executor executor;
 
@@ -93,37 +98,66 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<CourseResponse> getHighlightedCourses() {
+        var key = RedisPrefixConstant.COURSE_HIGHLIGHTED;
+        var cachedData = redisTemplate.opsForValue().get(key);
+        if (cachedData != null) {
+            // Convert object to list response with objectMapper
+            return objectMapper.convertValue(
+                    cachedData,
+                    new TypeReference<List<CourseResponse>>() {
+                    }
+            );
+        }
+
+        var highlightedCourses = courseRepository.findHighlightedCourses(10);
+        if (highlightedCourses.isEmpty()) {
+            return List.of();
+        }
+
+        var globalDiscount = getGlobalDiscountPercentage();
+        var courses = highlightedCourses.stream().map(c -> convertProjectionToRes(c, globalDiscount)).toList();
+        redisTemplate.opsForValue().set(key, courses, RedisDurationConstant.HIGHLIGHTED_COURSE_DURATION);
+        return courses;
+    }
+
+    @Override
     public CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest req) {
-        if(req.getStatus() == null) {
+        if (req.getStatus() == null) {
             req.setStatus(ItemStatus.ACTIVE);
         }
 
         Function<TimeStampCursor, Page<CourseDetailProjection>> queryFn;
+        var pageable = req.toPageable();
+        int limit = StringUtils.hasText(req.getNextCursor())
+                ? pageable.getPageSize() - 1
+                : pageable.getPageSize();
+
         if (categoryId != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
                 case ALL ->
-                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
             };
         } else if (keyword != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
                 case DELETED ->
-                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
                 case ALL ->
-                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
             };
         } else {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit, pageable);
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), req.toPageable());
-                case ALL -> courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), req.toPageable());
+                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                case ALL -> courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), limit, pageable);
             };
         }
 
@@ -235,7 +269,6 @@ public class CourseServiceImpl implements CourseService {
                 )
                 .toList();
         courseLecturerRepository.saveAll(courseLecturers);
-        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
 
         TransactionUtils.runAfterCommitAsync(() -> {
             var tracking = TrackingEvent.builder()
@@ -248,6 +281,7 @@ public class CourseServiceImpl implements CourseService {
         }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());
+        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_HIGHLIGHTED);
 
         var updatedCourses = courseMapper.entityToRes(updatedCourse);
         updatedCourses.setLecturers(course.getLecturerUsernames());
@@ -287,6 +321,7 @@ public class CourseServiceImpl implements CourseService {
         existingCourse.setDeletedAt(LocalDateTime.now());
         courseRepository.save(existingCourse);
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + courseId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_HIGHLIGHTED);
     }
 
     private CourseEntity getCourseEntityById(UUID courseId) {

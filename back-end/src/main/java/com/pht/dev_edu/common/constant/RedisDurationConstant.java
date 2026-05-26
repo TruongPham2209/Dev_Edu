@@ -9,6 +9,7 @@ public class RedisDurationConstant {
     public static final Duration ROLE_DATA_DURATION = Duration.ofHours(6);
 
     public static final Duration COURSE_DATA_DURATION = Duration.ofHours(2);
+    public static final Duration HIGHLIGHTED_COURSE_DURATION = Duration.ofHours(12);
     public static final Duration CATEGORY_DATA_DURATION = Duration.ofHours(2);
 
     public static final Duration LECTURE_DATA_DURATION = Duration.ofHours(2);

@@ -60,6 +60,14 @@ public class CourseCategoryController {
     }
 
     @PreAuthorize("permitAll()")
+    @GetMapping("/courses/highlighted")
+    public ResponseEntity<ApiResponse> getHighlightedCourses() {
+        var courses = courseService.getHighlightedCourses();
+
+        return ApiUtils.buildSuccessResponse(courses);
+    }
+
+    @PreAuthorize("permitAll()")
     @GetMapping("/courses/{courseId}/")
     public ResponseEntity<ApiResponse> getCourseById(@PathVariable UUID courseId) {
         var course = courseService.getCourseDetails(courseId);

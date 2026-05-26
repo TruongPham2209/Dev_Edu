@@ -30,5 +30,9 @@ public class CourseResponse {
     BigDecimal discountedPrice;
     LocalDateTime validTo;
 
+    BigDecimal avgReview;
+    Long totalReview;
+    Long totalEnrollment;
+
     List<String> lecturers;
 }

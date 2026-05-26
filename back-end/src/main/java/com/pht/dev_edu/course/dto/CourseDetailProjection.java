@@ -10,7 +10,9 @@ import java.util.UUID;
 public interface CourseDetailProjection {
     UUID getId();
 
-    UUID getCourseId();
+    UUID getCategoryId();
+
+    String getCategoryName();
 
     String getTitle();
 
@@ -23,6 +25,12 @@ public interface CourseDetailProjection {
     BigDecimal getOriginalPrice();
 
     BigDecimal getDiscountedPercentage();
+
+    BigDecimal getAvgReview();
+
+    Long getTotalReview();
+
+    Long getTotalEnrollment();
 
     LocalDateTime getValidTo();
 

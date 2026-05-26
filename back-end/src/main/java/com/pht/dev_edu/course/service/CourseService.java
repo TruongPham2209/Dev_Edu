@@ -5,6 +5,7 @@ import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface CourseService {
@@ -12,6 +13,8 @@ public interface CourseService {
 
     // For cache and validate
     CourseResponse getCourseById(UUID courseId);
+
+    List<CourseResponse> getHighlightedCourses();
 
     CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest pageRequest);
 
