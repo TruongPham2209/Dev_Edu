@@ -2,7 +2,6 @@ import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 import type {
   CategoryRequest,
   CategoryResponse,
-  CourseDetailProjection,
   CourseRequest,
   CourseResponse,
   CustomPaging,
@@ -12,6 +11,10 @@ import type {
 } from "./types";
 
 // --- Courses ---
+
+export async function getFeaturedCourses(): Promise<CourseResponse[]> {
+  return apiGet<CourseResponse[]>("/api/v1/courses/highlighted");
+}
 
 export async function getCourses(params?: {
   sortBy?: string;
@@ -74,10 +77,8 @@ export async function getAssignedCourses(
   return response;
 }
 
-export async function getCourseById(
-  courseId: string,
-): Promise<CourseDetailProjection> {
-  return apiGet<CourseDetailProjection>(`/api/v1/courses/${courseId}/`);
+export async function getCourseById(courseId: string): Promise<CourseResponse> {
+  return apiGet<CourseResponse>(`/api/v1/courses/${courseId}/`);
 }
 
 export async function getAllAdminCourses(params?: {

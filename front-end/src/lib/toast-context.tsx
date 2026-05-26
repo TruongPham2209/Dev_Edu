@@ -5,6 +5,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -37,7 +38,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     // Auto remove after 4 seconds
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    }, 3000);
   }, []);
 
   const success = useCallback(
@@ -54,8 +55,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [show],
   );
 
+  const value = useMemo(
+    () => ({ show, success, error, info, warning }),
+    [show, success, error, info, warning],
+  );
+
   return (
-    <ToastContext.Provider value={{ show, success, error, info, warning }}>
+    <ToastContext.Provider value={value}>
       {children}
 
       {toasts.map((toast, index) => (

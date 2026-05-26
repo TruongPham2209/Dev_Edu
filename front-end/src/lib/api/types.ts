@@ -34,8 +34,10 @@ export type UserResponse = {
   username: string;
   email: string;
   fullName: string;
-  avatarUrl: string | null;
+  avatarUrl?: string;
   role: RoleEnum;
+  courseCount?: number;
+  postedPosts?: number;
 };
 
 // --- Category ---
@@ -45,7 +47,8 @@ export type CategoryResponse = {
   name: string;
   description: string;
   thumbnailObjectKey: string;
-  thumbnailUrl: string | null;
+  thumbnailUrl: string;
+  totalCourses: number;
 };
 
 export type CategoryRequest = {
@@ -60,15 +63,22 @@ export type CategoryRequest = {
 export type CourseResponse = {
   id: string;
   categoryId: string;
+
   title: string;
   thumbnailObjectKey: string;
   thumbnailUrl: string | null;
   description: string;
   createdAt: string;
+
   originalPrice: number | null;
   discountedPercentage: number | null;
   discountedPrice: number | null;
   validTo: string | null;
+
+  avgReview: number;
+  totalReview: number;
+  totalEnrollment: number;
+
   lecturers: string[] | null;
 };
 
@@ -81,8 +91,6 @@ export type CourseRequest = {
   thumbnailObjectKey: string;
   lecturerUsernames: string[];
 };
-
-export type CourseDetailProjection = any;
 
 // --- Review ---
 
@@ -108,6 +116,7 @@ export type LectureResponse = {
   summary: string;
   content: string | null;
   videoObjectKey: string | null;
+  duration: number;
   uploadedAt: string;
   isCompleted: boolean | null;
 };
@@ -196,6 +205,9 @@ export type SubmissionResponse = {
   studentUsername: string;
   fileObjectKey: string;
   submittedAt: string;
+  fileName: string;
+  contentType: string;
+  fileSize: number;
 };
 
 export type SubmissionRequest = {
@@ -240,6 +252,7 @@ export type PostResponse = {
   shortDescription: string;
   content: string;
   views: number;
+  status?: PostStatus;
   comments: number;
   createdAt: string;
   updatedAt: string;
@@ -339,6 +352,21 @@ export type CourseDiscountRequest = {
   validTo: string;
 };
 
+export type CourseDiscountResponse = {
+  id: string;
+  courseId?: string | null;
+  originalPrice?: number | null;
+  courseTitle?: string | null;
+  courseDescription?: string | null;
+  courseThumbnailUrl?: string | null;
+  discountDescription: string;
+  discountPercentage: number;
+  validFrom: string;
+  validTo: string;
+  createdBy: string;
+  createdAt: string;
+};
+
 // --- File ---
 
 export type FilePreSignUploadRequest = {
@@ -361,9 +389,9 @@ export type FileUploadResponse = {
 // --- User ---
 
 export type RegisterUser = {
-  username: string;
-  email: string;
-  password: string;
+  username: string; // validate "^[a-zA-Z][a-zA-Z0-9]{2,31}$"
+  email: string; // validate mail
+  password: string; // validate "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
   fullName: string;
   role?: RoleEnum | null;
 };

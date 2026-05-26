@@ -1,20 +1,20 @@
 "use client";
 
-import { Box, Card, CardContent, Grid, Skeleton, Stack } from "@mui/material";
-import { useParams } from "next/navigation";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { ErrorState } from "@/components/common/error-state";
 import { getCourseById } from "@/lib/api/courses";
 import type { CourseResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { ErrorState } from "@/components/common/error-state";
+import { Box, Grid, Stack } from "@mui/material";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AdminCourseDetailSkeleton } from "./course-detail-skeleton";
 
 // Custom Admin Course Detail Page Components
 import { CourseHero } from "./course-hero";
-import { LecturersList } from "./lecturers-list";
-import { StudentsList } from "./students-list";
-import { LecturesList } from "./lectures-list";
 import { DiscountsList } from "./discounts-list";
+import { LecturersList } from "./lecturers-list";
+import { LecturesList } from "./lectures-list";
+import { StudentsList } from "./students-list";
 
 export default function AdminCourseDetailPage() {
   const params = useParams();

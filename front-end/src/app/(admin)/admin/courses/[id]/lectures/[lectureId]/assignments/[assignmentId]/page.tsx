@@ -13,14 +13,14 @@ import { getDownloadUrl } from "@/lib/api/files";
 import { getLectureById } from "@/lib/api/lectures";
 import type {
   AssignmentResponse,
-  CourseDetailProjection,
+  CourseResponse,
   FeedbackResponse,
   LectureResponse,
   SubmissionLogResponse,
   SubmissionResponse,
 } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { Box, Container, Skeleton, Stack } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -43,7 +43,7 @@ export default function AdminAssignmentDetailPage() {
 
   // Core Data States
   const [assignment, setAssignment] = useState<AssignmentResponse | null>(null);
-  const [course, setCourse] = useState<CourseDetailProjection | null>(null);
+  const [course, setCourse] = useState<CourseResponse | null>(null);
   const [lecture, setLecture] = useState<LectureResponse | null>(null);
 
   // Submissions Paging States
