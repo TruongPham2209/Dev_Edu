@@ -7,8 +7,9 @@ import { MaterialFormDialog } from "@/components/dialog/material-form";
 import { getDownloadUrl } from "@/lib/api/files";
 import { deleteMaterial } from "@/lib/api/lectures";
 import type { MaterialResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate } from "@/lib/util/date-utils";
+import { getFileIcon } from "@/lib/util/file-utils";
 import {
   Box,
   Card,
@@ -17,16 +18,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import {
-  Download,
-  File,
-  FileArchive,
-  FilePlus,
-  FileText,
-  Image as ImageIcon,
-  Trash2,
-  Video,
-} from "lucide-react";
+import { Download, File, FilePlus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 interface MaterialsListProps {
@@ -48,43 +40,6 @@ export function MaterialsList({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletingTitle, setDeletingTitle] = useState<string>("");
   const [exitingIds, setExitingIds] = useState<string[]>([]);
-
-  // File type helper
-  const getFileIcon = (fileName: string) => {
-    const ext = fileName.split(".").pop()?.toLowerCase();
-
-    if (!ext) return <File size={24} style={{ color: "#64748b" }} />;
-
-    switch (ext) {
-      case "pdf":
-        return <FileText size={24} style={{ color: "#ef4444" }} />;
-      case "doc":
-      case "docx":
-        return <FileText size={24} style={{ color: "#3b82f6" }} />;
-      case "xls":
-      case "xlsx":
-        return <FileText size={24} style={{ color: "#10b981" }} />;
-      case "ppt":
-      case "pptx":
-        return <FileText size={24} style={{ color: "#f59e0b" }} />;
-      case "zip":
-      case "rar":
-      case "7z":
-        return <FileArchive size={24} style={{ color: "#8b5cf6" }} />;
-      case "mp4":
-      case "webm":
-      case "mkv":
-        return <Video size={24} style={{ color: "#ec4899" }} />;
-      case "png":
-      case "jpg":
-      case "jpeg":
-      case "gif":
-      case "svg":
-        return <ImageIcon size={24} style={{ color: "#06b6d4" }} />;
-      default:
-        return <File size={24} style={{ color: "#64748b" }} />;
-    }
-  };
 
   const handleDownload = async (material: MaterialResponse) => {
     try {
@@ -222,7 +177,7 @@ export function MaterialsList({
                               flexShrink: 0,
                             }}
                           >
-                            {getFileIcon(fileName)}
+                            {getFileIcon(fileName, 24)}
                           </Box>
                           <Box sx={{ minWidth: 0 }}>
                             <Typography

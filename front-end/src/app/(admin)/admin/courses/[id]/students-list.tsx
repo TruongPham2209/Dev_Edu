@@ -17,7 +17,7 @@ import type { EnrollmentUserResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { EmptyState } from "@/components/common/empty-state";
 import { InfiniteLoadButton } from "@/components/common/infinite-load-button";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { ListSkeleton } from "@/components/skeleton";
 
 interface StudentsListProps {

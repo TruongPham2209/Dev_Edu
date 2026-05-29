@@ -7,6 +7,7 @@ import type {
   ForumCommentResponse,
   ForumCommentRequest,
   CustomPaging,
+  UpdatedPostResponse,
 } from "./types";
 
 // --- Posts ---
@@ -67,12 +68,12 @@ export async function getRelatedPosts(postId: string): Promise<PostResponse[]> {
 export async function getPostVersions(
   status: string,
   lastCursor?: string,
-): Promise<CustomPaging<unknown>> {
+): Promise<CustomPaging<PostResponse>> {
   const query = new URLSearchParams();
   query.append("status", status);
   if (lastCursor) query.append("lastCursor", lastCursor);
 
-  return apiGet<CustomPaging<unknown>>(
+  return apiGet<CustomPaging<PostResponse>>(
     `/api/v1/forum/posts/versions?${query.toString()}`,
   );
 }
@@ -80,15 +81,17 @@ export async function getPostVersions(
 export async function getPostVersionsByPostId(
   postId: string,
   status?: string,
-): Promise<unknown> {
+): Promise<PostResponse[]> {
   const query = status ? `?status=${status}` : "";
-  return apiGet<unknown>(`/api/v1/forum/posts/versions/${postId}${query}`);
+  return apiGet<PostResponse[]>(
+    `/api/v1/forum/posts/versions/${postId}${query}`,
+  );
 }
 
 export async function updatePostVersion(
   request: PostVersionUpdateRequest,
-): Promise<unknown> {
-  return apiPut<unknown>("/api/v1/forum/posts/versions", request);
+): Promise<UpdatedPostResponse> {
+  return apiPut<UpdatedPostResponse>("/api/v1/forum/posts/versions", request);
 }
 
 export async function deletePostVersion(postVersionId: string): Promise<void> {

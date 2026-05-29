@@ -1,7 +1,7 @@
 "use client";
 
 import type { CourseDiscountResponse } from "@/lib/api/types";
-import { formatServerDate, parseServerDate } from "@/lib/date-utils";
+import { formatServerDate, parseServerDate } from "@/lib/util/date-utils";
 import { Avatar, Box, Skeleton, Typography } from "@mui/material";
 import { Calendar, Trash2, User } from "lucide-react";
 import ButtonAction from "@/components/common/button-action";

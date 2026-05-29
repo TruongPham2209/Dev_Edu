@@ -4,7 +4,7 @@ import { LecturerLayout } from "@/components/layout/lecturer/page";
 export const metadata: Metadata = {
   title: "Lecturer Studio",
   description:
-    "Không gian dành cho giảng viên quản lý lớp học và nội dung giảng dạy.",
+    "Lecturer Studio for managing course content and student assignments.",
 };
 
 export default function Layout({

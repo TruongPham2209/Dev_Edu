@@ -23,7 +23,7 @@ import {
   FileText,
 } from "lucide-react";
 import Link from "next/link";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import type { CourseResponse } from "@/lib/api/types";
 import { MetricItem } from "@/components/common/metric-item";
 import Image from "next/image";

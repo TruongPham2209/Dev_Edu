@@ -17,7 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { AssignmentHeroInfo } from "@/components/common/assignment-hero-info";
 
 interface AssignmentHeroSectionProps {

@@ -21,9 +21,9 @@ import { History, Info, X } from "lucide-react";
 import { useState } from "react";
 
 // Tabs sub-components
+import { CommentInput } from "@/components/common/comment-input";
 import { SubmissionHistoryTab } from "./submission-history-tab";
 import { SubmissionInfoTab } from "./submission-info-tab";
-import { CommentInput } from "@/components/common/comment-input";
 
 interface SubmissionDetailsDialogProps {
   open: boolean;
@@ -187,10 +187,6 @@ export function SubmissionDetailsDialog({
                   isAdmin={isAdmin}
                   feedbacks={feedbacks}
                   feedbacksLoading={feedbacksLoading}
-                  newFeedback={newFeedback}
-                  setNewFeedback={setNewFeedback}
-                  submittingFeedback={submittingFeedback}
-                  onSubmitFeedback={handleFeedbackSubmit}
                   onDeleteFeedbackClick={setConfirmFeedbackDelete}
                   triggerDownload={triggerDownload}
                 />

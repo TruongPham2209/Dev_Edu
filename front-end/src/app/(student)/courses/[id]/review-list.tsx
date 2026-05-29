@@ -1,7 +1,7 @@
 "use client";
 
 import { ReviewResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
   Box,

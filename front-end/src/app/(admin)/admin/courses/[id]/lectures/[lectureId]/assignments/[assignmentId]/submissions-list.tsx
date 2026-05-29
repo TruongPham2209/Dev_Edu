@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import { Download, Eye, Paperclip, Users } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 
 interface SubmissionsListProps {
   submissions: SubmissionResponse[];

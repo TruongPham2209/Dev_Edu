@@ -2,7 +2,7 @@
 
 import { getDownloadUrl } from "@/lib/api/files";
 import type { LectureResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Box,

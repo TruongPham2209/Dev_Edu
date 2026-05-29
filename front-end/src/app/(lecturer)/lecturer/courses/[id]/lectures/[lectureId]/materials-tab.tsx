@@ -7,8 +7,9 @@ import { MaterialFormDialog } from "@/components/dialog/material-form";
 import { getDownloadUrl } from "@/lib/api/files";
 import { deleteMaterial, getMaterials } from "@/lib/api/lectures";
 import type { MaterialResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate } from "@/lib/util/date-utils";
+import { getFileIcon } from "@/lib/util/file-utils";
 import {
   Box,
   Card,
@@ -18,16 +19,8 @@ import {
   Stack,
   Tooltip,
   Typography,
-  useTheme,
 } from "@mui/material";
-import {
-  Download,
-  File,
-  FilePlus2,
-  FileText,
-  Paperclip,
-  Trash2,
-} from "lucide-react";
+import { Download, File, FilePlus2, Paperclip, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface MaterialsTabProps {
@@ -36,7 +29,6 @@ interface MaterialsTabProps {
 }
 
 export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
-  const theme = useTheme();
   const { handleError, showSuccess } = useApiWithToast();
 
   const [materials, setMaterials] = useState<MaterialResponse[]>([]);
@@ -66,29 +58,6 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
   useEffect(() => {
     onCountChange?.(materials.length);
   }, [materials, onCountChange]);
-
-  // File type helper
-  const getFileIcon = (fileName: string) => {
-    const ext = fileName.split(".").pop()?.toLowerCase();
-
-    if (!ext) return <File size={24} style={{ color: "#64748b" }} />;
-
-    switch (ext) {
-      case "pdf":
-        return <FileText size={24} style={{ color: "#ef4444" }} />;
-      case "doc":
-      case "docx":
-        return <FileText size={24} style={{ color: "#3b82f6" }} />;
-      case "xls":
-      case "xlsx":
-        return <FileText size={24} style={{ color: "#10b981" }} />;
-      case "ppt":
-      case "pptx":
-        return <FileText size={24} style={{ color: "#f59e0b" }} />;
-      default:
-        return <File size={24} style={{ color: "#64748b" }} />;
-    }
-  };
 
   const handleDownload = async (material: MaterialResponse) => {
     try {
@@ -323,7 +292,7 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                               flexShrink: 0,
                             }}
                           >
-                            {getFileIcon(fileName)}
+                            {getFileIcon(fileName, 24)}
                           </Box>
                           <Box sx={{ minWidth: 0 }}>
                             <Typography

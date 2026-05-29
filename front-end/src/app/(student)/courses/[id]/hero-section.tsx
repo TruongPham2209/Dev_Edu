@@ -2,7 +2,7 @@
 
 import { getCategories } from "@/lib/api/courses";
 import { CourseResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
   AvatarGroup,

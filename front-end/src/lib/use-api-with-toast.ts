@@ -7,21 +7,21 @@ import type { ApiResponse } from "./api/client";
  * Maps documented API error statuses to user-friendly default messages.
  */
 const STATUS_MESSAGES: Record<string, string> = {
-  BAD_REQUEST: "Dữ liệu không hợp lệ.",
-  UNAUTHORIZED: "Vui lòng đăng nhập để tiếp tục.",
-  FORBIDDEN: "Bạn không có quyền thực hiện hành động này.",
-  NOT_FOUND: "Không tìm thấy dữ liệu.",
-  CONFLICT: "Dữ liệu bị trùng lặp.",
-  METHOD_NOT_ALLOWED: "Phương thức không được hỗ trợ.",
-  REQUEST_TIMEOUT: "Yêu cầu đã hết hạn.",
-  INTERNAL_SERVER_ERROR: "Lỗi máy chủ. Vui lòng thử lại sau.",
+  BAD_REQUEST: "Invalid data.",
+  UNAUTHORIZED: "Please login to continue.",
+  FORBIDDEN: "You don't have permission to perform this action.",
+  NOT_FOUND: "Data not found.",
+  CONFLICT: "Data is duplicated.",
+  METHOD_NOT_ALLOWED: "Unsupported method.",
+  REQUEST_TIMEOUT: "Request timeout.",
+  INTERNAL_SERVER_ERROR: "Internal server error. Please try again later.",
 };
 
 export function useApiWithToast() {
   const toast = useToast();
 
   const handleError = useCallback(
-    (error: unknown, defaultMessage = "Đã xảy ra lỗi") => {
+    (error: unknown, defaultMessage = "Something went wrong") => {
       if (error instanceof ApiError) {
         // Prefer server message, fall back to status-based message, then default
         const message =
@@ -39,7 +39,7 @@ export function useApiWithToast() {
   );
 
   const showSuccess = useCallback(
-    (message = "Thành công") => {
+    (message = "Success") => {
       toast.success(message);
     },
     [toast],

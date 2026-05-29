@@ -60,14 +60,14 @@ export function UserFormDialog({
   const isSubmitDisabled =
     tabValue === 0 ? !manualState.isValid : !importState.isValid;
   const onSubmit = tabValue === 0 ? manualState.fn : importState.fn;
-  const submitText = tabValue === 0 ? "Tạo người dùng" : `Lưu tất cả`;
+  const submitText = tabValue === 0 ? "Create users" : `Save all`;
 
   return (
     <FormDialog
       open={open}
       onClose={onClose}
       onSubmit={onSubmit}
-      title="Thêm người dùng mới"
+      title="Add new users"
       headerIcon={<UserPlus size={24} />}
       submitText={submitText}
       isSubmitDisabled={isSubmitDisabled}
@@ -86,14 +86,14 @@ export function UserFormDialog({
           >
             <Tab
               value={0}
-              label="Nhập thủ công"
+              label="Manual entry"
               icon={<User size={18} />}
               iconPosition="start"
               sx={{ textTransform: "none", fontWeight: 700, minHeight: 48 }}
             />
             <Tab
               value={1}
-              label="Tải lên Excel"
+              label="Upload Excel file"
               icon={<FileSpreadsheet size={18} />}
               iconPosition="start"
               sx={{ textTransform: "none", fontWeight: 700, minHeight: 48 }}

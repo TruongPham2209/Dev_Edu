@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { AssignmentFormDialog } from "@/components/dialog/assignment-form";
 import { deleteAssignment, getAssignments } from "@/lib/api/assignments";
 import type { AssignmentResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Box,

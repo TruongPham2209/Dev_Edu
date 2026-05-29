@@ -15,7 +15,7 @@ import { getEnrolledUsers } from "@/lib/api/enrollments";
 import type { EnrollmentUserResponse } from "@/lib/api/types";
 import { EmptyState } from "@/components/common/empty-state";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { ListSkeleton } from "@/components/skeleton";
 import { Users } from "lucide-react";
 

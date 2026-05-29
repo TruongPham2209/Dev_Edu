@@ -3,7 +3,7 @@
 import { FilterSelect } from "@/components/common/filter-select";
 import { FormDialog } from "@/components/common/form-dialog";
 import { FormInput } from "@/components/common/form-input";
-import { ImageUpload } from "@/components/common/image-upload";
+import { FileUpload } from "@/components/common/file-upload";
 import { RichTextEditor } from "@/components/common/rich-text-editor";
 import { SearchInput } from "@/components/common/search-input";
 import { getCourseById } from "@/lib/api/courses";
@@ -433,7 +433,7 @@ export function CourseFormDialog({
               >
                 Course Cover Image
               </Typography>
-              <ImageUpload
+              <FileUpload
                 value={editingCourse?.thumbnailUrl}
                 file={selectedFile}
                 onChange={setSelectedFile}
@@ -444,6 +444,7 @@ export function CourseFormDialog({
                     : ""
                 }
                 height={160}
+                accept="image/*"
               />
             </Box>
 

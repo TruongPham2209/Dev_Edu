@@ -1,7 +1,7 @@
 "use client";
 
 import type { CourseResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Card,

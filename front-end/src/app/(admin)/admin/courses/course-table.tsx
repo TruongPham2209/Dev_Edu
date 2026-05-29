@@ -3,7 +3,7 @@
 import ButtonAction from "@/components/common/button-action";
 import { DataTable, ColumnDef } from "@/components/common/data-table";
 import type { CourseResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { Avatar, Box, Skeleton, Typography } from "@mui/material";
 import { BookOpen, Edit, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";

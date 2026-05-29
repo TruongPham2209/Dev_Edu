@@ -1,7 +1,12 @@
 "use client";
 
 import type { FeedbackResponse, SubmissionResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
+import {
+  formatBytes,
+  getFileIcon,
+  getFileNameFromKey,
+} from "@/lib/util/file-utils";
 import {
   Avatar,
   Box,
@@ -12,67 +17,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import {
-  Download,
-  FileCode,
-  FileText,
-  MessageSquare,
-  Paperclip,
-  Trash2,
-} from "lucide-react";
-import React from "react";
-
-export const getFileNameFromKey = (key: string) => {
-  if (!key) return "Tệp đính kèm";
-  return key.split("/").pop() || key;
-};
-
-export const getFileIcon = (fileName?: string) => {
-  if (!fileName) return <FileText size={22} />;
-  const ext = fileName.split(".").pop()?.toLowerCase();
-  switch (ext) {
-    case "pdf":
-      return <FileText size={22} style={{ color: "#ef4444" }} />;
-    case "zip":
-    case "rar":
-    case "7z":
-    case "tar":
-    case "gz":
-      return <FileCode size={22} style={{ color: "#d97706" }} />;
-    case "png":
-    case "jpg":
-    case "jpeg":
-    case "gif":
-    case "webp":
-    case "svg":
-      return <Paperclip size={22} style={{ color: "#16a34a" }} />;
-    case "doc":
-    case "docx":
-    case "odt":
-      return <FileText size={22} style={{ color: "#2563eb" }} />;
-    default:
-      return <FileText size={22} style={{ color: "#64748b" }} />;
-  }
-};
-
-export const formatBytes = (bytes?: number) => {
-  if (bytes === undefined || bytes === null) return "0 B";
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-};
+import { Download, MessageSquare, Trash2 } from "lucide-react";
 
 interface SubmissionInfoTabProps {
   selectedSubmission: SubmissionResponse;
   isAdmin?: boolean;
   feedbacks: FeedbackResponse[];
   feedbacksLoading: boolean;
-  newFeedback: string;
-  setNewFeedback: (val: string) => void;
-  submittingFeedback: boolean;
-  onSubmitFeedback: (e: React.FormEvent) => void;
   onDeleteFeedbackClick: (fb: FeedbackResponse) => void;
   triggerDownload: (fileObjectKey: string) => Promise<void>;
 }
@@ -82,10 +33,6 @@ export function SubmissionInfoTab({
   isAdmin = false,
   feedbacks,
   feedbacksLoading,
-  newFeedback,
-  setNewFeedback,
-  submittingFeedback,
-  onSubmitFeedback,
   onDeleteFeedbackClick,
   triggerDownload,
 }: SubmissionInfoTabProps) {

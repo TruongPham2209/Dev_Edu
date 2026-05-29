@@ -1,17 +1,14 @@
-import { Suspense } from "react";
-import { Container, Grid, Stack, Box } from "@mui/material";
-import { getForumPostById } from "@/lib/api/forum";
-import { PostHeader } from "./_components/post-header";
-import { PostContent } from "./_components/post-content";
-import { PostComments } from "./_components/post-comments";
-import { RelatedPostsSidebar } from "./_components/related-posts-sidebar";
-import { PostDetailSkeleton } from "./_components/skeletons";
 import { EmptyState } from "@/components/common/empty-state";
-import { FileQuestion } from "lucide-react";
-
-export const metadata = {
-  title: "Chi tiết bài viết",
-};
+import { getForumPostById } from "@/lib/api/forum";
+import { Box, Container, Grid } from "@mui/material";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { Suspense } from "react";
+import { PostComments } from "./post-comments";
+import { PostContent } from "./post-content";
+import { PostHeader } from "./post-header";
+import { RelatedPostsSidebar } from "./related-posts-sidebar";
+import { PostDetailSkeleton } from "./skeletons";
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -19,15 +16,47 @@ interface PageProps {
 
 export default async function PostDetailPage(props: PageProps) {
   const searchParams = await props.searchParams;
-  const postId = typeof searchParams.id === "string" ? searchParams.id : undefined;
+  const postId =
+    typeof searchParams.id === "string" ? searchParams.id : undefined;
 
   if (!postId) {
     return (
       <Container maxWidth="xl" sx={{ py: 8 }}>
-        <EmptyState 
-          title="Không tìm thấy bài viết" 
-          subtitle="Đường dẫn không hợp lệ hoặc thiếu mã bài viết."
-        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <EmptyState
+            title="Post Not Found"
+            subtitle="Invalid path or missing post ID."
+          />
+          <Link
+            href="/forum"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#2563eb",
+              color: "#ffffff",
+              padding: "8px 22px",
+              borderRadius: "999px",
+              textDecoration: "none",
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              marginTop: "16px",
+              gap: "8px",
+              transition:
+                "background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+              boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)",
+            }}
+          >
+            <ArrowLeft size={18} />
+            Back to Forum
+          </Link>
+        </Box>
       </Container>
     );
   }
@@ -44,25 +73,11 @@ async function PostDetailContent({ postId }: { postId: string }) {
   try {
     post = await getForumPostById(postId);
   } catch (error) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 8 }}>
-        <EmptyState 
-          title="Không tìm thấy bài viết" 
-          subtitle="Bài viết không tồn tại hoặc đã bị xóa."
-        />
-      </Container>
-    );
+    return <ErrorPageContent />;
   }
 
   if (!post) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 8 }}>
-        <EmptyState 
-          title="Không tìm thấy bài viết" 
-          subtitle="Bài viết không tồn tại hoặc đã bị xóa."
-        />
-      </Container>
-    );
+    return <ErrorPageContent />;
   }
 
   return (
@@ -79,11 +94,64 @@ async function PostDetailContent({ postId }: { postId: string }) {
 
         {/* Right Side: Related Posts Sidebar */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Suspense fallback={<Box sx={{ position: { xs: 'static', md: 'sticky' }, top: { md: 88 } }}>Đang tải bài viết liên quan...</Box>}>
+          <Suspense
+            fallback={
+              <Box
+                sx={{
+                  position: { xs: "static", md: "sticky" },
+                  top: { md: 88 },
+                }}
+              >
+                Loading related posts...
+              </Box>
+            }
+          >
             <RelatedPostsSidebar postId={postId} />
           </Suspense>
         </Grid>
       </Grid>
+    </Container>
+  );
+}
+
+function ErrorPageContent() {
+  return (
+    <Container maxWidth="xl" sx={{ py: 8 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <EmptyState
+          title="Post Not Found"
+          subtitle="Invalid path or missing post ID."
+        />
+        <Link
+          href="/forum"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#2563eb",
+            color: "#ffffff",
+            padding: "8px 22px",
+            borderRadius: "999px",
+            textDecoration: "none",
+            fontWeight: 500,
+            fontSize: "0.875rem",
+            marginTop: "16px",
+            gap: "8px",
+            transition:
+              "background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+            boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)",
+          }}
+        >
+          <ArrowLeft size={18} />
+          Back to Forum
+        </Link>
+      </Box>
     </Container>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import type { AssignmentResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { Box, Stack, Typography } from "@mui/material";
 import { Calendar, ClipboardCheck, FileText, Users } from "lucide-react";
 

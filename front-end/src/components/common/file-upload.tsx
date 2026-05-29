@@ -1,11 +1,24 @@
 "use client";
 
-import { Box, FormHelperText, IconButton, Stack, Typography } from "@mui/material";
-import { Image as ImageIcon, UploadCloud, X } from "lucide-react";
+import {
+  Box,
+  FormHelperText,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import {
+  File as FileIcon,
+  UploadCloud,
+  X,
+  FileText,
+  Video,
+} from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
+import { getFileAcceptString, isValidFileType } from "@/lib/util/file-utils";
 
-interface ImageUploadProps {
-  value?: string | null; // Existing image URL from database
+interface FileUploadProps {
+  value?: string | null; // Existing file URL from database
   file: File | null; // Local selected file
   onChange: (file: File | null) => void;
   onClear?: () => void;
@@ -14,9 +27,11 @@ interface ImageUploadProps {
   maxSizeMB?: number;
   width?: string | number;
   height?: string | number;
+  accept?: string;
+  fileType?: "image" | "video" | "document";
 }
 
-export function ImageUpload({
+export function FileUpload({
   value,
   file,
   onChange,
@@ -26,7 +41,9 @@ export function ImageUpload({
   maxSizeMB = 5,
   width = "100%",
   height = 200,
-}: ImageUploadProps) {
+  accept,
+  fileType = "image",
+}: FileUploadProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,9 +71,11 @@ export function ImageUpload({
     (selectedFile: File) => {
       setLocalError(null);
 
-      // Check if it's an image
-      if (!selectedFile.type.startsWith("image/")) {
-        setLocalError("Only image files are allowed.");
+      // Validate file type
+      if (!isValidFileType(selectedFile.type, fileType)) {
+        setLocalError(
+          `Unsupported file format. Please upload a valid ${fileType}.`,
+        );
         return;
       }
 
@@ -69,7 +88,7 @@ export function ImageUpload({
 
       onChange(selectedFile);
     },
-    [maxSizeMB, onChange]
+    [maxSizeMB, onChange],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -95,7 +114,7 @@ export function ImageUpload({
         validateAndProcessFile(droppedFile);
       }
     },
-    [validateAndProcessFile]
+    [validateAndProcessFile],
   );
 
   const handleFileChange = useCallback(
@@ -105,7 +124,7 @@ export function ImageUpload({
         validateAndProcessFile(selectedFile);
       }
     },
-    [validateAndProcessFile]
+    [validateAndProcessFile],
   );
 
   const handleButtonClick = useCallback(() => {
@@ -124,7 +143,7 @@ export function ImageUpload({
         fileInputRef.current.value = "";
       }
     },
-    [onChange, onClear]
+    [onChange, onClear],
   );
 
   const activeError = error || Boolean(localError);
@@ -145,8 +164,8 @@ export function ImageUpload({
           borderColor: activeError
             ? "error.main"
             : isDragActive
-            ? "primary.main"
-            : "rgba(15, 23, 42, 0.15)",
+              ? "primary.main"
+              : "rgba(15, 23, 42, 0.15)",
           bgcolor: isDragActive
             ? "rgba(37, 99, 235, 0.02)"
             : "rgba(15, 23, 42, 0.01)",
@@ -170,16 +189,40 @@ export function ImageUpload({
       >
         {activePreview ? (
           <>
-            <Box
-              component="img"
-              src={activePreview}
-              alt="Preview"
-              sx={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
+            {fileType === "image" ? (
+              <Box
+                component="img"
+                src={activePreview}
+                alt="Preview"
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : fileType === "video" ? (
+              <Box
+                component="video"
+                src={activePreview}
+                controls
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  bgcolor: "black",
+                }}
+              />
+            ) : (
+              <Stack
+                spacing={1.5}
+                sx={{ alignItems: "center", p: 3, textAlign: "center" }}
+              >
+                <FileText size={48} className="text-slate-500" />
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {file ? file.name : "Document Selected"}
+                </Typography>
+              </Stack>
+            )}
 
             {/* Hover overlay to change image */}
             <Box
@@ -202,7 +245,7 @@ export function ImageUpload({
             >
               <UploadCloud size={28} />
               <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
-                Change Image
+                Change File
               </Typography>
               <Typography variant="caption" sx={{ opacity: 0.8, mt: 0.5 }}>
                 Drag and drop or click to replace
@@ -233,7 +276,10 @@ export function ImageUpload({
             </IconButton>
           </>
         ) : (
-          <Stack spacing={1.5} sx={{ alignItems: "center", p: 3, textAlign: "center" }}>
+          <Stack
+            spacing={1.5}
+            sx={{ alignItems: "center", p: 3, textAlign: "center" }}
+          >
             <Box
               sx={{
                 p: 1.5,
@@ -248,18 +294,36 @@ export function ImageUpload({
               <UploadCloud size={28} className="text-slate-400" />
             </Box>
             <Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                Upload Course Thumbnail
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: 600, color: "text.primary" }}
+              >
+                Upload File
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mt: 0.5 }}>
-                Drag and drop your image here, or{" "}
-                <Box component="span" sx={{ color: "primary.main", fontWeight: 600 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: "text.secondary", display: "block", mt: 0.5 }}
+              >
+                Drag and drop your file here, or{" "}
+                <Box
+                  component="span"
+                  sx={{ color: "primary.main", fontWeight: 600 }}
+                >
                   browse
                 </Box>
               </Typography>
             </Box>
-            <Typography variant="caption" sx={{ color: "text.secondary", opacity: 0.8 }}>
-              Supports JPG, PNG, WEBP (Max {maxSizeMB}MB)
+            <Typography
+              variant="caption"
+              sx={{ color: "text.secondary", opacity: 0.8 }}
+            >
+              Supports{" "}
+              {fileType === "image"
+                ? "JPG, PNG, GIF, WEBP"
+                : fileType === "video"
+                  ? "MP4, AVI, MKV, WEBM, MOV"
+                  : "PDF, DOC, XLS, PPT, ZIP, TXT"}{" "}
+              (Max {maxSizeMB}MB)
             </Typography>
           </Stack>
         )}
@@ -268,7 +332,7 @@ export function ImageUpload({
           type="file"
           ref={fileInputRef}
           hidden
-          accept="image/*"
+          accept={accept || getFileAcceptString(fileType)}
           onChange={handleFileChange}
         />
       </Box>

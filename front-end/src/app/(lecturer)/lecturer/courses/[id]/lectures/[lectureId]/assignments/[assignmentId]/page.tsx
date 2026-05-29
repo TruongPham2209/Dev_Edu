@@ -24,7 +24,7 @@ import type {
   SubmissionLogResponse,
   SubmissionResponse,
 } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 
 // Modular Sub-components

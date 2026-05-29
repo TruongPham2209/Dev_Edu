@@ -275,6 +275,12 @@ export type SavedPostResponse = {
   savedAt: string;
 };
 
+export type UpdatedPostResponse = {
+  affectedVersionIds: string[];
+  newStatus: PostStatus;
+  currentVersionId: string;
+};
+
 // --- Post Version ---
 
 export type PostVersionUpdateRequest = {
