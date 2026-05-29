@@ -126,4 +126,6 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
             RETURNING fc.id
             """, nativeQuery = true)
     List<UUID> deleteCommentWithoutPostReference();
+
+    boolean existsByRootCommentIdAndDeletedAtIsNull(UUID rootCommentId);
 }

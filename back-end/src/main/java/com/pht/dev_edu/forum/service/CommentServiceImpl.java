@@ -57,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
                 throw new BadRequestException("Parent comment does not belong to the same post.");
             }
 
-            if (parentComment.getDeletedAt() != null) {
+            if (parentComment.getDeletedAt() != null && !commentRepository.existsByRootCommentIdAndDeletedAtIsNull(parentComment.getId())) {
                 log.error("Cannot reply to deleted comment with ID {}", parentComment.getId());
                 throw new BadRequestException("Parent comment not found.");
             }

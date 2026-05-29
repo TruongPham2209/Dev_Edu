@@ -41,7 +41,7 @@ public class ProgressServiceImpl implements ProgressService {
     @Override
     @Transactional
     public ProgressResponse updateProgress(String actor, ProgressSegmentRequest req) {
-        if (req.getSegmentStart() >= req.getSegmentEnd()) {
+        if (req.getSegmentStart() > req.getSegmentEnd()) {
             throw new BadRequestException("Invalid segment range");
         }
 
