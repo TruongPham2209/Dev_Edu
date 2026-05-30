@@ -98,6 +98,7 @@ export function SubmissionDetailsDialog({
         maxWidth="md"
         fullWidth
         scroll="paper"
+        transitionDuration={{ enter: 225, exit: 0 }}
         slotProps={{
           paper: {
             sx: {

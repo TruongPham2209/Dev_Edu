@@ -1,6 +1,6 @@
 "use client";
 
-import { getCategories } from "@/lib/api/courses";
+import { useCategoriesQuery } from "@/lib/api/courses";
 import { CourseResponse } from "@/lib/api/types";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
@@ -12,35 +12,20 @@ import {
 } from "@mui/material";
 import { ChevronRight, Clock, Home, Star, User } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 interface HeroSectionProps {
   course: CourseResponse;
 }
 
 export const HeroSection = ({ course }: HeroSectionProps) => {
-  const [categoryName, setCategoryName] = useState<string | null>(null);
+  const { data: categories = [] } = useCategoriesQuery();
 
-  useEffect(() => {
-    let isMounted = true;
-    if (course.categoryId) {
-      getCategories()
-        .then((cats) => {
-          if (!isMounted) return;
-          const match = cats.find((c) => c.id === course.categoryId);
-          setCategoryName(match ? match.name : null);
-        })
-        .catch(() => {
-          if (!isMounted) return;
-          setCategoryName(null);
-        });
-    } else {
-      setCategoryName(null);
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [course.categoryId]);
+  const categoryName = useMemo(() => {
+    if (!course.categoryId) return null;
+    const match = categories.find((c) => c.id === course.categoryId);
+    return match ? match.name : null;
+  }, [categories, course.categoryId]);
 
   return (
     <Box

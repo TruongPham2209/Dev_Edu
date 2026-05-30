@@ -10,8 +10,8 @@ import {
   CircularProgress,
   Button,
 } from "@mui/material";
-import { useState, useEffect, useRef } from "react";
-import { getEnrolledUsers } from "@/lib/api/enrollments";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useEnrolledUsersInfiniteQuery } from "@/lib/api/enrollments";
 import type { EnrollmentUserResponse } from "@/lib/api/types";
 import { EmptyState } from "@/components/common/empty-state";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
@@ -21,49 +21,30 @@ import { Users } from "lucide-react";
 
 export const StudentsTab = ({ courseId }: { courseId: string }) => {
   const { handleError } = useApiWithToast();
-  const [students, setStudents] = useState<EnrollmentUserResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
-  const fetchedRef = useRef(false);
+  const {
+    data,
+    isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage: hasMore,
+    fetchNextPage: fetchNext,
+    error,
+  } = useEnrolledUsersInfiniteQuery(courseId);
 
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
+    if (error) {
+      handleError(error, "Failed to load students");
+    }
+  }, [error, handleError]);
 
-    const loadInitial = async () => {
-      try {
-        setLoading(true);
-        const res = await getEnrolledUsers(courseId);
-        const unique = Array.from(
-          new Map(res.contents.map((s) => [s.id, s])).values(),
-        );
-        setStudents(unique);
-        setNextCursor(res.nextCursor || null);
-      } catch (err) {
-        handleError(err, "Failed to load students");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadInitial();
-  }, [courseId, handleError]);
+  const students = useMemo(() => {
+    const raw = data?.pages.flatMap((page) => page.contents) || [];
+    return Array.from(new Map(raw.map((s) => [s.id, s])).values());
+  }, [data]);
 
-  const loadMore = async () => {
-    if (!nextCursor || loadingMore) return;
-    try {
-      setLoadingMore(true);
-      const res = await getEnrolledUsers(courseId, nextCursor);
-      setStudents((prev) => {
-        const combined = [...prev, ...res.contents];
-        return Array.from(new Map(combined.map((s) => [s.id, s])).values());
-      });
-      setNextCursor(res.nextCursor || null);
-    } catch (err) {
-      handleError(err, "Failed to load more students");
-    } finally {
-      setLoadingMore(false);
+  const loadMore = () => {
+    if (hasMore && !loadingMore) {
+      fetchNext();
     }
   };
 
@@ -135,7 +116,7 @@ export const StudentsTab = ({ courseId }: { courseId: string }) => {
               </Box>
             ))}
 
-            {nextCursor && (
+            {hasMore && (
               <Box
                 sx={{ display: "flex", justifyContent: "center", mt: 2, pt: 2 }}
               >

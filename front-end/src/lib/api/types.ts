@@ -269,6 +269,9 @@ export type PostRequest = {
 export type SavedPostResponse = {
   id: string;
   postId: string;
+  authorUsername: string;
+  authorFullName: string;
+  authorAvatarUrl: string | null;
   thumbUrl: string | null;
   title: string;
   shortDescription: string;

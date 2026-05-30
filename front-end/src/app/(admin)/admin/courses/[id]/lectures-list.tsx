@@ -4,7 +4,10 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ListSkeleton } from "@/components/skeleton";
-import { deleteLecture, getLecturesByCourse } from "@/lib/api/lectures";
+import {
+  useLecturesByCourseQuery,
+  useDeleteLectureMutation,
+} from "@/lib/api/lectures";
 import type { LectureResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
@@ -20,7 +23,7 @@ import {
 } from "@mui/material";
 import { BookOpen, Edit, Eye, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { LectureFormDialog } from "../../../../../components/dialog/lecture-form";
 
 interface LecturesListProps {
@@ -33,9 +36,6 @@ export const LecturesList = ({
   onTotalCountChange,
 }: LecturesListProps) => {
   const { handleError, showSuccess } = useApiWithToast();
-  const [lectures, setLectures] = useState<LectureResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   // Dialog / Modal States
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -44,44 +44,38 @@ export const LecturesList = ({
     LectureResponse | undefined
   >(undefined);
 
-  // Track active fetch
-  const isFetchingRef = useRef(false);
-
-  const fetchLectures = useCallback(async () => {
-    if (!courseId || isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    setLoading(true);
-    try {
-      const data = await getLecturesByCourse(courseId);
-      setLectures(data || []);
-      if (onTotalCountChange) {
-        onTotalCountChange(data?.length || 0);
-      }
-    } catch (err) {
-      handleError(err, "Failed to load lectures");
-    } finally {
-      setLoading(false);
-      isFetchingRef.current = false;
-    }
-  }, [courseId, handleError, onTotalCountChange]);
+  // React Query Hooks
+  const {
+    data: lectures = [],
+    isLoading: loading,
+    refetch: fetchLectures,
+    error,
+  } = useLecturesByCourseQuery(courseId);
 
   useEffect(() => {
-    fetchLectures();
-  }, [fetchLectures]);
+    if (onTotalCountChange) {
+      onTotalCountChange(lectures.length);
+    }
+  }, [lectures, onTotalCountChange]);
+
+  useEffect(() => {
+    if (error) {
+      handleError(error, "Failed to load lectures");
+    }
+  }, [error, handleError]);
+
+  const { mutateAsync: deleteLectureMutate, isPending: deleting } =
+    useDeleteLectureMutation();
 
   const handleDelete = async () => {
     if (!confirmDeleteId || deleting) return;
-    setDeleting(true);
     try {
-      await deleteLecture(confirmDeleteId);
+      await deleteLectureMutate(confirmDeleteId);
       showSuccess("Deleted lecture successfully!");
       setConfirmDeleteId(null);
-      // Reload lectures list
-      await fetchLectures();
+      fetchLectures();
     } catch (err) {
       handleError(err, "Failed to delete lecture");
-    } finally {
-      setDeleting(false);
     }
   };
 

@@ -1,9 +1,11 @@
 "use client";
 
+import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
-import { getMaterials } from "@/lib/api/lectures";
-import { MaterialResponse } from "@/lib/api/types";
 import { getDownloadUrl } from "@/lib/api/files";
+import { useMaterialsQuery } from "@/lib/api/lectures";
+import { formatServerDate } from "@/lib/util/date-utils";
+import { getFileIcon } from "@/lib/util/file-utils";
 import {
   alpha,
   Box,
@@ -13,11 +15,8 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { FileDown, File as FileIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { formatServerDate } from "@/lib/util/date-utils";
-import { getFileIcon } from "@/lib/util/file-utils";
-import ButtonAction from "@/components/common/button-action";
 
 interface TabMaterialsProps {
   lectureId: string;
@@ -25,28 +24,17 @@ interface TabMaterialsProps {
 
 export function TabMaterials({ lectureId }: TabMaterialsProps) {
   const theme = useTheme();
-  const [materials, setMaterials] = useState<MaterialResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchMaterials = async () => {
-      setLoading(true);
-      try {
-        const data = await getMaterials(lectureId);
-        setMaterials(data);
-      } catch (err) {
-        console.error("Failed to fetch materials", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMaterials();
-  }, [lectureId]);
+  const { data: materials = [], isLoading: loading } =
+    useMaterialsQuery(lectureId);
 
   const handleDownload = async (objectKey: string) => {
     try {
-      const response = await getDownloadUrl(objectKey);
+      const response = await queryClient.fetchQuery({
+        queryKey: ["files", "download", objectKey],
+        queryFn: () => getDownloadUrl(objectKey),
+      });
       if (response.downloadUrl) {
         window.open(response.downloadUrl, "_blank");
       }

@@ -6,11 +6,11 @@ import { ErrorState } from "@/components/common/error-state";
 import { HeroInfo } from "@/components/common/hero-info";
 import { UserFormDialog } from "@/components/dialog/user-form/page";
 import type { RoleEnum, UserResponse } from "@/lib/api/types";
-import { searchUsers } from "@/lib/api/users";
+import { useSearchUsersQuery } from "@/lib/api/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Button, CircularProgress, Stack } from "@mui/material";
 import { ChevronDown, RefreshCw, UserPlus, Users } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { UserSearchSection } from "./user-search-section";
 import { UserTable } from "./user-table";
 
@@ -18,11 +18,7 @@ export default function AdminUsersPage() {
   const { handleError } = useApiWithToast();
 
   const [users, setUsers] = useState<UserResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [isError, setIsError] = useState(false);
 
   // Active filters in use for the loaded results
   const [activeKeyword, setActiveKeyword] = useState("");
@@ -31,62 +27,54 @@ export default function AdminUsersPage() {
   // Form dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const fetchUsers = useCallback(
-    async (
-      pageNum: number,
-      keyword: string,
-      role: RoleEnum,
-      isAppend: boolean,
-    ) => {
-      if (isAppend) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
+  // React Query Hook
+  const {
+    data: usersData,
+    isLoading: loading,
+    isFetching: loadingMore,
+    error,
+    refetch,
+  } = useSearchUsersQuery(page, activeKeyword, activeRole);
 
-      try {
-        const response = await searchUsers(pageNum, keyword, role);
-        if (isAppend) {
-          setUsers((prev) => [...prev, ...response.contents]);
-        } else {
-          setUsers(response.contents);
-        }
-        setPage(response.currentPage);
-        setTotalPages(response.totalPages);
-        setIsError(false);
-      } catch (err) {
-        handleError(err, "Không thể tải danh sách người dùng");
-        setIsError(true);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [handleError],
-  );
+  const totalPages = usersData?.totalPages ?? 0;
+  const isError = Boolean(error);
 
-  // Initial load
+  // Append new data when usersData is loaded
   useEffect(() => {
-    fetchUsers(0, "", "STUDENT", false);
-  }, [fetchUsers]);
+    if (usersData) {
+      if (page === 0) {
+        setUsers(usersData.contents);
+      } else {
+        setUsers((prev) => [...prev, ...usersData.contents]);
+      }
+    }
+  }, [usersData, page]);
+
+  useEffect(() => {
+    if (error) {
+      handleError(error, "Failed to load users");
+    }
+  }, [error, handleError]);
 
   const handleSearch = (newKeyword: string, newRole: RoleEnum) => {
     setActiveKeyword(newKeyword);
     setActiveRole(newRole);
-    fetchUsers(0, newKeyword, newRole, false);
+    setPage(0);
   };
 
   const handleLoadMore = () => {
     if (loading || loadingMore || page >= totalPages - 1) return;
-    fetchUsers(page + 1, activeKeyword, activeRole, true);
+    setPage((prev) => prev + 1);
   };
 
   const handleRefresh = () => {
-    fetchUsers(0, activeKeyword, activeRole, false);
+    setPage(0);
+    refetch();
   };
 
   const handleUserSaved = () => {
-    fetchUsers(0, activeKeyword, activeRole, false);
+    setPage(0);
+    refetch();
   };
 
   const hasNextPage = page < totalPages - 1;
@@ -120,14 +108,14 @@ export default function AdminUsersPage() {
         </Box>
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
           <ButtonAction
-            tooltip="Tải lại dữ liệu"
+            tooltip="Refresh data"
             variant="soft"
             color="info"
             onClick={handleRefresh}
             icon={<RefreshCw size={21} strokeWidth={2.3} />}
           />
           <ButtonAction
-            tooltip="Thêm người dùng"
+            tooltip="Add user"
             onClick={() => setDialogOpen(true)}
             icon={<UserPlus size={21} strokeWidth={2.3} />}
           />
@@ -145,8 +133,8 @@ export default function AdminUsersPage() {
             errorState={
               isError ? (
                 <ErrorState
-                  title="Lỗi tải dữ liệu"
-                  subtitle="Không thể tải danh sách người dùng. Vui lòng thử lại sau."
+                  title="Failed to load users"
+                  subtitle="Failed to load users. Please try again later."
                   onRetry={handleRefresh}
                 />
               ) : undefined
@@ -154,20 +142,16 @@ export default function AdminUsersPage() {
             emptyState={
               <EmptyState
                 title={
-                  Boolean(activeKeyword)
-                    ? "Không tìm thấy người dùng"
-                    : "Chưa có người dùng nào"
+                  Boolean(activeKeyword) ? "No users found" : "No users found"
                 }
                 subtitle={
                   Boolean(activeKeyword)
-                    ? "Hãy thử tìm kiếm với từ khóa khác hoặc điều chỉnh lựa chọn vai trò trong bộ lọc."
-                    : "Hệ thống chưa có tài khoản nào thuộc vai trò này. Bạn có thể tạo người dùng mới ngay bây giờ."
+                    ? "Try searching with a different keyword or adjust the role selection in the filter."
+                    : "The system doesn't have any accounts of this role yet. You can create a new user now."
                 }
                 icon={<Users size={32} />}
                 actionLabel={
-                  !Boolean(activeKeyword)
-                    ? "Thêm người dùng đầu tiên"
-                    : undefined
+                  !Boolean(activeKeyword) ? "Add first user" : undefined
                 }
                 onAction={
                   !Boolean(activeKeyword)
@@ -208,7 +192,7 @@ export default function AdminUsersPage() {
                   fontWeight: 700,
                 }}
               >
-                {loadingMore ? "Đang tải..." : "Tải thêm kết quả"}
+                {loadingMore ? "Loading..." : "Load more"}
               </Button>
             )}
           </Box>

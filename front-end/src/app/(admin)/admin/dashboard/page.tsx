@@ -2,9 +2,9 @@
 
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { getAllAdminCourses } from "@/lib/api/courses";
-import type { CourseResponse } from "@/lib/api/types";
+import { useAllAdminCoursesQuery } from "@/lib/api/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate, parseServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Card,
@@ -12,9 +12,6 @@ import {
   Divider,
   Grid,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
@@ -26,10 +23,9 @@ import {
   GraduationCap,
   TrendingUp,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { RevenueAnalytics } from "./revenue-analytics";
-import { parseServerDate, formatServerDate } from "@/lib/date-utils";
 
 type ActivityItem = {
   id: string;
@@ -40,27 +36,19 @@ type ActivityItem = {
 
 export default function AdminDashboard() {
   const { handleError } = useApiWithToast();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [courses, setCourses] = useState<CourseResponse[]>([]);
 
-  const loadData = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const courseList = await getAllAdminCourses();
-      setCourses(courseList);
-    } catch (error) {
-      setError(true);
-      handleError(error, "Không thể tải dữ liệu dashboard");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: courses = [],
+    isLoading: loading,
+    error,
+    refetch: loadData,
+  } = useAllAdminCoursesQuery();
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (error) {
+      handleError(error, "Không thể tải dữ liệu dashboard");
+    }
+  }, [error, handleError]);
 
   const uniqueLecturers = useMemo(() => {
     return Array.from(

@@ -2,22 +2,25 @@
 
 import { CoursePurchaseCard } from "@/components/card/course-purchase-card";
 import { EmptyState } from "@/components/common/empty-state";
-import { getCourseById, getCourseReviews, getCourses } from "@/lib/api/courses";
-import { addToCart, getEnrollments } from "@/lib/api/enrollments";
-import { getLecturesByCourse } from "@/lib/api/lectures";
-import type {
-  CourseResponse,
-  LectureResponse,
-  ReviewResponse,
-} from "@/lib/api/types";
+import {
+  useCourseByIdQuery,
+  useCoursesQuery,
+  useCourseReviewsInfiniteQuery,
+} from "@/lib/api/courses";
+import type { CustomPaging, ReviewResponse } from "@/lib/api/types";
+import {
+  useAddToCartMutation,
+  useEnrollmentsQuery,
+} from "@/lib/api/enrollments";
+import { useLecturesByCourseQuery } from "@/lib/api/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import { Box, Container, Grid, Stack } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { StudentCourseDetailSkeleton } from "./course-detail-skeleton";
+import { useEffect, useMemo, useState } from "react";
 import { CourseAbout } from "./course-about";
 import { CourseContent } from "./course-content";
+import { StudentCourseDetailSkeleton } from "./course-detail-skeleton";
 import { HeroSection } from "./hero-section";
 import { RelatedCourseList } from "./related-course-list";
 import { ReviewList } from "./review-list";
@@ -29,125 +32,56 @@ export default function CourseDetailPage() {
   const { handleError, showSuccess, toast } = useApiWithToast();
   const { isAuthenticated } = useAuth();
 
-  const [course, setCourse] = useState<CourseResponse | null>(null);
-  const [lectures, setLectures] = useState<LectureResponse[]>([]);
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const [reviews, setReviews] = useState<ReviewResponse[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [loadingReviews, setLoadingReviews] = useState(false);
-  const [loadingMoreReviews, setLoadingMoreReviews] = useState(false);
-
-  const [relatedCourses, setRelatedCourses] = useState<CourseResponse[]>([]);
-  const [loadingRelated, setLoadingRelated] = useState(false);
-
   const [loadingAction, setLoadingAction] = useState<"buy" | "cart" | null>(
     null,
   );
 
+  const {
+    data: course,
+    isLoading: courseLoading,
+    error: courseError,
+  } = useCourseByIdQuery(courseId);
+  const { data: lectures = [] } = useLecturesByCourseQuery(courseId);
+  const { data: relatedCoursesData } = useCoursesQuery();
+
+  const relatedCourses = (relatedCoursesData?.contents || [])
+    .filter((c) => c.id !== courseId)
+    .slice(0, 3);
+
+  const {
+    data: reviewsData,
+    isLoading: loadingReviews,
+    isFetchingNextPage: loadingMoreReviews,
+    hasNextPage,
+    fetchNextPage,
+  } = useCourseReviewsInfiniteQuery(courseId);
+
+  const reviews = reviewsData?.pages.flatMap((page: CustomPaging<ReviewResponse>) => page.contents || []) || [];
+  const nextCursor = hasNextPage ? "has_more" : null;
+
+  const { data: enrollmentsData } = useEnrollmentsQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const isEnrolled = useMemo(() => {
+    if (!enrollmentsData?.contents) return false;
+    return enrollmentsData.contents.some(
+      (c) => c.courseId === courseId || c.id === courseId,
+    );
+  }, [enrollmentsData, courseId]);
+
+  const { mutateAsync: addToCartMutate } = useAddToCartMutation();
+
   useEffect(() => {
-    if (!courseId) return;
+    if (courseError) {
+      toast.error("Course does not exist");
+      router.push("/courses");
+    }
+  }, [courseError, router, toast]);
 
-    let isMounted = true;
-
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        // 1. Course Detail
-        let courseData: CourseResponse | null = null;
-        try {
-          courseData = await getCourseById(courseId);
-        } catch {
-          if (isMounted) {
-            toast.error("Course does not exist");
-            router.push("/courses");
-            return;
-          }
-        }
-
-        if (!isMounted) return;
-        if (!courseData) {
-          toast.error("Course does not exist");
-          router.push("/courses");
-          return;
-        }
-        setCourse(courseData);
-
-        // 2. Lectures
-        try {
-          const lectureData = await getLecturesByCourse(courseId);
-          if (isMounted) setLectures(lectureData);
-        } catch {
-          // Handle lecture load error quietly
-        }
-
-        // 3. Reviews
-        setLoadingReviews(true);
-        try {
-          const reviewsData = await getCourseReviews(courseId);
-          if (isMounted) {
-            setReviews(reviewsData.contents || []);
-            setNextCursor(reviewsData.nextCursor || null);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          if (isMounted) setLoadingReviews(false);
-        }
-
-        // 4. Related Courses
-        setLoadingRelated(true);
-        try {
-          const coursesData = await getCourses();
-          if (isMounted) {
-            const filtered = (coursesData.contents || [])
-              .filter((c) => c.id !== courseId)
-              .slice(0, 3);
-            setRelatedCourses(filtered);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          if (isMounted) setLoadingRelated(false);
-        }
-
-        // Enrollment
-        if (isAuthenticated) {
-          try {
-            await getEnrollments();
-            // TODO check actual enrollment status correctly based on data.
-            setIsEnrolled(false);
-          } catch {
-            setIsEnrolled(false);
-          }
-        }
-      } catch (error) {
-        if (!isMounted) return;
-        handleError(error, "Could not load course");
-        router.push("/courses");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [courseId, router, isAuthenticated, toast, handleError]);
-
-  const loadMoreReviews = async () => {
-    if (!courseId || !nextCursor) return;
-    setLoadingMoreReviews(true);
-    try {
-      const reviewsData = await getCourseReviews(courseId, nextCursor);
-      setReviews((prev) => [...prev, ...(reviewsData.contents || [])]);
-      setNextCursor(reviewsData.nextCursor || null);
-    } catch (err) {
-      handleError(err, "Could not load more reviews");
-    } finally {
-      setLoadingMoreReviews(false);
+  const loadMoreReviews = () => {
+    if (hasNextPage && !loadingMoreReviews) {
+      fetchNextPage();
     }
   };
 
@@ -163,7 +97,7 @@ export default function CourseDetailPage() {
     if (!course) return;
     setLoadingAction("cart");
     try {
-      await addToCart(course.id);
+      await addToCartMutate(course.id);
       showSuccess("Added to cart successfully");
     } catch (error) {
       handleError(error, "Could not add to cart");
@@ -176,7 +110,7 @@ export default function CourseDetailPage() {
     return null;
   }
 
-  if (loading && !course) {
+  if (courseLoading && !course) {
     return <StudentCourseDetailSkeleton />;
   }
 
@@ -232,7 +166,7 @@ export default function CourseDetailPage() {
                 />
                 <RelatedCourseList
                   relatedCourses={relatedCourses}
-                  loadingRelated={loadingRelated}
+                  loadingRelated={!relatedCoursesData}
                 />
               </Stack>
             </Box>

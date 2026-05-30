@@ -11,8 +11,8 @@ import {
   Skeleton,
 } from "@mui/material";
 import { Users } from "lucide-react";
-import { useEffect, useState, useRef, useCallback } from "react";
-import { getEnrolledUsers } from "@/lib/api/enrollments";
+import { useEffect, useMemo, useState } from "react";
+import { useEnrolledUsersInfiniteQuery } from "@/lib/api/enrollments";
 import type { EnrollmentUserResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { EmptyState } from "@/components/common/empty-state";
@@ -30,52 +30,38 @@ export const StudentsList = ({
   onTotalCountChange,
 }: StudentsListProps) => {
   const { handleError } = useApiWithToast();
-  const [students, setStudents] = useState<EnrollmentUserResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
-  // Keep track of the active request to prevent duplicate calls
-  const isFetchingRef = useRef(false);
+  // React Query Hooks
+  const {
+    data,
+    isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage,
+    fetchNextPage,
+    error,
+  } = useEnrolledUsersInfiniteQuery(courseId);
 
-  const fetchInitialStudents = useCallback(async () => {
-    if (!courseId || isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    setLoading(true);
-    try {
-      const response = await getEnrolledUsers(courseId);
-      setStudents(response?.contents || []);
-      setNextCursor(response?.nextCursor ?? null);
-      if (onTotalCountChange) {
-        onTotalCountChange(response.totalElements);
-      }
-    } catch (err) {
-      handleError(err, "Failed to load student list");
-    } finally {
-      setLoading(false);
-      isFetchingRef.current = false;
-    }
-  }, [courseId, handleError, onTotalCountChange]);
+  const students = useMemo(() => {
+    return data?.pages.flatMap((page) => page.contents) ?? [];
+  }, [data]);
+
+  const totalElements = data?.pages[0]?.totalElements ?? 0;
 
   useEffect(() => {
-    fetchInitialStudents();
-  }, [fetchInitialStudents]);
-
-  const handleLoadMore = async () => {
-    if (!courseId || !nextCursor || loadingMore || isFetchingRef.current)
-      return;
-    isFetchingRef.current = true;
-    setLoadingMore(true);
-    try {
-      const response = await getEnrolledUsers(courseId, nextCursor);
-      setStudents((prev) => [...(prev || []), ...(response?.contents || [])]);
-      setNextCursor(response?.nextCursor ?? null);
-    } catch (err) {
-      handleError(err, "Failed to load more students");
-    } finally {
-      setLoadingMore(false);
-      isFetchingRef.current = false;
+    if (onTotalCountChange) {
+      onTotalCountChange(totalElements);
     }
+  }, [totalElements, onTotalCountChange]);
+
+  useEffect(() => {
+    if (error) {
+      handleError(error, "Failed to load student list");
+    }
+  }, [error, handleError]);
+
+  const handleLoadMore = () => {
+    if (loading || loadingMore || !hasNextPage) return;
+    fetchNextPage();
   };
 
   // Generate avatar colors based on initials
@@ -257,7 +243,7 @@ export const StudentsList = ({
 
             <InfiniteLoadButton
               loading={loadingMore}
-              hasMore={Boolean(nextCursor)}
+              hasMore={hasNextPage}
               onLoadMore={handleLoadMore}
             />
           </Stack>

@@ -5,11 +5,12 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { MaterialFormDialog } from "@/components/dialog/material-form";
 import { getDownloadUrl } from "@/lib/api/files";
-import { deleteMaterial } from "@/lib/api/lectures";
+import { useDeleteMaterialMutation } from "@/lib/api/lectures";
 import type { MaterialResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { getFileIcon } from "@/lib/util/file-utils";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Card,
@@ -35,6 +36,7 @@ export function MaterialsList({
   onMaterialDeleted,
 }: MaterialsListProps) {
   const { handleError, showSuccess } = useApiWithToast();
+  const queryClient = useQueryClient();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -43,7 +45,10 @@ export function MaterialsList({
 
   const handleDownload = async (material: MaterialResponse) => {
     try {
-      const res = await getDownloadUrl(material.fileObjectKey);
+      const res = await queryClient.fetchQuery({
+        queryKey: ["files", "download", material.fileObjectKey],
+        queryFn: () => getDownloadUrl(material.fileObjectKey),
+      });
       const downloadUrl = res.downloadUrl || res.publicUrl;
       if (downloadUrl) {
         window.open(downloadUrl, "_blank");
@@ -60,11 +65,13 @@ export function MaterialsList({
     setDeletingTitle(material.title);
   };
 
+  const { mutateAsync: deleteMaterialMutate } = useDeleteMaterialMutation();
+
   const handleConfirmDelete = async () => {
     if (!deletingId) return;
 
     try {
-      await deleteMaterial(deletingId);
+      await deleteMaterialMutate(deletingId);
       showSuccess(`Deleted material "${deletingTitle}" successfully`);
 
       // Exit animation

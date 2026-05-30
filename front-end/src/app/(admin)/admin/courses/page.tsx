@@ -10,13 +10,16 @@ import { ImagePreview } from "@/components/common/image-preview";
 import { SearchInput } from "@/components/common/search-input";
 import { CourseFormDialog } from "@/components/dialog/course-form";
 import {
-  createCourse,
-  deleteCourse,
-  getCategories,
-  getCourses,
-  updateCourse,
+  useCategoriesQuery,
+  useCoursesQuery,
+  useCreateCourseMutation,
+  useUpdateCourseMutation,
+  useDeleteCourseMutation,
 } from "@/lib/api/courses";
-import { confirmImageUpload, getPreSignedUploadUrl } from "@/lib/api/files";
+import {
+  useConfirmImageUploadMutation,
+  usePreSignedUploadUrlMutation,
+} from "@/lib/api/files";
 import type {
   CategoryResponse,
   CourseRequest,
@@ -32,16 +35,6 @@ import { CourseTable } from "./course-table";
 export default function AdminCoursesPage() {
   const router = useRouter();
   const { handleError, showSuccess } = useApiWithToast();
-
-  // Data States
-  const [courses, setCourses] = useState<CourseResponse[]>([]);
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [coursesError, setCoursesError] = useState(false);
-
-  // Submitting States
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   // Dialog States
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -59,64 +52,59 @@ export default function AdminCoursesPage() {
 
   // Server Pagination States
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
 
-  // Load categories EXACTLY ONCE on initial load
-  const loadCategories = async () => {
-    try {
-      const data = await getCategories("ACTIVE");
-      setCategories(data);
-    } catch (error) {
-      handleError(error, "Không thể tải danh mục");
+  // Queries & Mutations
+  const { data: categories = [] } = useCategoriesQuery("ACTIVE");
+
+  const queryParams = useMemo(() => {
+    const params: {
+      page: number;
+      keyword?: string;
+      categoryId?: string;
+    } = {
+      page,
+    };
+
+    if (query.trim() !== "") {
+      params.keyword = query.trim();
+    } else if (categoryFilter !== "ALL") {
+      params.categoryId = categoryFilter;
     }
-  };
+    return params;
+  }, [page, query, categoryFilter]);
 
-  // Modern server-side fetch courses
-  const fetchCourses = async (
-    targetPage = page,
-    targetCategoryId = categoryFilter,
-    targetKeyword = query,
-  ) => {
-    setLoading(true);
-    setCoursesError(false);
-    try {
-      const params: Parameters<typeof getCourses>[0] = {
-        page: targetPage,
-      };
+  const {
+    data: coursesData,
+    isLoading: loading,
+    error: coursesErrorObj,
+    refetch: fetchCourses,
+  } = useCoursesQuery(queryParams);
 
-      // Only search when keyword is not blank; otherwise load category / default view
-      if (targetKeyword.trim() !== "") {
-        params.keyword = targetKeyword.trim();
-        // Hide category option bar and bypass categoryId parameter
-      } else if (targetCategoryId !== "ALL") {
-        params.categoryId = targetCategoryId;
-      }
+  const courses = coursesData?.contents ?? [];
+  const totalPages = coursesData?.totalPages ?? 0;
+  const totalElements = coursesData?.totalElements ?? 0;
+  const coursesError = Boolean(coursesErrorObj);
 
-      const response = await getCourses(params);
-      setCourses(response.contents);
-      setTotalPages(response.totalPages);
-      setTotalElements(response.totalElements);
-      setPage(response.currentPage);
-    } catch (error) {
-      setCoursesError(true);
-      handleError(error, "Không thể tải khóa học");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { mutateAsync: createCourseMutate } = useCreateCourseMutation();
+  const { mutateAsync: updateCourseMutate } = useUpdateCourseMutation();
+  const { mutateAsync: deleteCourseMutate, isPending: deleting } =
+    useDeleteCourseMutation();
+  const { mutateAsync: getPreSignedUrlMutate, isPending: saving } =
+    usePreSignedUploadUrlMutation();
+  const { mutateAsync: confirmImageUploadMutate } =
+    useConfirmImageUploadMutation();
 
-  // Perform initial mount fetching
+  // Adjust page state to match what is returned by the server
   useEffect(() => {
-    loadCategories();
-    fetchCourses(0, "ALL", "");
-  }, []);
+    if (coursesData && coursesData.currentPage !== page) {
+      setPage(coursesData.currentPage);
+    }
+  }, [coursesData, page]);
 
   // Handle pagination navigation
   const handlePageChange = (nextPage: number) => {
     if (nextPage < 0 || nextPage >= totalPages || loading) return;
     setPage(nextPage);
-    fetchCourses(nextPage, categoryFilter, query);
   };
 
   // Handle Category Filter change
@@ -124,14 +112,12 @@ export default function AdminCoursesPage() {
     setCategoryFilter(categoryId);
     setQuery(""); // Do NOT send keyword simultaneously
     setPage(0);
-    fetchCourses(0, categoryId, "");
   };
 
   // Handle Search Keyword execution
   const handleSearch = (keyword: string) => {
     setQuery(keyword);
     setPage(0);
-    fetchCourses(0, "ALL", keyword); // Do NOT send categoryId simultaneously
   };
 
   // Handle Search Reset console action
@@ -139,8 +125,6 @@ export default function AdminCoursesPage() {
     setQuery("");
     setCategoryFilter("ALL");
     setPage(0);
-    // Restores original category options and reloads data under categoryFilter
-    fetchCourses(0, "ALL", "");
   };
 
   // Handle Create Course Trigger
@@ -154,14 +138,12 @@ export default function AdminCoursesPage() {
     payload: CourseRequest,
     selectedFile: File | null,
   ) => {
-    if (saving) return; // Prevent duplicate requests
-    setSaving(true);
     try {
       let finalThumbnailObjectKey = payload.thumbnailObjectKey;
 
       // Handle new uploaded image direct file-presign upload flow
       if (selectedFile) {
-        const preSignRes = await getPreSignedUploadUrl({
+        const preSignRes = await getPreSignedUrlMutate({
           fileName: selectedFile.name,
           contentType: selectedFile.type,
           fileSize: selectedFile.size,
@@ -182,7 +164,7 @@ export default function AdminCoursesPage() {
         });
 
         // Confirm upload
-        await confirmImageUpload(preSignRes.objectKey);
+        await confirmImageUploadMutate(preSignRes.objectKey);
         finalThumbnailObjectKey = preSignRes.objectKey;
       }
 
@@ -192,36 +174,30 @@ export default function AdminCoursesPage() {
       };
 
       if (editingCourse) {
-        await updateCourse(finalPayload);
+        await updateCourseMutate(finalPayload);
         showSuccess("Cập nhật khóa học thành công");
       } else {
-        await createCourse(finalPayload);
+        await createCourseMutate(finalPayload);
         showSuccess("Tạo khóa học thành công");
       }
       setDialogOpen(false);
-      // Reload current list keeping filter/search status
-      fetchCourses(page, categoryFilter, query);
+      fetchCourses();
     } catch (error) {
       handleError(error, "Không thể lưu khóa học");
-    } finally {
-      setSaving(false);
     }
   };
 
   // Delete execution handling
   const handleDelete = async () => {
     if (!confirmId || deleting) return;
-    setDeleting(true);
     try {
-      await deleteCourse(confirmId);
+      await deleteCourseMutate(confirmId);
       showSuccess("Đã xóa khóa học thành công");
       setConfirmId(null);
-      // Reload page from 0 on delete success
-      fetchCourses(0, categoryFilter, query);
+      setPage(0);
+      fetchCourses();
     } catch (error) {
       handleError(error, "Không thể xóa khóa học");
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -330,8 +306,8 @@ export default function AdminCoursesPage() {
             <ButtonAction
               variant="soft"
               color="info"
-              tooltip="Tải lại dữ liệu"
-              onClick={() => fetchCourses(page, categoryFilter, query)}
+              tooltip="Refresh"
+              onClick={() => fetchCourses()}
               icon={<RefreshCw size={21} strokeWidth={2.3} />}
             />
             <ButtonAction
@@ -361,7 +337,7 @@ export default function AdminCoursesPage() {
               <ErrorState
                 title="Failed to load courses"
                 subtitle="An error occurred while connecting to the system. Please try again later."
-                onRetry={() => fetchCourses(page, categoryFilter, query)}
+                onRetry={() => fetchCourses()}
                 actionLabel="Refresh"
               />
             ) : undefined
@@ -399,7 +375,7 @@ export default function AdminCoursesPage() {
         title="Delete course?"
         description={
           deleting
-            ? `Đang thực hiện xóa khóa học "${courses.find((c) => c.id === confirmId)?.title || ""}"...`
+            ? `Deleting course "${courses.find((c) => c.id === confirmId)?.title || ""}"...`
             : `Are you sure you want to delete the course "${courses.find((c) => c.id === confirmId)?.title || ""}"? This action is permanent and cannot be undone.`
         }
         confirmLabel={deleting ? "Deleting..." : "Delete"}

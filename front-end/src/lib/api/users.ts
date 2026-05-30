@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiPut } from "./client";
+import { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from "@tanstack/react-query";
 import type {
   CustomPaging,
   RegisterUser,
@@ -55,3 +56,96 @@ export async function searchUsers(
     `/api/v1/users?${query.toString()}`,
   );
 }
+
+// --- React Query Hooks ---
+
+export function useMeQuery(
+  options?: Omit<UseQueryOptions<UserResponse, Error>, "queryKey" | "queryFn">,
+) {
+  return useQuery({
+    queryKey: ["users", "me"],
+    queryFn: getMe,
+    ...options,
+  });
+}
+
+export function useRegisterMutation(
+  options?: UseMutationOptions<string, Error, RegisterUser>,
+) {
+  return useMutation({
+    mutationFn: register,
+    ...options,
+  });
+}
+
+export function useChangePasswordMutation(
+  options?: UseMutationOptions<
+    string,
+    Error,
+    { oldPassword: string; newPassword: string }
+  >,
+) {
+  return useMutation({
+    mutationFn: ({ oldPassword, newPassword }) =>
+      changePassword(oldPassword, newPassword),
+    ...options,
+  });
+}
+
+export function useBatchCreateUsersMutation(
+  options?: UseMutationOptions<string, Error, RegisterUser[]>,
+) {
+  return useMutation({
+    mutationFn: batchCreateUsers,
+    ...options,
+  });
+}
+
+export function useUpdateAvatarMutation(
+  options?: UseMutationOptions<string, Error, string>,
+) {
+  return useMutation({
+    mutationFn: updateAvatar,
+    ...options,
+  });
+}
+
+export function useSetUsernameFromGoogleMutation(
+  options?: UseMutationOptions<
+    string,
+    Error,
+    { email: string; username: string }
+  >,
+) {
+  return useMutation({
+    mutationFn: ({ email, username }) =>
+      setUsernameFromGoogle(email, username),
+    ...options,
+  });
+}
+
+export function useSearchUsersQuery(
+  page: number,
+  keyword: string,
+  role: RoleEnum,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<UserResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["users", "search", { page, keyword, role }],
+    queryFn: () => searchUsers(page, keyword, role),
+    ...options,
+  });
+}
+
+// Aliases for backward compatibility during refactoring
+export {
+  useMeQuery as useGetMe,
+  useRegisterMutation as useRegister,
+  useChangePasswordMutation as useChangePassword,
+  useUpdateAvatarMutation as useUpdateAvatar,
+  useSearchUsersQuery as useSearchUsers,
+};
+

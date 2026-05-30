@@ -1,4 +1,5 @@
 import { apiDelete, apiGet, apiPost } from "./client";
+import { useQuery, useMutation, useInfiniteQuery, UseQueryOptions, UseMutationOptions, UseInfiniteQueryOptions, InfiniteData } from "@tanstack/react-query";
 import type {
   AssignmentRequest,
   AssignmentResponse,
@@ -109,3 +110,174 @@ export async function deleteFeedback(feedbackId: string): Promise<void> {
     `/api/v1/assignments/feedbacks?feedbackId=${feedbackId}`,
   );
 }
+
+// --- React Query Hooks ---
+
+export function useAssignmentsQuery(
+  lectureId: string,
+  options?: Omit<
+    UseQueryOptions<AssignmentResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["assignments", "lecture", lectureId],
+    queryFn: () => getAssignments(lectureId),
+    enabled: !!lectureId,
+    ...options,
+  });
+}
+
+export function useAssignmentByIdQuery(
+  assignmentId: string,
+  options?: Omit<
+    UseQueryOptions<AssignmentResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["assignments", "detail", assignmentId],
+    queryFn: () => getAssignmentById(assignmentId),
+    enabled: !!assignmentId,
+    ...options,
+  });
+}
+
+export function useCreateAssignmentMutation(
+  options?: UseMutationOptions<AssignmentResponse, Error, AssignmentRequest>,
+) {
+  return useMutation({
+    mutationFn: createAssignment,
+    ...options,
+  });
+}
+
+export function useDeleteAssignmentMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteAssignment,
+    ...options,
+  });
+}
+
+export function useSubmissionsQuery(
+  assignmentId: string,
+  page: number = 0,
+  size: number = 10,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<SubmissionResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["submissions", assignmentId, page, size],
+    queryFn: () => getSubmissions(assignmentId, page, size),
+    enabled: !!assignmentId,
+    ...options,
+  });
+}
+
+export function useSubmissionsInfiniteQuery(
+  assignmentId: string,
+  size: number = 10,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<SubmissionResponse>,
+      Error,
+      InfiniteData<CustomPaging<SubmissionResponse>, number>,
+      readonly unknown[],
+      number
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["submissions", "infinite", assignmentId, size],
+    queryFn: ({ pageParam }) => getSubmissions(assignmentId, pageParam, size),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =>
+      lastPage.currentPage < lastPage.totalPages - 1
+        ? lastPage.currentPage + 1
+        : undefined,
+    enabled: !!assignmentId,
+    ...options,
+  });
+}
+
+export function useCreateSubmissionMutation(
+  options?: UseMutationOptions<SubmissionResponse, Error, SubmissionRequest>,
+) {
+  return useMutation({
+    mutationFn: createSubmission,
+    ...options,
+  });
+}
+
+export function useDeleteSubmissionMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteSubmission,
+    ...options,
+  });
+}
+
+export function useSubmissionTrackingQuery(
+  assignmentId: string,
+  studentUsername?: string,
+  page: number = 0,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<SubmissionLogResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["submissions", "tracking", assignmentId, studentUsername, page],
+    queryFn: () => getSubmissionTracking(assignmentId, studentUsername, page),
+    enabled: !!assignmentId,
+    ...options,
+  });
+}
+
+export function useFeedbacksQuery(
+  assignmentId: string,
+  studentUsername?: string,
+  options?: Omit<
+    UseQueryOptions<FeedbackResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["feedbacks", assignmentId, studentUsername],
+    queryFn: () => getFeedbacks(assignmentId, studentUsername),
+    enabled: !!assignmentId,
+    ...options,
+  });
+}
+
+export function useCreateFeedbackMutation(
+  options?: UseMutationOptions<FeedbackResponse, Error, FeedbackRequest>,
+) {
+  return useMutation({
+    mutationFn: createFeedback,
+    ...options,
+  });
+}
+
+export function useDeleteFeedbackMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteFeedback,
+    ...options,
+  });
+}
+
+// Aliases for backward compatibility during refactoring
+export {
+  useAssignmentsQuery as useGetAssignments,
+  useSubmissionsQuery as useGetSubmissions,
+  useFeedbacksQuery as useGetFeedbacks,
+};
+

@@ -1,6 +1,10 @@
 "use client";
 
 import { AnimatedTabs } from "@/components/common/animated-tabs";
+import { ErrorState } from "@/components/common/error-state";
+import { useCourseByIdQuery } from "@/lib/api/courses";
+import { useLectureByIdQuery } from "@/lib/api/lectures";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Box,
   Breadcrumbs,
@@ -20,14 +24,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LectureDetailSkeleton } from "./lecture-detail-skeleton";
-
-import { ErrorState } from "@/components/common/error-state";
-import { getCourseById } from "@/lib/api/courses";
-import { getLectureById } from "@/lib/api/lectures";
-import type { CourseResponse, LectureResponse } from "@/lib/api/types";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 
 // Tabs
 import { LectureHeroInfo } from "@/components/common/lecture-hero-info";
@@ -43,11 +41,19 @@ export default function LecturerLectureDetailPage() {
   const lectureId = params.lectureId as string;
   const courseId = params.id as string;
 
-  // Primary Data State
-  const [lecture, setLecture] = useState<LectureResponse | null>(null);
-  const [course, setCourse] = useState<CourseResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  // React Query queries
+  const {
+    data: lecture,
+    isLoading: lectureLoading,
+    error: lectureError,
+  } = useLectureByIdQuery(lectureId);
+  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(
+    courseId,
+    { enabled: !!courseId },
+  );
+
+  const loading = lectureLoading || courseLoading;
+  const error = !!lectureError || (!lectureLoading && !lecture);
 
   // Synchronized counts for Hero metadata
   const [materialsCount, setMaterialsCount] = useState(0);
@@ -55,33 +61,6 @@ export default function LecturerLectureDetailPage() {
 
   // Tab State
   const [tab, setTab] = useState("overview");
-
-  const loadPageData = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      // Parallel loading for ultimate speed
-      const [lectureData, courseData] = await Promise.all([
-        getLectureById(lectureId),
-        getCourseById(courseId).catch((err) => {
-          console.error("Failed to load course details", err);
-          return null; // Fallback so page doesn't crash
-        }),
-      ]);
-
-      setLecture(lectureData);
-      setCourse(courseData);
-    } catch (err) {
-      setError(true);
-      handleError(err, "Failed to load lecture details");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadPageData();
-  }, [lectureId, courseId]);
 
   if (loading) {
     return <LectureDetailSkeleton />;

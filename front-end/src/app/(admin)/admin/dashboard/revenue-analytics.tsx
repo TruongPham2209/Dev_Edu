@@ -1,8 +1,16 @@
-import { Box, Card, CardContent, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useMemo, useState } from "react";
 import type { CourseResponse } from "@/lib/api/types";
-import { parseServerDate } from "@/lib/date-utils";
+import { parseServerDate } from "@/lib/util/date-utils";
 
 type RevenuePoint = {
   label: string;
@@ -10,8 +18,10 @@ type RevenuePoint = {
 };
 
 export function RevenueAnalytics({ courses }: { courses: CourseResponse[] }) {
-  const [period, setPeriod] = useState<"weekly" | "monthly" | "yearly">("monthly");
-  
+  const [period, setPeriod] = useState<"weekly" | "monthly" | "yearly">(
+    "monthly",
+  );
+
   const now = Date.now();
   const revenueSeries = useMemo(() => {
     if (period === "weekly") {
@@ -103,8 +113,7 @@ export function RevenueAnalytics({ courses }: { courses: CourseResponse[] }) {
             exclusive
             value={period}
             onChange={(_, value) =>
-              value &&
-              setPeriod(value as "weekly" | "monthly" | "yearly")
+              value && setPeriod(value as "weekly" | "monthly" | "yearly")
             }
           >
             <ToggleButton value="weekly">Weekly</ToggleButton>
@@ -136,10 +145,7 @@ export function RevenueAnalytics({ courses }: { courses: CourseResponse[] }) {
                   flex: 1,
                 }}
               >
-                <Tooltip
-                  title={`${point.value.toLocaleString()} VND`}
-                  arrow
-                >
+                <Tooltip title={`${point.value.toLocaleString()} VND`} arrow>
                   <Box
                     sx={{
                       height,

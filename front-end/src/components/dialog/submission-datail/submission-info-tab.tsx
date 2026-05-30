@@ -1,5 +1,6 @@
 "use client";
 
+import ButtonAction from "@/components/common/button-action";
 import type { FeedbackResponse, SubmissionResponse } from "@/lib/api/types";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
@@ -110,30 +111,13 @@ export function SubmissionInfoTab({
             </Box>
           </Box>
 
-          <Tooltip title="Download" arrow>
-            <IconButton
-              onClick={() => triggerDownload(selectedSubmission.fileObjectKey)}
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: 2.5,
-                bgcolor: "success.main",
-                color: "white",
-                boxShadow: "0 6px 16px rgba(34,197,94,0.18)",
-                transition: "all 0.22s ease",
-                "&:hover": {
-                  bgcolor: "success.dark",
-                  transform: "translateY(-2px) scale(1.04)",
-                  boxShadow: "0 10px 22px rgba(34,197,94,0.24)",
-                },
-                "&:active": {
-                  transform: "scale(0.98)",
-                },
-              }}
-            >
-              <Download size={18} />
-            </IconButton>
-          </Tooltip>
+          <ButtonAction
+            tooltip="Download"
+            icon={<Download size={22} />}
+            variant="soft-dark"
+            color="primary"
+            onClick={() => triggerDownload(selectedSubmission.fileObjectKey)}
+          />
         </Stack>
       </Card>
 

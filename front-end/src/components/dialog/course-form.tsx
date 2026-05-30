@@ -6,14 +6,14 @@ import { FormInput } from "@/components/common/form-input";
 import { FileUpload } from "@/components/common/file-upload";
 import { RichTextEditor } from "@/components/common/rich-text-editor";
 import { SearchInput } from "@/components/common/search-input";
-import { getCourseById } from "@/lib/api/courses";
+import { useCourseByIdQuery } from "@/lib/api/courses";
 import type {
   CategoryResponse,
   CourseRequest,
   CourseResponse,
   UserResponse,
 } from "@/lib/api/types";
-import { searchUsers } from "@/lib/api/users";
+import { useSearchUsersQuery } from "@/lib/api/users";
 import {
   Box,
   Chip,
@@ -50,43 +50,54 @@ export function CourseFormDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [touched, setTouched] = useState(false);
 
-  // Detail loading state for update mode
-  const [loadingDetails, setLoadingDetails] = useState(false);
-
   // Lecturer search states
   const [lecturerSearchQuery, setLecturerSearchQuery] = useState("");
-  const [lecturerSearchResults, setLecturerSearchResults] = useState<
-    UserResponse[]
-  >([]);
-  const [isSearchingLecturers, setIsSearchingLecturers] = useState(false);
   const [lecturerInputFocused, setLecturerInputFocused] = useState(false);
 
   // Debounced search logic for lecturers (role: LECTURER, page: 0)
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   useEffect(() => {
-    if (!lecturerInputFocused) return;
-
-    const trimmed = lecturerSearchQuery.trim();
-    setIsSearchingLecturers(true);
-
-    const delayDebounceFn = setTimeout(async () => {
-      try {
-        const res = await searchUsers(0, trimmed, "LECTURER");
-        setLecturerSearchResults(res.contents || []);
-      } catch (err) {
-        console.error("Failed to query lecturers:", err);
-        setLecturerSearchResults([]);
-      } finally {
-        setIsSearchingLecturers(false);
-      }
+    const handler = setTimeout(() => {
+      setDebouncedQuery(lecturerSearchQuery);
     }, 450);
+    return () => clearTimeout(handler);
+  }, [lecturerSearchQuery]);
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [lecturerSearchQuery, lecturerInputFocused]);
+  const { data: searchData, isLoading: isSearchingLecturers } = useSearchUsersQuery(
+    0,
+    debouncedQuery,
+    "LECTURER",
+    {
+      enabled: lecturerInputFocused,
+    }
+  );
+
+  const lecturerSearchResults = useMemo(() => {
+    return searchData?.contents || [];
+  }, [searchData]);
+
+  // React Query Hook for Course Details
+  const isUpdate = Boolean(initialValue.id);
+  const { data: courseDetails, isLoading: loadingDetails } = useCourseByIdQuery(
+    initialValue.id || "",
+    {
+      enabled: open && isUpdate && !!initialValue.id,
+    }
+  );
+
+  useEffect(() => {
+    if (courseDetails) {
+      setForm((prev) => ({
+        ...prev,
+        lecturerUsernames: courseDetails.lecturers ?? [],
+        description: courseDetails.description || prev.description,
+      }));
+    }
+  }, [courseDetails]);
 
   // Initialize and apply fallback selection logic
   useEffect(() => {
     if (open) {
-      const isUpdate = Boolean(initialValue.id);
       let targetCategoryId = initialValue.categoryId;
 
       if (isUpdate) {
@@ -107,36 +118,15 @@ export function CourseFormDialog({
         }
       }
 
-      setForm({
+      setForm((prev) => ({
         ...initialValue,
         categoryId: targetCategoryId,
-      });
+        lecturerUsernames: prev.lecturerUsernames || initialValue.lecturerUsernames || [],
+      }));
       setSelectedFile(null);
       setTouched(false);
-
-      // Call API getCourseById to retrieve latest details (including all lecturers) in update mode
-      if (isUpdate && initialValue.id) {
-        const loadCourseDetails = async () => {
-          setLoadingDetails(true);
-          try {
-            const courseDetails = await getCourseById(initialValue.id!);
-            if (courseDetails) {
-              setForm((prev) => ({
-                ...prev,
-                lecturerUsernames: courseDetails.lecturers ?? [],
-                description: courseDetails.description || prev.description,
-              }));
-            }
-          } catch (err) {
-            console.error("Failed to load old lecturers list:", err);
-          } finally {
-            setLoadingDetails(false);
-          }
-        };
-        loadCourseDetails();
-      }
     }
-  }, [open, initialValue, categories]);
+  }, [open, initialValue, categories, isUpdate]);
 
   // Comprehensive, strict validation
   const errors = useMemo(() => {
@@ -179,7 +169,7 @@ export function CourseFormDialog({
       onSubmit={handleSave}
       title={title}
       headerIcon={<BookOpen size={20} />}
-      submitText={editingCourse ? "Lưu thay đổi" : "Tạo khóa học"}
+      submitText={editingCourse ? "Save Changes" : "Create Course"}
       submitIcon={editingCourse ? <Save size={16} /> : <FolderPlus size={16} />}
       isSubmitDisabled={!isValid || saving || loadingDetails}
       maxWidth="md"

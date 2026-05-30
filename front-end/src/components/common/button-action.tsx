@@ -12,7 +12,14 @@ type ButtonActionProps = {
   tooltip?: ReactNode;
   icon: ReactNode;
   variant?: "contained" | "soft" | "soft-dark" | "outline";
-  color?: "primary" | "error" | "success" | "warning" | "info" | "default";
+  color?:
+    | "primary"
+    | "error"
+    | "success"
+    | "warning"
+    | "info"
+    | "default"
+    | "secondary";
 
   /**
    * Custom gradient background
@@ -73,6 +80,12 @@ export default function ButtonAction({
           main: theme.palette.grey[500],
           dark: theme.palette.grey[700],
           light: theme.palette.grey[300],
+        };
+      case "secondary":
+        return {
+          main: theme.palette.secondary.main,
+          dark: theme.palette.secondary.dark,
+          light: theme.palette.secondary.light,
         };
       case "primary":
       default:

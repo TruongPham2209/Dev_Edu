@@ -5,26 +5,27 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { LectureFormDialog } from "@/components/dialog/lecture-form";
 import { ListSkeleton } from "@/components/skeleton";
-import { deleteLecture, getLecturesByCourse } from "@/lib/api/lectures";
+import {
+  useDeleteLectureMutation,
+  useLecturesByCourseQuery,
+} from "@/lib/api/lectures";
 import type { LectureResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import {
+  FilePlus,
   LayoutList,
   Pencil,
-  FilePlus,
   Settings,
   Trash2,
   Video,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useMemo, useState } from "react";
 
 export const LecturesTab = ({ courseId }: { courseId: string }) => {
   const router = useRouter();
   const { handleError, showSuccess } = useApiWithToast();
-  const [lectures, setLectures] = useState<LectureResponse[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState<
@@ -32,27 +33,15 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
   >(undefined);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await getLecturesByCourse(courseId);
-      const unique = Array.from(new Map(res.map((l) => [l.id, l])).values());
-      setLectures(unique);
-    } catch (err) {
-      handleError(err, "Failed to load lectures");
-    } finally {
-      setLoading(false);
-    }
-  }, [courseId, handleError]);
+  const {
+    data: lecturesData = [],
+    isLoading: loading,
+    refetch,
+  } = useLecturesByCourseQuery(courseId);
 
-  const fetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      loadData();
-    }
-  }, [loadData]);
+  const lectures = useMemo(() => {
+    return Array.from(new Map(lecturesData.map((l) => [l.id, l])).values());
+  }, [lecturesData]);
 
   const handleCreate = () => {
     setEditingLecture(undefined);
@@ -64,12 +53,14 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
     setModalOpen(true);
   };
 
+  const { mutateAsync: deleteLectureMutate } = useDeleteLectureMutation();
+
   const handleDelete = async () => {
     if (!confirmDelete) return;
     try {
-      await deleteLecture(confirmDelete);
+      await deleteLectureMutate(confirmDelete);
       showSuccess("Lecture deleted successfully");
-      loadData();
+      refetch();
     } catch (err) {
       handleError(err, "Failed to delete lecture");
     } finally {
@@ -256,7 +247,7 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSaved={() => {
-          loadData();
+          refetch();
         }}
         courseId={courseId}
         initialData={editingLecture}

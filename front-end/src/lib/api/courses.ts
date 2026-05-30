@@ -1,4 +1,13 @@
 import { apiDelete, apiGet, apiPost, apiPut } from "./client";
+import {
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+  UseQueryOptions,
+  UseMutationOptions,
+  UseInfiniteQueryOptions,
+  InfiniteData,
+} from "@tanstack/react-query";
 import type {
   CategoryRequest,
   CategoryResponse,
@@ -171,3 +180,255 @@ export async function updateCategory(
 export async function deleteCategory(categoryId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/categories/${categoryId}`);
 }
+
+export function useCategoriesQuery(
+  status?: ItemStatus,
+  options?: Omit<
+    UseQueryOptions<CategoryResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["categories", status],
+    queryFn: () => getCategories(status),
+    ...options,
+  });
+}
+
+export function useCreateCategoryMutation(
+  options?: UseMutationOptions<CategoryResponse, Error, CategoryRequest>,
+) {
+  return useMutation({
+    mutationFn: createCategory,
+    ...options,
+  });
+}
+
+export function useUpdateCategoryMutation(
+  options?: UseMutationOptions<CategoryResponse, Error, CategoryRequest>,
+) {
+  return useMutation({
+    mutationFn: updateCategory,
+    ...options,
+  });
+}
+
+export function useDeleteCategoryMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteCategory,
+    ...options,
+  });
+}
+
+export function useFeaturedCoursesQuery(
+  options?: Omit<
+    UseQueryOptions<CourseResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["courses", "featured"],
+    queryFn: getFeaturedCourses,
+    ...options,
+  });
+}
+
+export function useCoursesQuery(
+  params?: {
+    sortBy?: string;
+    nextCursor?: string;
+    categoryId?: string;
+    keyword?: string;
+    page?: number;
+    status?: ItemStatus;
+  },
+  options?: Omit<
+    UseQueryOptions<CustomPaging<CourseResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["courses", "list", params],
+    queryFn: () => getCourses(params),
+    ...options,
+  });
+}
+
+export function useCourseByIdQuery(
+  courseId: string,
+  options?: Omit<
+    UseQueryOptions<CourseResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["courses", courseId],
+    queryFn: () => getCourseById(courseId),
+    enabled: !!courseId,
+    ...options,
+  });
+}
+
+export function useCoursesInfiniteQuery(
+  params?: {
+    sortBy?: string;
+    categoryId?: string;
+    keyword?: string;
+    status?: ItemStatus;
+  },
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<CourseResponse>,
+      Error,
+      InfiniteData<CustomPaging<CourseResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["courses", "infinite", params],
+    queryFn: ({ pageParam }) =>
+      getCourses({ ...params, nextCursor: pageParam || undefined }),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function useAssignedCoursesInfiniteQuery(
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<CourseResponse>,
+      Error,
+      InfiniteData<CustomPaging<CourseResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["courses", "assigned-infinite"],
+    queryFn: ({ pageParam }) => getAssignedCourses(pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function useAllAdminCoursesQuery(
+  params?: {
+    status?: ItemStatus;
+    sortBy?: string;
+  },
+  options?: Omit<
+    UseQueryOptions<CourseResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["courses", "admin-all", params],
+    queryFn: () => getAllAdminCourses(params),
+    ...options,
+  });
+}
+
+export function useCreateCourseMutation(
+  options?: UseMutationOptions<CourseResponse, Error, CourseRequest>,
+) {
+  return useMutation({
+    mutationFn: createCourse,
+    ...options,
+  });
+}
+
+export function useUpdateCourseMutation(
+  options?: UseMutationOptions<CourseResponse, Error, CourseRequest>,
+) {
+  return useMutation({
+    mutationFn: updateCourse,
+    ...options,
+  });
+}
+
+export function useDeleteCourseMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteCourse,
+    ...options,
+  });
+}
+
+export function useCourseReviewsQuery(
+  courseId: string,
+  nextCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<ReviewResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["reviews", "course", courseId, nextCursor],
+    queryFn: () => getCourseReviews(courseId, nextCursor),
+    enabled: !!courseId,
+    ...options,
+  });
+}
+
+export function useCourseReviewsInfiniteQuery(
+  courseId: string,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<ReviewResponse>,
+      Error,
+      InfiniteData<CustomPaging<ReviewResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["reviews", "course-infinite", courseId],
+    queryFn: ({ pageParam }) =>
+      getCourseReviews(courseId, pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    enabled: !!courseId,
+    ...options,
+  });
+}
+
+export function useCreateReviewMutation(
+  options?: UseMutationOptions<ReviewResponse, Error, ReviewRequest>,
+) {
+  return useMutation({
+    mutationFn: createReview,
+    ...options,
+  });
+}
+
+export function useDeleteReviewMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteReview,
+    ...options,
+  });
+}
+
+// Aliases for backward compatibility during refactoring
+export {
+  useCategoriesQuery as useGetCategories,
+  useFeaturedCoursesQuery as useGetFeaturedCourses,
+  useCoursesQuery as useGetCourses,
+  useCourseByIdQuery as useGetCourseById,
+  useCoursesInfiniteQuery as useGetInfiniteCourses,
+  useCourseReviewsInfiniteQuery as useGetInfiniteCourseReviews,
+};
+

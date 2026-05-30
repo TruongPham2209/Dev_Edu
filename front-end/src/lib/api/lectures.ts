@@ -1,4 +1,11 @@
 import { apiGet, apiPost, apiPut, apiDelete } from "./client";
+import {
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+  UseQueryOptions,
+  UseMutationOptions,
+} from "@tanstack/react-query";
 import type {
   LectureResponse,
   LectureRequest,
@@ -100,3 +107,167 @@ export async function deleteLectureComment(
     `/api/v1/lectures/comments?commentId=${commentId}`,
   );
 }
+
+export function useLecturesByCourseQuery(
+  courseId: string,
+  options?: Omit<
+    UseQueryOptions<LectureResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["lectures", "course", courseId],
+    queryFn: () => getLecturesByCourse(courseId),
+    enabled: !!courseId,
+    ...options,
+  });
+}
+
+export function useLectureByIdQuery(
+  lectureId: string,
+  options?: Omit<
+    UseQueryOptions<LectureResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["lectures", lectureId],
+    queryFn: () => getLectureById(lectureId),
+    enabled: !!lectureId,
+    ...options,
+  });
+}
+
+export function useCreateLectureMutation(
+  options?: UseMutationOptions<LectureResponse, Error, LectureRequest>,
+) {
+  return useMutation({
+    mutationFn: createLecture,
+    ...options,
+  });
+}
+
+export function useUpdateLectureMutation(
+  options?: UseMutationOptions<LectureResponse, Error, LectureRequest>,
+) {
+  return useMutation({
+    mutationFn: updateLecture,
+    ...options,
+  });
+}
+
+export function useDeleteLectureMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteLecture,
+    ...options,
+  });
+}
+
+export function useUpdateLectureProgressMutation(
+  options?: UseMutationOptions<
+    ProgressResponse,
+    Error,
+    ProgressSegmentRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: updateLectureProgress,
+    ...options,
+  });
+}
+
+export function useMaterialsQuery(
+  lectureId: string,
+  options?: Omit<
+    UseQueryOptions<MaterialResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["materials", "lecture", lectureId],
+    queryFn: () => getMaterials(lectureId),
+    enabled: !!lectureId,
+    ...options,
+  });
+}
+
+export function useCreateMaterialMutation(
+  options?: UseMutationOptions<MaterialResponse, Error, MaterialRequest>,
+) {
+  return useMutation({
+    mutationFn: createMaterial,
+    ...options,
+  });
+}
+
+export function useDeleteMaterialMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteMaterial,
+    ...options,
+  });
+}
+
+export function useLectureCommentsQuery(
+  request: CommentPageRequest,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<LectureCommentResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["lectures", "comments", request],
+    queryFn: () => getLectureComments(request),
+    enabled: !!request.lectureId,
+    ...options,
+  });
+}
+
+export function useInfiniteLectureCommentsQuery(
+  request: Omit<CommentPageRequest, "nextCursor">,
+) {
+  return useInfiniteQuery({
+    queryKey: ["lectures", "comments", "infinite", request],
+    queryFn: ({ pageParam }) =>
+      getLectureComments({
+        ...request,
+        nextCursor: pageParam || undefined,
+      }),
+    initialPageParam: "",
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
+    enabled: !!request.lectureId,
+  });
+}
+
+export function useCreateLectureCommentMutation(
+  options?: UseMutationOptions<
+    LectureCommentResponse,
+    Error,
+    { lectureId: string; content: string; parentCommentId?: string }
+  >,
+) {
+  return useMutation({
+    mutationFn: createLectureComment,
+    ...options,
+  });
+}
+
+export function useDeleteLectureCommentMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteLectureComment,
+    ...options,
+  });
+}
+
+// Aliases for backward compatibility during refactoring
+export {
+  useLecturesByCourseQuery as useGetLecturesByCourse,
+  useLectureByIdQuery as useGetLectureById,
+  useMaterialsQuery as useGetMaterials,
+  useLectureCommentsQuery as useGetLectureComments,
+};

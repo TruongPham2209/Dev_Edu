@@ -4,11 +4,11 @@ import { CommentInput } from "@/components/common/comment-input";
 import { CommentItem } from "@/components/common/comment-item";
 import { EmptyState } from "@/components/common/empty-state";
 import {
-  createLectureComment,
   getLectureComments,
-  deleteLectureComment,
+  useCreateLectureCommentMutation,
+  useDeleteLectureCommentMutation,
+  useInfiniteLectureCommentsQuery,
 } from "@/lib/api/lectures";
-import { LectureCommentResponse } from "@/lib/api/types";
 import {
   Box,
   Button,
@@ -17,7 +17,8 @@ import {
   Stack,
   useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface TabCommentsProps {
   lectureId: string;
@@ -25,55 +26,43 @@ interface TabCommentsProps {
 
 export function TabComments({ lectureId }: TabCommentsProps) {
   const theme = useTheme();
-  const [comments, setComments] = useState<LectureCommentResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchComments = async (cursor?: string) => {
-    if (cursor) setLoadingMore(true);
-    else setLoading(true);
+  const {
+    data: commentsData,
+    isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage,
+    fetchNextPage,
+  } = useInfiniteLectureCommentsQuery({ lectureId });
 
-    try {
-      const response = await getLectureComments({
-        lectureId,
-        nextCursor: cursor || undefined,
-      });
+  const { mutateAsync: createCommentMutate, isPending: submitting } =
+    useCreateLectureCommentMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["lectures", "comments"] });
+      },
+    });
 
-      if (cursor) {
-        setComments((prev) => [...prev, ...response.contents]);
-      } else {
-        setComments(response.contents);
-      }
-      setNextCursor(response.nextCursor || null);
-    } catch (err) {
-      console.error("Failed to fetch comments", err);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
+  const { mutateAsync: deleteCommentMutate } = useDeleteLectureCommentMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lectures", "comments"] });
+    },
+  });
 
-  useEffect(() => {
-    fetchComments();
-  }, [lectureId]);
+  const comments = commentsData?.pages.flatMap((page) => page.contents) || [];
+  const rootComments = comments.filter((c) => !c.parentCommentId);
 
   const handlePostComment = async () => {
     if (!newComment.trim()) return;
-    setSubmitting(true);
     try {
-      await createLectureComment({
+      await createCommentMutate({
         lectureId,
         content: newComment,
       });
       setNewComment("");
-      fetchComments(); // Refresh list
     } catch (err) {
       console.error("Failed to post comment", err);
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -84,12 +73,6 @@ export function TabComments({ lectureId }: TabCommentsProps) {
       </Box>
     );
   }
-
-  // Organize comments into root and replies for recursive rendering
-  // Note: The API might already return them flat with parentId.
-  // A real implementation would need to build the tree if the API doesn't.
-  // For this demo, we'll assume we render root comments and they handle their own replies if fetched.
-  const rootComments = comments.filter((c) => !c.parentCommentId);
 
   return (
     <Stack spacing={1.5}>
@@ -129,11 +112,15 @@ export function TabComments({ lectureId }: TabCommentsProps) {
                 parentId={comment.parentCommentId || ""}
                 canDelete={comment.isMine}
                 onDelete={async (id) => {
-                  await deleteLectureComment(id);
+                  await deleteCommentMutate(id);
                 }}
-                onDeleteComplete={() => fetchComments()}
+                onDeleteComplete={() => {
+                  queryClient.invalidateQueries({
+                    queryKey: ["lectures", "comments"],
+                  });
+                }}
                 onAddReply={async (content, replyToId) => {
-                  const res = await createLectureComment({
+                  const res = await createCommentMutate({
                     lectureId,
                     content,
                     parentCommentId: replyToId,
@@ -141,11 +128,21 @@ export function TabComments({ lectureId }: TabCommentsProps) {
                   return res as any;
                 }}
                 onLoadReply={async (parentId, nextCursor) => {
-                  const res = await getLectureComments({
-                    lectureId,
-                    parentCommentId: parentId,
-                    nextCursor: nextCursor || undefined,
-                    size: 5,
+                  const res = await queryClient.fetchQuery({
+                    queryKey: [
+                      "lectures",
+                      "comments",
+                      "replies",
+                      parentId,
+                      nextCursor,
+                    ],
+                    queryFn: () =>
+                      getLectureComments({
+                        lectureId,
+                        parentCommentId: parentId,
+                        nextCursor: nextCursor || undefined,
+                        size: 5,
+                      }),
                   });
                   return {
                     contents: res.contents as any[],
@@ -155,10 +152,10 @@ export function TabComments({ lectureId }: TabCommentsProps) {
               />
             ))}
 
-            {nextCursor && (
+            {hasNextPage && (
               <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
                 <Button
-                  onClick={() => fetchComments(nextCursor)}
+                  onClick={() => fetchNextPage()}
                   disabled={loadingMore}
                   variant="outlined"
                   sx={{

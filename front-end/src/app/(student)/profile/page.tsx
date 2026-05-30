@@ -1,29 +1,48 @@
 "use client";
 
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 // import { useAuth } from "@/lib/use-auth";
+import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { EmptyState } from "@/components/common/empty-state";
+import { useGetMe } from "@/lib/api/users";
 import { AuthUser } from "@/lib/auth-storage";
-import { useState } from "react";
-import { PostedPostsTab } from "./components/posted-posts-tab";
-import { ProfileHeader } from "./components/profile-header";
-import { SavedPostsTab } from "./components/saved-posts-tab";
-
-const MOCK_USER: AuthUser = {
-  id: "mock-user-123",
-  username: "dev_user",
-  fullName: "Học viên ưu tú",
-  role: "STUDENT",
-  email: "student@devedu.vn",
-  avatarUrl: "https://i.pravatar.cc/150?u=dev_user",
-};
+import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { CircularProgress } from "@mui/material";
+import { Bookmark, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PostedPostsTab } from "./posts-tab";
+import { ProfileHeader } from "./profile-header";
+import { SavedPostsTab } from "./saved-tab";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<AuthUser | null>(MOCK_USER);
-  const [activeTab, setActiveTab] = useState(0);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [activeTab, setActiveTab] = useState<"posted" | "saved">("posted");
+  const { handleError } = useApiWithToast();
+
+  const { data: userData, isLoading, error } = useGetMe();
+
+  useEffect(() => {
+    if (userData) {
+      setUser(userData as unknown as AuthUser);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (error) {
+      handleError(error, "Failed to fetch profile information.");
+    }
+  }, [error, handleError]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   if (!user) {
-    return <EmptyState title="Hãy đăng nhập để xem hồ sơ" />;
+    return <EmptyState title="Please login to view your profile." />;
   }
 
   const handleAvatarChange = (newAvatarUrl: string) => {
@@ -32,13 +51,6 @@ export default function ProfilePage() {
 
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto", width: "100%", pb: 8 }}>
-      <Typography
-        variant="h4"
-        sx={{ fontWeight: 800, mb: 3, display: { xs: "none", md: "block" } }}
-      >
-        Hồ sơ cá nhân
-      </Typography>
-
       <ProfileHeader user={user} onAvatarChange={handleAvatarChange} />
 
       <Box
@@ -47,31 +59,36 @@ export default function ProfilePage() {
           borderColor: "divider",
           mb: 3,
           position: "sticky",
-          top: 64,
+          top: 70,
           bgcolor: "background.default",
           zIndex: 10,
         }}
       >
-        <Tabs
+        <AnimatedTabs
           value={activeTab}
-          onChange={(_, newValue) => setActiveTab(newValue)}
-          sx={{
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: "1rem",
-              minWidth: 120,
+          onChange={setActiveTab}
+          tabs={[
+            {
+              value: "posted",
+              label: "Posted posts",
+              icon: <FileText size={18} />,
             },
-          }}
-        >
-          <Tab label="Bài viết của tôi" />
-          <Tab label="Bài viết đã lưu" />
-        </Tabs>
+            {
+              value: "saved",
+              label: "Saved posts",
+              icon: <Bookmark size={18} />,
+            },
+          ]}
+        />
       </Box>
 
       <Box>
-        {activeTab === 0 && <PostedPostsTab />}
-        {activeTab === 1 && <SavedPostsTab />}
+        <Box sx={{ display: activeTab === "posted" ? "block" : "none" }}>
+          <PostedPostsTab />
+        </Box>
+        <Box sx={{ display: activeTab === "saved" ? "block" : "none" }}>
+          <SavedPostsTab />
+        </Box>
       </Box>
     </Box>
   );

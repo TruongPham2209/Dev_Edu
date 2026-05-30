@@ -1,4 +1,13 @@
 import { apiGet, apiPost, apiPut, apiDelete } from "./client";
+import {
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+  UseQueryOptions,
+  UseMutationOptions,
+  UseInfiniteQueryOptions,
+  InfiniteData,
+} from "@tanstack/react-query";
 import type {
   PostResponse,
   PostRequest,
@@ -159,3 +168,373 @@ export async function createForumComment(
 export async function deleteForumComment(commentId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/forum/comments?commentId=${commentId}`);
 }
+
+export function useCreateForumPostMutation(
+  options?: UseMutationOptions<PostResponse, Error, PostRequest>,
+) {
+  return useMutation({
+    mutationFn: createForumPost,
+    ...options,
+  });
+}
+
+export function useUpdateForumPostMutation(
+  options?: UseMutationOptions<PostResponse, Error, PostRequest>,
+) {
+  return useMutation({
+    mutationFn: updateForumPost,
+    ...options,
+  });
+}
+
+export function useDeleteForumPostMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteForumPost,
+    ...options,
+  });
+}
+
+export function useForumPostByIdQuery(
+  postId: string,
+  options?: Omit<
+    UseQueryOptions<PostResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "post", postId],
+    queryFn: () => getForumPostById(postId),
+    enabled: !!postId,
+    ...options,
+  });
+}
+
+export function useForumFeedQuery(
+  nextCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<PostResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "feed", nextCursor],
+    queryFn: () => getForumFeed(nextCursor),
+    ...options,
+  });
+}
+
+export function useForumFeedInfiniteQuery(
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<PostResponse>,
+      Error,
+      InfiniteData<CustomPaging<PostResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "feed-infinite"],
+    queryFn: ({ pageParam }) => getForumFeed(pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function useSearchForumPostsQuery(
+  keyword: string,
+  nextCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<PostResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "search", { keyword, nextCursor }],
+    queryFn: () => searchForumPosts(keyword, nextCursor),
+    enabled: !!keyword,
+    ...options,
+  });
+}
+
+export function useSearchForumPostsInfiniteQuery(
+  keyword: string,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<PostResponse>,
+      Error,
+      InfiniteData<CustomPaging<PostResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "search-infinite", keyword],
+    queryFn: ({ pageParam }) =>
+      searchForumPosts(keyword, pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    enabled: !!keyword,
+    ...options,
+  });
+}
+
+export function useRelatedPostsQuery(
+  postId: string,
+  options?: Omit<
+    UseQueryOptions<PostResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "post", postId, "related"],
+    queryFn: () => getRelatedPosts(postId),
+    enabled: !!postId,
+    ...options,
+  });
+}
+
+export function usePostVersionsQuery(
+  status: string,
+  lastCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<PostResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "versions", { status, lastCursor }],
+    queryFn: () => getPostVersions(status, lastCursor),
+    ...options,
+  });
+}
+
+export function usePostVersionsInfiniteQuery(
+  status: string,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<PostResponse>,
+      Error,
+      InfiniteData<CustomPaging<PostResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "versions-infinite", status],
+    queryFn: ({ pageParam }) => getPostVersions(status, pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function usePostVersionsByPostIdQuery(
+  postId: string,
+  status?: string,
+  options?: Omit<
+    UseQueryOptions<PostResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "post-versions", postId, status],
+    queryFn: () => getPostVersionsByPostId(postId, status),
+    enabled: !!postId,
+    ...options,
+  });
+}
+
+export function useUpdatePostVersionMutation(
+  options?: UseMutationOptions<
+    UpdatedPostResponse,
+    Error,
+    PostVersionUpdateRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: updatePostVersion,
+    ...options,
+  });
+}
+
+export function useDeletePostVersionMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deletePostVersion,
+    ...options,
+  });
+}
+
+export function useSavedPostsQuery(
+  nextCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<SavedPostResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "saved", nextCursor],
+    queryFn: () => getSavedPosts(nextCursor),
+    ...options,
+  });
+}
+
+export function useSavedPostsInfiniteQuery(
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<SavedPostResponse>,
+      Error,
+      InfiniteData<CustomPaging<SavedPostResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "saved-infinite"],
+    queryFn: ({ pageParam }) => getSavedPosts(pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function useSavePostMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: savePost,
+    ...options,
+  });
+}
+
+export function useUnsavePostMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: unsavePost,
+    ...options,
+  });
+}
+
+export function useForumCommentsQuery(
+  postId: string,
+  nextCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<ForumCommentResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "comments", postId, nextCursor],
+    queryFn: () => getForumComments(postId, nextCursor),
+    enabled: !!postId,
+    ...options,
+  });
+}
+
+export function useForumCommentsInfiniteQuery(
+  postId: string,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<ForumCommentResponse>,
+      Error,
+      InfiniteData<CustomPaging<ForumCommentResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "comments-infinite", postId],
+    queryFn: ({ pageParam }) =>
+      getForumComments(postId, pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    enabled: !!postId,
+    ...options,
+  });
+}
+
+export function useForumCommentRepliesQuery(
+  parentCommentId: string,
+  nextCursor?: string,
+  options?: Omit<
+    UseQueryOptions<CustomPaging<ForumCommentResponse>, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["forum", "replies", parentCommentId, nextCursor],
+    queryFn: () => getForumCommentReplies(parentCommentId, nextCursor),
+    enabled: !!parentCommentId,
+    ...options,
+  });
+}
+
+export function useForumCommentRepliesInfiniteQuery(
+  parentCommentId: string,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<ForumCommentResponse>,
+      Error,
+      InfiniteData<CustomPaging<ForumCommentResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "replies-infinite", parentCommentId],
+    queryFn: ({ pageParam }) =>
+      getForumCommentReplies(parentCommentId, pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    enabled: !!parentCommentId,
+    ...options,
+  });
+}
+
+export function useCreateForumCommentMutation(
+  options?: UseMutationOptions<
+    ForumCommentResponse,
+    Error,
+    ForumCommentRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: createForumComment,
+    ...options,
+  });
+}
+
+export function useDeleteForumCommentMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  return useMutation({
+    mutationFn: deleteForumComment,
+    ...options,
+  });
+}
+
+// Aliases for backward compatibility during refactoring
+export {
+  useForumFeedQuery as useGetForumFeed,
+  useSearchForumPostsQuery as useSearchForumPosts,
+  useForumPostByIdQuery as useGetForumPostById,
+  useRelatedPostsQuery as useGetRelatedPosts,
+};

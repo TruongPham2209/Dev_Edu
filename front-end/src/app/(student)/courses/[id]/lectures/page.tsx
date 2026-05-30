@@ -9,12 +9,12 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
-  getLectureById,
-  getLecturesByCourse,
-  updateLectureProgress,
+  useLecturesByCourseQuery,
+  useLectureByIdQuery,
+  useUpdateLectureProgressMutation,
 } from "@/lib/api/lectures";
 import { LectureResponse } from "@/lib/api/types";
 
@@ -56,66 +56,53 @@ export default function StudentLecturePage() {
   const courseId = params.id as string;
   const lectureIdFromUrl = searchParams.get("lectureId");
 
-  const [lectures, setLectures] = useState<LectureResponse[]>([]);
-  const [activeLecture, setActiveLecture] = useState<LectureResponse | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
+  const [localLectures, setLocalLectures] = useState<LectureResponse[]>([]);
   const [navigating, setNavigating] = useState(false);
   const [tabValue, setTabValue] = useState(0);
 
   // Load all lectures for sidebar
-  useEffect(() => {
-    const loadLectures = async () => {
-      try {
-        const data = await getLecturesByCourse(courseId);
-        setLectures(data);
+  const { data: lectures = [], refetch: refetchLectures } = useLecturesByCourseQuery(courseId);
 
-        // If no lectureId in URL, default to first uncompleted one, or last one if all completed
-        if (!lectureIdFromUrl && data.length > 0) {
-          const firstUncompleted = data.find((l) => !l.isCompleted);
-          if (firstUncompleted) {
-            handleSelectLecture(firstUncompleted.id);
-          } else {
-            handleSelectLecture(data[data.length - 1].id);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load lectures", err);
-      }
-    };
-    loadLectures();
-  }, [courseId]);
-
-  // Load active lecture details when ID changes
-  useEffect(() => {
-    if (lectureIdFromUrl) {
-      const loadDetail = async () => {
-        setLoading(true);
-        try {
-          const detail = await getLectureById(lectureIdFromUrl);
-          setActiveLecture(detail);
-        } catch (err) {
-          console.error("Failed to load lecture detail", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadDetail();
-    }
-  }, [lectureIdFromUrl]);
-
-  const handleSelectLecture = (id: string) => {
-    router.push(`/courses/${courseId}/lectures?lectureId=${id}`);
-  };
-
-  const currentIndex = useMemo(
-    () => lectures.findIndex((l) => l.id === activeLecture?.id),
-    [lectures, activeLecture],
+  const handleSelectLecture = useCallback(
+    (id: string) => {
+      router.push(`/courses/${courseId}/lectures?lectureId=${id}`);
+    },
+    [router, courseId],
   );
 
-  const nextLecture = lectures[currentIndex + 1];
-  const prevLecture = lectures[currentIndex - 1];
+  useEffect(() => {
+    if (lectures.length > 0) {
+      setLocalLectures(lectures);
+
+      // If no lectureId in URL, default to first uncompleted one, or last one if all completed
+      if (!lectureIdFromUrl) {
+        const firstUncompleted = lectures.find((l) => !l.isCompleted);
+        if (firstUncompleted) {
+          handleSelectLecture(firstUncompleted.id);
+        } else {
+          handleSelectLecture(lectures[lectures.length - 1].id);
+        }
+      }
+    }
+  }, [lectures, lectureIdFromUrl, handleSelectLecture]);
+
+  // Load active lecture details when ID changes
+  const { data: activeLecture, isLoading: loading, refetch: refetchActiveLecture } = useLectureByIdQuery(
+    lectureIdFromUrl || "",
+    {
+      enabled: !!lectureIdFromUrl,
+    }
+  );
+
+  const { mutateAsync: updateProgress } = useUpdateLectureProgressMutation();
+
+  const currentIndex = useMemo(
+    () => localLectures.findIndex((l) => l.id === activeLecture?.id),
+    [localLectures, activeLecture],
+  );
+
+  const nextLecture = localLectures[currentIndex + 1];
+  const prevLecture = localLectures[currentIndex - 1];
 
   const handleNext = async () => {
     if (!activeLecture) return;
@@ -124,17 +111,12 @@ export default function StudentLecturePage() {
     try {
       // If text lecture and not completed, mark as completed first
       if (!activeLecture.videoObjectKey && !activeLecture.isCompleted) {
-        await updateLectureProgress({
+        await updateProgress({
           lectureId: activeLecture.id,
           segmentStart: 0,
           segmentEnd: 0,
         });
-        // Update state locally so sidebar updates
-        setLectures((prev) =>
-          prev.map((l) =>
-            l.id === activeLecture.id ? { ...l, isCompleted: true } : l,
-          ),
-        );
+        refetchLectures();
       }
 
       if (nextLecture) {
@@ -195,16 +177,8 @@ export default function StudentLecturePage() {
               navigating={navigating}
               onVideoCompleted={() => {
                 // Refresh active lecture to show completed status
-                getLectureById(activeLecture.id).then((data) => {
-                  setActiveLecture(data);
-                  setLectures((prev) =>
-                    prev.map((l) =>
-                      l.id === activeLecture.id
-                        ? { ...l, isCompleted: true }
-                        : l,
-                    ),
-                  );
-                });
+                refetchActiveLecture();
+                refetchLectures();
               }}
             />
 

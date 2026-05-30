@@ -1,7 +1,7 @@
 import { FormInput } from "@/components/common/form-input";
 import { FilterSelect } from "@/components/common/filter-select";
 import type { RegisterUser, RoleEnum } from "@/lib/api/types";
-import { batchCreateUsers } from "@/lib/api/users";
+import { useBatchCreateUsersMutation } from "@/lib/api/users";
 import { ROLE_OPTIONS } from "@/lib/roles";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, FormHelperText, Grid } from "@mui/material";
@@ -21,6 +21,7 @@ interface ManualTabProps {
 
 export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
   const { handleError, showSuccess } = useApiWithToast();
+  const { mutateAsync: batchCreateUsersMutate } = useBatchCreateUsersMutation();
 
   const [manualForm, setManualForm] = useState({
     username: "",
@@ -71,15 +72,23 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
         role: manualForm.role,
       };
 
-      await batchCreateUsers([payload]);
-      showSuccess("Đã tạo người dùng mới thành công!");
+      await batchCreateUsersMutate([payload]);
+      showSuccess("User created successfully!");
       onSaved();
       onClose();
     } catch (err) {
-      handleError(err, "Không thể tạo người dùng mới");
+      handleError(err, "Could not create user");
       throw err;
     }
-  }, [manualForm, isFormValid, showSuccess, onSaved, onClose, handleError]);
+  }, [
+    manualForm,
+    isFormValid,
+    showSuccess,
+    onSaved,
+    onClose,
+    handleError,
+    batchCreateUsersMutate,
+  ]);
 
   useEffect(() => {
     onReady(isFormValid, handleSubmit);
@@ -89,8 +98,8 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
     <Grid container spacing={2.5}>
       <Grid size={{ xs: 12, md: 6 }}>
         <FormInput
-          label="Họ và tên *"
-          placeholder="Nguyễn Văn A"
+          label="Full name *"
+          placeholder="Nguyen Van A"
           value={manualForm.fullName}
           onChange={(e) =>
             setManualForm((prev) => ({
@@ -100,14 +109,14 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
           }
           onBlur={() => setTouched((prev) => ({ ...prev, fullName: true }))}
           error={touched.fullName && isFullNameInvalid}
-          helperText="Họ và tên là bắt buộc"
+          helperText="Full name is required"
           icon={<User size={18} />}
           iconPosition="start"
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <FormInput
-          label="Tên đăng nhập (Username) *"
+          label="Username *"
           placeholder="nguyena"
           value={manualForm.username}
           onChange={(e) =>
@@ -118,7 +127,7 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
           }
           onBlur={() => setTouched((prev) => ({ ...prev, username: true }))}
           error={touched.username && isUsernameInvalid}
-          helperText="Phải bắt đầu bằng chữ cái, dài từ 3-32 ký tự chữ và số"
+          helperText="Must start with a letter, be 3-32 characters long (letters and numbers)"
           icon={<AtSign size={18} />}
           iconPosition="start"
         />
@@ -133,14 +142,14 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
           }
           onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
           error={touched.email && isEmailInvalid}
-          helperText="Email không đúng định dạng"
+          helperText="Email is invalid"
           icon={<Mail size={18} />}
           iconPosition="start"
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <FormInput
-          label="Mật khẩu *"
+          label="Password *"
           placeholder="User@123"
           type={showPassword ? "text" : "password"}
           value={manualForm.password}
@@ -152,7 +161,7 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
           }
           onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
           error={touched.password && isPasswordInvalid}
-          helperText="Tối thiểu 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt"
+          helperText="At least 8 characters, including at least one uppercase letter, one lowercase letter, one number, and one special character"
           icon={showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           iconPosition="end"
           onIconClick={() => setShowPassword((p) => !p)}
@@ -166,7 +175,7 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
           }}
         >
           <FilterSelect
-            label="Vai trò *"
+            label="Role *"
             value={manualForm.role}
             onChange={(val) =>
               setManualForm((prev) => ({
@@ -177,7 +186,7 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
             items={ROLE_OPTIONS}
           />
           <FormHelperText sx={{ mx: 1.5, mt: 0.5 }}>
-            Chọn quyền hạn cho tài khoản
+            Select the role for the account
           </FormHelperText>
         </Box>
       </Grid>

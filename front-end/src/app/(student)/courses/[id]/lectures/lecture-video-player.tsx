@@ -1,7 +1,7 @@
 "use client";
 
-import { getDownloadUrl } from "@/lib/api/files";
-import { updateLectureProgress } from "@/lib/api/lectures";
+import { useDownloadUrlQuery } from "@/lib/api/files";
+import { useUpdateLectureProgressMutation } from "@/lib/api/lectures";
 import {
   alpha,
   Box,
@@ -27,29 +27,33 @@ export function LectureVideoPlayer({
 }: LectureVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(isInitiallyCompleted);
   const lastTrackedTime = useRef<number>(0);
   const lastCurrentTime = useRef<number>(0);
 
+  const { data: response, isLoading: loadingUrl } = useDownloadUrlQuery(
+    videoObjectKey,
+    {
+      enabled: !!videoObjectKey,
+    }
+  );
+
+  const { mutateAsync: updateProgress } = useUpdateLectureProgressMutation();
+
   // Fetch video URL and load as blob to avoid 403 on long videos
   useEffect(() => {
-    const fetchUrl = async () => {
+    const fetchBlob = async () => {
+      if (!response?.downloadUrl) return;
       setLoading(true);
       setError(null);
       try {
-        const response = await getDownloadUrl(videoObjectKey);
-        if (response.downloadUrl) {
-          // Download the video file fully to browser memory/cache
-          const videoRes = await fetch(response.downloadUrl);
-          if (!videoRes.ok) throw new Error("Failed to download video content");
-          const blob = await videoRes.blob();
-          const objectUrl = URL.createObjectURL(blob);
-          setVideoUrl(objectUrl);
-        } else {
-          setError("Cannot find video url");
-        }
+        const videoRes = await fetch(response.downloadUrl);
+        if (!videoRes.ok) throw new Error("Failed to download video content");
+        const blob = await videoRes.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        setVideoUrl(objectUrl);
       } catch (err) {
         console.error("Failed to fetch video URL", err);
         setError("Cannot fetch video url");
@@ -58,10 +62,8 @@ export function LectureVideoPlayer({
       }
     };
 
-    if (videoObjectKey) {
-      fetchUrl();
-    }
-  }, [videoObjectKey]);
+    fetchBlob();
+  }, [response]);
 
   // Cleanup blob URL on unmount or URL change
   useEffect(() => {
@@ -101,13 +103,13 @@ export function LectureVideoPlayer({
           // A seek occurred! Send the old segment if duration >= 2s
           if (previousTime - startTime >= 2) {
             try {
-              const response = await updateLectureProgress({
+              const res = await updateProgress({
                 lectureId,
                 segmentStart: startTime,
                 segmentEnd: previousTime,
               });
 
-              if (response.completed) {
+              if (res.completed) {
                 setIsCompleted(true);
                 onCompleted?.();
                 clearInterval(interval);
@@ -122,7 +124,7 @@ export function LectureVideoPlayer({
           // Normal playback
           if (currentTime - startTime >= 10) {
             try {
-              const response = await updateLectureProgress({
+              const res = await updateProgress({
                 lectureId,
                 segmentStart: startTime,
                 segmentEnd: currentTime,
@@ -130,7 +132,7 @@ export function LectureVideoPlayer({
 
               lastTrackedTime.current = currentTime;
 
-              if (response.completed) {
+              if (res.completed) {
                 setIsCompleted(true);
                 onCompleted?.();
                 clearInterval(interval);
@@ -146,9 +148,11 @@ export function LectureVideoPlayer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lectureId, isCompleted, onCompleted]);
+  }, [lectureId, isCompleted, onCompleted, updateProgress]);
 
-  if (loading) {
+  const isLoadingVideo = loadingUrl || loading;
+
+  if (isLoadingVideo) {
     return (
       <Box sx={{ width: "100%", position: "relative", paddingTop: "56.25%" }}>
         <Box
@@ -221,7 +225,7 @@ export function LectureVideoPlayer({
         onEnded={() => {
           // Final progress update if not completed
           if (!isCompleted && videoRef.current) {
-            updateLectureProgress({
+            updateProgress({
               lectureId,
               segmentStart: lastTrackedTime.current,
               segmentEnd: Math.floor(videoRef.current.currentTime),

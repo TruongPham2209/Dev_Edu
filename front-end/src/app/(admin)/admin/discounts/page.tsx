@@ -7,82 +7,62 @@ import { ErrorState } from "@/components/common/error-state";
 import { HeroInfo } from "@/components/common/hero-info";
 import { DiscountFormDialog } from "@/components/dialog/discount-form";
 import {
-  deleteCourseDiscount,
-  getGlobalCourseDiscounts,
+  useDeleteCourseDiscountMutation,
+  useGlobalCourseDiscountsInfiniteQuery,
 } from "@/lib/api/enrollments";
 import type { CourseDiscountResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Button, CircularProgress, Stack } from "@mui/material";
 import { ChevronDown, Percent, Plus, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DiscountsTable } from "./discounts-table";
 
 export default function AdminDiscountsPage() {
   const { handleError, showSuccess } = useApiWithToast();
 
-  const [discounts, setDiscounts] = useState<CourseDiscountResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null | undefined>(null);
-  const [isError, setIsError] = useState(false);
-
   // Dialog state
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
-  // Ref to track duplicate API requests
-  const isFetchingRef = useRef(false);
   // Observer target ref
   const observerTargetRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchDiscounts = useCallback(
-    async (cursor?: string, isAppend?: boolean) => {
-      if (isFetchingRef.current) return;
-      isFetchingRef.current = true;
+  // React Query Hooks
+  const {
+    data,
+    isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage,
+    fetchNextPage,
+    refetch: fetchDiscounts,
+    error,
+  } = useGlobalCourseDiscountsInfiniteQuery();
 
-      if (isAppend) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
-      }
+  const isError = Boolean(error);
 
-      try {
-        const response = await getGlobalCourseDiscounts(cursor);
-        if (isAppend) {
-          setDiscounts((prev) => [...prev, ...response.contents]);
-        } else {
-          setDiscounts(response.contents);
-        }
-        setNextCursor(response.nextCursor);
-        setIsError(false);
-      } catch (err) {
-        handleError(err, "Không thể tải danh sách giảm giá");
-        setIsError(true);
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-        isFetchingRef.current = false;
-      }
-    },
-    [handleError],
-  );
+  const discounts = useMemo(() => {
+    return data?.pages.flatMap((page) => page.contents) ?? [];
+  }, [data]);
 
-  // Initial load
+  const { mutateAsync: deleteCourseDiscountMutate, isPending: deleting } =
+    useDeleteCourseDiscountMutation();
+
   useEffect(() => {
-    fetchDiscounts();
-  }, [fetchDiscounts]);
+    if (error) {
+      handleError(error, "Failed to load discounts");
+    }
+  }, [error, handleError]);
 
   // Load More Handler
   const handleLoadMore = useCallback(() => {
-    if (loading || loadingMore || !nextCursor) return;
-    fetchDiscounts(nextCursor, true);
-  }, [loading, loadingMore, nextCursor, fetchDiscounts]);
+    if (loading || loadingMore || !hasNextPage) return;
+    fetchNextPage();
+  }, [loading, loadingMore, hasNextPage, fetchNextPage]);
 
   // Auto Infinite scroll using IntersectionObserver
   useEffect(() => {
     const currentTarget = observerTargetRef.current;
-    if (!currentTarget || !nextCursor || loading || loadingMore) return;
+    if (!currentTarget || !hasNextPage || loading || loadingMore) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -98,15 +78,14 @@ export default function AdminDiscountsPage() {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [nextCursor, loading, loadingMore, handleLoadMore]);
+  }, [hasNextPage, loading, loadingMore, handleLoadMore]);
 
   const handleRefresh = () => {
     fetchDiscounts();
   };
 
   const handleCreateSaved = (newDiscount: CourseDiscountResponse) => {
-    // Prepend newly created global discount into state, avoiding page reload
-    setDiscounts((prev) => [newDiscount, ...prev]);
+    fetchDiscounts();
   };
 
   const handleDeleteTrigger = (id: string) => {
@@ -116,15 +95,12 @@ export default function AdminDiscountsPage() {
   const handleDeleteConfirm = async () => {
     if (!deleteConfirmId || deleting) return;
     try {
-      setDeleting(true);
-      await deleteCourseDiscount(deleteConfirmId);
-      showSuccess("Đã xóa chiến dịch giảm giá thành công!");
-      setDiscounts((prev) => prev.filter((d) => d.id !== deleteConfirmId));
+      await deleteCourseDiscountMutate(deleteConfirmId);
+      showSuccess("Successfully deleted discount campaign!");
       setDeleteConfirmId(null);
+      fetchDiscounts();
     } catch (err) {
-      handleError(err, "Không thể xóa chiến dịch giảm giá");
-    } finally {
-      setDeleting(false);
+      handleError(err, "Failed to delete discount campaign");
     }
   };
 
@@ -134,15 +110,13 @@ export default function AdminDiscountsPage() {
 
   const getDeleteDescription = () => {
     if (!selectedDeleteDiscount) return "";
-    const prefix = deleting
-      ? "Đang tiến hành xóa"
-      : "Bạn có chắc chắn muốn xóa";
+    const prefix = deleting ? "Deleting..." : "Are you sure you want to delete";
     const suffix = deleting ? "..." : "?";
 
     if (!selectedDeleteDiscount.courseId) {
-      return `${prefix} chiến dịch giảm giá ${selectedDeleteDiscount.discountPercentage}% ("${selectedDeleteDiscount.discountDescription}") áp dụng cho tất cả khóa học${suffix}`;
+      return `${prefix} discount campaign ${selectedDeleteDiscount.discountPercentage}% ("${selectedDeleteDiscount.discountDescription}") applied to all courses${suffix}`;
     }
-    return `${prefix} chiến dịch giảm giá ${selectedDeleteDiscount.discountPercentage}% ("${selectedDeleteDiscount.discountDescription}") của khóa học "${selectedDeleteDiscount.courseTitle}"${suffix}`;
+    return `${prefix} discount campaign ${selectedDeleteDiscount.discountPercentage}% ("${selectedDeleteDiscount.discountDescription}") of course "${selectedDeleteDiscount.courseTitle}"${suffix}`;
   };
 
   return (
@@ -168,14 +142,14 @@ export default function AdminDiscountsPage() {
             }}
           >
             <ButtonAction
-              tooltip="Tải lại dữ liệu"
+              tooltip="Reload data"
               onClick={handleRefresh}
               variant="soft"
               color="info"
               icon={<RefreshCw size={21} strokeWidth={2.3} />}
             />
             <ButtonAction
-              tooltip="Tạo giảm giá chung"
+              tooltip="Create global discount"
               onClick={() => setFormDialogOpen(true)}
               icon={<Plus size={21} strokeWidth={2.3} />}
             />
@@ -189,18 +163,18 @@ export default function AdminDiscountsPage() {
             errorState={
               isError ? (
                 <ErrorState
-                  title="Lỗi tải dữ liệu"
-                  subtitle="Không thể tải danh sách giảm giá. Vui lòng thử lại sau."
+                  title="Failed to load discounts"
+                  subtitle="Failed to load discounts. Please try again later."
                   onRetry={handleRefresh}
                 />
               ) : undefined
             }
             emptyState={
               <EmptyState
-                title="Chưa có chiến dịch giảm giá nào"
-                subtitle="Chưa có chương trình ưu đãi học phí nào đang chạy. Hãy thiết lập một chiến dịch giảm giá chung áp dụng cho tất cả khóa học để thúc đẩy đăng ký học."
+                title="No discount campaigns found"
+                subtitle="No discount campaigns are currently running. Please set up a global discount campaign applied to all courses to encourage course enrollments."
                 icon={<Percent size={32} />}
-                actionLabel="Tạo chiến dịch ưu đãi"
+                actionLabel="Create discount campaign"
                 onAction={() => setFormDialogOpen(true)}
               />
             }
@@ -216,7 +190,7 @@ export default function AdminDiscountsPage() {
               mt: 1,
             }}
           >
-            {nextCursor && (
+            {hasNextPage && (
               <Box
                 ref={observerTargetRef}
                 sx={{
@@ -241,7 +215,7 @@ export default function AdminDiscountsPage() {
                       fontWeight: 700,
                     }}
                   >
-                    Tải thêm giảm giá
+                    Load more discounts
                   </Button>
                 )}
               </Box>
@@ -262,12 +236,12 @@ export default function AdminDiscountsPage() {
         open={Boolean(deleteConfirmId)}
         title={
           selectedDeleteDiscount?.courseId
-            ? "Xóa giảm giá khóa học?"
-            : "Xóa giảm giá chung?"
+            ? "Delete course discount?"
+            : "Delete global discount?"
         }
         description={getDeleteDescription()}
-        confirmLabel={deleting ? "Đang xóa..." : "Xóa"}
-        cancelLabel="Hủy bỏ"
+        confirmLabel={deleting ? "Deleting..." : "Delete"}
+        cancelLabel="Cancel"
         onConfirm={handleDeleteConfirm}
         onCancel={() => {
           if (!deleting) setDeleteConfirmId(null);

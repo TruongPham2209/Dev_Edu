@@ -3,11 +3,14 @@
 import { FormInput } from "@/components/common/form-input";
 import { RichTextEditor } from "@/components/common/rich-text-editor";
 import {
-  confirmImageUpload,
-  getDownloadUrl,
-  getPreSignedUploadUrl,
+  useConfirmImageUploadMutation,
+  useDownloadUrlQuery,
+  usePreSignedUploadUrlMutation,
 } from "@/lib/api/files";
-import { createLecture, updateLecture } from "@/lib/api/lectures";
+import {
+  useCreateLectureMutation,
+  useUpdateLectureMutation,
+} from "@/lib/api/lectures";
 import type { LectureRequest, LectureResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { FormDialog } from "@/components/common/form-dialog";
@@ -75,6 +78,23 @@ export function LectureFormDialog({
 
   const isFormValid = !isTitleInvalid && !isSummaryInvalid && !isContentInvalid;
 
+  // React Query Hooks
+  const { mutateAsync: preSignMutate } = usePreSignedUploadUrlMutation();
+  const { mutateAsync: createLectureMutate } = useCreateLectureMutation();
+  const { mutateAsync: updateLectureMutate } = useUpdateLectureMutation();
+  const { mutateAsync: confirmImageUploadMutate } = useConfirmImageUploadMutation();
+
+  const videoObjectKey = initialData?.videoObjectKey;
+  const { data: downloadData } = useDownloadUrlQuery(videoObjectKey || "", {
+    enabled: open && !!videoObjectKey,
+  });
+
+  useEffect(() => {
+    if (downloadData) {
+      setVideoPreviewUrl(downloadData.downloadUrl || downloadData.publicUrl || null);
+    }
+  }, [downloadData]);
+
   // Separate effect to load form and video preview on open or data change
   useEffect(() => {
     if (open) {
@@ -93,9 +113,7 @@ export function LectureFormDialog({
           videoObjectKey: initialData.videoObjectKey,
         });
 
-        if (initialData.videoObjectKey) {
-          loadExistingVideo(initialData.videoObjectKey);
-        } else {
+        if (!initialData.videoObjectKey) {
           setVideoPreviewUrl(null);
         }
       } else {
@@ -113,19 +131,6 @@ export function LectureFormDialog({
       }
     };
   }, [videoPreviewUrl]);
-
-  const loadExistingVideo = async (objectKey: string) => {
-    try {
-      const res = await getDownloadUrl(objectKey);
-      if (res.downloadUrl) {
-        setVideoPreviewUrl(res.downloadUrl);
-      } else if (res.publicUrl) {
-        setVideoPreviewUrl(res.publicUrl);
-      }
-    } catch (err) {
-      console.error("Failed to get video download URL:", err);
-    }
-  };
 
   const validateAndSetVideo = (file: File) => {
     if (isVideoLocked) return;
@@ -224,7 +229,7 @@ export function LectureFormDialog({
         await Promise.all(
           uniqueKeys.map(async (key) => {
             try {
-              await confirmImageUpload(key);
+              await confirmImageUploadMutate(key);
             } catch (err) {
               console.warn(`Failed to confirm image: ${key}`, err);
             }
@@ -234,7 +239,7 @@ export function LectureFormDialog({
 
       // 2. Upload video ONLY in CREATE mode or if not locked
       if (videoFile && !isVideoLocked) {
-        const preSignRes = await getPreSignedUploadUrl({
+        const preSignRes = await preSignMutate({
           fileName: videoFile.name,
           contentType: videoFile.type,
           fileSize: videoFile.size,
@@ -275,10 +280,10 @@ export function LectureFormDialog({
 
       // 3. Save lecture
       if (payload.id) {
-        await updateLecture(payload);
+        await updateLectureMutate(payload);
         showSuccess("Lecture updated successfully!");
       } else {
-        await createLecture(payload);
+        await createLectureMutate(payload);
         showSuccess("Lecture created successfully!");
       }
 
@@ -336,7 +341,7 @@ export function LectureFormDialog({
 
         <Box>
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Course content *
+            Lecture content *
           </Typography>
           <Box
             sx={{

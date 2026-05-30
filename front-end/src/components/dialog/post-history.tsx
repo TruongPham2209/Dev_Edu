@@ -6,13 +6,16 @@ import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { FilterSelect } from "@/components/common/filter-select";
 import { InfoDialog } from "@/components/common/info-dialog";
-import { deletePostVersion, getPostVersionsByPostId } from "@/lib/api/forum";
+import {
+  useDeletePostVersionMutation,
+  usePostVersionsByPostIdQuery,
+} from "@/lib/api/forum";
 import { PostStatus } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Box, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { Calendar, Eye, FileText, History, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface PostHistoryModalProps {
   open: boolean;
@@ -51,9 +54,6 @@ export function PostHistoryModal({
   mode = "normal",
   isMine = false,
 }: PostHistoryModalProps) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [versions, setVersions] = useState<any[]>([]);
   const [filterStatus, setFilterStatus] = useState("ALL");
 
   const [selectedVersion, setSelectedVersion] = useState<any>(null);
@@ -61,51 +61,35 @@ export function PostHistoryModal({
 
   const { handleError, showSuccess } = useApiWithToast();
 
-  const lastFetchParams = useRef({ postId: "", filterStatus: "" });
+  const apiStatus =
+    mode === "normal"
+      ? "APPROVED"
+      : filterStatus === "ALL"
+        ? undefined
+        : filterStatus;
 
-  const fetchHistory = useCallback(async () => {
-    if (!postId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const apiStatus =
-        mode === "normal"
-          ? "APPROVED"
-          : filterStatus === "ALL"
-            ? undefined
-            : filterStatus;
-      const response: any = await getPostVersionsByPostId(postId, apiStatus);
-      setVersions(
-        Array.isArray(response) ? response : response?.contents || [],
-      );
-    } catch (err) {
-      setError(err as Error);
-      handleError(err, "Failed to fetch post history");
-    } finally {
-      setLoading(false);
-    }
-  }, [postId, mode, filterStatus, handleError]);
+  // React Query Hooks
+  const {
+    data: versions = [],
+    isLoading: loading,
+    error,
+    refetch: fetchHistory,
+  } = usePostVersionsByPostIdQuery(postId, apiStatus, { enabled: open && !!postId });
+
+  const { mutateAsync: deletePostVersionMutate } = useDeletePostVersionMutation();
 
   useEffect(() => {
-    if (open) {
-      const currentParams = { postId, filterStatus };
-      // Only fetch if parameters have changed
-      if (
-        lastFetchParams.current.postId !== currentParams.postId ||
-        lastFetchParams.current.filterStatus !== currentParams.filterStatus
-      ) {
-        fetchHistory();
-        lastFetchParams.current = currentParams;
-      }
+    if (error) {
+      handleError(error, "Failed to fetch post history");
     }
-  }, [open, postId, filterStatus, fetchHistory]);
+  }, [error, handleError]);
 
   const handleDelete = async () => {
     if (!versionToDelete) return;
     try {
-      await deletePostVersion(versionToDelete);
+      await deletePostVersionMutate(versionToDelete);
       showSuccess("Post version deleted successfully");
-      setVersions((prev) => prev.filter((v) => v.id !== versionToDelete));
+      fetchHistory();
     } catch (err) {
       handleError(err, "Failed to delete version");
     } finally {

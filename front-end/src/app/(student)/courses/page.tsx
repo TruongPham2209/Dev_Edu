@@ -1,6 +1,6 @@
 "use client";
 
-import { getCategories, getCourses } from "@/lib/api/courses";
+import { useGetCategories, useGetInfiniteCourses } from "@/lib/api/courses";
 import type { CategoryResponse, CourseResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Stack } from "@mui/material";
@@ -11,21 +11,9 @@ import { CourseSearch } from "./course-search";
 
 export default function CourseDetailPage() {
   const { handleError } = useApiWithToast();
-  const [courses, setCourses] = useState<CourseResponse[]>([]);
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-
-  // Loading states
-  const [initialLoad, setInitialLoad] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-
-  // Filters
   const [searchKeyword, setSearchKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
-  // Pagination
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -35,70 +23,33 @@ export default function CourseDetailPage() {
     return () => clearTimeout(timer);
   }, [searchKeyword]);
 
-  // Load categories
+  // Use React Query
+  const { data: categoriesData, error: catError } = useGetCategories();
+  
+  const {
+    data: coursesData,
+    isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage,
+    fetchNextPage,
+    error: coursesError,
+  } = useGetInfiniteCourses({
+    keyword: debouncedKeyword || undefined,
+    categoryId: selectedCategory || undefined,
+  });
+
+  const categories = categoriesData || [];
+  const courses = coursesData?.pages.flatMap((page) => page.contents) || [];
+  const nextCursor = hasNextPage ? "has_more" : null; // course-list expects nextCursor to be truthy to show load more
+
   useEffect(() => {
-    const loadCats = async () => {
-      try {
-        const data = await getCategories();
-        setCategories(data);
-      } catch (error) {
-        handleError(error, "Không thể tải danh mục");
-      }
-    };
-    loadCats();
-  }, [handleError]);
+    if (catError) handleError(catError, "Không thể tải danh mục");
+    if (coursesError) handleError(coursesError, "Không thể tải khóa học");
+  }, [catError, coursesError, handleError]);
 
-  // Load courses when filters change
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchCourses = async () => {
-      setLoading(true);
-      try {
-        const response = await getCourses({
-          keyword: debouncedKeyword || undefined,
-          categoryId: selectedCategory || undefined,
-        });
-
-        if (isMounted) {
-          setCourses(response.contents);
-          setNextCursor(response.nextCursor ?? null);
-        }
-      } catch (error) {
-        if (isMounted) handleError(error, "Không thể tải khóa học");
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-          setInitialLoad(false);
-        }
-      }
-    };
-
-    fetchCourses();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [debouncedKeyword, selectedCategory, handleError]);
-
-  // Load more
-  const handleLoadMore = async () => {
-    if (!nextCursor || loadingMore) return;
-
-    setLoadingMore(true);
-    try {
-      const response = await getCourses({
-        keyword: debouncedKeyword || undefined,
-        categoryId: selectedCategory || undefined,
-        nextCursor: nextCursor,
-      });
-
-      setCourses((prev) => [...prev, ...response.contents]);
-      setNextCursor(response.nextCursor ?? null);
-    } catch (error) {
-      handleError(error, "Could not load more courses");
-    } finally {
-      setLoadingMore(false);
+  const handleLoadMore = () => {
+    if (hasNextPage && !loadingMore) {
+      fetchNextPage();
     }
   };
 
@@ -119,7 +70,7 @@ export default function CourseDetailPage() {
       <CourseList
         courses={courses}
         loading={loading}
-        initialLoad={initialLoad}
+        initialLoad={loading}
         nextCursor={nextCursor}
         loadingMore={loadingMore}
         onLoadMore={handleLoadMore}

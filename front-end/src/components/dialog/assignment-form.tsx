@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { FolderPlus, Type } from "lucide-react";
 import { RichTextEditor } from "@/components/common/rich-text-editor";
-import { createAssignment } from "@/lib/api/assignments";
+import { useCreateAssignmentMutation } from "@/lib/api/assignments";
 import type { AssignmentResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { FormDialog } from "@/components/common/form-dialog";
@@ -29,6 +29,8 @@ export function AssignmentFormDialog({
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [touched, setTouched] = useState({ title: false, description: false });
+
+  const { mutateAsync: createAssignmentMutate } = useCreateAssignmentMutation();
 
   useEffect(() => {
     if (open) {
@@ -71,7 +73,7 @@ export function AssignmentFormDialog({
     setSubmitting(true);
 
     try {
-      const newAssignment = await createAssignment({
+      const newAssignment = await createAssignmentMutate({
         lectureId,
         title: title.trim(),
         description: description, // Pass the HTML formatted content

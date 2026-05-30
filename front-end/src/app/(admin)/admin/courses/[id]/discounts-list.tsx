@@ -5,8 +5,8 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ListSkeleton } from "@/components/skeleton";
 import {
-  deleteCourseDiscount,
-  getCourseDiscountsByCourse,
+  useCourseDiscountsByCourseQuery,
+  useDeleteCourseDiscountMutation,
 } from "@/lib/api/enrollments";
 import type { CourseDiscountResponse } from "@/lib/api/types";
 import { formatServerDate, parseServerDate } from "@/lib/util/date-utils";
@@ -24,7 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import { BadgePercent, Percent, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { DiscountFormDialog } from "../../../../../components/dialog/discount-form";
 
 interface DiscountsListProps {
@@ -37,52 +37,43 @@ export function DiscountsList({
   onTotalCountChange,
 }: DiscountsListProps) {
   const { handleError, showSuccess } = useApiWithToast();
-  const [discounts, setDiscounts] = useState<CourseDiscountResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   // Dialog / Modal States
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Track active fetch
-  const isFetchingRef = useRef(false);
-
-  const fetchInitialDiscounts = useCallback(async () => {
-    if (!courseId || isFetchingRef.current) return;
-    isFetchingRef.current = true;
-    setLoading(true);
-    try {
-      const response = await getCourseDiscountsByCourse(courseId);
-      setDiscounts(response);
-      if (onTotalCountChange) {
-        onTotalCountChange(response.length);
-      }
-    } catch (err) {
-      handleError(err, "Không thể tải lịch giảm giá");
-    } finally {
-      setLoading(false);
-      isFetchingRef.current = false;
-    }
-  }, [courseId, handleError, onTotalCountChange]);
+  // React Query Hooks
+  const {
+    data: discounts = [],
+    isLoading: loading,
+    refetch: fetchInitialDiscounts,
+    error,
+  } = useCourseDiscountsByCourseQuery(courseId);
 
   useEffect(() => {
-    fetchInitialDiscounts();
-  }, [fetchInitialDiscounts]);
+    if (onTotalCountChange) {
+      onTotalCountChange(discounts.length);
+    }
+  }, [discounts, onTotalCountChange]);
+
+  useEffect(() => {
+    if (error) {
+      handleError(error, "Failed to load discounts");
+    }
+  }, [error, handleError]);
+
+  const { mutateAsync: deleteCourseDiscountMutate, isPending: deleting } =
+    useDeleteCourseDiscountMutation();
 
   const handleDelete = async () => {
     if (!confirmDeleteId || deleting) return;
-    setDeleting(true);
     try {
-      await deleteCourseDiscount(confirmDeleteId);
-      showSuccess("Đã xóa chiến dịch giảm giá thành công!");
+      await deleteCourseDiscountMutate(confirmDeleteId);
+      showSuccess("Deleted successfully!");
       setConfirmDeleteId(null);
-      // Reload discounts list
-      await fetchInitialDiscounts();
+      fetchInitialDiscounts();
     } catch (err) {
-      handleError(err, "Không thể xóa chiến dịch giảm giá");
-    } finally {
-      setDeleting(false);
+      handleError(err, "Failed to delete discount");
     }
   };
 
@@ -322,7 +313,9 @@ export function DiscountsList({
       <DiscountFormDialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSaved={fetchInitialDiscounts}
+        onSaved={() => {
+          fetchInitialDiscounts();
+        }}
         courseId={courseId}
       />
 

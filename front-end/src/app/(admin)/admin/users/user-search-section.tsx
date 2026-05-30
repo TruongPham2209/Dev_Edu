@@ -45,7 +45,7 @@ export function UserSearchSection({
           onChange={setKeyword}
           onSearch={handleSearchTrigger}
           onClear={() => handleSearchTrigger("")}
-          placeholder="Tìm kiếm theo họ tên, email, tên đăng nhập..."
+          placeholder="Search by full name, email, username..."
         />
       </Box>
 
@@ -56,7 +56,7 @@ export function UserSearchSection({
         }}
       >
         <FilterSelect
-          label="Vai trò bắt buộc *"
+          label="Required role *"
           value={role}
           onChange={(val) => {
             const newRole = val as RoleEnum;

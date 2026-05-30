@@ -1,7 +1,8 @@
 "use client";
 
+import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { FormDialog } from "@/components/common/form-dialog";
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box } from "@mui/material";
 import { FileSpreadsheet, User, UserPlus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ImportTab } from "./import-tab";
@@ -18,7 +19,7 @@ export function UserFormDialog({
   onClose,
   onSaved,
 }: UserFormDialogProps) {
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState<"manual" | "import">("manual");
 
   const [manualState, setManualState] = useState({
     isValid: false,
@@ -34,7 +35,7 @@ export function UserFormDialog({
 
   useEffect(() => {
     if (open) {
-      setTabValue(0);
+      setTabValue("manual");
       setResetKey((prev) => prev + 1);
     }
   }, [open]);
@@ -53,14 +54,10 @@ export function UserFormDialog({
     [],
   );
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   const isSubmitDisabled =
-    tabValue === 0 ? !manualState.isValid : !importState.isValid;
-  const onSubmit = tabValue === 0 ? manualState.fn : importState.fn;
-  const submitText = tabValue === 0 ? "Create users" : `Save all`;
+    tabValue === "manual" ? !manualState.isValid : !importState.isValid;
+  const onSubmit = tabValue === "manual" ? manualState.fn : importState.fn;
+  const submitText = tabValue === "manual" ? "Create users" : `Save all`;
 
   return (
     <FormDialog
@@ -78,38 +75,36 @@ export function UserFormDialog({
         sx={{ width: "100%", display: "flex", flexDirection: "column" }}
       >
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 1, mt: -1 }}>
-          <Tabs
-            value={open ? tabValue : false}
-            onChange={handleTabChange}
-            textColor="primary"
-            indicatorColor="primary"
-          >
-            <Tab
-              value={0}
-              label="Manual entry"
-              icon={<User size={18} />}
-              iconPosition="start"
-              sx={{ textTransform: "none", fontWeight: 700, minHeight: 48 }}
-            />
-            <Tab
-              value={1}
-              label="Upload Excel file"
-              icon={<FileSpreadsheet size={18} />}
-              iconPosition="start"
-              sx={{ textTransform: "none", fontWeight: 700, minHeight: 48 }}
-            />
-          </Tabs>
+          <AnimatedTabs
+            tabs={[
+              {
+                value: "manual",
+                label: "Manual entry",
+                icon: <User size={18} />,
+                iconPosition: "start",
+              },
+              {
+                value: "import",
+                label: "Upload Excel file",
+                icon: <FileSpreadsheet size={18} />,
+                iconPosition: "start",
+              },
+            ]}
+            value={tabValue}
+            onChange={setTabValue}
+            colorTheme="primary"
+          />
         </Box>
 
         <Box sx={{ minHeight: 320, py: 1 }}>
-          <Box sx={{ display: tabValue === 0 ? "block" : "none" }}>
+          <Box sx={{ display: tabValue === "manual" ? "block" : "none" }}>
             <ManualTab
               onReady={handleManualReady}
               onSaved={onSaved}
               onClose={onClose}
             />
           </Box>
-          <Box sx={{ display: tabValue === 1 ? "block" : "none" }}>
+          <Box sx={{ display: tabValue === "import" ? "block" : "none" }}>
             <ImportTab
               onReady={handleImportReady}
               onSaved={onSaved}

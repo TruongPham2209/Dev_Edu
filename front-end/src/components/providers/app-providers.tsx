@@ -1,9 +1,11 @@
 "use client";
 
+import { ToastProvider } from "@/lib/toast-context";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, theme as antdTheme } from "antd";
 import type { ReactNode } from "react";
-import { ToastProvider } from "@/lib/toast-context";
+import { useState } from "react";
 
 const muiTheme = createTheme({
   palette: {
@@ -107,14 +109,18 @@ const antdConfig = {
 };
 
 export function AppProviders({ children }: Readonly<{ children: ReactNode }>) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
-    <ToastProvider>
-      <ConfigProvider theme={antdConfig}>
-        <ThemeProvider theme={muiTheme}>
-          <CssBaseline />
-          {children}
-        </ThemeProvider>
-      </ConfigProvider>
-    </ToastProvider>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
+        <ConfigProvider theme={antdConfig}>
+          <ThemeProvider theme={muiTheme}>
+            <CssBaseline />
+            {children}
+          </ThemeProvider>
+        </ConfigProvider>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }

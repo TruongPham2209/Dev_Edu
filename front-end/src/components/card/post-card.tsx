@@ -1,6 +1,11 @@
 "use client";
 
-import type { PostResponse, PostStatus } from "@/lib/api/types";
+import type {
+  PostResponse,
+  PostStatus,
+  SavedPostResponse,
+} from "@/lib/api/types";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
   Box,
@@ -18,30 +23,35 @@ import {
   BookmarkMinus,
   Clock,
   Edit2,
-  Eye,
   History,
-  MessageCircle,
   MoreVertical,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-export function PostCard({
-  post,
-  tab,
-  onEdit,
-  onHistory,
-  onRemove,
-  onUnsave,
-}: {
+type PostedTabProps = {
+  tab: "posted";
   post: PostResponse;
-  tab?: "posted" | "saved";
   onEdit?: (post: PostResponse) => void;
   onHistory?: (post: PostResponse) => void;
   onRemove?: (post: PostResponse) => void;
-  onUnsave?: (post: PostResponse) => void;
-}) {
+};
+
+type SavedTabProps = {
+  tab: "saved";
+  post: SavedPostResponse;
+  onUnsave?: (post: SavedPostResponse) => void;
+};
+
+type DefaultTabProps = {
+  tab?: undefined;
+  post: PostResponse;
+};
+
+export type PostCardProps = PostedTabProps | SavedTabProps | DefaultTabProps;
+
+export function PostCard(props: PostCardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
 
@@ -55,39 +65,25 @@ export function PostCard({
     setAnchorEl(null);
   };
 
-  const formattedDate = post.createdAt
-    ? new Date(post.createdAt).toLocaleDateString("vi-VN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      })
-    : "";
-
-  const authorName =
-    post.authorFullName || post.authorUsername || "Thành viên DevEdu";
-  const tags = ["Thảo luận"];
-  const comments = post.comments ?? 0;
-  const views = post.views ?? 0;
-
   const getStatusConfig = (status?: PostStatus) => {
     switch (status) {
       case "PENDING":
         return {
-          label: "Chờ duyệt",
+          label: "Waiting for approval",
           color: "#f59e0b",
           bgcolor: "#fef3c7",
           icon: <Clock size={12} />,
         };
       case "REJECTED":
         return {
-          label: "Từ chối",
+          label: "Rejected",
           color: "#ef4444",
           bgcolor: "#fee2e2",
           icon: <AlertCircle size={12} />,
         };
       case "APPROVED":
         return {
-          label: "Đã duyệt",
+          label: "Approved",
           color: "#10b981",
           bgcolor: "#d1fae5",
           icon: null,
@@ -97,10 +93,43 @@ export function PostCard({
     }
   };
 
-  const statusConfig = getStatusConfig(post.status);
-  const isApproved = post.status === "APPROVED" || !post.status;
+  // Extract variables based on the tab type
+  let id: string;
+  let navId: string;
+  let title: string;
+  let content: string;
+  let date: string;
+  let authorName: string;
+  let authorAvatarUrl: string | undefined;
+  let thumbUrl: string | null;
+  let status: PostStatus | undefined;
+
+  if (props.tab === "saved") {
+    id = props.post.id;
+    navId = props.post.postId;
+    title = props.post.title;
+    content = props.post.shortDescription;
+    date = props.post.savedAt;
+    authorName = "DevEdu Member";
+    authorAvatarUrl = undefined;
+    thumbUrl = props.post.thumbUrl;
+    status = undefined;
+  } else {
+    id = props.post.id;
+    navId = props.post.id;
+    title = props.post.title;
+    content = props.post.shortDescription || props.post.content;
+    date = props.post.createdAt;
+    authorName = props.post.authorFullName || "DevEdu Member";
+    authorAvatarUrl = props.post.authorAvatarUrl || undefined;
+    thumbUrl = props.post.thumbUrl;
+    status = props.post.status;
+  }
+
+  const statusConfig = getStatusConfig(status);
+  const isApproved = status === "APPROVED" || !status;
   const CardComponent = isApproved ? Link : Box;
-  const cardProps = isApproved ? { href: `/posts?id=${post.id}` } : {};
+  const cardProps = isApproved ? { href: `/posts?id=${navId}` } : {};
 
   return (
     <Card
@@ -109,7 +138,7 @@ export function PostCard({
       sx={{
         display: "block",
         textDecoration: "none",
-        borderRadius: 4,
+        borderRadius: 1,
         border: "1px solid rgba(0,0,0,0.05)",
         boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -146,7 +175,7 @@ export function PostCard({
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Avatar
-                src={post.authorAvatarUrl || undefined}
+                src={authorAvatarUrl || undefined}
                 sx={{
                   width: 32,
                   height: 32,
@@ -174,7 +203,7 @@ export function PostCard({
                     gap: 0.5,
                   }}
                 >
-                  <Clock size={12} /> {formattedDate}
+                  <Clock size={12} /> {formatServerDate(date)}
                 </Typography>
               </Box>
             </Box>
@@ -202,23 +231,8 @@ export function PostCard({
                   }}
                 />
               )}
-              {tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  size="small"
-                  sx={{
-                    bgcolor: "#f1f5f9",
-                    color: "#475569",
-                    fontWeight: 500,
-                    fontSize: "0.75rem",
-                    height: 24,
-                    display: { xs: "none", sm: "inline-flex" },
-                  }}
-                />
-              ))}
 
-              {tab && (
+              {props.tab && (
                 <Box>
                   <IconButton
                     size="small"
@@ -243,18 +257,18 @@ export function PostCard({
                       },
                     }}
                   >
-                    {tab === "posted" && [
+                    {props.tab === "posted" && [
                       <MenuItem
                         key="edit"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleCloseMenu();
-                          onEdit?.(post);
+                          props.onEdit?.(props.post);
                         }}
                         disabled={!isApproved}
                       >
-                        <Edit2 size={16} style={{ marginRight: 8 }} /> Chỉnh sửa
+                        <Edit2 size={16} style={{ marginRight: 8 }} /> Edit
                       </MenuItem>,
                       <MenuItem
                         key="history"
@@ -262,10 +276,10 @@ export function PostCard({
                           e.preventDefault();
                           e.stopPropagation();
                           handleCloseMenu();
-                          onHistory?.(post);
+                          props.onHistory?.(props.post);
                         }}
                       >
-                        <History size={16} style={{ marginRight: 8 }} /> Lịch sử
+                        <History size={16} style={{ marginRight: 8 }} /> History
                       </MenuItem>,
                       <MenuItem
                         key="remove"
@@ -273,24 +287,24 @@ export function PostCard({
                           e.preventDefault();
                           e.stopPropagation();
                           handleCloseMenu();
-                          onRemove?.(post);
+                          props.onRemove?.(props.post);
                         }}
                         sx={{ color: "#ef4444" }}
                       >
-                        <Trash2 size={16} style={{ marginRight: 8 }} /> Xóa
+                        <Trash2 size={16} style={{ marginRight: 8 }} /> Delete
                       </MenuItem>,
                     ]}
-                    {tab === "saved" && (
+                    {props.tab === "saved" && (
                       <MenuItem
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                           handleCloseMenu();
-                          onUnsave?.(post);
+                          props.onUnsave?.(props.post);
                         }}
                       >
                         <BookmarkMinus size={16} style={{ marginRight: 8 }} />{" "}
-                        Bỏ lưu
+                        Unsave
                       </MenuItem>
                     )}
                   </Menu>
@@ -307,7 +321,7 @@ export function PostCard({
               alignItems: "flex-start",
             }}
           >
-            {post.thumbUrl && (
+            {thumbUrl && (
               <Box
                 sx={{
                   width: { xs: 90, sm: 170 },
@@ -320,8 +334,8 @@ export function PostCard({
               >
                 <Box
                   component="img"
-                  src={post.thumbUrl}
-                  alt={post.title}
+                  src={thumbUrl}
+                  alt={title}
                   sx={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </Box>
@@ -343,7 +357,7 @@ export function PostCard({
                   lineHeight: 1.4,
                 }}
               >
-                {post.title}
+                {title}
               </Typography>
               <Typography
                 variant="body2"
@@ -358,31 +372,7 @@ export function PostCard({
                   fontSize: "0.95rem",
                 }}
               >
-                {post.content}
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Engagement Metrics */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 3,
-              pt: 1,
-              color: "#64748b",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <MessageCircle size={16} />
-              <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                {comments}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <Eye size={16} />
-              <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                {views}
+                {content}
               </Typography>
             </Box>
           </Box>

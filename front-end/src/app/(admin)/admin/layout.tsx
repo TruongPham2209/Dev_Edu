@@ -4,7 +4,7 @@ import { AdminLayout } from "@/components/layout/admin/page";
 export const metadata: Metadata = {
   title: "Admin Console",
   description:
-    "Bảng điều khiển cho quản trị hệ thống, kiểm duyệt và doanh thu.",
+    "Admin console for system management, course approval, and revenue tracking.",
 };
 
 export default function Layout({

@@ -1,5 +1,5 @@
 import type { RegisterUser, RoleEnum } from "@/lib/api/types";
-import { batchCreateUsers } from "@/lib/api/users";
+import { useBatchCreateUsersMutation } from "@/lib/api/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Alert,
@@ -49,6 +49,7 @@ interface ImportTabProps {
 
 export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
   const { handleError, showSuccess } = useApiWithToast();
+  const { mutateAsync: batchCreateUsersMutate } = useBatchCreateUsersMutation();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -62,15 +63,22 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
     }
 
     try {
-      await batchCreateUsers(importedUsers);
-      showSuccess(`Đã tạo thành công ${importedUsers.length} người dùng mới!`);
+      await batchCreateUsersMutate(importedUsers);
+      showSuccess(`Created ${importedUsers.length} users successfully!`);
       onSaved();
       onClose();
     } catch (err) {
-      handleError(err, "Không thể tạo danh sách người dùng");
+      handleError(err, "Could not create users");
       throw err;
     }
-  }, [importedUsers, showSuccess, onSaved, onClose, handleError]);
+  }, [
+    importedUsers,
+    showSuccess,
+    onSaved,
+    onClose,
+    handleError,
+    batchCreateUsersMutate,
+  ]);
 
   useEffect(() => {
     const isValid = importedUsers.length > 0 && importErrors.length === 0;
@@ -85,11 +93,11 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
         "nguyena",
         "nguyena@example.com",
         "NguyenA123!",
-        "Nguyễn Văn A",
+        "Nguyen Van A",
         "STUDENT",
       ],
-      ["tranb", "tranb@example.com", "TranB456!", "Trần Thị B", "LECTURER"],
-      ["adminc", "adminc@example.com", "AdminC789!", "Vũ Văn C", "ADMIN"],
+      ["tranb", "tranb@example.com", "TranB456!", "Tran Thi B", "LECTURER"],
+      ["adminc", "adminc@example.com", "AdminC789!", "Vu Van C", "ADMIN"],
     ];
     const ws = XLSX.utils.aoa_to_sheet([...headers, ...sampleRow]);
     const wb = XLSX.utils.book_new();
@@ -116,7 +124,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               field: "File",
               value: "",
               message:
-                "Tệp không chứa bất kỳ dòng dữ liệu nào ngoài dòng tiêu đề.",
+                "Your file does not contain any data rows other than the header row.",
             },
           ]);
           setImportedUsers([]);
@@ -172,14 +180,14 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               row: rowNum,
               field: "role",
               value: "",
-              message: "Vai trò là trường bắt buộc (STUDENT, LECTURER, ADMIN)",
+              message: "Role is required (STUDENT, LECTURER, ADMIN)",
             });
           } else {
             errors.push({
               row: rowNum,
               field: "role",
               value: rawRole,
-              message: `Vai trò không hợp lệ: "${rawRole}". Chấp nhận: STUDENT, LECTURER, ADMIN`,
+              message: `Invalid role: "${rawRole}". Accepted: STUDENT, LECTURER, ADMIN`,
             });
           }
 
@@ -189,7 +197,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               row: rowNum,
               field: "username",
               value: "",
-              message: "Tên đăng nhập là trường bắt buộc",
+              message: "Username is required",
             });
           } else if (!usernameRegex.test(username)) {
             errors.push({
@@ -197,14 +205,14 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               field: "username",
               value: username,
               message:
-                "Tên đăng nhập không hợp lệ (bắt đầu bằng chữ cái, dài từ 3-32 ký tự chữ và số)",
+                "Invalid username (must start with a letter, be 3-32 characters long - letters and numbers only)",
             });
           } else if (seenUsernames.has(username)) {
             errors.push({
               row: rowNum,
               field: "username",
               value: username,
-              message: "Tên đăng nhập bị trùng lặp trong tệp tải lên",
+              message: "Username is duplicated in the uploaded file",
             });
           } else {
             seenUsernames.add(username);
@@ -216,21 +224,21 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               row: rowNum,
               field: "email",
               value: "",
-              message: "Email là trường bắt buộc",
+              message: "Email is required",
             });
           } else if (!emailRegex.test(email)) {
             errors.push({
               row: rowNum,
               field: "email",
               value: email,
-              message: "Email không đúng định dạng",
+              message: "Email is invalid",
             });
           } else if (seenEmails.has(email)) {
             errors.push({
               row: rowNum,
               field: "email",
               value: email,
-              message: "Email bị trùng lặp trong tệp tải lên",
+              message: "Email is duplicated in the uploaded file",
             });
           } else {
             seenEmails.add(email);
@@ -242,7 +250,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               row: rowNum,
               field: "password",
               value: "",
-              message: "Mật khẩu là trường bắt buộc",
+              message: "Password is required",
             });
           } else if (!passwordRegex.test(password)) {
             errors.push({
@@ -250,7 +258,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               field: "password",
               value: "******",
               message:
-                "Mật khẩu yếu (tối thiểu 8 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt)",
+                "Password is weak (at least 8 characters, including at least one uppercase letter, one lowercase letter, one number, and one special character)",
             });
           }
 
@@ -260,7 +268,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               row: rowNum,
               field: "fullName",
               value: "",
-              message: "Họ và tên là trường bắt buộc",
+              message: "Full name is required",
             });
           }
 
@@ -290,7 +298,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             field: "File",
             value: "",
             message:
-              "Không thể phân tích dữ liệu tệp. Vui lòng đảm bảo đúng định dạng Excel.",
+              "Could not parse file data. Please ensure the Excel format is correct.",
           },
         ]);
         setImportedUsers([]);
@@ -324,7 +332,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             row: 0,
             field: "File",
             value: droppedFile.name,
-            message: "Hệ thống chỉ hỗ trợ định dạng Excel (.xlsx, .xls)",
+            message: "System only support Excel (.xlsx, .xls)",
           },
         ]);
         return;
@@ -362,8 +370,8 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
           color="text.secondary"
           sx={{ fontWeight: 500 }}
         >
-          Bạn có thể tạo hàng loạt người dùng bằng cách tải lên file mẫu Excel đã
-          nhập thông tin.
+          You can create bulk users by uploading an Excel template file with the
+          entered information.
         </Typography>
         <Button
           variant="outlined"
@@ -376,7 +384,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             fontWeight: 700,
           }}
         >
-          Tải file mẫu
+          Download Template
         </Button>
       </Box>
 
@@ -430,10 +438,10 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             variant="subtitle1"
             sx={{ fontWeight: 700, color: "text.primary", mb: 0.5 }}
           >
-            Kéo và thả file Excel vào đây
+            Drag and drop Excel file here
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Hoặc nhấp để chọn tệp từ máy tính. Hỗ trợ định dạng .xlsx, .xls
+            Or click to select a file from your computer. Supports .xlsx, .xls
           </Typography>
         </Box>
       ) : importErrors.length > 0 ? (
@@ -441,8 +449,8 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
         <Box>
           <Alert severity="error" sx={{ mb: 2, borderRadius: 2.5 }}>
             <Typography variant="body2" sx={{ fontWeight: 700 }}>
-              Tệp của bạn chứa {importErrors.length} lỗi validation. Vui lòng sửa
-              lại tệp Excel và tải lên lại.
+              Your file contains {importErrors.length} validation errors. Please
+              correct the Excel file and upload it again.
             </Typography>
           </Alert>
           <TableContainer
@@ -457,13 +465,11 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: "grey.50" }}>
-                  <TableCell sx={{ fontWeight: 700 }}>Dòng</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Cột / Trường</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>
-                    Giá trị hiện tại
-                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Line</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Column / Field</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Current Value</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: "error.main" }}>
-                    Mô tả lỗi
+                    Error Description
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -471,7 +477,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
                 {importErrors.map((err, idx) => (
                   <TableRow key={idx}>
                     <TableCell sx={{ fontWeight: 650 }}>
-                      {err.row > 0 ? `Dòng ${err.row}` : "-"}
+                      {err.row > 0 ? `Line ${err.row}` : "-"}
                     </TableCell>
                     <TableCell
                       sx={{
@@ -487,7 +493,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
                         fontFamily: "monospace",
                       }}
                     >
-                      {err.value || <em style={{ opacity: 0.5 }}>Trống</em>}
+                      {err.value || <em style={{ opacity: 0.5 }}>Empty</em>}
                     </TableCell>
                     <TableCell sx={{ color: "error.main", fontWeight: 500 }}>
                       <Box
@@ -521,7 +527,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
                 fontWeight: 700,
               }}
             >
-              Chọn file khác
+              Choose Another File
             </Button>
           </Box>
         </Box>
@@ -546,7 +552,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             >
               <CheckCircle2 size={18} />
               <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Hợp lệ {importedUsers.length} người dùng từ tệp &quot;
+                Valid {importedUsers.length} users from file &quot;
                 {file?.name}&quot;
               </Typography>
             </Box>
@@ -560,7 +566,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               }}
               sx={{ textTransform: "none", fontWeight: 700 }}
             >
-              Xóa tệp đã chọn
+              Remove Selected File
             </Button>
           </Box>
 
@@ -576,13 +582,13 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: "grey.50" }}>
-                  <TableCell sx={{ fontWeight: 700 }}>STT</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Họ và tên</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Tên đăng nhập</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>No</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Full Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Username</TableCell>
                   <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Vai trò</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 700 }}>
-                    Thao tác
+                    Action
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -595,7 +601,9 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
                     <TableCell sx={{ fontWeight: 700, color: "text.primary" }}>
                       {usr.fullName}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>{usr.username}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {usr.username}
+                    </TableCell>
                     <TableCell sx={{ color: "text.secondary" }}>
                       {usr.email}
                     </TableCell>

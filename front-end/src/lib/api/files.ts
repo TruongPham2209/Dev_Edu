@@ -1,4 +1,10 @@
 import { apiGet, apiPost } from "./client";
+import {
+  useQuery,
+  useMutation,
+  UseQueryOptions,
+  UseMutationOptions,
+} from "@tanstack/react-query";
 import type { FilePreSignUploadRequest, FileUploadResponse } from "./types";
 
 export async function getPreSignedUploadUrl(
@@ -31,3 +37,61 @@ export async function getFileMetadata(
     `/api/v1/files/metadata?fullObjectKey=${encodeURIComponent(fullObjectKey)}`,
   );
 }
+
+export function useDownloadUrlQuery(
+  fullObjectKey: string,
+  options?: Omit<
+    UseQueryOptions<FileUploadResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["files", "download", fullObjectKey],
+    queryFn: () => getDownloadUrl(fullObjectKey),
+    enabled: !!fullObjectKey,
+    ...options,
+  });
+}
+
+export function useFileMetadataQuery(
+  fullObjectKey: string,
+  options?: Omit<
+    UseQueryOptions<FileUploadResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["files", "metadata", fullObjectKey],
+    queryFn: () => getFileMetadata(fullObjectKey),
+    enabled: !!fullObjectKey,
+    ...options,
+  });
+}
+
+export function usePreSignedUploadUrlMutation(
+  options?: UseMutationOptions<
+    FileUploadResponse,
+    Error,
+    FilePreSignUploadRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: getPreSignedUploadUrl,
+    ...options,
+  });
+}
+
+export function useConfirmImageUploadMutation(
+  options?: UseMutationOptions<string, Error, string>,
+) {
+  return useMutation({
+    mutationFn: confirmImageUpload,
+    ...options,
+  });
+}
+
+// Aliases for backward compatibility during refactoring
+export {
+  useDownloadUrlQuery as useGetDownloadUrl,
+  useFileMetadataQuery as useGetFileMetadata,
+};

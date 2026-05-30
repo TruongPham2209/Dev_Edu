@@ -24,20 +24,20 @@ export function UserTable({
 
   const getRoleChip = (role: string) => {
     let icon = <User size={14} />;
-    let label = "Học viên";
+    let label = "Student";
     let color = "#3b82f6";
     let bg = "rgba(59, 130, 246, 0.08)";
     let border = "1px solid rgba(59, 130, 246, 0.16)";
 
     if (role === "LECTURER") {
       icon = <UserCheck size={14} />;
-      label = "Giảng viên";
+      label = "Lecturer";
       color = "#f59e0b";
       bg = "rgba(245, 158, 11, 0.08)";
       border = "1px solid rgba(245, 158, 11, 0.16)";
     } else if (role === "ADMIN") {
       icon = <Shield size={14} />;
-      label = "Quản trị viên";
+      label = "Administrator";
       color = "#ef4444";
       bg = "rgba(239, 68, 68, 0.08)";
       border = "1px solid rgba(239, 68, 68, 0.16)";
@@ -76,7 +76,7 @@ export function UserTable({
 
   const columns: ColumnDef<UserResponse>[] = [
     {
-      header: "Họ và tên",
+      header: "Full name",
       width: 320,
       renderSkeleton: () => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -126,7 +126,7 @@ export function UserTable({
       ),
     },
     {
-      header: "Tên đăng nhập",
+      header: "Username",
       width: 180,
       skeletonVariant: "text",
       render: (user) => (
@@ -149,13 +149,13 @@ export function UserTable({
       ),
     },
     {
-      header: "Vai trò",
+      header: "Role",
       width: 140,
       skeletonVariant: "rounded",
       render: (user) => getRoleChip(user.role),
     },
     {
-      header: "Hoạt động",
+      header: "Activity",
       width: 260,
       renderSkeleton: () => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -175,7 +175,7 @@ export function UserTable({
           >
             <BookOpen size={16} style={{ color: "#3b82f6" }} />
             <Typography variant="body2" sx={{ fontWeight: 550 }}>
-              Đã tham gia {user.courseCount || 0} khóa học
+              Has joined {user.courseCount || 0} courses
             </Typography>
           </Box>
         ) : (
@@ -189,7 +189,7 @@ export function UserTable({
           >
             <FileText size={16} style={{ color: "#f59e0b" }} />
             <Typography variant="body2" sx={{ fontWeight: 550 }}>
-              Đã đăng {user.postedPosts || 0} bài viết
+              Has posted {user.postedPosts || 0} posts
             </Typography>
           </Box>
         ),

@@ -1,18 +1,11 @@
 "use client";
 
 import { ErrorState } from "@/components/common/error-state";
-import { getAssignments } from "@/lib/api/assignments";
-import { getCourseById } from "@/lib/api/courses";
-import { getLectureById, getMaterials } from "@/lib/api/lectures";
-import type {
-  AssignmentResponse,
-  LectureResponse,
-  MaterialResponse,
-} from "@/lib/api/types";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { useAssignmentsQuery } from "@/lib/api/assignments";
+import { useCourseByIdQuery } from "@/lib/api/courses";
+import { useLectureByIdQuery, useMaterialsQuery } from "@/lib/api/lectures";
 import { Box, Skeleton, Stack } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { AssignmentsList } from "./assignments-list";
 import { LectureDetailSkeleton } from "./lecture-detail-skeleton";
 import { LectureHeroSection } from "./lecture-hero";
@@ -24,85 +17,32 @@ export default function AdminLectureDetailPage() {
   const router = useRouter();
   const lectureId = params.lectureId as string;
   const courseId = params.id as string;
-  const { handleError, showSuccess } = useApiWithToast();
 
-  // Core data states
-  const [lecture, setLecture] = useState<LectureResponse | null>(null);
-  const [courseTitle, setCourseTitle] = useState("");
-  const [materials, setMaterials] = useState<MaterialResponse[]>([]);
-  const [assignments, setAssignments] = useState<AssignmentResponse[]>([]);
+  // Core data queries via React Query
+  const { data: lecture, isLoading: loadingLecture } = useLectureByIdQuery(lectureId);
+  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(courseId, { enabled: !!courseId });
+  const { data: materials = [], isLoading: materialsLoading, refetch: refetchMaterials } = useMaterialsQuery(lectureId, { enabled: !!lectureId });
+  const { data: assignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useAssignmentsQuery(lectureId, { enabled: !!lectureId });
 
-  // Loading states
-  const [loadingLecture, setLoadingLecture] = useState(true);
-  const [loadingSecondary, setLoadingSecondary] = useState(false);
-
-  // Modal / Dialog states
-  const [form, setForm] = useState({ title: "", summary: "", content: "" });
-
-  // Sequential loading: First getLectureById, then secondary APIs
-  const loadLectureData = async () => {
-    try {
-      setLoadingLecture(true);
-      const lectureData = await getLectureById(lectureId);
-      setLecture(lectureData);
-      setForm({
-        title: lectureData.title,
-        summary: lectureData.summary,
-        content: lectureData.content || "",
-      });
-
-      // Lecture resolved successfully! Now load secondary metadata in parallel
-      loadSecondaryData();
-    } catch (error) {
-      handleError(error, "Failed to load lecture information");
-    } finally {
-      setLoadingLecture(false);
-    }
-  };
-
-  const loadSecondaryData = async () => {
-    try {
-      setLoadingSecondary(true);
-      const [courseData, materialData, assignmentData] = await Promise.all([
-        getCourseById(courseId),
-        getMaterials(lectureId),
-        getAssignments(lectureId),
-      ]);
-      setCourseTitle(courseData.title);
-      setMaterials(materialData);
-      setAssignments(assignmentData);
-    } catch (error) {
-      // Gracefully handle metadata load errors without breaking the main UI
-      console.error("Error when loading secondary lecture data:", error);
-    } finally {
-      setLoadingSecondary(false);
-    }
-  };
-
-  useEffect(() => {
-    if (lectureId) {
-      loadLectureData();
-    }
-  }, [lectureId]);
+  const loadingSecondary = courseLoading || materialsLoading || assignmentsLoading;
+  const courseTitle = course?.title || "";
 
   // Materials updates
-  const handleMaterialCreated = (newMaterial: MaterialResponse) => {
-    // Append to the top of list
-    setMaterials((prev) => [newMaterial, ...prev]);
+  const handleMaterialCreated = () => {
+    refetchMaterials();
   };
 
-  const handleMaterialDeleted = (deletedId: string) => {
-    setMaterials((prev) => prev.filter((m) => m.id !== deletedId));
+  const handleMaterialDeleted = () => {
+    refetchMaterials();
   };
 
   // Assignments updates
-  const handleAssignmentCreated = (newAssignment: AssignmentResponse) => {
-    // Append to the top of list
-    setAssignments((prev) => [newAssignment, ...prev]);
+  const handleAssignmentCreated = () => {
+    refetchAssignments();
   };
 
-  const handleAssignmentDeleted = (deletedId: string) => {
-    setAssignments((prev) => prev.filter((a) => a.id !== deletedId));
+  const handleAssignmentDeleted = () => {
+    refetchAssignments();
   };
 
   // 1. Initial Lecture Loading Skeleton State

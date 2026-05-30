@@ -1,7 +1,9 @@
 "use client";
 
+import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
 import type { SubmissionResponse } from "@/lib/api/types";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
   Box,
@@ -9,7 +11,6 @@ import {
   CardContent,
   Chip,
   CircularProgress,
-  IconButton,
   Skeleton,
   Stack,
   Table,
@@ -18,12 +19,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { Download, Eye, Paperclip, Users } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { formatServerDate } from "@/lib/util/date-utils";
 
 interface SubmissionsListProps {
   submissions: SubmissionResponse[];
@@ -163,7 +162,7 @@ export function SubmissionsList({
                       pl: 3,
                     }}
                   >
-                    Học viên
+                    Student
                   </TableCell>
                   <TableCell
                     sx={{
@@ -176,7 +175,7 @@ export function SubmissionsList({
                       borderColor: "grey.200",
                     }}
                   >
-                    Thời gian nộp
+                    Submitted Time
                   </TableCell>
                   <TableCell
                     sx={{
@@ -307,59 +306,22 @@ export function SubmissionsList({
                         spacing={1}
                         sx={{ justifyContent: "flex-end" }}
                       >
-                        <Tooltip title="Details & Feedback" arrow>
-                          <IconButton
-                            size="small"
-                            onClick={() => openSubmissionDetails(submission)}
-                            sx={{
-                              width: 36,
-                              height: 36,
-                              border: "1px solid",
-                              borderColor: "grey.200",
-                              borderRadius: 2,
-                              bgcolor: "white",
-                              color: "grey.600",
-                              transition: "all 0.22s ease",
-                              "&:hover": {
-                                bgcolor: "#f8fafc",
-                                borderColor: "primary.light",
-                                color: "primary.main",
-                                transform: "translateY(-2px)",
-                                boxShadow: "0 6px 14px rgba(59,130,246,0.12)",
-                              },
-                            }}
-                          >
-                            <Eye size={16} />
-                          </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Download files" arrow>
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              triggerDownload(submission.fileObjectKey)
-                            }
-                            sx={{
-                              width: 36,
-                              height: 36,
-                              border: "1px solid",
-                              borderColor: "grey.200",
-                              borderRadius: 2,
-                              bgcolor: "white",
-                              color: "info.main",
-                              transition: "all 0.22s ease",
-                              "&:hover": {
-                                bgcolor: "#f0f9ff",
-                                borderColor: "info.light",
-                                color: "info.dark",
-                                transform: "translateY(-2px)",
-                                boxShadow: "0 6px 14px rgba(14,165,233,0.14)",
-                              },
-                            }}
-                          >
-                            <Download size={16} />
-                          </IconButton>
-                        </Tooltip>
+                        <ButtonAction
+                          tooltip="Details & Feedback"
+                          icon={<Eye size={16} />}
+                          variant="outline"
+                          color="default"
+                          onClick={() => openSubmissionDetails(submission)}
+                        />
+                        <ButtonAction
+                          tooltip="Download file"
+                          icon={<Download size={16} />}
+                          variant="soft"
+                          color="primary"
+                          onClick={() =>
+                            triggerDownload(submission.fileObjectKey)
+                          }
+                        />
                       </Stack>
                     </TableCell>
                   </TableRow>

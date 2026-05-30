@@ -2,7 +2,7 @@
 
 import { FormDialog } from "@/components/common/form-dialog";
 import { FormInput } from "@/components/common/form-input";
-import { createCourseDiscount } from "@/lib/api/enrollments";
+import { useCreateCourseDiscountMutation } from "@/lib/api/enrollments";
 import type {
   CourseDiscountRequest,
   CourseDiscountResponse,
@@ -41,6 +41,10 @@ export function DiscountFormDialog({
     validFrom: false,
     validTo: false,
   });
+
+  // React Query Mutation Hook
+  const { mutateAsync: createDiscountMutate } =
+    useCreateCourseDiscountMutation();
 
   // Reset form when open changes
   useEffect(() => {
@@ -108,7 +112,7 @@ export function DiscountFormDialog({
         validTo: new Date(form.validTo).toISOString(),
       };
 
-      const newDiscount = await createCourseDiscount(requestPayload);
+      const newDiscount = await createDiscountMutate(requestPayload);
       showSuccess(
         courseId
           ? "Successfully created course discount!"
@@ -162,16 +166,16 @@ export function DiscountFormDialog({
                   fontSize: "0.825rem",
                 }}
               >
-                Thiết lập Giảm giá chung (Tất cả khóa học)
+                Global Discount Setup (All Courses)
               </Typography>
               <Typography
                 variant="caption"
                 sx={{ color: "#b45309", fontWeight: 550, lineHeight: 1.4 }}
               >
-                Mức giảm giá này sẽ tự động áp dụng cho{" "}
-                <strong>tất cả khóa học</strong>. Nếu bạn muốn thiết lập giảm
-                giá riêng cho một khóa học cụ thể, vui lòng thực hiện trong phần
-                Quản lý giảm giá tại trang Chi tiết khóa học đó.
+                This discount will be automatically applied to{" "}
+                <strong>all courses</strong>. If you want to set a specific
+                discount for a particular course, please do so in the Discount
+                Management section of that course details page.
               </Typography>
             </Box>
           </Box>

@@ -47,10 +47,10 @@ export default function LoginForm() {
       if (state.success && state.token) {
         // Temporarily set token so apiCall can authorize the /me request
         localStorage.setItem("auth_token", state.token);
-        
+
         let role = "STUDENT";
         let fullName = state.username?.split("@")[0] || "User";
-        
+
         try {
           const me = await getMe();
           role = me.role;
@@ -59,11 +59,11 @@ export default function LoginForm() {
           console.error("Failed to fetch user info, using fallback.", e);
         }
 
-        setAuthSession(state.token, {
-          username: state.username || "User",
-          fullName,
-          role: role as any,
-        });
+        // setAuthSession(state.token, {
+        //   username: state.username || "User",
+        //   fullName,
+        //   role: role as any,
+        // });
 
         // Role-based routing
         if (role === "ADMIN") {
@@ -73,11 +73,11 @@ export default function LoginForm() {
         } else {
           router.push("/home");
         }
-        
+
         router.refresh();
       }
     }
-    
+
     syncAuth();
   }, [state, router]);
 

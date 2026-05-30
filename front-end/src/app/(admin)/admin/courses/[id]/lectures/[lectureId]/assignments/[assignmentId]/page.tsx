@@ -1,21 +1,17 @@
 "use client";
 
 import {
-  createFeedback,
-  deleteFeedback,
-  getAssignmentById,
-  getFeedbacks,
-  getSubmissions,
-  getSubmissionTracking,
+  useAssignmentByIdQuery,
+  useSubmissionsInfiniteQuery,
+  useFeedbacksQuery,
+  useSubmissionTrackingQuery,
+  useCreateFeedbackMutation,
+  useDeleteFeedbackMutation,
 } from "@/lib/api/assignments";
-import { getCourseById } from "@/lib/api/courses";
+import { useCourseByIdQuery } from "@/lib/api/courses";
 import { getDownloadUrl } from "@/lib/api/files";
-import { getLectureById } from "@/lib/api/lectures";
+import { useLectureByIdQuery } from "@/lib/api/lectures";
 import type {
-  AssignmentResponse,
-  CourseResponse,
-  FeedbackResponse,
-  LectureResponse,
   SubmissionLogResponse,
   SubmissionResponse,
 } from "@/lib/api/types";
@@ -24,6 +20,7 @@ import { Container, Stack } from "@mui/material";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Modular Sub-components
 import { ErrorState } from "@/components/common/error-state";
@@ -38,106 +35,92 @@ export default function AdminAssignmentDetailPage() {
   const assignmentId = params.assignmentId as string;
   const lectureId = params.lectureId as string;
   const courseId = params.id as string;
+  const queryClient = useQueryClient();
 
   const { handleError, showSuccess } = useApiWithToast();
 
-  // Core Data States
-  const [assignment, setAssignment] = useState<AssignmentResponse | null>(null);
-  const [course, setCourse] = useState<CourseResponse | null>(null);
-  const [lecture, setLecture] = useState<LectureResponse | null>(null);
+  // Core Data Queries via React Query
+  const { data: assignment, isLoading: assignmentLoading } = useAssignmentByIdQuery(assignmentId);
+  const { data: lecture, isLoading: lectureLoading } = useLectureByIdQuery(lectureId);
+  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(courseId, { enabled: !!courseId });
+
+  const pageLoading = assignmentLoading || lectureLoading || courseLoading;
+  const pageError = !assignment && !assignmentLoading;
 
   // Submissions Paging States
-  const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
-  const [submissionsPage, setSubmissionsPage] = useState(0);
-  const [submissionsLoading, setSubmissionsLoading] = useState(false);
-  const [submissionsHasMore, setSubmissionsHasMore] = useState(true);
+  const {
+    data: submissionsData,
+    isLoading: submissionsQueryLoading,
+    isFetchingNextPage: submissionsFetchingMore,
+    hasNextPage: submissionsHasMore,
+    fetchNextPage: fetchNextSubmissions,
+  } = useSubmissionsInfiniteQuery(assignmentId);
 
-  // Overall Orchestration States
-  const [pageLoading, setPageLoading] = useState(true);
-  const [pageError, setPageError] = useState(false);
+  const submissions = submissionsData?.pages.flatMap((p) => p.contents) || [];
+  const submissionsLoading = submissionsQueryLoading || submissionsFetchingMore;
+
+  const loadSubmissionsList = async (reset = false) => {
+    if (reset) {
+      queryClient.invalidateQueries({ queryKey: ["submissions", "infinite", assignmentId] });
+    } else {
+      fetchNextSubmissions();
+    }
+  };
 
   // --- Modal Specific States ---
   const [selectedSubmission, setSelectedSubmission] =
     useState<SubmissionResponse | null>(null);
-  const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
-  const [feedbacksLoading, setFeedbacksLoading] = useState(false);
 
-  // History Timelines
-  const [history, setHistory] = useState<SubmissionLogResponse[]>([]);
+  const { data: feedbacks = [], isLoading: feedbacksLoading, refetch: refetchFeedbacks } = useFeedbacksQuery(
+    assignmentId,
+    selectedSubmission?.studentUsername,
+    {
+      enabled: !!selectedSubmission,
+    }
+  );
+
   const [historyPage, setHistoryPage] = useState(0);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [historyHasMore, setHistoryHasMore] = useState(true);
 
-  // --- Initial Data Load (Strict Sequence) ---
-  const loadPageData = async () => {
-    setPageLoading(true);
-    setPageError(false);
-    try {
-      // 1. Fetch assignment first
-      const assignmentData = await getAssignmentById(assignmentId);
-      setAssignment(assignmentData);
-
-      // 2. Fetch course and lecture in parallel ONLY after assignment succeeds
-      const [courseData, lectureData] = await Promise.all([
-        getCourseById(courseId).catch((err) => {
-          console.error("Failed to load course details", err);
-          return null;
-        }),
-        getLectureById(lectureId).catch((err) => {
-          console.error("Failed to load lecture details", err);
-          return null;
-        }),
-      ]);
-
-      setCourse(courseData);
-      setLecture(lectureData);
-    } catch (err) {
-      setPageError(true);
-      handleError(err, "Cannot load assignment details");
-    } finally {
-      setPageLoading(false);
+  const { data: trackingData, isLoading: historyLoading } = useSubmissionTrackingQuery(
+    assignmentId,
+    selectedSubmission?.studentUsername,
+    historyPage,
+    {
+      enabled: !!selectedSubmission,
     }
-  };
+  );
 
-  // Trigger initial sequence
+  const [history, setHistory] = useState<SubmissionLogResponse[]>([]);
+
   useEffect(() => {
-    loadPageData();
-  }, [assignmentId, lectureId, courseId]);
-
-  // Load Submissions - triggers ONLY after assignment successfully loaded
-  const loadSubmissionsList = async (reset = false) => {
-    if (submissionsLoading) return;
-    setSubmissionsLoading(true);
-    const targetPage = reset ? 0 : submissionsPage;
-
-    try {
-      const response = await getSubmissions(assignmentId, targetPage, 10);
-      if (reset) {
-        setSubmissions(response.contents);
-        setSubmissionsPage(1);
+    if (!selectedSubmission) {
+      setHistory([]);
+      setHistoryPage(0);
+      return;
+    }
+    if (trackingData) {
+      if (historyPage === 0) {
+        setHistory(trackingData.contents);
       } else {
-        setSubmissions((prev) => [...prev, ...response.contents]);
-        setSubmissionsPage((prev) => prev + 1);
+        setHistory((prev) => [...prev, ...trackingData.contents]);
       }
-      setSubmissionsHasMore(response.currentPage < response.totalPages - 1);
-    } catch (error) {
-      handleError(error, "Cannot load student submissions");
-    } finally {
-      setSubmissionsLoading(false);
     }
-  };
+  }, [trackingData, historyPage, selectedSubmission]);
 
-  // Trigger submissions list fetch when assignment becomes available
-  useEffect(() => {
-    if (assignment) {
-      loadSubmissionsList(true);
-    }
-  }, [assignment?.id]);
+  const historyHasMore = trackingData ? trackingData.currentPage < trackingData.totalPages - 1 : false;
+
+  const loadMoreHistory = async () => {
+    if (historyLoading || !historyHasMore) return;
+    setHistoryPage((prev) => prev + 1);
+  };
 
   // --- Download Trigger ---
   const triggerDownload = async (fileObjectKey: string) => {
     try {
-      const response = (await getDownloadUrl(fileObjectKey)) as any;
+      const response = await queryClient.fetchQuery({
+        queryKey: ["files", "download", fileObjectKey],
+        queryFn: () => getDownloadUrl(fileObjectKey),
+      });
       if (response?.downloadUrl) {
         window.open(response.downloadUrl, "_blank");
       } else {
@@ -149,70 +132,27 @@ export default function AdminAssignmentDetailPage() {
   };
 
   // --- Modal Selection & Parallel API Fetch ---
-  const openSubmissionDetails = async (submission: SubmissionResponse) => {
-    setSelectedSubmission(submission);
-    setFeedbacksLoading(true);
-    setHistoryLoading(true);
+  const openSubmissionDetails = (submission: SubmissionResponse) => {
     setHistoryPage(0);
     setHistory([]);
-    setHistoryHasMore(true);
-
-    try {
-      const [feedbackList, trackingList] = await Promise.all([
-        getFeedbacks(assignmentId, submission.studentUsername).catch((e) => {
-          console.error("Failed to load feedbacks", e);
-          return [];
-        }),
-        getSubmissionTracking(
-          assignmentId,
-          submission.studentUsername,
-          0,
-        ).catch((e) => {
-          console.error("Failed to load activity logs", e);
-          return null;
-        }),
-      ]);
-
-      setFeedbacks(feedbackList);
-      if (trackingList) {
-        setHistory(trackingList.contents);
-        setHistoryHasMore(
-          trackingList.currentPage < trackingList.totalPages - 1,
-        );
-      }
-    } catch (err) {
-      handleError(err, "Cannot load feedback and activity history");
-    } finally {
-      setFeedbacksLoading(false);
-      setHistoryLoading(false);
-    }
+    setSelectedSubmission(submission);
   };
 
   // --- Submit Feedback (Admin or Lecturer) ---
+  const { mutateAsync: createFeedbackMutate } = useCreateFeedbackMutation();
+  const { mutateAsync: deleteFeedbackMutate } = useDeleteFeedbackMutation();
+
   const handleAddFeedback = async (text: string) => {
     if (!selectedSubmission) return;
     try {
-      const created = await createFeedback({
+      await createFeedbackMutate({
         assignmentId,
         studentUsername: selectedSubmission.studentUsername,
         feedback: text,
       });
-      setFeedbacks((prev) => [...prev, created]);
       showSuccess("Feedback added successfully");
-
-      // Refetch history tracking list to capture the new feedback event
-      const trackingList = await getSubmissionTracking(
-        assignmentId,
-        selectedSubmission.studentUsername,
-        0,
-      );
-      if (trackingList) {
-        setHistory(trackingList.contents);
-        setHistoryPage(0);
-        setHistoryHasMore(
-          trackingList.currentPage < trackingList.totalPages - 1,
-        );
-      }
+      refetchFeedbacks();
+      setHistoryPage(0);
     } catch (error) {
       handleError(error, "Failed to add feedback");
       throw error;
@@ -222,49 +162,13 @@ export default function AdminAssignmentDetailPage() {
   // --- Delete Feedback (ADMIN mode allows deleting ANY feedback card) ---
   const handleDeleteFeedback = async (feedbackId: string) => {
     try {
-      await deleteFeedback(feedbackId);
-      setFeedbacks((prev) => prev.filter((item) => item.id !== feedbackId));
+      await deleteFeedbackMutate(feedbackId);
       showSuccess("Feedback deleted successfully");
-
-      // Refetch history tracking list to record the delete action
-      if (selectedSubmission) {
-        const trackingList = await getSubmissionTracking(
-          assignmentId,
-          selectedSubmission.studentUsername,
-          0,
-        );
-        if (trackingList) {
-          setHistory(trackingList.contents);
-          setHistoryPage(0);
-          setHistoryHasMore(
-            trackingList.currentPage < trackingList.totalPages - 1,
-          );
-        }
-      }
+      refetchFeedbacks();
+      setHistoryPage(0);
     } catch (error) {
       handleError(error, "Failed to delete feedback");
       throw error;
-    }
-  };
-
-  // --- Activity Log Infinite Pagination ---
-  const loadMoreHistory = async () => {
-    if (historyLoading || !historyHasMore || !selectedSubmission) return;
-    setHistoryLoading(true);
-    const nextPage = historyPage + 1;
-    try {
-      const response = await getSubmissionTracking(
-        assignmentId,
-        selectedSubmission.studentUsername,
-        nextPage,
-      );
-      setHistory((prev) => [...prev, ...response.contents]);
-      setHistoryPage(nextPage);
-      setHistoryHasMore(response.currentPage < response.totalPages - 1);
-    } catch (error) {
-      handleError(error, "Cannot load more activity history");
-    } finally {
-      setHistoryLoading(false);
     }
   };
 

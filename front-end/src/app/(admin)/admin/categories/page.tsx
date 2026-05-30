@@ -8,12 +8,12 @@ import { HeroInfo } from "@/components/common/hero-info";
 import { ImagePreview } from "@/components/common/image-preview";
 import { CategoryFormDialog } from "@/components/dialog/category-form";
 import {
-  createCategory,
-  deleteCategory,
-  getCategories,
-  updateCategory,
+  useCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
 } from "@/lib/api/courses";
-import { getPreSignedUploadUrl } from "@/lib/api/files";
+import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
 import type { CategoryRequest, CategoryResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
@@ -31,12 +31,22 @@ import { CategoryTable } from "./category-table";
 export default function AdminCategoriesPage() {
   const { handleError, showSuccess } = useApiWithToast();
 
-  // Data State
-  const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [loading, setLoading] = useState(true); // Initialize as true to ensure Skeleton displays immediately, eliminating EmptyState flashes
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  // Queries & Mutations
+  const {
+    data: categories = [],
+    isLoading: loading,
+    error: queryError,
+    refetch: loadCategories,
+  } = useCategoriesQuery("ACTIVE");
+
+  const { mutateAsync: createCategoryMutate } = useCreateCategoryMutation();
+  const { mutateAsync: updateCategoryMutate } = useUpdateCategoryMutation();
+  const { mutateAsync: deleteCategoryMutate, isPending: deleting } = useDeleteCategoryMutation();
+  const { mutateAsync: getPreSignedUrlMutate, isPending: saving } = usePreSignedUploadUrlMutation();
+
+  const error = queryError
+    ? "Failed to load categories. Please try again later."
+    : null;
 
   // Dialog Form State
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -53,24 +63,6 @@ export default function AdminCategoriesPage() {
   // Preview Image State
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const loadCategories = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const categoryData = await getCategories("ACTIVE");
-      setCategories(categoryData);
-    } catch (err: any) {
-      setError("Failed to load categories. Please try again later.");
-      handleError(err, "Failed to load categories");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
   const openDialog = (category?: CategoryResponse) => {
     if (category) {
       setEditing(category);
@@ -84,13 +76,12 @@ export default function AdminCategoriesPage() {
     form: CategoryRequest,
     selectedFile: File | null,
   ) => {
-    setSaving(true);
     try {
       let finalThumbnailObjectKey = form.thumbnailObjectKey;
 
       // Handle S3/R2 direct upload workflow if new branding asset is selected
       if (selectedFile) {
-        const preSignRes = await getPreSignedUploadUrl({
+        const preSignRes = await getPreSignedUrlMutate({
           fileName: selectedFile.name,
           contentType: selectedFile.type,
           fileSize: selectedFile.size,
@@ -118,10 +109,10 @@ export default function AdminCategoriesPage() {
       };
 
       if (editing) {
-        await updateCategory(payload);
+        await updateCategoryMutate(payload);
         showSuccess("Category updated successfully");
       } else {
-        await createCategory(payload);
+        await createCategoryMutate(payload);
         showSuccess("Category created successfully");
       }
 
@@ -129,23 +120,18 @@ export default function AdminCategoriesPage() {
       loadCategories();
     } catch (err) {
       handleError(err, "Failed to save category");
-    } finally {
-      setSaving(false);
     }
   };
 
   const handleDelete = async () => {
     if (!confirmId || deleting) return;
-    setDeleting(true);
     try {
-      await deleteCategory(confirmId);
+      await deleteCategoryMutate(confirmId);
       showSuccess("Category deleted successfully");
       setConfirmId(null);
       loadCategories();
     } catch (err) {
       handleError(err, "Failed to delete category");
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -191,7 +177,7 @@ export default function AdminCategoriesPage() {
         <Box sx={{ display: "flex", gap: 1 }}>
           <ButtonAction
             tooltip="Tải lại dữ liệu"
-            onClick={loadCategories}
+            onClick={() => loadCategories()}
             variant="soft"
             color="info"
             icon={<RefreshCw size={21} strokeWidth={2.3} />}

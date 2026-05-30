@@ -4,12 +4,13 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { MaterialFormDialog } from "@/components/dialog/material-form";
+import { useMaterialsQuery, useDeleteMaterialMutation } from "@/lib/api/lectures";
 import { getDownloadUrl } from "@/lib/api/files";
-import { deleteMaterial, getMaterials } from "@/lib/api/lectures";
 import type { MaterialResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { getFileIcon } from "@/lib/util/file-utils";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Card,
@@ -30,30 +31,15 @@ interface MaterialsTabProps {
 
 export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
   const { handleError, showSuccess } = useApiWithToast();
+  const queryClient = useQueryClient();
 
-  const [materials, setMaterials] = useState<MaterialResponse[]>([]);
-  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Delete State
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [exitingIds, setExitingIds] = useState<string[]>([]);
 
-  const loadMaterials = async () => {
-    try {
-      setLoading(true);
-      const data = await getMaterials(lectureId);
-      setMaterials(data);
-    } catch (err) {
-      handleError(err, "Failed to load materials");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadMaterials();
-  }, [lectureId]);
+  const { data: materials = [], isLoading: loading, refetch } = useMaterialsQuery(lectureId);
 
   useEffect(() => {
     onCountChange?.(materials.length);
@@ -61,7 +47,10 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
 
   const handleDownload = async (material: MaterialResponse) => {
     try {
-      const res = await getDownloadUrl(material.fileObjectKey);
+      const res = await queryClient.fetchQuery({
+        queryKey: ["files", "download", material.fileObjectKey],
+        queryFn: () => getDownloadUrl(material.fileObjectKey),
+      });
       const downloadUrl = res.downloadUrl || res.publicUrl;
       if (downloadUrl) {
         window.open(downloadUrl, "_blank");
@@ -77,11 +66,13 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
     setDeletingId(id);
   };
 
+  const { mutateAsync: deleteMaterialMutate } = useDeleteMaterialMutation();
+
   const handleConfirmDelete = async () => {
     if (!deletingId) return;
 
     try {
-      await deleteMaterial(deletingId);
+      await deleteMaterialMutate(deletingId);
       showSuccess("Deleted material successfully");
 
       // Smooth exit animation
@@ -94,8 +85,8 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
   };
 
   const handleAnimationExited = (id: string) => {
-    setMaterials((prev) => prev.filter((m) => m.id !== id));
     setExitingIds((prev) => prev.filter((exId) => exId !== id));
+    refetch();
   };
 
   const handleOpenDialog = () => {
@@ -382,8 +373,8 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
         open={dialogOpen}
         onClose={handleCloseDialog}
         lectureId={lectureId}
-        onSuccess={(newMaterial) => {
-          setMaterials((prev) => [newMaterial, ...prev]);
+        onSuccess={() => {
+          refetch();
         }}
       />
 

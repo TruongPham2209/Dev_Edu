@@ -43,7 +43,7 @@ export function DiscountsTable({
             border: "1px solid rgba(59, 130, 246, 0.16)",
           }}
         >
-          Sắp diễn ra
+          Scheduled
         </Box>
       );
     } else if (now >= from && now <= to) {
@@ -62,7 +62,7 @@ export function DiscountsTable({
             border: "1px solid rgba(16, 185, 129, 0.16)",
           }}
         >
-          Đang áp dụng
+          Applicable
         </Box>
       );
     } else {
@@ -81,7 +81,7 @@ export function DiscountsTable({
             border: "1px solid rgba(239, 68, 68, 0.16)",
           }}
         >
-          Hết hạn
+          Expired
         </Box>
       );
     }
@@ -105,7 +105,7 @@ export function DiscountsTable({
             mt: 0.5,
           }}
         >
-          Áp dụng cho tất cả khóa học
+          Applicable to all courses
         </Box>
       );
     }
@@ -126,7 +126,7 @@ export function DiscountsTable({
             border: "1px solid rgba(99, 102, 241, 0.12)",
           }}
         >
-          Khóa học
+          Course
         </Box>
         <Typography
           variant="caption"
@@ -148,7 +148,7 @@ export function DiscountsTable({
 
   const columns: ColumnDef<CourseDiscountResponse>[] = [
     {
-      header: "Mức giảm (%)",
+      header: "Discount (%)",
       width: 140,
       renderSkeleton: () => (
         <Skeleton
@@ -179,7 +179,7 @@ export function DiscountsTable({
       ),
     },
     {
-      header: "Mô tả chiến dịch",
+      header: "Campaign Description",
       skeletonVariant: "text-double",
       render: (discount) => (
         <>
@@ -194,7 +194,7 @@ export function DiscountsTable({
       ),
     },
     {
-      header: "Thời hạn áp dụng",
+      header: "Applicable Period",
       width: 320,
       skeletonVariant: "text",
       render: (discount) => (
@@ -221,14 +221,14 @@ export function DiscountsTable({
       ),
     },
     {
-      header: "Trạng thái",
+      header: "Status",
       width: 140,
       skeletonVariant: "rounded",
       render: (discount) =>
         getStatusBadge(discount.validFrom, discount.validTo),
     },
     {
-      header: "Người tạo",
+      header: "Creator",
       width: 220,
       renderSkeleton: () => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -256,14 +256,14 @@ export function DiscountsTable({
               {discount.createdBy}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Tạo lúc {formatServerDate(discount.createdAt, "date")}
+              Created at {formatServerDate(discount.createdAt, "date")}
             </Typography>
           </Box>
         </Box>
       ),
     },
     {
-      header: "Thao tác",
+      header: "Action",
       width: 100,
       align: "right",
       renderSkeleton: () => (
@@ -273,7 +273,7 @@ export function DiscountsTable({
       ),
       render: (discount) => (
         <ButtonAction
-          tooltip="Xóa giảm giá"
+          tooltip="Delete discount"
           icon={<Trash2 size={16} />}
           variant="soft"
           color="error"

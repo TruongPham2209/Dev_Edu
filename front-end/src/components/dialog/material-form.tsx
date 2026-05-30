@@ -1,8 +1,8 @@
 "use client";
 
-import { getPreSignedUploadUrl } from "@/lib/api/files";
+import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
 import { FormInput } from "@/components/common/form-input";
-import { createMaterial } from "@/lib/api/lectures";
+import { useCreateMaterialMutation } from "@/lib/api/lectures";
 import type { MaterialResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { FormDialog } from "@/components/common/form-dialog";
@@ -51,6 +51,9 @@ export function MaterialFormDialog({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
+
+  const { mutateAsync: preSignMutate } = usePreSignedUploadUrlMutation();
+  const { mutateAsync: createMaterialMutate } = useCreateMaterialMutation();
 
   useEffect(() => {
     if (open) {
@@ -188,7 +191,7 @@ export function MaterialFormDialog({
 
     try {
       // 1. Get Presigned S3 Upload URL
-      const preSignRes = await getPreSignedUploadUrl({
+      const preSignRes = await preSignMutate({
         fileName: file!.name,
         contentType: file!.type || "application/octet-stream",
         fileSize: file!.size,
@@ -233,7 +236,7 @@ export function MaterialFormDialog({
       setUploadProgress(90);
 
       // 3. Call Material Creation API
-      const newMaterial = await createMaterial({
+      const newMaterial = await createMaterialMutate({
         lectureId,
         title: title.trim(),
         fileObjectKey: preSignRes.objectKey,

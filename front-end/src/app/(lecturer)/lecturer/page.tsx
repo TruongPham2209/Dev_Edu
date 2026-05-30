@@ -3,124 +3,38 @@
 import { CourseManageCard } from "@/components/card/course-manage-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { getAssignedCourses } from "@/lib/api/courses";
-import { getLecturesByCourse } from "@/lib/api/lectures";
+import { useAssignedCoursesInfiniteQuery } from "@/lib/api/courses";
 import type { CourseResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { LayoutGrid, RefreshCw } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CourseManageGridSkeleton } from "./course-manage-grid-skeleton";
-
-// The rest of the component definition remains same...
-// Let's make sure the target range covers the imports and the inline loading skeleton.
-// We'll replace the loading block in the page content.
-
-type CourseStats = {
-  students: number;
-  lectures: number;
-};
 
 export default function LecturerDashboardPage() {
   const { handleError } = useApiWithToast();
 
-  // State
-  const [courses, setCourses] = useState<CourseResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<boolean>(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const {
+    data: coursesData,
+    isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage,
+    fetchNextPage,
+    error,
+    refetch,
+  } = useAssignedCoursesInfiniteQuery();
 
-  // Stats state
-  const [stats, setStats] = useState<Record<string, CourseStats>>({});
+  const courses = coursesData?.pages.flatMap((page) => page.contents) || [];
+  const nextCursor = hasNextPage ? "has_more" : null;
 
-  // Ref for intersection observer
+  // Intersection observer for infinite scroll
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  const loadCourses = useCallback(
-    async (cursor?: string | null, isInitial = false) => {
-      if (isInitial) {
-        setLoading(true);
-        setError(false);
-      } else {
-        setLoadingMore(true);
-      }
-
-      try {
-        const data = await getAssignedCourses(cursor || undefined);
-
-        if (isInitial) {
-          setCourses(data.contents);
-        } else {
-          setCourses((prev) => [...prev, ...data.contents]);
-        }
-        setNextCursor(data.nextCursor || null);
-      } catch (err) {
-        setError(true);
-        handleError(err, "Không thể tải danh sách khóa học");
-      } finally {
-        setLoading(false);
-        setLoadingMore(false);
-      }
-    },
-    [handleError],
-  );
-
-  // Initial load and filter change
-  useEffect(() => {
-    loadCourses(null, true);
-  }, [loadCourses]);
-
-  // Stats loading logic (batches when courses change)
-  useEffect(() => {
-    if (courses.length === 0) return;
-
-    const loadStats = async () => {
-      // Only load stats for courses that don't have them yet
-      const missingStats = courses.filter((c) => !stats[c.id]);
-      if (missingStats.length === 0) return;
-
-      try {
-        const lectureCounts = await Promise.all(
-          missingStats.map(async (course) => {
-            try {
-              const lectures = await getLecturesByCourse(course.id);
-              return [course.id, lectures.length] as const;
-            } catch {
-              return [course.id, 0] as const;
-            }
-          }),
-        );
-
-        const nextStats = { ...stats };
-        missingStats.forEach((course) => {
-          const lectures =
-            lectureCounts.find(([id]) => id === course.id)?.[1] || 0;
-          // Simple heuristic for students for now as getEnrollments() might not be filtered by courseId easily
-          nextStats[course.id] = {
-            students: 0, // Placeholder
-            lectures,
-          };
-        });
-        setStats(nextStats);
-      } finally {
-      }
-    };
-
-    loadStats();
-  }, [courses, stats]);
-
-  // Infinite scroll observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          nextCursor &&
-          !loadingMore &&
-          !loading
-        ) {
-          loadCourses(nextCursor);
+        if (entries[0].isIntersecting && hasNextPage && !loadingMore && !loading) {
+          fetchNextPage();
         }
       },
       { threshold: 1.0 },
@@ -131,10 +45,16 @@ export default function LecturerDashboardPage() {
     }
 
     return () => observer.disconnect();
-  }, [nextCursor, loadingMore, loading, loadCourses]);
+  }, [hasNextPage, loadingMore, loading, fetchNextPage]);
+
+  useEffect(() => {
+    if (error) {
+      handleError(error, "Không thể tải danh sách khóa học");
+    }
+  }, [error, handleError]);
 
   const handleRetry = () => {
-    loadCourses(null, true);
+    refetch();
   };
 
   return (

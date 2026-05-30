@@ -13,7 +13,7 @@ import { BookOpen, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-import { formatServerDate } from "@/lib/date-utils";
+import { formatServerDate } from "@/lib/util/date-utils";
 
 export type CourseCardProps = {
   title: string;
