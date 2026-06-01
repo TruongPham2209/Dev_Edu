@@ -9,9 +9,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface PostService {
-    CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor);
+    CustomPaging<PostResponse> getPostVersions(PostStatus status, String lastCursor);
 
-    List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status);
+    CustomPaging<PostResponse> getPostedPosts(String username, PostStatus status, String lastCursor);
+
+    List<PostResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status);
 
     PostResponse getPostDetail(String actor, UUID postId);
 

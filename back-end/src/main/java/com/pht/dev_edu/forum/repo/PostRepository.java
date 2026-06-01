@@ -2,9 +2,12 @@ package com.pht.dev_edu.forum.repo;
 
 import com.pht.dev_edu.forum.dto.PostDetailProjection;
 import com.pht.dev_edu.forum.entity.PostEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,4 +41,37 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
     WHERE p.id = :id
     """, nativeQuery = true)
     Optional<PostDetailProjection> getPostDetailById(UUID id);
+
+    @Query(value = """
+    SELECT  p.id                        AS id,
+            pv.title                    AS title,
+            pv.short_description        AS shortDescription,
+            pv.content                  AS content,
+            pv.thumb_url                AS thumbUrl,
+            pv.status                   AS status,
+            0                           AS views,
+            0                           AS comments,
+            p.created_at                AS createdAt,
+            p.updated_at                AS updatedAt,
+            p.author                    AS authorUsername,
+            u.full_name                 AS authorFullName,
+            u.avatar_url                AS authorAvatarUrl
+    FROM forum_post p
+    LEFT JOIN forum_post_version pv
+        ON p.current_version_id = pv.id
+    LEFT JOIN "user" u
+        ON p.author = u.username
+    WHERE   p.author                = :username
+    AND     (p.updated_at, p.id)    < (:lastUpdatedAt, :lastId)
+    AND     p.deleted_at            IS NULL
+    AND     p.current_version_id    IS NOT NULL
+    ORDER BY p.updated_at DESC, p.id DESC
+    """, countQuery = """
+    SELECT  COUNT(*)
+    FROM forum_post p
+    WHERE   p.author                = :username
+    AND     p.deleted_at            IS NULL
+    AND     p.current_version_id    IS NOT NULL
+    """, nativeQuery = true)
+    Page<PostDetailProjection> getPostedPosts(String username, LocalDateTime lastUpdatedAt, UUID lastId, Pageable pageable);
 }

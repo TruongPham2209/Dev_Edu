@@ -11,23 +11,14 @@ import java.util.Collections;
 import java.util.function.Function;
 
 @Getter
+@Setter
 @ToString
 public class CustomPaging<T> {
-    private final Collection<T> contents;
-
-    @Setter
+    private Collection<T> contents;
     private long totalPages;
-
-    @Setter
     private long pageSize;
-
-    @Setter
     private long totalElements;
-
-    @Setter
     private long currentPage;
-
-    @Setter
     private String nextCursor;
 
     public CustomPaging() {

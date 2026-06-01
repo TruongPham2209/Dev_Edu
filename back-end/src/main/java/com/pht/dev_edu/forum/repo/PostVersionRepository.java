@@ -1,5 +1,6 @@
 package com.pht.dev_edu.forum.repo;
 
+import com.pht.dev_edu.forum.dto.PostDetailProjection;
 import com.pht.dev_edu.forum.dto.PostStatus;
 import com.pht.dev_edu.forum.dto.SupersededVersionProjection;
 import com.pht.dev_edu.forum.entity.PostVersionEntity;
@@ -42,16 +43,55 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
     @Query(value = """
             DELETE FROM forum_post_version
             WHERE   id      = :postVersionId
-            AND     status  = :status
+            AND     status  IN :statuses
             RETURNING thumb_object_key
             """, nativeQuery = true)
-    List<String> deleteByIdAndStatusThenReturnObjectKeys(UUID postVersionId, String status);
-
-    List<PostVersionEntity> findByPostIdAndStatusOrderByVersionNumberDesc(UUID postId, PostStatus status);
+    List<String> deleteByIdAndStatusThenReturnObjectKeys(UUID postVersionId, List<String> statuses);
 
     @Query(value = """
-            SELECT *
+            SELECT  pv.id                       AS id,
+                    pv.title                    AS title,
+                    pv.short_description        AS shortDescription,
+                    pv.content                  AS content,
+                    pv.thumb_url                AS thumbUrl,
+                    pv.status                   AS status,
+                    0                           AS views,
+                    0                           AS comments,
+                    p.created_at                AS createdAt,
+                    p.updated_at                AS updatedAt,
+                    p.author                    AS authorUsername,
+                    u.full_name                 AS authorFullName,
+                    u.avatar_url                AS authorAvatarUrl
             FROM forum_post_version pv
+            LEFT JOIN forum_post p
+                ON  p.id = pv.post_id
+            LEFT JOIN "user" u
+                ON p.author = u.username
+            WHERE   pv.post_id  = :postId
+            AND     pv.status   = :status
+            ORDER BY pv.version_number DESC
+            """, nativeQuery = true)
+    List<PostDetailProjection> findByPostIdAndStatusOrderByVersionNumberDesc(UUID postId, String status);
+
+    @Query(value = """
+            SELECT  pv.id                       AS id,
+                    pv.title                    AS title,
+                    pv.short_description        AS shortDescription,
+                    pv.content                  AS content,
+                    pv.thumb_url                AS thumbUrl,
+                    pv.status                   AS status,
+                    0                           AS views,
+                    0                           AS comments,
+                    p.created_at                AS createdAt,
+                    p.updated_at                AS updatedAt,
+                    p.author                    AS authorUsername,
+                    u.full_name                 AS authorFullName,
+                    u.avatar_url                AS authorAvatarUrl
+            FROM forum_post_version pv
+            LEFT JOIN forum_post p
+                ON  p.id = pv.post_id
+            LEFT JOIN "user" u
+                ON p.author = u.username
             WHERE   (pv.updated_at, pv.id)  < (:lastUpdatedAt, :lastId)
             AND     pv.status               = :status
             """, countQuery = """
@@ -60,7 +100,7 @@ public interface PostVersionRepository extends JpaRepository<PostVersionEntity, 
             WHERE   pv.status = :status
             """,
             nativeQuery = true)
-    Page<PostVersionEntity> findByStatusAndCursor(String status, UUID lastId, LocalDateTime lastUpdatedAt, org.springframework.data.domain.Pageable pageable);
+    Page<PostDetailProjection> findByStatusAndCursor(String status, UUID lastId, LocalDateTime lastUpdatedAt, org.springframework.data.domain.Pageable pageable);
 
     @Modifying
     @Query(value = """

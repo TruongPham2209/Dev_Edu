@@ -19,6 +19,7 @@ public class PostResponse {
     String shortDescription;
     String thumbUrl;
     String content;
+    PostStatus status;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 

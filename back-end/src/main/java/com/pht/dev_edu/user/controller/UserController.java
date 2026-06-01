@@ -29,7 +29,7 @@ public class UserController {
             @RequestParam String keyword
     ) {
         int defaultUserPageSize = 15;
-        var pageable = PagingUtils.getPageable(page, defaultUserPageSize);
+        var pageable = PagingUtils.getPageable(page + 1, defaultUserPageSize);
 
         var users = userService.searchUsers(keyword, role, pageable);
         return ApiUtils.buildSuccessResponse(users);

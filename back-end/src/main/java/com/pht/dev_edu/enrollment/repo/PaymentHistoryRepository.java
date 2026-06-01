@@ -1,6 +1,5 @@
 package com.pht.dev_edu.enrollment.repo;
 
-import com.pht.dev_edu.enrollment.dto.PaymentStatus;
 import com.pht.dev_edu.enrollment.entity.PaymentHistoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -17,5 +16,5 @@ public interface PaymentHistoryRepository extends JpaRepository<PaymentHistoryEn
             AND     status IN :statuses
             RETURNING id
             """, nativeQuery = true)
-    List<UUID> deleteByExpirationTimeBeforeAndStatuses(java.time.LocalDateTime cutoffTime, List<PaymentStatus> statuses);
+    List<UUID> deleteByExpirationTimeBeforeAndStatuses(java.time.LocalDateTime cutoffTime, List<String> statuses);
 }

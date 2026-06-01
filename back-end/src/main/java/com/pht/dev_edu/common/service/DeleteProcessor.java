@@ -5,7 +5,9 @@ import com.pht.dev_edu.common.util.ExceptionUtils;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.tracking.dto.CronJobEvent;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -21,9 +23,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DeleteProcessor {
-    private final Executor executor;
+    Executor executor;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     public <T> BatchResult<T> processBatch(

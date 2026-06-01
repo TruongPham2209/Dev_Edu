@@ -38,9 +38,9 @@ public class OrderScheduler {
                     var deletedPaymentIds = paymentHistoryRepository.deleteByExpirationTimeBeforeAndStatuses(
                             cutoffTime,
                             java.util.List.of(
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.PENDING,
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.FAILED,
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.CANCELLED
+                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.PENDING.name(),
+                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.FAILED.name(),
+                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.CANCELLED.name()
                             )
                     );
 

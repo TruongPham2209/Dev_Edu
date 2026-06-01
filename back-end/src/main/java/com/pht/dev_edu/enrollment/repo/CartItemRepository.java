@@ -67,6 +67,7 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, UUID> 
                 AND     ci.item_type = 'COURSE'
                 AND     c.deleted_at IS NOT NULL
             )
+            RETURNING ci.id
             """, nativeQuery = true)
     List<UUID> deleteInvalidCourseCartItems();
 }

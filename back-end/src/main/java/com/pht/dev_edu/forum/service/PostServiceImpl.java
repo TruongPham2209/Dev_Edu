@@ -15,9 +15,9 @@ import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.forum.dto.*;
 import com.pht.dev_edu.forum.entity.PostEntity;
-import com.pht.dev_edu.forum.entity.PostVersionEntity;
 import com.pht.dev_edu.forum.mapper.PostMapper;
 import com.pht.dev_edu.forum.mapper.PostVersionMapper;
+import com.pht.dev_edu.forum.repo.PostQueryRepository;
 import com.pht.dev_edu.forum.repo.PostRepository;
 import com.pht.dev_edu.forum.repo.PostVersionRepository;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
@@ -42,6 +42,7 @@ import java.util.concurrent.Executor;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class PostServiceImpl implements PostService {
     PostVersionRepository postVersionRepository;
+    PostQueryRepository postQueryRepository;
     PostRepository postRepository;
 
     FileService fileService;
@@ -50,7 +51,7 @@ public class PostServiceImpl implements PostService {
     Executor executor;
 
     @Override
-    public CustomPaging<PostVersionResponse> getPostVersions(PostStatus status, String lastCursor) {
+    public CustomPaging<PostResponse> getPostVersions(PostStatus status, String lastCursor) {
         var pageable = PageRequest.of(0, 11, Sort.by(Sort.Direction.DESC, "updated_at").and(Sort.by(Sort.Direction.DESC, "id")));
         TimeStampCursor cursor = !StringUtils.hasText(lastCursor)
                 ? TimeStampCursor.getDefaultCursor(true)
@@ -59,15 +60,45 @@ public class PostServiceImpl implements PostService {
 
         return PagingUtils.getPagedWithCursor(
                 postVersionPage,
-                postVersionMapper::entityToRes,
-                PostVersionEntity::getUpdatedAt,
-                PostVersionEntity::getId,
+                postMapper::projectionToRes,
+                PostDetailProjection::getUpdatedAt,
+                PostDetailProjection::getId,
                 pageable.getPageSize() - 1
         );
     }
 
     @Override
-    public List<PostVersionResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status) {
+    public CustomPaging<PostResponse> getPostedPosts(String username, PostStatus status, String lastCursor) {
+        int defaultPageSize = 11;
+        var pageable = PageRequest.of(0, defaultPageSize);
+        TimeStampCursor cursor = !StringUtils.hasText(lastCursor)
+                ? TimeStampCursor.getDefaultCursor(true)
+                : PagingUtils.decodeTimeStampCursor(lastCursor);
+
+        if (status == PostStatus.APPROVED) {
+            var postPage = postRepository.getPostedPosts(username, cursor.getTimeStamp(), cursor.getId(), pageable);
+            return PagingUtils.getPagedWithCursor(
+                    postPage,
+                    postMapper::projectionToRes,
+                    PostDetailProjection::getUpdatedAt,
+                    PostDetailProjection::getId,
+                    pageable.getPageSize() - 1
+            );
+        }
+
+        var postPage = postQueryRepository.getPostedPosts(username, status, cursor.getTimeStamp(), cursor.getId(), defaultPageSize);
+
+        return PagingUtils.getPagedWithCursor(
+                postPage,
+                postMapper::infoToRes,
+                PostInfoProjection::updatedAt,
+                PostInfoProjection::id,
+                pageable.getPageSize() - 1
+        );
+    }
+
+    @Override
+    public List<PostResponse> getPostVersionsByPostId(Set<String> authorities, String actor, UUID postId, PostStatus status) {
         var post = getPostById(postId);
         if (post == null) {
             log.warn("Post {} not found", postId);
@@ -81,9 +112,9 @@ public class PostServiceImpl implements PostService {
 
         boolean canAccessAllStatuses = post.getAuthor().equals(actor) || authorities.contains(RoleEnum.ADMIN.name());
         var statusToQuery = canAccessAllStatuses ? status : PostStatus.APPROVED;
-        var postVersions = postVersionRepository.findByPostIdAndStatusOrderByVersionNumberDesc(postId, statusToQuery);
+        var postVersions = postVersionRepository.findByPostIdAndStatusOrderByVersionNumberDesc(postId, statusToQuery.name());
         return postVersions.stream()
-                .map(postVersionMapper::entityToRes)
+                .map(postMapper::projectionToRes)
                 .toList();
     }
 
@@ -138,7 +169,7 @@ public class PostServiceImpl implements PostService {
             throw new DataNotFoundException("Post not found");
         }
 
-        if (!postVersionRepository.existsByPostIdAndStatusIn(post.getId(), List.of(PostStatus.PENDING, PostStatus.APPROVED))) {
+        if (!postVersionRepository.existsByPostIdAndStatusIn(post.getId(), List.of(PostStatus.APPROVED))) {
             log.warn("No pending or approved version found for post {}, cannot update for author {}", postRequest.getPostId(), author);
             throw new DataNotFoundException("Cannot update this post");
         }
@@ -165,7 +196,8 @@ public class PostServiceImpl implements PostService {
             throw new DataNotFoundException("Post version not found");
         }
 
-        var invalidThumbnailObjectKeys = postVersionRepository.deleteByIdAndStatusThenReturnObjectKeys(postVersionId, PostStatus.PENDING.name());
+        var invalidThumbnailObjectKeys = postVersionRepository.
+                deleteByIdAndStatusThenReturnObjectKeys(postVersionId, List.of(PostStatus.PENDING.name(), PostStatus.REJECTED.name(), PostStatus.SUPERSEDED.name()));
         if (invalidThumbnailObjectKeys.isEmpty()) {
             log.warn("Post version {} not found or not in pending status, cannot delete for author {}", postVersionId, author);
             return;

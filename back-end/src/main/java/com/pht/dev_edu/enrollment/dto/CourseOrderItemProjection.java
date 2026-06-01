@@ -9,9 +9,13 @@ import java.util.UUID;
 public interface CourseOrderItemProjection {
     UUID getId();
 
+    UUID getCourseId();
+
     Boolean getRegistered();
 
     String getTitle();
+
+    String getDescription();
 
     String getThumbnailUrl();
 

@@ -39,6 +39,17 @@ public class PostController {
         return ApiUtils.buildSuccessResponse(versions);
     }
 
+    @GetMapping("/posted")
+    public ResponseEntity<?> getPostedPost(
+            @RequestParam(required = false) String lastCursor,
+            @RequestParam PostStatus status
+    ) {
+        var username = SecurityContextUtils.getCurrentUsername();
+
+        var versions = postService.getPostedPosts(username, status, lastCursor);
+        return ApiUtils.buildSuccessResponse(versions);
+    }
+
     @GetMapping("/versions/{postId}")
     public ResponseEntity<?> getVersionsByPostId(
             @PathVariable UUID postId,
@@ -87,7 +98,7 @@ public class PostController {
     ) {
         var username = SecurityContextUtils.getCurrentUsername();
         var postDetail = postService.getPostDetail(username, id);
-        return  ApiUtils.buildSuccessResponse(postDetail);
+        return ApiUtils.buildSuccessResponse(postDetail);
     }
 
     @PostMapping
