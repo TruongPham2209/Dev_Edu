@@ -23,6 +23,8 @@ services:
         condition: service_started
       kafka:
         condition: service_started
+      elasticsearch:
+        condition: service_started
 
   postgres:
     image: postgres:16-alpine
@@ -46,6 +48,15 @@ services:
       - "6380:6379"
     volumes:
       - redis-data:/data
+
+  elasticsearch:
+    image: elasticsearch:8.14.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
 
   kafka:
     image: apache/kafka:3.7.1

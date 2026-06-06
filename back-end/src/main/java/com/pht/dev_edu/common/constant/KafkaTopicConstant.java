@@ -15,4 +15,9 @@ public class KafkaTopicConstant {
     public static final String TRACKING_EVENT_TOPIC = "tracking-event-topic";
     public static final String SUBMISSION_EVENT_TOPIC = "submission-event-topic";
     public static final String CRON_JOB_EVENT_TOPIC = "cron-job-event-topic";
+
+    // Sync Elastic Topics
+    public static final String POST_ELASTIC_DATA_UPDATE_TOPIC = "post-elastic-data-update-topic";
+    public static final String POST_INTERACT_ELASTIC_DATA_UPDATE_TOPIC = "post-interactive-elastic-data-update-topic";
+    public static final String POST_ELASTIC_DATA_DELETE_TOPIC = "post-elastic-data-delete-topic";
 }

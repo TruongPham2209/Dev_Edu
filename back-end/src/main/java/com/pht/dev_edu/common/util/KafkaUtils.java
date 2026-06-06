@@ -2,10 +2,15 @@ package com.pht.dev_edu.common.util;
 
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.file.dto.FileDeleteEvent;
+import com.pht.dev_edu.forum.document.PostDocument;
+import com.pht.dev_edu.forum.dto.PostInteractiveData;
+import com.pht.dev_edu.forum.entity.PostVersionEntity;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import java.util.UUID;
 
 @Component
 public class KafkaUtils {
@@ -31,6 +36,32 @@ public class KafkaUtils {
                     KafkaTopicConstant.TRACKING_EVENT_TOPIC,
                     event
             );
+        }
+    }
+
+    public static void sendSyncPostEvent(PostVersionEntity entity, String username) {
+        if (entity != null) {
+            var document = PostDocument.builder()
+                    .id(entity.getPostId())
+                    .title(entity.getTitle())
+                    .content(entity.getContent())
+                    .shortDescription(entity.getShortDescription())
+                    .thumbUrl(entity.getThumbUrl())
+                    .authorUsername(username)
+                    .build();
+            kafkaTemplate.send(KafkaTopicConstant.POST_ELASTIC_DATA_UPDATE_TOPIC, document);
+        }
+    }
+
+    public static void sendSyncInteractivePostEvent(PostInteractiveData interactiveData) {
+        if (interactiveData != null && interactiveData.getPostId() != null) {
+            kafkaTemplate.send(KafkaTopicConstant.POST_INTERACT_ELASTIC_DATA_UPDATE_TOPIC, interactiveData);
+        }
+    }
+
+    public static void sendSyncPostDeleteEvent(UUID postId) {
+        if (postId != null) {
+            kafkaTemplate.send(KafkaTopicConstant.POST_ELASTIC_DATA_DELETE_TOPIC, postId);
         }
     }
 }

@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.assignment.dto.SubmissionEvent;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.common.service.MailService;
+import com.pht.dev_edu.forum.document.PostDocument;
+import com.pht.dev_edu.forum.dto.PostInteractiveData;
+import com.pht.dev_edu.forum.service.PostElasticService;
 import com.pht.dev_edu.tracking.dto.CronJobEvent;
 import com.pht.dev_edu.tracking.dto.RequestLoggingEvent;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
@@ -21,6 +24,8 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -29,10 +34,12 @@ public class TrackingEventListener {
     LogService logService;
     SubmissionService submissionService;
     MailService mailService;
+    PostElasticService postElasticService;
+
     ObjectMapper objectMapper;
 
     @RetryableTopic(
-            attempts = "5",
+            attempts = "3",
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
@@ -45,7 +52,7 @@ public class TrackingEventListener {
     }
 
     @RetryableTopic(
-            attempts = "5",
+            attempts = "3",
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
@@ -58,7 +65,7 @@ public class TrackingEventListener {
     }
 
     @RetryableTopic(
-            attempts = "5",
+            attempts = "3",
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
@@ -71,7 +78,7 @@ public class TrackingEventListener {
     }
 
     @RetryableTopic(
-            attempts = "5",
+            attempts = "3",
             backoff = @Backoff(delay = 5000, multiplier = 2),
             dltTopicSuffix = "-dlq"
     )
@@ -99,6 +106,45 @@ public class TrackingEventListener {
                 .template(event.getTemplate().getValue())
                 .build();
         mailService.sendMail(mailPayload);
+
+        ack.acknowledge();
+    }
+
+    @RetryableTopic(
+            attempts = "5",
+            backoff = @Backoff(delay = 3000, multiplier = 2),
+            dltTopicSuffix = "-dlq"
+    )
+    @KafkaListener(topics = KafkaTopicConstant.POST_ELASTIC_DATA_UPDATE_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void syncPostUpdateEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
+        var event = objectMapper.readValue(payload, PostDocument.class);
+        postElasticService.upsertPostContent(event);
+
+        ack.acknowledge();
+    }
+
+    @RetryableTopic(
+            attempts = "3",
+            backoff = @Backoff(delay = 3000, multiplier = 2),
+            dltTopicSuffix = "-dlq"
+    )
+    @KafkaListener(topics = KafkaTopicConstant.POST_INTERACT_ELASTIC_DATA_UPDATE_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void syncPostInteractiveUpdateEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
+        var interactiveData = objectMapper.readValue(payload, PostInteractiveData.class);
+        postElasticService.updateInteractiveData(interactiveData);
+
+        ack.acknowledge();
+    }
+
+    @RetryableTopic(
+            attempts = "5",
+            backoff = @Backoff(delay = 2000, multiplier = 2),
+            dltTopicSuffix = "-dlq"
+    )
+    @KafkaListener(topics = KafkaTopicConstant.POST_ELASTIC_DATA_DELETE_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
+    public void syncPostDeleteEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
+        var postId = objectMapper.readValue(payload, UUID.class);
+        postElasticService.deletePost(postId);
 
         ack.acknowledge();
     }

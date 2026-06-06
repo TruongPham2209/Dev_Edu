@@ -35,13 +35,26 @@
         <flying.saucer.version>9.13.3</flying.saucer.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
+        <elastic.version>8.14.1</elastic.version>
     </properties>
     <dependencies>
+        <!-- Mail SDK -->
         <dependency>
             <groupId>com.brevo</groupId>
             <artifactId>brevo</artifactId>
             <version>${brevo.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Elastic -->
+        <dependency>
+            <groupId>co.elastic.clients</groupId>
+            <artifactId>elasticsearch-java</artifactId>
+            <version>${elastic.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
         </dependency>
 
         <!-- AWS SDK's S3 integration -->

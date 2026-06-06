@@ -3,6 +3,7 @@ package com.pht.dev_edu.common.config;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.security.OAuth2PasswordGrantAuthenticationConverter;
+import com.pht.dev_edu.forum.repo.PostElasticsearchRepository;
 import com.pht.dev_edu.user.dto.RegisterUser;
 import com.pht.dev_edu.user.entity.RoleEntity;
 import com.pht.dev_edu.user.repo.RoleRepository;
@@ -145,6 +146,15 @@ public class InitDataConfig {
                     .build();
 
             repository.save(webClient);
+        };
+    }
+
+    @Bean
+    @Transactional
+    @Order(3)
+    CommandLineRunner syncPostToElastic(PostElasticsearchRepository postElasticsearchRepository) {
+        return args -> {
+            postElasticsearchRepository.syncAllToElasticsearch();
         };
     }
 }

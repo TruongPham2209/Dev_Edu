@@ -251,6 +251,8 @@ public class PostServiceImpl implements PostService {
                     .details(String.format("Deleted post %s", postId))
                     .build();
             KafkaUtils.sendTrackingEvent(trackingEvent);
+
+            KafkaUtils.sendSyncPostDeleteEvent(postId);
         }, executor);
     }
 
@@ -311,6 +313,10 @@ public class PostServiceImpl implements PostService {
 
             if (postStatus == PostStatus.REJECTED) {
                 KafkaUtils.sendDeleteFileEvent(postVersion.getThumbObjectKey());
+            }
+
+            if (postStatus == PostStatus.APPROVED) {
+                KafkaUtils.sendSyncPostEvent(postVersion, post.getAuthor());
             }
         }, executor);
 
