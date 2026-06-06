@@ -31,6 +31,14 @@ public class ReviewController {
     }
 
     @PreAuthorize("hasAuthority('STUDENT')")
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyReview(@RequestParam UUID courseId) {
+        var username = SecurityContextUtils.getCurrentUsernameForController();
+        var review = reviewService.getMyReview(courseId, username);
+        return ApiUtils.buildSuccessResponse(review);
+    }
+
+    @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping
     public ResponseEntity<?> createReview(@RequestBody @Valid ReviewRequest request) {
         var username = SecurityContextUtils.getCurrentUsername();

@@ -28,6 +28,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
 
     @Query(value = """
             SELECT  oi.id               AS id,
+                    oi.order_id         AS orderId,
                     c.id                AS courseId,
                     c.title             AS title,
                     c.description       AS description,
@@ -35,8 +36,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItemEntity, UUID
                     c.price             AS originalPrice
             FROM order_item oi
             LEFT JOIN course c
-                ON  oi.item_id      = c.id
-                AND oi.item_type    = 'COURSE'
+                ON  oi.item_type    = 'COURSE'
+                AND oi.item_id      = c.id
             WHERE oi.order_id IN :orderIds
             """, nativeQuery = true)
     List<CourseOrderItemProjection> getOrderItemsByOrderIds(List<UUID> orderIds);

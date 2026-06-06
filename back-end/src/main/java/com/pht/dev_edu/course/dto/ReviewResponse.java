@@ -18,5 +18,7 @@ public class ReviewResponse {
     String comment;
     Integer rating;
     String username;
+    String fullName;
+    String avatarUrl;
     LocalDateTime createdAt;
 }

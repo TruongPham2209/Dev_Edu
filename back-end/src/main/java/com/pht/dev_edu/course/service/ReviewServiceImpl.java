@@ -8,9 +8,9 @@ import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.course.dto.ReviewProjection;
 import com.pht.dev_edu.course.dto.ReviewRequest;
 import com.pht.dev_edu.course.dto.ReviewResponse;
-import com.pht.dev_edu.course.entity.CourseReviewEntity;
 import com.pht.dev_edu.course.mapper.ReviewMapper;
 import com.pht.dev_edu.course.repo.CourseReviewRepository;
 import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
@@ -20,7 +20,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -62,6 +61,17 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public ReviewResponse getMyReview(UUID courseId, String username) {
+        var projection = reviewRepository.findByUsernameAndCourseId(username, courseId);
+        if (projection == null) {
+            log.warn("User {} is not enrolled in course ID {}", username, courseId);
+            return null;
+        }
+
+        return reviewMapper.projectionToResponse(projection);
+    }
+
+    @Override
     @Transactional
     public void deleteReview(Set<String> authorities, String username, UUID reviewId) {
         var review = reviewRepository.findById(reviewId).orElse(null);
@@ -71,7 +81,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         boolean hasDeletePermission = authorities.contains(RoleEnum.ADMIN.name())
-                                      || review.getStudentUsername().equals(username);
+                || review.getStudentUsername().equals(username);
         if (!hasDeletePermission) {
             log.error("User {} does not have permission to delete review with ID {}", username, reviewId);
             throw new BadRequestException("You do not have permission to delete this review.");
@@ -95,17 +105,17 @@ public class ReviewServiceImpl implements ReviewService {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 11, Sort.by(Sort.Direction.DESC, "created_at", "id"));
+        var pageable = PageRequest.of(0, 11);
 
         var pageResult = reviewRepository.findByCourseIdAndCursor(courseId, cursor.getId(), cursor.getTimeStamp(), pageable);
 
         // Remove my comments from the page result if they exist, to avoid duplication
-        List<CourseReviewEntity> content = new java.util.ArrayList<>(pageResult.getContent()
+        List<ReviewProjection> content = new java.util.ArrayList<>(pageResult.getContent()
                 .stream()
-                .filter(review -> !review.getStudentUsername().equals(username))
+                .filter(review -> !review.getUsername().equals(username))
                 .toList());
         if (!StringUtils.hasText(nextCursor) && StringUtils.hasText(username)) {
-            var myComments = reviewRepository.findByCourseIdAndStudentUsernameOrderByCreatedAtDesc(courseId, username);
+            var myComments = reviewRepository.findByCourseIdAndStudentUsername(courseId, username);
             content.addAll(0, myComments);
         }
         pageResult = new PageImpl<>(
@@ -116,9 +126,9 @@ public class ReviewServiceImpl implements ReviewService {
 
         return PagingUtils.getPagedWithCursor(
                 pageResult,
-                reviewMapper::entityToResponse,
-                CourseReviewEntity::getCreatedAt,
-                CourseReviewEntity::getId,
+                reviewMapper::projectionToResponse,
+                ReviewProjection::getCreatedAt,
+                ReviewProjection::getId,
                 pageable.getPageSize() - 1 // Truyền vào số lượng item thực tế user muốn (n)
         );
     }

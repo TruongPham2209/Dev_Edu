@@ -129,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
                 .toList();
 
         var items = orderItemRepository.getOrderItemsByOrderIds(orderIds).stream()
-                .collect(java.util.stream.Collectors.groupingBy(CourseOrderItemProjection::getId));
+                .collect(java.util.stream.Collectors.groupingBy(CourseOrderItemProjection::getOrderId));
 
         orderPaged.setContents(
                 orderPaged.getContents().stream()

@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 @Configuration
+//@EnableScheduling
 public class CommonConfig {
     @Bean
     @Primary

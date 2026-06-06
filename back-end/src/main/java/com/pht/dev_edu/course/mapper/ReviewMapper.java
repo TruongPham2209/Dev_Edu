@@ -1,5 +1,6 @@
 package com.pht.dev_edu.course.mapper;
 
+import com.pht.dev_edu.course.dto.ReviewProjection;
 import com.pht.dev_edu.course.dto.ReviewRequest;
 import com.pht.dev_edu.course.dto.ReviewResponse;
 import com.pht.dev_edu.course.entity.CourseReviewEntity;
@@ -16,4 +17,6 @@ public interface ReviewMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "comment", source = "content")
     CourseReviewEntity reqToEntity(ReviewRequest response);
+
+    ReviewResponse projectionToResponse(ReviewProjection projection);
 }
