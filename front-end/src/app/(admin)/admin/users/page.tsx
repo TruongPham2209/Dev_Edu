@@ -3,7 +3,7 @@
 import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { HeroInfo } from "@/components/common/hero-info";
+import { HeroInfo } from "@/components/common/hero-section/hero-info";
 import { UserFormDialog } from "@/components/dialog/user-form/page";
 import type { RoleEnum, UserResponse } from "@/lib/api/types";
 import { useSearchUsersQuery } from "@/lib/api/users";

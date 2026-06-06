@@ -36,13 +36,6 @@ export function CoursePurchaseCard({
       ? course.originalPrice * (1 - course.discountedPercentage / 100)
       : course.originalPrice;
 
-  const formatDate = (dateString?: string | Date) => {
-    if (!dateString) return "Đang cập nhật";
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return "Đang cập nhật";
-    return d.toLocaleDateString("vi-VN");
-  };
-
   return (
     <Box
       sx={{
@@ -64,10 +57,10 @@ export function CoursePurchaseCard({
           borderBottom: "1px solid rgba(255,255,255,0.1)",
         }}
       >
-        {course.thumbnailUrl || course.thumbnailObjectKey ? (
+        {course.thumbnailUrl ? (
           <Box
             component="img"
-            src={course.thumbnailUrl || course.thumbnailObjectKey}
+            src={course.thumbnailUrl}
             alt={course.title}
             sx={{
               position: "absolute",

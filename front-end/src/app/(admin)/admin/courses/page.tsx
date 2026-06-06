@@ -4,10 +4,10 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { FilterSelect } from "@/components/common/filter-select";
-import { HeroInfo } from "@/components/common/hero-info";
+import { FilterSelect } from "@/components/common/form/filter-select";
+import { HeroInfo } from "@/components/common/hero-section/hero-info";
 import { ImagePreview } from "@/components/common/image-preview";
-import { SearchInput } from "@/components/common/search-input";
+import { SearchInput } from "@/components/common/form/search-input";
 import { CourseFormDialog } from "@/components/dialog/course-form";
 import {
   useCategoriesQuery,

@@ -24,6 +24,7 @@ export const studentNavItems: NavItem[] = [
 
 export const adminNavItems: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Forum", href: "/admin/posts", icon: MessagesSquare },
   { label: "Categories", href: "/admin/categories", icon: Tags },
   { label: "Courses", href: "/admin/courses", icon: BookOpen },
   { label: "Users", href: "/admin/users", icon: Users },

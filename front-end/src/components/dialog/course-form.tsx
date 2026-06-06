@@ -1,11 +1,11 @@
 "use client";
 
-import { FilterSelect } from "@/components/common/filter-select";
-import { FormDialog } from "@/components/common/form-dialog";
-import { FormInput } from "@/components/common/form-input";
-import { FileUpload } from "@/components/common/file-upload";
-import { RichTextEditor } from "@/components/common/rich-text-editor";
-import { SearchInput } from "@/components/common/search-input";
+import { FilterSelect } from "@/components/common/form/filter-select";
+import { FormDialog } from "@/components/common/form/form-dialog";
+import { FormInput } from "@/components/common/form/form-input";
+import { FileUpload } from "@/components/common/form/file-upload";
+import { RichTextEditor } from "@/components/common/form/rich-text-editor";
+import { SearchInput } from "@/components/common/form/search-input";
 import { useCourseByIdQuery } from "@/lib/api/courses";
 import type {
   CategoryResponse,
@@ -63,14 +63,10 @@ export function CourseFormDialog({
     return () => clearTimeout(handler);
   }, [lecturerSearchQuery]);
 
-  const { data: searchData, isLoading: isSearchingLecturers } = useSearchUsersQuery(
-    0,
-    debouncedQuery,
-    "LECTURER",
-    {
+  const { data: searchData, isLoading: isSearchingLecturers } =
+    useSearchUsersQuery(0, debouncedQuery, "LECTURER", {
       enabled: lecturerInputFocused,
-    }
-  );
+    });
 
   const lecturerSearchResults = useMemo(() => {
     return searchData?.contents || [];
@@ -82,7 +78,7 @@ export function CourseFormDialog({
     initialValue.id || "",
     {
       enabled: open && isUpdate && !!initialValue.id,
-    }
+    },
   );
 
   useEffect(() => {
@@ -121,7 +117,8 @@ export function CourseFormDialog({
       setForm((prev) => ({
         ...initialValue,
         categoryId: targetCategoryId,
-        lecturerUsernames: prev.lecturerUsernames || initialValue.lecturerUsernames || [],
+        lecturerUsernames:
+          prev.lecturerUsernames || initialValue.lecturerUsernames || [],
       }));
       setSelectedFile(null);
       setTouched(false);

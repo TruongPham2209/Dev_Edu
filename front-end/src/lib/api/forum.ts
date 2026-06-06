@@ -17,6 +17,7 @@ import type {
   ForumCommentRequest,
   CustomPaging,
   UpdatedPostResponse,
+  PostStatus,
 } from "./types";
 
 // --- Posts ---
@@ -42,6 +43,18 @@ export async function getForumPostById(postId: string): Promise<PostResponse> {
 }
 
 // --- Feed / Search / Related ---
+
+export async function getPostedPosts(
+  status: PostStatus,
+  nextCursor?: string,
+): Promise<CustomPaging<PostResponse>> {
+  const query = new URLSearchParams();
+  query.append("status", status);
+  if (nextCursor) query.append("nextCursor", nextCursor);
+
+  const qs = query.toString();
+  return apiGet<CustomPaging<PostResponse>>(`/api/v1/forum/posts/posted?${qs}`);
+}
 
 export async function getForumFeed(
   nextCursor?: string,
@@ -198,10 +211,7 @@ export function useDeleteForumPostMutation(
 
 export function useForumPostByIdQuery(
   postId: string,
-  options?: Omit<
-    UseQueryOptions<PostResponse, Error>,
-    "queryKey" | "queryFn"
-  >,
+  options?: Omit<UseQueryOptions<PostResponse, Error>, "queryKey" | "queryFn">,
 ) {
   return useQuery({
     queryKey: ["forum", "post", postId],
@@ -240,6 +250,28 @@ export function useForumFeedInfiniteQuery(
   return useInfiniteQuery({
     queryKey: ["forum", "feed-infinite"],
     queryFn: ({ pageParam }) => getForumFeed(pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function usePostedPostsInfiniteQuery(
+  status: PostStatus,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<PostResponse>,
+      Error,
+      InfiniteData<CustomPaging<PostResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["forum", "posted-infinite", status],
+    queryFn: ({ pageParam }) => getPostedPosts(status, pageParam || undefined),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor || null,
     ...options,

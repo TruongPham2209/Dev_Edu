@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { MessageSquare } from "lucide-react";
+import { EmptyState } from "@/components/common/empty-state";
 
 interface ReviewListProps {
   reviews: ReviewResponse[];
@@ -69,66 +70,64 @@ export const ReviewList = ({
       </Box>
 
       {/* Review Summary Card */}
-      <Paper
-        elevation={0}
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 2,
-          mb: 4,
-          p: 2,
-          borderRadius: 3,
-          border: "1px solid #e2e8f0",
-          alignItems: "center",
-          bgcolor: "white",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
-        }}
-      >
-        <Box
+      {reviews.length > 0 && (
+        <Paper
+          elevation={0}
           sx={{
-            textAlign: "center",
-            pr: { xs: 0, sm: 4 },
-            borderRight: { xs: "none", sm: "1px solid #e2e8f0" },
-            width: { xs: "100%", sm: "auto" },
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            mb: 2,
+            p: 2,
+            borderRadius: 1,
+            border: "1px solid #e2e8f0",
+            alignItems: "center",
+            bgcolor: "white",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
           }}
         >
-          <Typography
-            variant="h2"
-            sx={{ fontWeight: 900, color: "#0f172a", mb: 1 }}
+          <Box
+            sx={{
+              textAlign: "center",
+              pr: { xs: 0, sm: 4 },
+              borderRight: { xs: "none", sm: "1px solid #e2e8f0" },
+              width: { xs: "100%", sm: "auto" },
+            }}
           >
-            {rating ? rating.toFixed(1) : "0.0"}
-          </Typography>
-          <Rating
-            value={rating || 0}
-            readOnly
-            precision={0.1}
-            size="large"
-            sx={{ color: "#fbbf24" }}
-          />
-          <Typography sx={{ color: "#64748b", mt: 1, fontWeight: 500 }}>
-            {reviewCount || 0} reviews
-          </Typography>
-        </Box>
-        <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 800, mb: 1, color: "#1e293b" }}
-          >
-            {reviewCount === 0 || !rating
-              ? "No reviews yet"
-              : rating >= 4.0
+            <Typography
+              variant="h2"
+              sx={{ fontWeight: 900, color: "#0f172a", mb: 1 }}
+            >
+              {rating ? rating.toFixed(1) : "0.0"}
+            </Typography>
+            <Rating
+              value={rating || 0}
+              readOnly
+              precision={0.1}
+              size="large"
+              sx={{ color: "#fbbf24" }}
+            />
+            <Typography sx={{ color: "#64748b", mt: 1, fontWeight: 500 }}>
+              {reviewCount || 0} reviews
+            </Typography>
+          </Box>
+          <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 800, mb: 1, color: "#1e293b" }}
+            >
+              {rating >= 4.0
                 ? "This course is highly rated!"
                 : "Student feedback"}
-          </Typography>
-          <Typography sx={{ color: "#475569", lineHeight: 1.6 }}>
-            {reviewCount === 0 || !rating
-              ? "Be the first to share your experience and thoughts about this course."
-              : rating >= 4.0
+            </Typography>
+            <Typography sx={{ color: "#475569", lineHeight: 1.6 }}>
+              {rating >= 4.0
                 ? "Most students are satisfied with the teaching quality and practical application of this course."
                 : "See what students are saying about the teaching quality and practical application of this course."}
-          </Typography>
-        </Box>
-      </Paper>
+            </Typography>
+          </Box>
+        </Paper>
+      )}
 
       {loadingReviews ? (
         <Stack spacing={3}>
@@ -154,20 +153,23 @@ export const ReviewList = ({
           ))}
         </Stack>
       ) : reviews.length === 0 ? (
-        <Paper
-          elevation={0}
+        <Box
           sx={{
-            p: 6,
-            textAlign: "center",
-            borderRadius: 3,
-            border: "1px dashed #cbd5e1",
-            bgcolor: "rgba(248, 250, 252, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            height: 300,
+            borderRadius: 1,
+            bgcolor: "#e2e8f0",
           }}
         >
-          <Typography sx={{ color: "#64748b", fontWeight: 500 }}>
-            This course has no reviews yet. Be the first one!
-          </Typography>
-        </Paper>
+          <EmptyState
+            title="No reviews yet"
+            subtitle="Be the first to share your experience and thoughts about this course."
+            icon={<MessageSquare size={28} />}
+          />
+        </Box>
       ) : (
         <Stack spacing={3}>
           {reviews.map((review) => (
@@ -175,8 +177,9 @@ export const ReviewList = ({
               key={review.id}
               elevation={0}
               sx={{
-                p: 4,
-                borderRadius: 3,
+                px: 4,
+                py: 2,
+                borderRadius: 1,
                 border: "1px solid #e2e8f0",
                 bgcolor: "white",
                 transition: "all 0.2s ease",
@@ -187,74 +190,68 @@ export const ReviewList = ({
                 },
               }}
             >
-              <Box sx={{ display: "flex", gap: 3 }}>
-                <Avatar
-                  sx={{
-                    bgcolor: "#38bdf8",
-                    width: 56,
-                    height: 56,
-                    fontWeight: 700,
-                    fontSize: "1.25rem",
-                  }}
-                >
-                  {(review.username || "H").charAt(0).toUpperCase()}
-                </Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Box
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <Avatar
+                    src={review.avatarUrl}
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        sx={{
-                          fontWeight: 800,
-                          color: "#0f172a",
-                          fontSize: "1.125rem",
-                          mb: 0.5,
-                        }}
-                      >
-                        {review.username}
-                      </Typography>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1.5,
-                        }}
-                      >
-                        <Rating
-                          value={review.rating}
-                          readOnly
-                          size="small"
-                          sx={{ color: "#fbbf24" }}
-                        />
-                        <Typography
-                          sx={{
-                            fontSize: "0.875rem",
-                            color: "#94a3b8",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {formatDate(review.createdAt)}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  <Typography
-                    sx={{
-                      color: "#475569",
-                      lineHeight: 1.7,
-                      mt: 2,
+                      bgcolor: "#38bdf8",
+                      width: 40,
+                      height: 40,
+                      fontWeight: 700,
                       fontSize: "1rem",
                     }}
                   >
-                    {review.comment}
+                    {(review.fullName || review.username || "H")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </Avatar>
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontWeight: 600,
+                        color: "#1e293b",
+                        fontSize: "0.95rem",
+                      }}
+                    >
+                      {review.fullName || review.username}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "0.85rem",
+                        color: "#64748b",
+                        mt: 0.25,
+                      }}
+                    >
+                      @{review.username}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Rating
+                    value={review.rating}
+                    readOnly
+                    size="small"
+                    sx={{ color: "#fbbf24", fontSize: "1rem" }}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: "0.85rem",
+                      color: "#64748b",
+                    }}
+                  >
+                    {formatDate(review.createdAt)}
                   </Typography>
                 </Box>
+                <Typography
+                  sx={{
+                    color: "#334155",
+                    lineHeight: 1.6,
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  {review.comment}
+                </Typography>
               </Box>
             </Paper>
           ))}

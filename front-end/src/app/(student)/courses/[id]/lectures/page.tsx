@@ -61,7 +61,11 @@ export default function StudentLecturePage() {
   const [tabValue, setTabValue] = useState(0);
 
   // Load all lectures for sidebar
-  const { data: lectures = [], refetch: refetchLectures } = useLecturesByCourseQuery(courseId);
+  const {
+    data: lectures = [],
+    refetch: refetchLectures,
+    isLoading: isLoadingLectures,
+  } = useLecturesByCourseQuery(courseId);
 
   const handleSelectLecture = useCallback(
     (id: string) => {
@@ -87,12 +91,13 @@ export default function StudentLecturePage() {
   }, [lectures, lectureIdFromUrl, handleSelectLecture]);
 
   // Load active lecture details when ID changes
-  const { data: activeLecture, isLoading: loading, refetch: refetchActiveLecture } = useLectureByIdQuery(
-    lectureIdFromUrl || "",
-    {
-      enabled: !!lectureIdFromUrl,
-    }
-  );
+  const {
+    data: activeLecture,
+    isLoading: loading,
+    refetch: refetchActiveLecture,
+  } = useLectureByIdQuery(lectureIdFromUrl || "", {
+    enabled: !!lectureIdFromUrl,
+  });
 
   const { mutateAsync: updateProgress } = useUpdateLectureProgressMutation();
 
@@ -129,7 +134,8 @@ export default function StudentLecturePage() {
     }
   };
 
-  if (loading && !activeLecture) {
+  const isRedirecting = !lectureIdFromUrl && lectures.length > 0;
+  if (isLoadingLectures || (loading && !activeLecture) || isRedirecting) {
     return <LectureSkeleton />;
   }
 

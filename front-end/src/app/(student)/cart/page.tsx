@@ -1,84 +1,78 @@
 "use client";
 
-import { Box, Tab, Tabs } from "@mui/material";
+import { AnimatedTabs } from "@/components/common/animated-tabs";
+import { Box, Typography } from "@mui/material";
+import { BookOpen, PackageOpen, ShoppingCart } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CartHeader } from "./_components/cart-header";
-import { CartTabContent } from "./_components/cart-tab-content";
-import { PurchaseHistoryTabContent } from "./_components/purchase-history-tab-content";
-import { EnrollmentTabContent } from "./_components/enrollment-tab-content";
-import { ShoppingCart, PackageOpen, BookOpen } from "lucide-react";
 import { Suspense } from "react";
+import { CartTabContent } from "./cart-tab";
+import { EnrollmentTabContent } from "./enrollment-tab";
+import { PurchaseHistoryTabContent } from "./purchase-history-tab";
 
 function CartPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("type") || "cart";
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (newValue: string) => {
     router.push(`/cart?type=${newValue}`);
   };
 
-  return (
-    <Box sx={{ maxWidth: 1440, mx: "auto", px: { xs: 2, sm: 3, lg: 4 }, py: { xs: 3, md: 5 } }}>
-      <CartHeader />
+  const CART_TABS = [
+    { value: "cart", label: "Cart", icon: <ShoppingCart size={20} /> },
+    { value: "order", label: "Order History", icon: <PackageOpen size={20} /> },
+    { value: "enrolled", label: "Enrolled", icon: <BookOpen size={20} /> },
+  ];
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 5, position: "sticky", top: 70, zIndex: 10, bgcolor: "rgba(255,255,255,0.9)", backdropFilter: "blur(8px)" }}>
-        <Tabs
-          value={currentTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{
-            "& .MuiTab-root": {
-              textTransform: "none",
-              fontWeight: 800,
-              fontSize: "1.05rem",
-              minHeight: 60,
-              color: "#64748b",
-              px: 4,
-              "&.Mui-selected": { color: "#0ea5e9" },
-            },
-            "& .MuiTabs-indicator": {
-              backgroundColor: "#0ea5e9",
-              height: 4,
-              borderRadius: "4px 4px 0 0",
-            },
-          }}
+  return (
+    <Box
+      sx={{
+        maxWidth: 1440,
+        mx: "auto",
+        px: { xs: 2, sm: 3, lg: 4 },
+        py: { xs: 3, md: 5 },
+        width: "100%",
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
+        <Box
+          sx={{ p: 1.5, bgcolor: "#e0f2fe", borderRadius: 2, display: "flex" }}
         >
-          <Tab
-            label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <ShoppingCart size={20} />
-                Giỏ hàng
-              </Box>
-            }
-            value="cart"
-          />
-          <Tab
-            label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <PackageOpen size={20} />
-                Lịch sử mua hàng
-              </Box>
-            }
-            value="order"
-          />
-          <Tab
-            label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <BookOpen size={20} />
-                Đã đăng ký
-              </Box>
-            }
-            value="enrolled"
-          />
-        </Tabs>
+          <ShoppingCart size={28} color="#0284c7" />
+        </Box>
+        <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a" }}>
+          Your learning space
+        </Typography>
       </Box>
 
-      <Box>
-        {currentTab === "cart" && <CartTabContent />}
-        {currentTab === "order" && <PurchaseHistoryTabContent />}
-        {currentTab === "enrolled" && <EnrollmentTabContent />}
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: "divider",
+          mb: 5,
+          position: "sticky",
+          top: 70,
+          zIndex: 10,
+          bgcolor: "rgba(255,255,255,0.9)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        <AnimatedTabs
+          tabs={CART_TABS}
+          value={currentTab}
+          onChange={handleTabChange}
+          colorTheme="primary"
+        />
+      </Box>
+
+      <Box sx={{ display: currentTab === "cart" ? "block" : "none" }}>
+        <CartTabContent />
+      </Box>
+      <Box sx={{ display: currentTab === "order" ? "block" : "none" }}>
+        <PurchaseHistoryTabContent />
+      </Box>
+      <Box sx={{ display: currentTab === "enrolled" ? "block" : "none" }}>
+        <EnrollmentTabContent />
       </Box>
     </Box>
   );
@@ -87,7 +81,7 @@ function CartPageContent() {
 export default function CartPage() {
   return (
     <Suspense
-      fallback={<Box sx={{ py: 10, textAlign: "center" }}>Đang tải...</Box>}
+      fallback={<Box sx={{ py: 10, textAlign: "center" }}>Loading...</Box>}
     >
       <CartPageContent />
     </Suspense>

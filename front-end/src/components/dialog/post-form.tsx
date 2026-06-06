@@ -1,10 +1,10 @@
 "use client";
 
-import { FormDialog } from "@/components/common/form-dialog";
-import { FormInput } from "@/components/common/form-input";
-import { FileUpload } from "@/components/common/file-upload";
+import { FormDialog } from "@/components/common/form/form-dialog";
+import { FormInput } from "@/components/common/form/form-input";
+import { FileUpload } from "@/components/common/form/file-upload";
 import { ImagePreview } from "@/components/common/image-preview";
-import { RichTextEditor } from "@/components/common/rich-text-editor";
+import { RichTextEditor } from "@/components/common/form/rich-text-editor";
 import { PostRequest, PostResponse } from "@/lib/api/types";
 import { useConfirmImageUploadMutation } from "@/lib/api/files";
 import { Box, Button, FormHelperText, Typography } from "@mui/material";
@@ -44,7 +44,8 @@ export function PostFormDialog({
     { url: string; objectKey: string }[]
   >([]);
 
-  const { mutateAsync: confirmImageUploadMutate } = useConfirmImageUploadMutation();
+  const { mutateAsync: confirmImageUploadMutate } =
+    useConfirmImageUploadMutation();
 
   const previewSrc = useMemo(() => {
     if (selectedFile) return URL.createObjectURL(selectedFile);

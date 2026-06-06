@@ -4,7 +4,7 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { FilterSelect } from "@/components/common/filter-select";
+import { FilterSelect } from "@/components/common/form/filter-select";
 import { InfoDialog } from "@/components/common/info-dialog";
 import {
   useDeletePostVersionMutation,
@@ -74,9 +74,12 @@ export function PostHistoryModal({
     isLoading: loading,
     error,
     refetch: fetchHistory,
-  } = usePostVersionsByPostIdQuery(postId, apiStatus, { enabled: open && !!postId });
+  } = usePostVersionsByPostIdQuery(postId, apiStatus, {
+    enabled: open && !!postId,
+  });
 
-  const { mutateAsync: deletePostVersionMutate } = useDeletePostVersionMutation();
+  const { mutateAsync: deletePostVersionMutate } =
+    useDeletePostVersionMutation();
 
   useEffect(() => {
     if (error) {

@@ -1,4 +1,4 @@
-import { CourseHeroInfo } from "@/components/common/course-hero-info";
+import { CourseHeroInfo } from "@/components/common/hero-section/course-hero-info";
 import type { CourseResponse } from "@/lib/api/types";
 import { Breadcrumbs, Link as MuiLink, Stack, Typography } from "@mui/material";
 import { ChevronRight, Home } from "lucide-react";

@@ -1,19 +1,21 @@
-import { apiDelete, apiGet, apiPost } from "./client";
 import {
-  useQuery,
-  useMutation,
-  useInfiniteQuery,
-  UseQueryOptions,
-  UseMutationOptions,
-  UseInfiniteQueryOptions,
   InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
 } from "@tanstack/react-query";
+import { apiDelete, apiGet, apiPost } from "./client";
 import type {
   CourseDiscountRequest,
   CourseDiscountResponse,
   CourseItemDetailResponse,
   CustomPaging,
   EnrollmentUserResponse,
+  OrderDetailResponse,
+  PaymentStatus,
   PurchaseDetailResponse,
   PurchaseRequest,
 } from "./types";
@@ -76,6 +78,21 @@ export async function getEnrolledUsers(
 
   return apiGet<CustomPaging<EnrollmentUserResponse>>(
     `/api/v1/enrollments/enrolled-users?${query.toString()}`,
+  );
+}
+
+/** Order history by status (cursor-paginated) */
+export async function getOrderHistory(
+  status: PaymentStatus,
+  nextCursor?: string,
+): Promise<CustomPaging<OrderDetailResponse>> {
+  const query = new URLSearchParams();
+  query.append("orderStatus", status);
+  if (nextCursor) query.append("nextCursor", nextCursor);
+
+  const qs = query.toString();
+  return apiGet<CustomPaging<OrderDetailResponse>>(
+    `/api/v1/orders/history${qs ? "?" + qs : ""}`,
   );
 }
 
@@ -142,6 +159,28 @@ export function useCartItemsInfiniteQuery(
   return useInfiniteQuery({
     queryKey: ["cart", "items-infinite"],
     queryFn: ({ pageParam }) => getCartItems(pageParam || undefined),
+    initialPageParam: null as string | null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor || null,
+    ...options,
+  });
+}
+
+export function useOrderHistoryInfinateQuery(
+  status: PaymentStatus,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<OrderDetailResponse>,
+      Error,
+      InfiniteData<CustomPaging<OrderDetailResponse>, string | null>,
+      readonly unknown[],
+      string | null
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["order", "history", status, "infinite"],
+    queryFn: ({ pageParam }) => getOrderHistory(status, pageParam || undefined),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor || null,
     ...options,
@@ -302,7 +341,8 @@ export function useGlobalCourseDiscountsInfiniteQuery(
 ) {
   return useInfiniteQuery({
     queryKey: ["discounts", "global-infinite"],
-    queryFn: ({ pageParam }) => getGlobalCourseDiscounts(pageParam || undefined),
+    queryFn: ({ pageParam }) =>
+      getGlobalCourseDiscounts(pageParam || undefined),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor || null,
     ...options,
@@ -334,8 +374,8 @@ export function useDeleteCourseDiscountMutation(
 // Aliases for backward compatibility during refactoring
 export {
   useCartItemsQuery as useGetCartItems,
-  useEnrollmentsQuery as useGetEnrollments,
-  useEnrolledUsersQuery as useGetEnrolledUsers,
   useCourseDiscountsByCourseQuery as useGetCourseDiscountsByCourse,
+  useEnrolledUsersQuery as useGetEnrolledUsers,
+  useEnrollmentsQuery as useGetEnrollments,
   useGlobalCourseDiscountsQuery as useGetGlobalCourseDiscounts,
 };

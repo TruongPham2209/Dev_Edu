@@ -30,7 +30,7 @@ import { useApiWithToast } from "@/lib/use-api-with-toast";
 
 // Modular Sub-components
 import { AnimatedTabs } from "@/components/common/animated-tabs";
-import { AssignmentHeroInfo } from "@/components/common/assignment-hero-info";
+import { AssignmentHeroInfo } from "@/components/common/hero-section/assignment-hero-info";
 import { ErrorState } from "@/components/common/error-state";
 import { SubmissionDetailsDialog } from "@/components/dialog/submission-datail/page";
 import { AssignmentDetailSkeleton } from "./assignment-detail-skeleton";
@@ -48,9 +48,14 @@ export default function LecturerAssignmentDetailPage() {
   const courseId = params.id as string;
 
   // --- React Query details ---
-  const { data: assignment, isLoading: assignmentLoading } = useAssignmentByIdQuery(assignmentId);
-  const { data: lecture, isLoading: lectureLoading } = useLectureByIdQuery(lectureId);
-  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(courseId, { enabled: !!courseId });
+  const { data: assignment, isLoading: assignmentLoading } =
+    useAssignmentByIdQuery(assignmentId);
+  const { data: lecture, isLoading: lectureLoading } =
+    useLectureByIdQuery(lectureId);
+  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(
+    courseId,
+    { enabled: !!courseId },
+  );
 
   const pageLoading = assignmentLoading || lectureLoading || courseLoading;
   const pageError = !assignment && !assignmentLoading;
@@ -77,7 +82,9 @@ export default function LecturerAssignmentDetailPage() {
     if (reset) {
       // React query automatically refetches or keeps the cached pages,
       // but if we want to explicitly reset/invalidate we can:
-      queryClient.invalidateQueries({ queryKey: ["submissions", "infinite", assignmentId] });
+      queryClient.invalidateQueries({
+        queryKey: ["submissions", "infinite", assignmentId],
+      });
     } else {
       fetchNextSubmissions();
     }
@@ -87,24 +94,25 @@ export default function LecturerAssignmentDetailPage() {
   const [selectedSubmission, setSelectedSubmission] =
     useState<SubmissionResponse | null>(null);
 
-  const { data: feedbacks = [], isLoading: feedbacksLoading, refetch: refetchFeedbacks } = useFeedbacksQuery(
-    assignmentId,
-    selectedSubmission?.studentUsername,
-    {
-      enabled: !!selectedSubmission,
-    }
-  );
+  const {
+    data: feedbacks = [],
+    isLoading: feedbacksLoading,
+    refetch: refetchFeedbacks,
+  } = useFeedbacksQuery(assignmentId, selectedSubmission?.studentUsername, {
+    enabled: !!selectedSubmission,
+  });
 
   const [historyPage, setHistoryPage] = useState(0);
 
-  const { data: trackingData, isLoading: historyLoading } = useSubmissionTrackingQuery(
-    assignmentId,
-    selectedSubmission?.studentUsername,
-    historyPage,
-    {
-      enabled: !!selectedSubmission,
-    }
-  );
+  const { data: trackingData, isLoading: historyLoading } =
+    useSubmissionTrackingQuery(
+      assignmentId,
+      selectedSubmission?.studentUsername,
+      historyPage,
+      {
+        enabled: !!selectedSubmission,
+      },
+    );
 
   const [history, setHistory] = useState<SubmissionLogResponse[]>([]);
 
@@ -123,7 +131,9 @@ export default function LecturerAssignmentDetailPage() {
     }
   }, [trackingData, historyPage, selectedSubmission]);
 
-  const historyHasMore = trackingData ? trackingData.currentPage < trackingData.totalPages - 1 : false;
+  const historyHasMore = trackingData
+    ? trackingData.currentPage < trackingData.totalPages - 1
+    : false;
 
   const loadMoreHistory = async () => {
     if (historyLoading || !historyHasMore) return;

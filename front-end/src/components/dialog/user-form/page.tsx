@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatedTabs } from "@/components/common/animated-tabs";
-import { FormDialog } from "@/components/common/form-dialog";
+import { FormDialog } from "@/components/common/form/form-dialog";
 import { Box } from "@mui/material";
 import { FileSpreadsheet, User, UserPlus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";

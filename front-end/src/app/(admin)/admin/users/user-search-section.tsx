@@ -3,8 +3,8 @@
 import type { RoleEnum } from "@/lib/api/types";
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import { SearchInput } from "@/components/common/search-input";
-import { FilterSelect } from "@/components/common/filter-select";
+import { SearchInput } from "@/components/common/form/search-input";
+import { FilterSelect } from "@/components/common/form/filter-select";
 import { ROLE_OPTIONS } from "@/lib/roles";
 
 interface UserSearchSectionProps {

@@ -1,7 +1,7 @@
 "use client";
 
-import { LectureHeroInfo } from "@/components/common/lecture-hero-info";
-import { MetricItem } from "@/components/common/metric-item";
+import { LectureHeroInfo } from "@/components/common/hero-section/lecture-hero-info";
+import { MetricItem } from "@/components/common/hero-section/metric-item";
 import { getDownloadUrl } from "@/lib/api/files";
 import type { LectureResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";

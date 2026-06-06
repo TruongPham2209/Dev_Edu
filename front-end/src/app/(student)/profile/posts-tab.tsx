@@ -6,6 +6,7 @@ import {
   deleteForumPost,
   updateForumPost,
   createForumPost,
+  deletePostVersion,
 } from "@/lib/api/forum";
 import { getPreSignedUploadUrl } from "@/lib/api/files";
 import {
@@ -27,49 +28,35 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { PostFormDialog } from "../../../components/dialog/post-form";
 
-// Mock API
-const MOCK_POSTS: PostResponse[] = Array.from({ length: 15 }).map((_, i) => ({
-  id: `mock-post-${i}`,
-  title: `Bài viết mẫu ${i + 1}`,
-  authorUsername: "current_user",
-  authorFullName: "Current User",
-  authorAvatarUrl: null,
-  thumbUrl: "https://via.placeholder.com/150",
-  shortDescription: "Mô tả ngắn của bài viết mẫu...",
-  content: "Nội dung chi tiết của bài viết mẫu này sẽ hiển thị ở đây.",
-  views: Math.floor(Math.random() * 1000),
-  comments: Math.floor(Math.random() * 100),
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  status: (["APPROVED", "PENDING", "REJECTED"] as PostStatus[])[
-    Math.floor(Math.random() * 3)
-  ],
-}));
+import { usePostedPostsInfiniteQuery } from "@/lib/api/forum";
+import {
+  FilterSelect,
+  FilterItem,
+} from "@/components/common/form/filter-select";
+import { useQueryClient } from "@tanstack/react-query";
 
-const mockGetPostedPosts = async (
-  cursor?: string,
-): Promise<CustomPaging<PostResponse>> => {
-  await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate delay
-  const pageSize = 5;
-  const startIndex = cursor ? parseInt(cursor) : 0;
-  const nextIndex = startIndex + pageSize;
-  const contents = MOCK_POSTS.slice(startIndex, nextIndex);
-
-  return {
-    contents,
-    currentPage: Math.floor(startIndex / pageSize),
-    pageSize,
-    totalElements: MOCK_POSTS.length,
-    totalPages: Math.ceil(MOCK_POSTS.length / pageSize),
-    nextCursor: nextIndex < MOCK_POSTS.length ? String(nextIndex) : null,
-  };
-};
+const FILTER_ITEMS: FilterItem[] = [
+  { id: "APPROVED", title: "Approved" },
+  { id: "PENDING", title: "Pending" },
+  { id: "REJECTED", title: "Rejected" },
+];
 
 export function PostedPostsTab() {
-  const [posts, setPosts] = useState<PostResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("APPROVED");
+  const [debouncedStatus, setDebouncedStatus] = useState<string>("APPROVED");
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedStatus(statusFilter);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [statusFilter]);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    usePostedPostsInfiniteQuery(debouncedStatus as PostStatus);
+
+  const rawPosts = data?.pages.flatMap((page) => page.contents) || [];
 
   // Modals state
   const [editPost, setEditPost] = useState<PostResponse | null>(null);
@@ -77,6 +64,7 @@ export function PostedPostsTab() {
   const [savingPost, setSavingPost] = useState(false);
   const [historyPost, setHistoryPost] = useState<PostResponse | null>(null);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
   const { handleError, showSuccess } = useApiWithToast();
 
   // Undo Delete Queue
@@ -84,38 +72,14 @@ export function PostedPostsTab() {
     { post: PostResponse; timeoutId: NodeJS.Timeout }[]
   >([]);
 
-  useEffect(() => {
-    let mounted = true;
-    mockGetPostedPosts().then((res) => {
-      if (mounted) {
-        setPosts(res.contents);
-        setNextCursor(res.nextCursor || null);
-        setLoading(false);
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleLoadMore = async () => {
-    if (!nextCursor || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const res = await mockGetPostedPosts(nextCursor);
-      setPosts((prev) => [...prev, ...res.contents]);
-      setNextCursor(res.nextCursor || null);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+  const posts = rawPosts.filter((p) => !removedIds.has(p.id));
 
   const handleRemove = (postToRemove: PostResponse) => {
     setDeletingIds((prev) => new Set(prev).add(postToRemove.id));
   };
 
   const finalizeRemoval = (postToRemove: PostResponse) => {
-    setPosts((prev) => prev.filter((p) => p.id !== postToRemove.id));
+    setRemovedIds((prev) => new Set(prev).add(postToRemove.id));
     setDeletingIds((prev) => {
       const next = new Set(prev);
       next.delete(postToRemove.id);
@@ -125,9 +89,14 @@ export function PostedPostsTab() {
     const timeoutId = setTimeout(async () => {
       // Actually delete from API if not undone
       try {
-        if (!postToRemove.id.startsWith("mock-")) {
+        if (postToRemove.status === "APPROVED") {
           await deleteForumPost(postToRemove.id);
+        } else {
+          await deletePostVersion(postToRemove.id);
         }
+        queryClient.invalidateQueries({
+          queryKey: ["forum", "posted-infinite"],
+        });
       } catch (e) {
         console.error("Delete failed", e);
       }
@@ -143,9 +112,10 @@ export function PostedPostsTab() {
     const lastItem = undoQueue[undoQueue.length - 1];
     clearTimeout(lastItem.timeoutId);
 
-    setPosts((prev) => {
-      // Re-insert at top or original position. For simplicity, just append to top.
-      return [lastItem.post, ...prev];
+    setRemovedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(lastItem.post.id);
+      return next;
     });
 
     setUndoQueue((prev) => prev.slice(0, -1));
@@ -178,16 +148,13 @@ export function PostedPostsTab() {
       }
 
       if (finalPayload.postId) {
-        const updated = await updateForumPost(finalPayload);
-        setPosts((prev) =>
-          prev.map((p) => (p.id === updated.id ? updated : p)),
-        );
+        await updateForumPost(finalPayload);
         showSuccess("Post updated successfully");
       } else {
-        const created = await createForumPost(finalPayload);
-        setPosts((prev) => [created, ...prev]);
+        await createForumPost(finalPayload);
         showSuccess("Post created successfully");
       }
+      queryClient.invalidateQueries({ queryKey: ["forum", "posted-infinite"] });
       setEditPost(null);
       setIsCreatingPost(false);
     } catch (error) {
@@ -200,12 +167,12 @@ export function PostedPostsTab() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!nextCursor || loadingMore || !sentinelRef.current) return;
+    if (!hasNextPage || isFetchingNextPage || !sentinelRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          handleLoadMore();
+          fetchNextPage();
         }
       },
       { threshold: 0.1 },
@@ -213,9 +180,9 @@ export function PostedPostsTab() {
 
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [nextCursor, loadingMore]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <SkeletonCard />
@@ -227,7 +194,18 @@ export function PostedPostsTab() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <FilterSelect
+          value={statusFilter}
+          onChange={setStatusFilter}
+          items={FILTER_ITEMS}
+        />
         <Button
           variant="contained"
           startIcon={<Sparkles size={16} />}
@@ -284,7 +262,7 @@ export function PostedPostsTab() {
           alignItems: "center",
         }}
       >
-        {loadingMore && <CircularProgress size={24} />}
+        {isFetchingNextPage && <CircularProgress size={24} />}
       </Box>
 
       {(editPost || isCreatingPost) && (

@@ -1,7 +1,7 @@
 "use client";
 
-import { FormInput } from "@/components/common/form-input";
-import { RichTextEditor } from "@/components/common/rich-text-editor";
+import { FormInput } from "@/components/common/form/form-input";
+import { RichTextEditor } from "@/components/common/form/rich-text-editor";
 import {
   useConfirmImageUploadMutation,
   useDownloadUrlQuery,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/api/lectures";
 import type { LectureRequest, LectureResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { FormDialog } from "@/components/common/form-dialog";
+import { FormDialog } from "@/components/common/form/form-dialog";
 import { Box, Typography, IconButton } from "@mui/material";
 import { Lock, UploadCloud, X, Type, AlignLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -82,7 +82,8 @@ export function LectureFormDialog({
   const { mutateAsync: preSignMutate } = usePreSignedUploadUrlMutation();
   const { mutateAsync: createLectureMutate } = useCreateLectureMutation();
   const { mutateAsync: updateLectureMutate } = useUpdateLectureMutation();
-  const { mutateAsync: confirmImageUploadMutate } = useConfirmImageUploadMutation();
+  const { mutateAsync: confirmImageUploadMutate } =
+    useConfirmImageUploadMutation();
 
   const videoObjectKey = initialData?.videoObjectKey;
   const { data: downloadData } = useDownloadUrlQuery(videoObjectKey || "", {
@@ -91,7 +92,9 @@ export function LectureFormDialog({
 
   useEffect(() => {
     if (downloadData) {
-      setVideoPreviewUrl(downloadData.downloadUrl || downloadData.publicUrl || null);
+      setVideoPreviewUrl(
+        downloadData.downloadUrl || downloadData.publicUrl || null,
+      );
     }
   }, [downloadData]);
 

@@ -15,6 +15,7 @@ import { DiscountsList } from "./discounts-list";
 import { LecturersList } from "./lecturers-list";
 import { LecturesList } from "./lectures-list";
 import { StudentsList } from "./students-list";
+import { ReviewList } from "./review-list";
 
 export default function AdminCourseDetailPage() {
   const params = useParams();
@@ -126,6 +127,16 @@ export default function AdminCourseDetailPage() {
             courseId={courseId}
             onTotalCountChange={setStudentsCount}
           />
+        </Grid>
+      </Grid>
+
+      {/* Review Row: Review list */}
+      <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+        <Grid
+          size={{ xs: 12, md: 6 }}
+          sx={{ display: "flex", flexDirection: "column" }}
+        >
+          <ReviewList courseId={courseId} />
         </Grid>
       </Grid>
     </Stack>

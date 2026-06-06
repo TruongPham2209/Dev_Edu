@@ -1,6 +1,6 @@
 "use client";
 
-import { SearchInput } from "@/components/common/search-input";
+import { SearchInput } from "@/components/common/form/search-input";
 import { Box, Chip, Typography } from "@mui/material";
 import { Search, TrendingUp } from "lucide-react";
 

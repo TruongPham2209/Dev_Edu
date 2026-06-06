@@ -1,6 +1,6 @@
 "use client";
 
-import { FileUpload } from "@/components/common/file-upload";
+import { FileUpload } from "@/components/common/form/file-upload";
 import {
   createSubmission,
   deleteSubmission,

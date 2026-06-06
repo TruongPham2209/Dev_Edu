@@ -25,9 +25,9 @@ import {
 import Link from "next/link";
 import { formatServerDate } from "@/lib/util/date-utils";
 import type { CourseResponse } from "@/lib/api/types";
-import { MetricItem } from "@/components/common/metric-item";
+import { MetricItem } from "@/components/common/hero-section/metric-item";
 import Image from "next/image";
-import { CourseHeroInfo } from "@/components/common/course-hero-info";
+import { CourseHeroInfo } from "@/components/common/hero-section/course-hero-info";
 
 interface CourseHeroProps {
   course: CourseResponse;

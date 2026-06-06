@@ -1,7 +1,7 @@
 "use client";
 
-import { FormDialog } from "@/components/common/form-dialog";
-import { FormInput } from "@/components/common/form-input";
+import { FormDialog } from "@/components/common/form/form-dialog";
+import { FormInput } from "@/components/common/form/form-input";
 import type { CategoryRequest, CategoryResponse } from "@/lib/api/types";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import {

@@ -99,6 +99,8 @@ export type ReviewResponse = {
   comment: string;
   rating: number;
   username: string;
+  fullName: string;
+  avatarUrl: string;
   createdAt: string;
 };
 
@@ -340,6 +342,14 @@ export type PurchaseDetailResponse = {
   totalAmount: number;
   entityType: string;
   items: CourseItemResponse[] | null; // TODO: Update if implements subscription
+};
+
+export type OrderDetailResponse = {
+  id: string;
+  totalAmount: number;
+  status: PaymentStatus;
+  createdAt: string;
+  items: CourseItemDetailResponse[];
 };
 
 export type CourseItemResponse = {

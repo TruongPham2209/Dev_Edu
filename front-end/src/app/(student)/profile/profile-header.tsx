@@ -1,6 +1,6 @@
-import { FileUpload } from "@/components/common/file-upload";
-import { FormDialog } from "@/components/common/form-dialog";
-import { FormInput } from "@/components/common/form-input";
+import { FileUpload } from "@/components/common/form/file-upload";
+import { FormDialog } from "@/components/common/form/form-dialog";
+import { FormInput } from "@/components/common/form/form-input";
 import { ImagePreview } from "@/components/common/image-preview";
 import { confirmImageUpload, getPreSignedUploadUrl } from "@/lib/api/files";
 import { changePassword, updateAvatar } from "@/lib/api/users";

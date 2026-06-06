@@ -143,6 +143,17 @@ export async function getCourseReviews(
   );
 }
 
+export async function getMyReview(
+  courseId: string,
+): Promise<ReviewResponse | null> {
+  const query = new URLSearchParams();
+  query.append("courseId", courseId);
+
+  return apiGet<ReviewResponse | null>(
+    `/api/v1/courses/reviews/me?${query.toString()}`,
+  );
+}
+
 export async function createReview(
   review: ReviewRequest,
 ): Promise<ReviewResponse> {
@@ -252,6 +263,21 @@ export function useCoursesQuery(
   return useQuery({
     queryKey: ["courses", "list", params],
     queryFn: () => getCourses(params),
+    ...options,
+  });
+}
+
+export function useMyReviewQuery(
+  courseId: string,
+  options?: Omit<
+    UseQueryOptions<ReviewResponse | null, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["reviews", "my", courseId],
+    queryFn: () => getMyReview(courseId),
+    enabled: !!courseId,
     ...options,
   });
 }
@@ -431,4 +457,3 @@ export {
   useCoursesInfiniteQuery as useGetInfiniteCourses,
   useCourseReviewsInfiniteQuery as useGetInfiniteCourseReviews,
 };
-

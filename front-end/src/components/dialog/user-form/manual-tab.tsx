@@ -1,5 +1,5 @@
-import { FormInput } from "@/components/common/form-input";
-import { FilterSelect } from "@/components/common/filter-select";
+import { FormInput } from "@/components/common/form/form-input";
+import { FilterSelect } from "@/components/common/form/filter-select";
 import type { RegisterUser, RoleEnum } from "@/lib/api/types";
 import { useBatchCreateUsersMutation } from "@/lib/api/users";
 import { ROLE_OPTIONS } from "@/lib/roles";

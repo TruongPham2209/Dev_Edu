@@ -20,6 +20,7 @@ import {
   ChevronRight,
   ClipboardList,
   Home,
+  MessageCircle,
   Paperclip,
 } from "lucide-react";
 import Link from "next/link";
@@ -28,9 +29,10 @@ import { useState } from "react";
 import { LectureDetailSkeleton } from "./lecture-detail-skeleton";
 
 // Tabs
-import { LectureHeroInfo } from "@/components/common/lecture-hero-info";
+import { LectureHeroInfo } from "@/components/common/hero-section/lecture-hero-info";
 import { AssignmentsTab } from "./assignments-tab";
 import { MaterialsTab } from "./materials-tab";
+import { TabComments } from "./comment-tab";
 
 export default function LecturerLectureDetailPage() {
   const params = useParams();
@@ -151,12 +153,22 @@ export default function LecturerLectureDetailPage() {
               label: "Assignments",
               icon: <ClipboardList size={16} />,
             },
+            {
+              value: "comments",
+              label: "Comments",
+              icon: <MessageCircle size={16} />,
+            },
           ]}
         />
       </Box>
 
       {/* 4. Tab Context Area */}
-      <Box sx={{ pb: 6 }}>
+      <Box
+        sx={{
+          pb: 6,
+          display: tab === "overview" ? "block" : "none",
+        }}
+      >
         {tab === "overview" && (
           <Card
             variant="outlined"
@@ -233,21 +245,37 @@ export default function LecturerLectureDetailPage() {
             </CardContent>
           </Card>
         )}
+      </Box>
 
-        {tab === "materials" && (
-          <MaterialsTab
-            lectureId={lectureId}
-            onCountChange={setMaterialsCount}
-          />
-        )}
+      <Box
+        sx={{
+          pb: 6,
+          display: tab === "materials" ? "block" : "none",
+        }}
+      >
+        <MaterialsTab lectureId={lectureId} onCountChange={setMaterialsCount} />
+      </Box>
 
-        {tab === "assignments" && (
-          <AssignmentsTab
-            lectureId={lectureId}
-            courseId={courseId}
-            onCountChange={setAssignmentsCount}
-          />
-        )}
+      <Box
+        sx={{
+          pb: 6,
+          display: tab === "assignments" ? "block" : "none",
+        }}
+      >
+        <AssignmentsTab
+          lectureId={lectureId}
+          courseId={courseId}
+          onCountChange={setAssignmentsCount}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          pb: 6,
+          display: tab === "comments" ? "block" : "none",
+        }}
+      >
+        <TabComments lectureId={lectureId} />
       </Box>
     </Container>
   );

@@ -4,7 +4,7 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { HeroInfo } from "@/components/common/hero-info";
+import { HeroInfo } from "@/components/common/hero-section/hero-info";
 import { ImagePreview } from "@/components/common/image-preview";
 import { CategoryFormDialog } from "@/components/dialog/category-form";
 import {
@@ -41,8 +41,10 @@ export default function AdminCategoriesPage() {
 
   const { mutateAsync: createCategoryMutate } = useCreateCategoryMutation();
   const { mutateAsync: updateCategoryMutate } = useUpdateCategoryMutation();
-  const { mutateAsync: deleteCategoryMutate, isPending: deleting } = useDeleteCategoryMutation();
-  const { mutateAsync: getPreSignedUrlMutate, isPending: saving } = usePreSignedUploadUrlMutation();
+  const { mutateAsync: deleteCategoryMutate, isPending: deleting } =
+    useDeleteCategoryMutation();
+  const { mutateAsync: getPreSignedUrlMutate, isPending: saving } =
+    usePreSignedUploadUrlMutation();
 
   const error = queryError
     ? "Failed to load categories. Please try again later."

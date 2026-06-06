@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/common/empty-state";
 import { LectureResponse } from "@/lib/api/types";
 import {
   Accordion,
@@ -25,7 +26,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
           display: "flex",
           alignItems: "center",
           gap: 2,
-          mb: 4,
+          mb: 2,
         }}
       >
         <Box
@@ -51,39 +52,53 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 3,
+          borderRadius: 1,
           border: "1px solid #e2e8f0",
           overflow: "hidden",
           boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
         }}
       >
-        <Box
-          sx={{
-            bgcolor: "#f8fafc",
-            px: 3,
-            py: 2.5,
-            borderBottom: "1px solid #e2e8f0",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography
+        {lectures.length > 0 && (
+          <Box
             sx={{
-              fontWeight: 800,
-              color: "#1e293b",
-              fontSize: "1.125rem",
+              bgcolor: "#f8fafc",
+              px: 3,
+              py: 2.5,
+              borderBottom: "1px solid #e2e8f0",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Total {lectures.length} lectures
-          </Typography>
-        </Box>
+            <Typography
+              sx={{
+                fontWeight: 800,
+                color: "#1e293b",
+                fontSize: "1.125rem",
+              }}
+            >
+              Total {lectures.length} lectures
+            </Typography>
+          </Box>
+        )}
 
         {lectures.length === 0 ? (
-          <Box sx={{ p: 6, textAlign: "center" }}>
-            <Typography sx={{ color: "#64748b" }}>
-              No lectures have been updated yet.
-            </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+              height: 300,
+              borderRadius: 1,
+              bgcolor: "#e2e8f0",
+            }}
+          >
+            <EmptyState
+              title="No lectures"
+              subtitle="This course does not have any lectures yet. Please check back later."
+              icon={<BookOpen size={28} />}
+            />
           </Box>
         ) : (
           <Stack divider={<Divider />}>
