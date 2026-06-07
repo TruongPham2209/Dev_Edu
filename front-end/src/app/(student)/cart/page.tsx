@@ -3,19 +3,18 @@
 import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { Box, Typography } from "@mui/material";
 import { BookOpen, PackageOpen, ShoppingCart } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
 import { CartTabContent } from "./cart-tab";
 import { EnrollmentTabContent } from "./enrollment-tab";
 import { PurchaseHistoryTabContent } from "./purchase-history-tab";
 
 function CartPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentTab = searchParams.get("type") || "cart";
+  const [currentTab, setCurrentTab] = useState("cart");
 
   const handleTabChange = (newValue: string) => {
-    router.push(`/cart?type=${newValue}`);
+    setCurrentTab(newValue);
   };
 
   const CART_TABS = [

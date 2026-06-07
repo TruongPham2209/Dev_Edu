@@ -18,7 +18,7 @@ import {
   Lock,
   PlayCircle,
 } from "lucide-react";
-import { LectureResponse } from "@/lib/api/types";
+import { LectureResponse } from "@/lib/type/lectures";
 
 interface LectureItemProps {
   lecture: LectureResponse;

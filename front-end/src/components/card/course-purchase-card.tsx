@@ -9,6 +9,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
+import { formatPrice } from "@/lib/util/date-utils";
 
 export interface CoursePurchaseCardProps {
   course: CourseResponse;
@@ -150,7 +151,7 @@ export function CoursePurchaseCard({
               letterSpacing: "-0.02em",
             }}
           >
-            {isFree ? "Free" : `${displayPrice?.toLocaleString("vi-VN")}đ`}
+            {isFree ? "Free" : `${displayPrice ? formatPrice(displayPrice) : "0"}đ`}
           </Typography>
           {!isFree &&
             course.originalPrice &&
@@ -163,7 +164,7 @@ export function CoursePurchaseCard({
                   fontWeight: 500,
                 }}
               >
-                {course.originalPrice.toLocaleString("vi-VN")}đ
+                {formatPrice(course.originalPrice)}đ
               </Typography>
             )}
         </Box>

@@ -203,14 +203,10 @@ export function CartTabContent() {
           border: "1px dashed #cbd5e1",
         }}
       >
-        <ShoppingCart
-          size={48}
-          color="#94a3b8"
-          style={{ margin: "0 auto 16px" }}
-        />
         <EmptyState
           title="Cart is empty"
           subtitle="Explore exciting courses and add them to your cart."
+          icon={<ShoppingCart size={32} />}
         />
         <Button
           variant="contained"

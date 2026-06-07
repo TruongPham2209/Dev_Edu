@@ -80,10 +80,10 @@ export function EnrollmentTabContent() {
           border: "1px dashed #cbd5e1",
         }}
       >
-        <BookOpen size={48} color="#94a3b8" style={{ margin: "0 auto 16px" }} />
         <EmptyState
           title="No courses enrolled"
           subtitle="You haven't enrolled in any courses yet. Explore exciting courses and start learning today!"
+          icon={<BookOpen size={32} />}
         />
         <Button
           variant="contained"

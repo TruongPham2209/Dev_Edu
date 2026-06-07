@@ -211,7 +211,6 @@ export default function LecturerDashboardPage() {
               }}
             >
               {courses.map((course) => {
-                console.log("co: ", course);
                 return (
                   <CourseManageCard
                     key={course.id}

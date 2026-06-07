@@ -1,125 +1,74 @@
-"use client";
-
-import { CoursePurchaseCard } from "@/components/card/course-purchase-card";
-import { EmptyState } from "@/components/common/empty-state";
-import {
-  useCourseByIdQuery,
-  useCourseReviewsInfiniteQuery,
-  useCoursesQuery,
-} from "@/lib/api/courses";
-import {
-  useAddToCartMutation,
-  useEnrollmentsQuery,
-} from "@/lib/api/enrollments";
-import { useLecturesByCourseQuery } from "@/lib/api/lectures";
-import type { CustomPaging } from "@/lib/type/api";
-import type { ReviewResponse } from "@/lib/type/courses";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { useAuth } from "@/lib/use-auth";
+import { getCourseById, getCourses } from "@/lib/api/courses";
+import { getEnrollments } from "@/lib/api/enrollments";
+import { getLecturesByCourse } from "@/lib/api/lectures";
 import { Box, Container, Grid, Stack } from "@mui/material";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 import { CourseAbout } from "./course-about";
 import { CourseContent } from "./course-content";
-import { StudentCourseDetailSkeleton } from "./course-detail-skeleton";
+import { CoursePurchaseSection } from "./course-purchase-section";
+import { CourseReviewsSection } from "./course-reviews-section";
 import { HeroSection } from "./hero-section";
 import { RelatedCourseList } from "./related-course-list";
-import { ReviewList } from "./review-list";
+import { LectureResponse } from "@/lib/type/lectures";
+import { CourseResponse } from "@/lib/type/courses";
 
-export default function CourseDetailPage() {
-  const params = useParams();
-  const courseId = params.id as string;
-  const router = useRouter();
-  const { handleError, showSuccess, toast } = useApiWithToast();
-  const { isAuthenticated } = useAuth();
+interface CourseDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  const [loadingAction, setLoadingAction] = useState<"buy" | "cart" | null>(
-    null,
-  );
-
-  const {
-    data: course,
-    isLoading: courseLoading,
-    error: courseError,
-  } = useCourseByIdQuery(courseId);
-  const { data: lectures = [] } = useLecturesByCourseQuery(courseId);
-  const { data: relatedCoursesData } = useCoursesQuery();
-
-  const relatedCourses = (relatedCoursesData?.contents || [])
-    .filter((c) => c.id !== courseId)
-    .slice(0, 3);
-
-  const {
-    data: reviewsData,
-    isLoading: loadingReviews,
-    isFetchingNextPage: loadingMoreReviews,
-    hasNextPage,
-    fetchNextPage,
-  } = useCourseReviewsInfiniteQuery(courseId);
-
-  const reviews =
-    reviewsData?.pages.flatMap(
-      (page: CustomPaging<ReviewResponse>) => page.contents || [],
-    ) || [];
-  const nextCursor = hasNextPage ? "has_more" : null;
-
-  const { data: enrollmentsData } = useEnrollmentsQuery(undefined, {
-    enabled: isAuthenticated,
-  });
-
-  const isEnrolled = useMemo(() => {
-    if (!enrollmentsData?.contents) return false;
-    return enrollmentsData.contents.some(
-      (c) => c.courseId === courseId || c.id === courseId,
-    );
-  }, [enrollmentsData, courseId]);
-
-  const { mutateAsync: addToCartMutate } = useAddToCartMutation();
-
-  useEffect(() => {
-    if (courseError) {
-      toast.error("Course does not exist");
-      router.push("/courses");
-    }
-  }, [courseError, router, toast]);
-
-  const loadMoreReviews = () => {
-    if (hasNextPage && !loadingMoreReviews) {
-      fetchNextPage();
-    }
-  };
-
-  const handleBuyNow = () => {
-    if (!isAuthenticated) {
-      router.push(`/login?redirect=/courses/${courseId}`);
-      return;
-    }
-    router.push(`/checkout`);
-  };
-
-  const handleAddToCart = async () => {
-    if (!course) return;
-    setLoadingAction("cart");
-    try {
-      await addToCartMutate(course.id);
-      showSuccess("Added to cart successfully");
-    } catch (error) {
-      handleError(error, "Could not add to cart");
-    } finally {
-      setLoadingAction(null);
-    }
-  };
+export default async function CourseDetailPage({
+  params,
+}: CourseDetailPageProps) {
+  const { id: courseId } = await params;
 
   if (!courseId) {
-    return null;
+    notFound();
   }
 
-  if (courseLoading && !course) {
-    return <StudentCourseDetailSkeleton />;
+  let course;
+  try {
+    course = await getCourseById(courseId);
+  } catch (error) {
+    console.error("Course not found:", error);
+    notFound();
   }
 
   if (!course) {
-    return <EmptyState title="Could not find course" />;
+    notFound();
+  }
+
+  let lectures: LectureResponse[] = [];
+  try {
+    lectures = await getLecturesByCourse(courseId);
+  } catch (error) {
+    console.error("Lectures fetch failed:", error);
+  }
+
+  let relatedCourses: CourseResponse[] = [];
+  try {
+    const relatedCoursesData = await getCourses();
+    relatedCourses = (relatedCoursesData?.contents || [])
+      .filter((c) => c.id !== courseId)
+      .slice(0, 3);
+  } catch (error) {
+    console.error("Related courses fetch failed:", error);
+  }
+
+  let isEnrolled = false;
+  let isLoggedIn = false;
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
+    if (token) {
+      isLoggedIn = true;
+      const enrollmentsData = await getEnrollments();
+      isEnrolled = (enrollmentsData?.contents || []).some(
+        (c) => c.courseId === courseId || c.id === courseId,
+      );
+    }
+  } catch (error) {
+    console.error("Enrollment check failed:", error);
   }
 
   return (
@@ -143,14 +92,11 @@ export default function CourseDetailPage() {
 
             {/* MOBILE ONLY: Purchase Card stacks perfectly below Hero content */}
             <Box sx={{ display: { xs: "block", md: "none" }, mb: 6 }}>
-              <CoursePurchaseCard
+              <CoursePurchaseSection
                 course={course}
                 isEnrolled={isEnrolled}
                 lectures={lectures}
-                handleBuyNow={handleBuyNow}
-                handleAddToCart={handleAddToCart}
-                loadingAction={loadingAction}
-                isLoggedIn={isAuthenticated}
+                isLoggedIn={isLoggedIn}
               />
             </Box>
 
@@ -159,18 +105,14 @@ export default function CourseDetailPage() {
               <Stack spacing={8}>
                 <CourseAbout description={course.description} />
                 <CourseContent lectures={lectures} />
-                <ReviewList
-                  reviews={reviews}
+                <CourseReviewsSection
+                  courseId={courseId}
                   rating={course.avgReview}
                   reviewCount={course.totalReview}
-                  loadingReviews={loadingReviews}
-                  nextCursor={nextCursor}
-                  loadingMoreReviews={loadingMoreReviews}
-                  loadMoreReviews={loadMoreReviews}
                 />
                 <RelatedCourseList
                   relatedCourses={relatedCourses}
-                  loadingRelated={!relatedCoursesData}
+                  loadingRelated={false}
                 />
               </Stack>
             </Box>
@@ -187,14 +129,11 @@ export default function CourseDetailPage() {
               zIndex: 100,
             }}
           >
-            <CoursePurchaseCard
+            <CoursePurchaseSection
               course={course}
               isEnrolled={isEnrolled}
               lectures={lectures}
-              handleBuyNow={handleBuyNow}
-              handleAddToCart={handleAddToCart}
-              loadingAction={loadingAction}
-              isLoggedIn={isAuthenticated}
+              isLoggedIn={isLoggedIn}
             />
           </Grid>
         </Grid>

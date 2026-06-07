@@ -34,7 +34,7 @@ import { TrendingTopics } from "./trending-topics";
 export default function ForumPage() {
   const { handleError, showSuccess } = useApiWithToast();
   const queryClient = useQueryClient();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, roles } = useAuth();
   const router = useRouter();
 
   const [keyword, setKeyword] = useState("");

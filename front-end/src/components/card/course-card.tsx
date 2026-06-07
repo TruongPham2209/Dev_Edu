@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { Star, Users } from "lucide-react";
 import Link from "next/link";
+import { formatPrice } from "@/lib/util/date-utils";
 
 export function CourseCard({ course }: { course: CourseResponse }) {
   const displayPrice = course.discountedPrice ?? course.originalPrice;
@@ -218,7 +219,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                       wordBreak: "break-word",
                     }}
                   >
-                    {course.originalPrice!.toLocaleString()}đ
+                    {formatPrice(course.originalPrice!)}đ
                   </Typography>
                 )}
                 <Typography
@@ -230,7 +231,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                     wordBreak: "break-word",
                   }}
                 >
-                  {isFree ? "Free" : `${displayPrice?.toLocaleString()}đ`}
+                  {isFree ? "Free" : `${displayPrice ? formatPrice(displayPrice) : "0"}đ`}
                 </Typography>
               </Box>
             </Box>
