@@ -44,18 +44,18 @@ export async function loginAction(
     if (error instanceof AuthError) {
       if (error.reason === "invalid_credentials") {
         return {
-          error: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
+          error: "Email or password is not correct. Please try again.",
         };
       }
       if (error.reason === "missing_config") {
         return {
-          error: "Hệ thống đăng nhập chưa được cấu hình. Vui lòng thử lại sau.",
+          error: "Login system is not configured. Please try again later.",
         };
       }
     }
 
     return {
-      error: "Không thể đăng nhập. Vui lòng thử lại.",
+      error: "Cannot login. Please try again later.",
     };
   }
 }

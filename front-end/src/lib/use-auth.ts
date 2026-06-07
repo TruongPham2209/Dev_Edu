@@ -11,6 +11,7 @@ import {
 export type AuthStatus = {
   isAuthenticated: boolean;
   role: AuthRole | null;
+  roles: AuthRole[];
   user: AuthUser | null;
 };
 
@@ -18,6 +19,7 @@ export function useAuth(): AuthStatus {
   const [status, setStatus] = useState<AuthStatus>({
     isAuthenticated: false,
     role: null,
+    roles: [],
     user: null,
   });
 
@@ -28,6 +30,7 @@ export function useAuth(): AuthStatus {
       setStatus({
         isAuthenticated: Boolean(token),
         role: user?.role ?? null,
+        roles: user?.roles ?? (user?.role ? [user.role] : []),
         user,
       });
     };

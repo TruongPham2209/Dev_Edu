@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { AppProviders } from "@/components/providers/app-providers";
+import { AuthSync } from "@/components/auth/auth-sync";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,26 +18,55 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SkillForge",
-    template: "%s | SkillForge",
+    default: "DevEdu",
+    template: "%s | DevEdu",
   },
-  description:
-    "Nền tảng bán khóa học với không gian riêng cho STUDENT, LECTURER và ADMIN.",
+  description: "A platform for learning and sharing knowledge",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("access_token")?.value ?? null;
+
   return (
     <html
       lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen" suppressHydrationWarning>
+        <script
+          id="auth-init-script"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var token = ${JSON.stringify(token)};
+                  if (token) {
+                    if (localStorage.getItem("auth_token") !== token) {
+                      localStorage.setItem("auth_token", token);
+                    }
+                  } else {
+                    if (localStorage.getItem("auth_token")) {
+                      localStorage.removeItem("auth_token");
+                      localStorage.removeItem("auth_user");
+                    }
+                  }
+                } catch (e) {
+                  console.error("Auth sync script error:", e);
+                }
+              })();
+            `
+          }}
+        />
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders>
+            {children}
+            <AuthSync serverToken={token} />
+          </AppProviders>
         </AppRouterCacheProvider>
       </body>
     </html>

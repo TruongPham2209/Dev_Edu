@@ -11,10 +11,12 @@ import {
   Typography,
   useScrollTrigger,
 } from "@mui/material";
+import { Bell, Code2, Home, Menu, Moon, X, UserCheck, Shield } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserMenu } from "./user-menu";
-import { Bell, Home, Code2, Moon, Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/use-auth";
 
 export type ManageHeaderProps = {
   title: string;
@@ -31,6 +33,8 @@ export function ManageHeader({
   menuOpen,
   onMenuClick,
 }: ManageHeaderProps) {
+  const pathname = usePathname();
+  const { roles } = useAuth();
   const scrollTrigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 12,
@@ -130,22 +134,78 @@ export function ManageHeader({
                 borderRadius: 999,
                 borderColor: "rgba(15, 23, 42, 0.12)",
                 color: "#0f172a",
-                minWidth: { xs: "auto", sm: 120 },
                 p: { xs: 1, sm: "4px 16px" },
+                textTransform: "none",
+                fontWeight: 700,
+                "&:hover": {
+                  borderColor: "#0f172a",
+                  bgcolor: "rgba(15, 23, 42, 0.04)",
+                },
               }}
             >
-              <Home size={18} />
+              <Home size={16} />
               <Box
                 component="span"
                 sx={{
                   display: { xs: "none", sm: "block" },
                   ml: 1,
-                  fontWeight: 700,
                 }}
               >
-                Public Site
+                Switch to Student Site
               </Box>
             </Button>
+
+            {/* Switch to Lecturer Portal (if on Admin site and user has LECTURER role) */}
+            {pathname.startsWith("/admin") && roles.includes("LECTURER") && (
+              <Button
+                component={Link}
+                href="/lecturer"
+                variant="outlined"
+                size="small"
+                startIcon={<UserCheck size={16} />}
+                sx={{
+                  borderRadius: 999,
+                  borderColor: "rgba(245, 158, 11, 0.4)",
+                  color: "#f59e0b",
+                  fontWeight: 700,
+                  px: 2,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "#f59e0b",
+                    bgcolor: "rgba(245, 158, 11, 0.04)",
+                  },
+                  display: { xs: "none", md: "inline-flex" },
+                }}
+              >
+                Switch to Lecturer Portal
+              </Button>
+            )}
+
+            {/* Switch to Admin Portal (if on Lecturer site and user has ADMIN role) */}
+            {pathname.startsWith("/lecturer") && roles.includes("ADMIN") && (
+              <Button
+                component={Link}
+                href="/admin"
+                variant="outlined"
+                size="small"
+                startIcon={<Shield size={16} />}
+                sx={{
+                  borderRadius: 999,
+                  borderColor: "rgba(239, 68, 68, 0.4)",
+                  color: "#ef4444",
+                  fontWeight: 700,
+                  px: 2,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "#ef4444",
+                    bgcolor: "rgba(239, 68, 68, 0.04)",
+                  },
+                  display: { xs: "none", md: "inline-flex" },
+                }}
+              >
+                Switch to Admin Portal
+              </Button>
+            )}
             <Tooltip title="Notifications" arrow>
               <IconButton sx={{ color: "#475569" }}>
                 <Bell size={18} />

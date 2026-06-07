@@ -1,5 +1,7 @@
 "use client";
 
+import { studentNavItems } from "@/lib/navigation";
+import { useAuth } from "@/lib/use-auth";
 import {
   AppBar,
   Box,
@@ -10,17 +12,15 @@ import {
   Typography,
   useScrollTrigger,
 } from "@mui/material";
+import { Code2, ShoppingCart, UserCheck, Shield } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { studentNavItems } from "@/lib/navigation";
-import { useAuth } from "@/lib/use-auth";
 import { UserMenu } from "../user-menu";
-import { Code2, ShoppingCart } from "lucide-react";
 
 export function StudentHeader() {
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, roles } = useAuth();
   const scrollTrigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 12,
@@ -150,18 +150,68 @@ export function StudentHeader() {
           >
             {isAuthenticated ? (
               <>
-                <IconButton
-                  component={Link}
-                  href="/cart"
-                  sx={{
-                    color: "#64748b",
-                    bgcolor: "#f8fafc",
-                    border: "1px solid #e2e8f0",
-                    "&:hover": { bgcolor: "#f1f5f9", color: "#0f172a" },
-                  }}
-                >
-                  <ShoppingCart size={20} />
-                </IconButton>
+                {roles.includes("LECTURER") && (
+                  <Button
+                    component={Link}
+                    href="/lecturer"
+                    variant="outlined"
+                    size="small"
+                    startIcon={<UserCheck size={16} />}
+                    sx={{
+                      borderRadius: 999,
+                      borderColor: "rgba(245, 158, 11, 0.4)",
+                      color: "#f59e0b",
+                      fontWeight: 700,
+                      px: 2,
+                      textTransform: "none",
+                      "&:hover": {
+                        borderColor: "#f59e0b",
+                        bgcolor: "rgba(245, 158, 11, 0.04)",
+                      },
+                      display: { xs: "none", md: "inline-flex" },
+                    }}
+                  >
+                    Switch to Lecturer Portal
+                  </Button>
+                )}
+                {roles.includes("ADMIN") && (
+                  <Button
+                    component={Link}
+                    href="/admin"
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Shield size={16} />}
+                    sx={{
+                      borderRadius: 999,
+                      borderColor: "rgba(239, 68, 68, 0.4)",
+                      color: "#ef4444",
+                      fontWeight: 700,
+                      px: 2,
+                      textTransform: "none",
+                      "&:hover": {
+                        borderColor: "#ef4444",
+                        bgcolor: "rgba(239, 68, 68, 0.04)",
+                      },
+                      display: { xs: "none", md: "inline-flex" },
+                    }}
+                  >
+                    Switch to Admin Portal
+                  </Button>
+                )}
+                {roles.includes("STUDENT") && (
+                  <IconButton
+                    component={Link}
+                    href="/cart"
+                    sx={{
+                      color: "#64748b",
+                      bgcolor: "#f8fafc",
+                      border: "1px solid #e2e8f0",
+                      "&:hover": { bgcolor: "#f1f5f9", color: "#0f172a" },
+                    }}
+                  >
+                    <ShoppingCart size={20} />
+                  </IconButton>
+                )}
                 <UserMenu />
               </>
             ) : (

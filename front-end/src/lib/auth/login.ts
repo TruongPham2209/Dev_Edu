@@ -10,10 +10,7 @@ export async function loginWithPasswordGrant(
   const scope = process.env.OAUTH_SCOPE;
 
   if (!baseUrl || !clientId || !clientSecret) {
-    throw new AuthError(
-      "missing_config",
-      "Missing OAuth environment configuration.",
-    );
+    throw new AuthError("missing_config", "Missing environment configuration.");
   }
 
   const url = new URL("/oauth2/token", baseUrl).toString();

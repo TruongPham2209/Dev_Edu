@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useToast } from "./toast-context";
-import type { ApiError, ApiResponse } from "./type/api";
+import { ApiError, ApiResponse } from "./type/api";
 
 /**
  * Maps documented API error statuses to user-friendly default messages.

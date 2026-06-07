@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import type { OAuthTokenResponse } from "./login";
+import type { OAuthTokenResponse } from "../type/api";
 
 const DEFAULT_COOKIE_OPTIONS = {
   httpOnly: true,

@@ -47,7 +47,7 @@ export function ErrorState({
           startIcon={iconAction}
           sx={{ mt: 3, borderRadius: 999 }}
         >
-          {actionLabel || "Thử lại"}
+          {actionLabel || "Retry"}
         </Button>
       )}
     </Box>

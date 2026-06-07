@@ -19,6 +19,10 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { setAuthSession } from "@/lib/auth-storage";
+import { decodeJwt } from "@/lib/auth/jwt";
+import { getPrimaryRole, getRedirectPathForRoles } from "@/lib/auth/constants";
+
 const initialState: LoginActionState = {
   error: null,
   fieldErrors: {},
@@ -49,29 +53,38 @@ export default function LoginForm() {
 
         let role = "STUDENT";
         let fullName = state.username?.split("@")[0] || "User";
+        let id = "";
+        let email = "";
+        let avatarUrl = undefined;
 
         try {
           const me = await getMe();
           role = me.role;
           fullName = me.fullName || me.username || fullName;
+          id = me.id || "";
+          email = me.email || "";
+          avatarUrl = me.avatarUrl;
         } catch (e) {
           console.error("Failed to fetch user info, using fallback.", e);
         }
 
-        // setAuthSession(state.token, {
-        //   username: state.username || "User",
-        //   fullName,
-        //   role: role as any,
-        // });
+        const decoded = decodeJwt(state.token);
+        const roles = decoded?.roles || [role as any];
+        const primaryRole = getPrimaryRole(roles);
 
-        // Role-based routing
-        if (role === "ADMIN") {
-          router.push("/admin");
-        } else if (role === "LECTURER") {
-          router.push("/lecturer");
-        } else {
-          router.push("/home");
-        }
+        setAuthSession(state.token, {
+          id,
+          username: state.username || "User",
+          fullName,
+          role: primaryRole,
+          roles: roles,
+          email,
+          avatarUrl,
+        });
+
+        // Role-based routing using priorities: ADMIN > LECTURER > STUDENT
+        const redirectPath = getRedirectPathForRoles(roles);
+        router.push(redirectPath);
 
         router.refresh();
       }

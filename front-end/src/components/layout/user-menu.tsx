@@ -13,11 +13,27 @@ import { LogOut, User } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/use-auth";
+import { clearAuthSession } from "@/lib/auth-storage";
+import { useRouter } from "next/navigation";
+import { logoutAction } from "@/app/logout/actions";
 
 export function UserMenu() {
+  const router = useRouter();
   const { user } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const handleLogout = async () => {
+    setAnchorEl(null);
+    clearAuthSession();
+    try {
+      await logoutAction();
+    } catch (err) {
+      console.error("Failed to perform server logout:", err);
+    }
+    router.replace("/home");
+    router.refresh();
+  };
 
   if (!user) {
     return null;
@@ -70,11 +86,7 @@ export function UserMenu() {
           <User size={16} style={{ marginRight: 8 }} />
           Profile
         </MenuItem>
-        <MenuItem
-          component={Link}
-          href="/logout"
-          onClick={() => setAnchorEl(null)}
-        >
+        <MenuItem onClick={handleLogout}>
           <LogOut size={16} style={{ marginRight: 8 }} />
           Logout
         </MenuItem>

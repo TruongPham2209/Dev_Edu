@@ -9,11 +9,17 @@ export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
+    clearAuthSession();
+
     async function performLogout() {
-      await logoutAction();
-      clearAuthSession();
-      router.replace("/home");
-      router.refresh();
+      try {
+        await logoutAction();
+      } catch (err) {
+        console.error("Failed to perform server logout:", err);
+      } finally {
+        router.replace("/home");
+        router.refresh();
+      }
     }
     performLogout();
   }, [router]);
