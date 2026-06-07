@@ -1,9 +1,9 @@
 "use client";
 
-import type { AssignmentResponse } from "@/lib/api/types";
+import type { AssignmentResponse } from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Box, Stack, Typography } from "@mui/material";
-import { Calendar, ClipboardCheck, FileText, Users } from "lucide-react";
+import { Calendar, ClipboardCheck, Users } from "lucide-react";
 
 interface AssignmentHeroProps {
   assignment: AssignmentResponse;

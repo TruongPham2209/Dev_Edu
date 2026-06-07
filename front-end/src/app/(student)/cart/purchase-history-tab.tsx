@@ -6,7 +6,8 @@ import {
   type FilterItem,
 } from "@/components/common/form/filter-select";
 import { useOrderHistoryInfinateQuery } from "@/lib/api/enrollments";
-import type { PaymentStatus } from "@/lib/api/types";
+import type { PaymentStatus } from "@/lib/type/enum";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Card,
@@ -18,7 +19,6 @@ import {
 import { PackageOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CourseOrderItem } from "./course-order-item";
-import { formatServerDate } from "@/lib/util/date-utils";
 
 const FILTER_ITEMS: FilterItem[] = [
   { id: "COMPLETED", title: "Completed" },

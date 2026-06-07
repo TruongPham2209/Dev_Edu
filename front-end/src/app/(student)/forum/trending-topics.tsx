@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
-import { Flame, Clock, Users } from "lucide-react";
+import { Clock, Flame, Users } from "lucide-react";
 
 interface TrendingTopic {
   title: string;
@@ -39,7 +39,7 @@ export function TrendingTopics({
   return (
     <Card
       sx={{
-        borderRadius: 4,
+        borderRadius: 2,
         bgcolor: "#ffffff",
         boxShadow: "0 4px 20px -5px rgba(0,0,0,0.05)",
         border: "1px solid rgba(0,0,0,0.03)",

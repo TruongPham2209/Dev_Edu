@@ -10,7 +10,7 @@ import {
   useDeleteCourseDiscountMutation,
   useGlobalCourseDiscountsInfiniteQuery,
 } from "@/lib/api/enrollments";
-import type { CourseDiscountResponse } from "@/lib/api/types";
+import type { CourseDiscountResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Button, CircularProgress, Stack } from "@mui/material";
 import { ChevronDown, Percent, Plus, RefreshCw } from "lucide-react";

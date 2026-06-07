@@ -1,10 +1,7 @@
 "use client";
 
-import type {
-  PostResponse,
-  PostStatus,
-  SavedPostResponse,
-} from "@/lib/api/types";
+import { PostStatus } from "@/lib/type/enum";
+import type { PostResponse, SavedPostResponse } from "@/lib/type/forums";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
@@ -49,9 +46,15 @@ type DefaultTabProps = {
   post: PostResponse;
 };
 
-export type PostCardProps = PostedTabProps | SavedTabProps | DefaultTabProps;
+export type PostCardProps = (
+  | PostedTabProps
+  | SavedTabProps
+  | DefaultTabProps
+) & {
+  showStatus?: boolean;
+};
 
-export function PostCard(props: PostCardProps) {
+export function PostCard({ showStatus = true, ...props }: PostCardProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
 
@@ -209,7 +212,7 @@ export function PostCard(props: PostCardProps) {
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {statusConfig && (
+              {showStatus && statusConfig && (
                 <Chip
                   label={statusConfig.label}
                   size="small"

@@ -12,11 +12,11 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
-  useLecturesByCourseQuery,
   useLectureByIdQuery,
+  useLecturesByCourseQuery,
   useUpdateLectureProgressMutation,
 } from "@/lib/api/lectures";
-import { LectureResponse } from "@/lib/api/types";
+import type { LectureResponse } from "@/lib/type/lectures";
 
 import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { ErrorState } from "@/components/common/error-state";

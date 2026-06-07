@@ -1,15 +1,23 @@
-import { apiDelete, apiGet, apiPost } from "./client";
-import { useQuery, useMutation, useInfiniteQuery, UseQueryOptions, UseMutationOptions, UseInfiniteQueryOptions, InfiniteData } from "@tanstack/react-query";
 import type {
   AssignmentRequest,
   AssignmentResponse,
-  CustomPaging,
   FeedbackRequest,
   FeedbackResponse,
   SubmissionLogResponse,
   SubmissionRequest,
   SubmissionResponse,
-} from "./types";
+} from "@/lib/type/assignments";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+import { CustomPaging } from "../type/api";
+import { apiDelete, apiGet, apiPost } from "./client";
 
 // --- Assignments ---
 
@@ -277,7 +285,6 @@ export function useDeleteFeedbackMutation(
 // Aliases for backward compatibility during refactoring
 export {
   useAssignmentsQuery as useGetAssignments,
-  useSubmissionsQuery as useGetSubmissions,
   useFeedbacksQuery as useGetFeedbacks,
+  useSubmissionsQuery as useGetSubmissions,
 };
-

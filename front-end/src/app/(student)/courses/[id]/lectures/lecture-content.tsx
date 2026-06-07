@@ -1,5 +1,7 @@
 "use client";
 
+import type { LectureResponse } from "@/lib/type/lectures";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Breadcrumbs,
@@ -20,10 +22,8 @@ import {
   Home,
 } from "lucide-react";
 import NextLink from "next/link";
-import { LectureResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/util/date-utils";
-import { LectureVideoPlayer } from "./lecture-video-player";
 import { LectureHTMLContent } from "./lecture-html-content";
+import { LectureVideoPlayer } from "./lecture-video-player";
 
 interface LectureContentProps {
   lecture: LectureResponse;

@@ -2,15 +2,15 @@
 
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
-import type { CategoryRequest, CategoryResponse } from "@/lib/api/types";
+import type { CategoryRequest, CategoryResponse } from "@/lib/type/courses";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import {
+  AlignLeft,
   FolderPlus,
   Save,
+  Type,
   UploadCloud,
   X,
-  Type,
-  AlignLeft,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 

@@ -1,28 +1,27 @@
 "use client";
 
+import { PostHistoryModal } from "@/components/dialog/post-history";
+import { savePost, unsavePost } from "@/lib/api/forum";
+import type { PostResponse } from "@/lib/type/forums";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { useAuth } from "@/lib/use-auth";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
-  Box,
-  Stack,
-  Typography,
   Avatar,
+  Box,
   IconButton,
+  Stack,
   Tooltip,
-  Chip,
+  Typography
 } from "@mui/material";
 import {
-  History,
   Bookmark,
   BookmarkCheck,
   Eye,
+  History,
   MessageSquare,
 } from "lucide-react";
-import type { PostResponse } from "@/lib/api/types";
 import { useState } from "react";
-import { PostHistoryModal } from "@/components/dialog/post-history";
-import { useAuth } from "@/lib/use-auth";
-import { savePost, unsavePost } from "@/lib/api/forum";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { formatServerDate } from "@/lib/util/date-utils";
 
 interface PostHeaderProps {
   post: PostResponse;

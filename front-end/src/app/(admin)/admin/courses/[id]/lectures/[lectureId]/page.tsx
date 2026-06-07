@@ -6,11 +6,11 @@ import { useCourseByIdQuery } from "@/lib/api/courses";
 import { useLectureByIdQuery, useMaterialsQuery } from "@/lib/api/lectures";
 import { Box, Skeleton, Stack } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
+import { BookOpen } from "lucide-react";
 import { AssignmentsList } from "./assignments-list";
 import { LectureDetailSkeleton } from "./lecture-detail-skeleton";
 import { LectureHeroSection } from "./lecture-hero";
 import { MaterialsList } from "./materials-list";
-import { BookOpen } from "lucide-react";
 
 export default function AdminLectureDetailPage() {
   const params = useParams();
@@ -19,12 +19,25 @@ export default function AdminLectureDetailPage() {
   const courseId = params.id as string;
 
   // Core data queries via React Query
-  const { data: lecture, isLoading: loadingLecture } = useLectureByIdQuery(lectureId);
-  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(courseId, { enabled: !!courseId });
-  const { data: materials = [], isLoading: materialsLoading, refetch: refetchMaterials } = useMaterialsQuery(lectureId, { enabled: !!lectureId });
-  const { data: assignments = [], isLoading: assignmentsLoading, refetch: refetchAssignments } = useAssignmentsQuery(lectureId, { enabled: !!lectureId });
+  const { data: lecture, isLoading: loadingLecture } =
+    useLectureByIdQuery(lectureId);
+  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(
+    courseId,
+    { enabled: !!courseId },
+  );
+  const {
+    data: materials = [],
+    isLoading: materialsLoading,
+    refetch: refetchMaterials,
+  } = useMaterialsQuery(lectureId, { enabled: !!lectureId });
+  const {
+    data: assignments = [],
+    isLoading: assignmentsLoading,
+    refetch: refetchAssignments,
+  } = useAssignmentsQuery(lectureId, { enabled: !!lectureId });
 
-  const loadingSecondary = courseLoading || materialsLoading || assignmentsLoading;
+  const loadingSecondary =
+    courseLoading || materialsLoading || assignmentsLoading;
   const courseTitle = course?.title || "";
 
   // Materials updates

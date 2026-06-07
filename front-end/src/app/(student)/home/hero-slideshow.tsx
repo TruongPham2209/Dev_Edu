@@ -2,7 +2,7 @@
 
 import { Box, IconButton } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface HeroSlideshowProps {
   images: string[];
@@ -17,13 +17,13 @@ export function HeroSlideshow({
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1,
     );
   }, [images.length]);
 
   const prevSlide = useCallback(() => {
     setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1,
     );
   }, [images.length]);
 

@@ -1,10 +1,12 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import { TableColumnConfig } from "@/components/skeleton/common-skeletons";
 import {
   Box,
   Button,
   Paper,
+  Skeleton,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -12,13 +14,8 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Skeleton,
-  Stack,
 } from "@mui/material";
-import {
-  TableSkeleton,
-  TableColumnConfig,
-} from "@/components/skeleton/common-skeletons";
+import { ReactNode } from "react";
 
 export interface ColumnDef<T> {
   header: ReactNode;
@@ -36,16 +33,16 @@ interface DataTableProps<T> {
   skeletonRowCount?: number;
   keyExtractor: (item: T) => string | number;
   minWidth?: number | string;
-  
+
   // Data Table Modes
   mode?: "all" | "infinite" | "pagination";
-  
+
   // Pagination
   page?: number;
   totalPages?: number;
   totalElements?: number;
   onPageChange?: (nextPage: number) => void;
-  
+
   // Optional states
   emptyState?: ReactNode;
   errorState?: ReactNode;
@@ -54,13 +51,34 @@ interface DataTableProps<T> {
 const renderCellSkeleton = (variant?: TableColumnConfig["variant"]) => {
   switch (variant) {
     case "thumbnail":
-      return <Skeleton variant="rounded" width={48} height={48} sx={{ borderRadius: 1.5 }} />;
+      return (
+        <Skeleton
+          variant="rounded"
+          width={48}
+          height={48}
+          sx={{ borderRadius: 1.5 }}
+        />
+      );
     case "circular":
       return <Skeleton variant="circular" width={40} height={40} />;
     case "rounded":
-      return <Skeleton variant="rounded" width={60} height={20} sx={{ borderRadius: 1 }} />;
+      return (
+        <Skeleton
+          variant="rounded"
+          width={60}
+          height={20}
+          sx={{ borderRadius: 1 }}
+        />
+      );
     case "action":
-      return <Skeleton variant="rounded" width={80} height={32} sx={{ borderRadius: 1.5 }} />;
+      return (
+        <Skeleton
+          variant="rounded"
+          width={80}
+          height={32}
+          sx={{ borderRadius: 1.5 }}
+        />
+      );
     case "actions":
       return (
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
@@ -97,13 +115,17 @@ export function DataTable<T>({
   emptyState,
   errorState,
 }: DataTableProps<T>) {
-  
   const renderSkeletons = (count: number) => {
     return Array.from({ length: count }).map((_, rowIndex) => (
       <TableRow key={`skeleton-${rowIndex}`}>
         {columns.map((col, colIndex) => (
-          <TableCell key={`col-${colIndex}`} sx={{ textAlign: col.align || "left", py: 2 }}>
-            {col.renderSkeleton ? col.renderSkeleton() : renderCellSkeleton(col.skeletonVariant)}
+          <TableCell
+            key={`col-${colIndex}`}
+            sx={{ textAlign: col.align || "left", py: 2 }}
+          >
+            {col.renderSkeleton
+              ? col.renderSkeleton()
+              : renderCellSkeleton(col.skeletonVariant)}
           </TableCell>
         ))}
       </TableRow>
@@ -113,7 +135,9 @@ export function DataTable<T>({
   // Check if we should render full table as skeletons
   const isFullSkeleton =
     loading &&
-    ((mode === "pagination" || mode === "all") || (mode === "infinite" && data.length === 0));
+    (mode === "pagination" ||
+      mode === "all" ||
+      (mode === "infinite" && data.length === 0));
 
   return (
     <>
@@ -152,13 +176,21 @@ export function DataTable<T>({
               renderSkeletons(skeletonRowCount)
             ) : errorState ? (
               <TableRow>
-                <TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
+                <TableCell
+                  colSpan={columns.length}
+                  align="center"
+                  sx={{ py: 4 }}
+                >
                   {errorState}
                 </TableCell>
               </TableRow>
             ) : data.length === 0 && !loading && emptyState ? (
               <TableRow>
-                <TableCell colSpan={columns.length} align="center" sx={{ py: 4 }}>
+                <TableCell
+                  colSpan={columns.length}
+                  align="center"
+                  sx={{ py: 4 }}
+                >
                   {emptyState}
                 </TableCell>
               </TableRow>
@@ -183,9 +215,12 @@ export function DataTable<T>({
                     ))}
                   </TableRow>
                 ))}
-                
+
                 {/* Append skeleton rows in infinite mode if loading and we already have some data */}
-                {loading && mode === "infinite" && data.length > 0 && renderSkeletons(skeletonRowCount)}
+                {loading &&
+                  mode === "infinite" &&
+                  data.length > 0 &&
+                  renderSkeletons(skeletonRowCount)}
               </>
             )}
           </TableBody>
@@ -193,75 +228,78 @@ export function DataTable<T>({
       </TableContainer>
 
       {/* Pagination Footer */}
-      {mode === "pagination" && page !== undefined && totalPages !== undefined && onPageChange && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            p: 2.5,
-            borderTop: "1px solid rgba(15, 23, 42, 0.08)",
-            flexWrap: "wrap",
-            gap: 2,
-            bgcolor: "#f8fafc",
-            borderBottomLeftRadius: 8,
-            borderBottomRightRadius: 8,
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: "text.secondary", fontWeight: 600 }}
+      {mode === "pagination" &&
+        page !== undefined &&
+        totalPages !== undefined &&
+        onPageChange && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              p: 2.5,
+              borderTop: "1px solid rgba(15, 23, 42, 0.08)",
+              flexWrap: "wrap",
+              gap: 2,
+              bgcolor: "#f8fafc",
+              borderBottomLeftRadius: 8,
+              borderBottomRightRadius: 8,
+            }}
           >
-            Showing page {page + 1} of {totalPages || 1}{" "}
-            {totalElements !== undefined && `(${totalElements} items)`}
-          </Typography>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", fontWeight: 600 }}
+            >
+              Showing page {page + 1} of {totalPages || 1}{" "}
+              {totalElements !== undefined && `(${totalElements} items)`}
+            </Typography>
 
-          <Box sx={{ display: "flex", gap: 1.5 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={page === 0 || loading}
-              onClick={() => onPageChange(page - 1)}
-              sx={{
-                borderRadius: 2.5,
-                textTransform: "none",
-                fontWeight: 600,
-                px: 2,
-                borderColor: "rgba(15, 23, 42, 0.12)",
-                color: "text.primary",
-                bgcolor: "white",
-                "&:hover": {
-                  borderColor: "text.primary",
-                  bgcolor: "rgba(15, 23, 42, 0.03)",
-                },
-              }}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={page >= (totalPages || 1) - 1 || loading}
-              onClick={() => onPageChange(page + 1)}
-              sx={{
-                borderRadius: 2.5,
-                textTransform: "none",
-                fontWeight: 600,
-                px: 2,
-                borderColor: "rgba(15, 23, 42, 0.12)",
-                color: "text.primary",
-                bgcolor: "white",
-                "&:hover": {
-                  borderColor: "text.primary",
-                  bgcolor: "rgba(15, 23, 42, 0.03)",
-                },
-              }}
-            >
-              Next
-            </Button>
+            <Box sx={{ display: "flex", gap: 1.5 }}>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={page === 0 || loading}
+                onClick={() => onPageChange(page - 1)}
+                sx={{
+                  borderRadius: 2.5,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2,
+                  borderColor: "rgba(15, 23, 42, 0.12)",
+                  color: "text.primary",
+                  bgcolor: "white",
+                  "&:hover": {
+                    borderColor: "text.primary",
+                    bgcolor: "rgba(15, 23, 42, 0.03)",
+                  },
+                }}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={page >= (totalPages || 1) - 1 || loading}
+                onClick={() => onPageChange(page + 1)}
+                sx={{
+                  borderRadius: 2.5,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2,
+                  borderColor: "rgba(15, 23, 42, 0.12)",
+                  color: "text.primary",
+                  bgcolor: "white",
+                  "&:hover": {
+                    borderColor: "text.primary",
+                    bgcolor: "rgba(15, 23, 42, 0.03)",
+                  },
+                }}
+              >
+                Next
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      )}
+        )}
     </>
   );
 }

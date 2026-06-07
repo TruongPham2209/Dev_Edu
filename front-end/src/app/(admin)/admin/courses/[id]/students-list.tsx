@@ -1,24 +1,23 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Box,
-  Avatar,
-  Divider,
-  Skeleton,
-} from "@mui/material";
-import { Users } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useEnrolledUsersInfiniteQuery } from "@/lib/api/enrollments";
-import type { EnrollmentUserResponse } from "@/lib/api/types";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { EmptyState } from "@/components/common/empty-state";
 import { InfiniteLoadButton } from "@/components/common/infinite-load-button";
-import { formatServerDate } from "@/lib/util/date-utils";
 import { ListSkeleton } from "@/components/skeleton";
+import { useEnrolledUsersInfiniteQuery } from "@/lib/api/enrollments";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate } from "@/lib/util/date-utils";
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  Skeleton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { Users } from "lucide-react";
+import { useEffect, useMemo } from "react";
 
 interface StudentsListProps {
   courseId: string;

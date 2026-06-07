@@ -6,15 +6,7 @@ import { confirmImageUpload, getPreSignedUploadUrl } from "@/lib/api/files";
 import { changePassword, updateAvatar } from "@/lib/api/users";
 import type { AuthUser } from "@/lib/auth-storage";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Avatar, Box, Button, Paper, Stack, Typography } from "@mui/material";
 import { Camera, Eye, EyeOff, Key, Mail, Shield } from "lucide-react";
 import { useState } from "react";
 

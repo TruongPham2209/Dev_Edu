@@ -1,15 +1,15 @@
+import type { CourseResponse } from "@/lib/type/courses";
 import {
+  Avatar,
   Box,
   Card,
   CardContent,
   CardMedia,
-  Typography,
-  Avatar,
   Divider,
+  Typography,
 } from "@mui/material";
+import { Star, Users } from "lucide-react";
 import Link from "next/link";
-import type { CourseResponse } from "@/lib/api/types";
-import { Users, Star } from "lucide-react";
 
 export function CourseCard({ course }: { course: CourseResponse }) {
   const displayPrice = course.discountedPrice ?? course.originalPrice;

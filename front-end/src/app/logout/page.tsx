@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { clearAuthSession } from "@/lib/auth-storage";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { logoutAction } from "./actions";
 
 export default function LogoutPage() {

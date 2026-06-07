@@ -1,12 +1,12 @@
 "use client";
 
+import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
 import { getAssignments } from "@/lib/api/assignments";
-import { AssignmentResponse } from "@/lib/api/types";
+import type { AssignmentResponse } from "@/lib/type/assignments";
 import {
   alpha,
   Box,
-  Button,
   Chip,
   CircularProgress,
   Paper,
@@ -17,7 +17,6 @@ import {
 import { ClipboardList, Eye, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AssignmentModal } from "./assignment-modal";
-import ButtonAction from "@/components/common/button-action";
 
 interface TabAssignmentsProps {
   lectureId: string;

@@ -1,11 +1,13 @@
+import { RegisterUser, UserResponse } from "@/lib/type/users";
+import {
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+import { CustomPaging } from "../type/api";
+import { RoleEnum } from "../type/enum";
 import { apiGet, apiPost, apiPut } from "./client";
-import { useQuery, useMutation, UseQueryOptions, UseMutationOptions } from "@tanstack/react-query";
-import type {
-  CustomPaging,
-  RegisterUser,
-  RoleEnum,
-  UserResponse,
-} from "./types";
 
 // --- Users ---
 
@@ -118,8 +120,7 @@ export function useSetUsernameFromGoogleMutation(
   >,
 ) {
   return useMutation({
-    mutationFn: ({ email, username }) =>
-      setUsernameFromGoogle(email, username),
+    mutationFn: ({ email, username }) => setUsernameFromGoogle(email, username),
     ...options,
   });
 }
@@ -142,10 +143,9 @@ export function useSearchUsersQuery(
 
 // Aliases for backward compatibility during refactoring
 export {
+  useChangePasswordMutation as useChangePassword,
   useMeQuery as useGetMe,
   useRegisterMutation as useRegister,
-  useChangePasswordMutation as useChangePassword,
-  useUpdateAvatarMutation as useUpdateAvatar,
   useSearchUsersQuery as useSearchUsers,
+  useUpdateAvatarMutation as useUpdateAvatar,
 };
-

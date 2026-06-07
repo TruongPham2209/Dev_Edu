@@ -7,7 +7,7 @@ export function CommunityGuidelines() {
   return (
     <Card
       sx={{
-        borderRadius: 4,
+        borderRadius: 2,
         bgcolor: "transparent",
         boxShadow: "none",
         border: "1px dashed #cbd5e1",
@@ -31,7 +31,7 @@ export function CommunityGuidelines() {
           variant="text"
           size="small"
           endIcon={<ChevronRight size={16} />}
-          sx={{ color: "#0284c7", fontWeight: 700, p: 0 }}
+          sx={{ color: "#0284c7", fontWeight: 700, px: 1.5 }}
         >
           Read Guidelines
         </Button>

@@ -6,7 +6,7 @@ import { useCreateCourseDiscountMutation } from "@/lib/api/enrollments";
 import type {
   CourseDiscountRequest,
   CourseDiscountResponse,
-} from "@/lib/api/types";
+} from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Grid, Typography } from "@mui/material";
 import { Calendar, HelpCircle, Percent, Tag } from "lucide-react";

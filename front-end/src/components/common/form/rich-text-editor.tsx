@@ -1,31 +1,31 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
+import { getPreSignedUploadUrl } from "@/lib/api/files";
 import {
   Box,
+  CircularProgress,
   IconButton,
   Paper,
   Stack,
-  CircularProgress,
   Tooltip,
 } from "@mui/material";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Quote,
   Code,
   Heading1,
   Heading2,
+  Image as ImageIcon,
+  Italic,
+  Link as LinkIcon,
+  List,
+  ListOrdered,
+  Quote,
 } from "lucide-react";
-import { useCallback, useState, useRef } from "react";
-import { getPreSignedUploadUrl } from "@/lib/api/files";
+import { useCallback, useRef, useState } from "react";
 
 interface RichTextEditorProps {
   value: string;

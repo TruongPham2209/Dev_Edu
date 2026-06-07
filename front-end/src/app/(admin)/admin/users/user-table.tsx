@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import type { UserResponse } from "@/lib/api/types";
+import { ColumnDef, DataTable } from "@/components/common/data-table";
+import { ImagePreview } from "@/components/common/image-preview";
+import { UserResponse } from "@/lib/type/users";
 import { Avatar, Box, Skeleton, Typography } from "@mui/material";
 import { BookOpen, FileText, Shield, User, UserCheck } from "lucide-react";
-import { DataTable, ColumnDef } from "@/components/common/data-table";
-import { ImagePreview } from "@/components/common/image-preview";
+import { useState } from "react";
 
 interface UserTableProps {
   users: UserResponse[];

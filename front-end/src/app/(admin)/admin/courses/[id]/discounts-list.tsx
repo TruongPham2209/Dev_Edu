@@ -8,9 +8,8 @@ import {
   useCourseDiscountsByCourseQuery,
   useDeleteCourseDiscountMutation,
 } from "@/lib/api/enrollments";
-import type { CourseDiscountResponse } from "@/lib/api/types";
-import { formatServerDate, parseServerDate } from "@/lib/util/date-utils";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate, parseServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
   Box,

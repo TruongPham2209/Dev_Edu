@@ -1,8 +1,8 @@
 "use server";
 
-import { redirect } from "next/navigation";
-import { loginWithPasswordGrant, AuthError } from "@/lib/auth/login";
 import { setAuthCookies } from "@/lib/auth/cookies";
+import { loginWithPasswordGrant } from "@/lib/auth/login";
+import { AuthError } from "@/lib/type/api";
 
 export type LoginActionState = {
   error: string | null;

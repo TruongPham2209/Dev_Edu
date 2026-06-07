@@ -1,5 +1,8 @@
 "use client";
 
+import { register } from "@/lib/api/users";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { useAuth } from "@/lib/use-auth";
 import {
   Box,
   Button,
@@ -11,13 +14,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { register } from "@/lib/api/users";
-import { useAuth } from "@/lib/use-auth";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Lock, Mail, ShieldCheck, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function RegisterPage() {
   const router = useRouter();

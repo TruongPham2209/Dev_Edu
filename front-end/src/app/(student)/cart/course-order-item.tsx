@@ -1,4 +1,5 @@
-import type { CourseItemDetailResponse, PaymentStatus } from "@/lib/api/types";
+import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
+import type { PaymentStatus } from "@/lib/type/enum";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
@@ -10,7 +11,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { CheckCircle2, PlayCircle, Trash2, Star } from "lucide-react";
+import { CheckCircle2, PlayCircle, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { ReviewDialog } from "./review-dialog";

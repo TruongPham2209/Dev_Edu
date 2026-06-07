@@ -1,37 +1,34 @@
 "use client";
 
 import { Box, Breadcrumbs, Container, Typography } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ChevronRight, Home, Info, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 import {
   useAssignmentByIdQuery,
-  useSubmissionsInfiniteQuery,
-  useFeedbacksQuery,
-  useSubmissionTrackingQuery,
   useCreateFeedbackMutation,
   useDeleteFeedbackMutation,
+  useFeedbacksQuery,
+  useSubmissionsInfiniteQuery,
+  useSubmissionTrackingQuery,
 } from "@/lib/api/assignments";
 import { useCourseByIdQuery } from "@/lib/api/courses";
 import { getDownloadUrl } from "@/lib/api/files";
 import { useLectureByIdQuery } from "@/lib/api/lectures";
 import type {
-  AssignmentResponse,
-  FeedbackResponse,
-  LectureResponse,
   SubmissionLogResponse,
   SubmissionResponse,
-} from "@/lib/api/types";
-import { formatServerDate } from "@/lib/util/date-utils";
+} from "@/lib/type/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate } from "@/lib/util/date-utils";
 
 // Modular Sub-components
 import { AnimatedTabs } from "@/components/common/animated-tabs";
-import { AssignmentHeroInfo } from "@/components/common/hero-section/assignment-hero-info";
 import { ErrorState } from "@/components/common/error-state";
+import { AssignmentHeroInfo } from "@/components/common/hero-section/assignment-hero-info";
 import { SubmissionDetailsDialog } from "@/components/dialog/submission-datail/page";
 import { AssignmentDetailSkeleton } from "./assignment-detail-skeleton";
 import { AssignmentOverview } from "./assignment-overview";

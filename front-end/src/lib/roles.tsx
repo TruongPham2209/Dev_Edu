@@ -1,5 +1,5 @@
-import type { RoleEnum } from "@/lib/api/types";
-import { Shield, User, UserCheck } from "lucide-react";
+import { User, UserCheck, Shield } from "lucide-react";
+import type { RoleEnum } from "./type/enum";
 
 export const ROLE_OPTIONS = [
   {

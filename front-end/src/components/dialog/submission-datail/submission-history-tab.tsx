@@ -1,17 +1,17 @@
 "use client";
 
+import type { SubmissionLogResponse } from "@/lib/type/assignments";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Card,
-  Stack,
-  Skeleton,
-  Typography,
   Chip,
   CircularProgress,
+  Skeleton,
+  Stack,
+  Typography,
 } from "@mui/material";
 import { Activity, Clock } from "lucide-react";
-import type { SubmissionLogResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/util/date-utils";
 import { useEffect, useRef } from "react";
 
 interface SubmissionHistoryTabProps {

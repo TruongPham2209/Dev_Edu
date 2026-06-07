@@ -4,15 +4,16 @@ import { CoursePurchaseCard } from "@/components/card/course-purchase-card";
 import { EmptyState } from "@/components/common/empty-state";
 import {
   useCourseByIdQuery,
-  useCoursesQuery,
   useCourseReviewsInfiniteQuery,
+  useCoursesQuery,
 } from "@/lib/api/courses";
-import type { CustomPaging, ReviewResponse } from "@/lib/api/types";
 import {
   useAddToCartMutation,
   useEnrollmentsQuery,
 } from "@/lib/api/enrollments";
 import { useLecturesByCourseQuery } from "@/lib/api/lectures";
+import type { CustomPaging } from "@/lib/type/api";
+import type { ReviewResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import { Box, Container, Grid, Stack } from "@mui/material";
@@ -56,7 +57,10 @@ export default function CourseDetailPage() {
     fetchNextPage,
   } = useCourseReviewsInfiniteQuery(courseId);
 
-  const reviews = reviewsData?.pages.flatMap((page: CustomPaging<ReviewResponse>) => page.contents || []) || [];
+  const reviews =
+    reviewsData?.pages.flatMap(
+      (page: CustomPaging<ReviewResponse>) => page.contents || [],
+    ) || [];
   const nextCursor = hasNextPage ? "has_more" : null;
 
   const { data: enrollmentsData } = useEnrollmentsQuery(undefined, {

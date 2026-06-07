@@ -2,11 +2,11 @@
 
 import {
   useAssignmentByIdQuery,
-  useSubmissionsInfiniteQuery,
-  useFeedbacksQuery,
-  useSubmissionTrackingQuery,
   useCreateFeedbackMutation,
   useDeleteFeedbackMutation,
+  useFeedbacksQuery,
+  useSubmissionsInfiniteQuery,
+  useSubmissionTrackingQuery,
 } from "@/lib/api/assignments";
 import { useCourseByIdQuery } from "@/lib/api/courses";
 import { getDownloadUrl } from "@/lib/api/files";
@@ -14,13 +14,13 @@ import { useLectureByIdQuery } from "@/lib/api/lectures";
 import type {
   SubmissionLogResponse,
   SubmissionResponse,
-} from "@/lib/api/types";
+} from "@/lib/type/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Container, Stack } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 // Modular Sub-components
 import { ErrorState } from "@/components/common/error-state";
@@ -40,9 +40,14 @@ export default function AdminAssignmentDetailPage() {
   const { handleError, showSuccess } = useApiWithToast();
 
   // Core Data Queries via React Query
-  const { data: assignment, isLoading: assignmentLoading } = useAssignmentByIdQuery(assignmentId);
-  const { data: lecture, isLoading: lectureLoading } = useLectureByIdQuery(lectureId);
-  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(courseId, { enabled: !!courseId });
+  const { data: assignment, isLoading: assignmentLoading } =
+    useAssignmentByIdQuery(assignmentId);
+  const { data: lecture, isLoading: lectureLoading } =
+    useLectureByIdQuery(lectureId);
+  const { data: course, isLoading: courseLoading } = useCourseByIdQuery(
+    courseId,
+    { enabled: !!courseId },
+  );
 
   const pageLoading = assignmentLoading || lectureLoading || courseLoading;
   const pageError = !assignment && !assignmentLoading;
@@ -61,7 +66,9 @@ export default function AdminAssignmentDetailPage() {
 
   const loadSubmissionsList = async (reset = false) => {
     if (reset) {
-      queryClient.invalidateQueries({ queryKey: ["submissions", "infinite", assignmentId] });
+      queryClient.invalidateQueries({
+        queryKey: ["submissions", "infinite", assignmentId],
+      });
     } else {
       fetchNextSubmissions();
     }
@@ -71,24 +78,25 @@ export default function AdminAssignmentDetailPage() {
   const [selectedSubmission, setSelectedSubmission] =
     useState<SubmissionResponse | null>(null);
 
-  const { data: feedbacks = [], isLoading: feedbacksLoading, refetch: refetchFeedbacks } = useFeedbacksQuery(
-    assignmentId,
-    selectedSubmission?.studentUsername,
-    {
-      enabled: !!selectedSubmission,
-    }
-  );
+  const {
+    data: feedbacks = [],
+    isLoading: feedbacksLoading,
+    refetch: refetchFeedbacks,
+  } = useFeedbacksQuery(assignmentId, selectedSubmission?.studentUsername, {
+    enabled: !!selectedSubmission,
+  });
 
   const [historyPage, setHistoryPage] = useState(0);
 
-  const { data: trackingData, isLoading: historyLoading } = useSubmissionTrackingQuery(
-    assignmentId,
-    selectedSubmission?.studentUsername,
-    historyPage,
-    {
-      enabled: !!selectedSubmission,
-    }
-  );
+  const { data: trackingData, isLoading: historyLoading } =
+    useSubmissionTrackingQuery(
+      assignmentId,
+      selectedSubmission?.studentUsername,
+      historyPage,
+      {
+        enabled: !!selectedSubmission,
+      },
+    );
 
   const [history, setHistory] = useState<SubmissionLogResponse[]>([]);
 
@@ -107,7 +115,9 @@ export default function AdminAssignmentDetailPage() {
     }
   }, [trackingData, historyPage, selectedSubmission]);
 
-  const historyHasMore = trackingData ? trackingData.currentPage < trackingData.totalPages - 1 : false;
+  const historyHasMore = trackingData
+    ? trackingData.currentPage < trackingData.totalPages - 1
+    : false;
 
   const loadMoreHistory = async () => {
     if (historyLoading || !historyHasMore) return;

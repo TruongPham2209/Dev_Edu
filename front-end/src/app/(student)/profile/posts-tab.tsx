@@ -2,21 +2,15 @@ import { PostCard } from "@/components/card/post-card";
 import { SkeletonCard } from "@/components/card/skeleton-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { PostHistoryModal } from "@/components/dialog/post-history";
-import {
-  deleteForumPost,
-  updateForumPost,
-  createForumPost,
-  deletePostVersion,
-} from "@/lib/api/forum";
 import { getPreSignedUploadUrl } from "@/lib/api/files";
 import {
-  CustomPaging,
-  PostResponse,
-  PostStatus,
-  PostRequest,
-} from "@/lib/api/types";
+  createForumPost,
+  deleteForumPost,
+  deletePostVersion,
+  updateForumPost,
+} from "@/lib/api/forum";
+import type { PostRequest, PostResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { Plus, Sparkles } from "lucide-react";
 import {
   Box,
   Button,
@@ -25,14 +19,16 @@ import {
   Fade,
   Snackbar,
 } from "@mui/material";
+import { Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { PostFormDialog } from "../../../components/dialog/post-form";
 
-import { usePostedPostsInfiniteQuery } from "@/lib/api/forum";
 import {
-  FilterSelect,
   FilterItem,
+  FilterSelect,
 } from "@/components/common/form/filter-select";
+import { usePostedPostsInfiniteQuery } from "@/lib/api/forum";
+import { PostStatus } from "@/lib/type/enum";
 import { useQueryClient } from "@tanstack/react-query";
 
 const FILTER_ITEMS: FilterItem[] = [

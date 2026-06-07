@@ -1,7 +1,7 @@
 "use client";
 
-import type { AssignmentResponse } from "@/lib/api/types";
 import { Box, Card, CardContent, Typography } from "@mui/material";
+import type { AssignmentResponse } from "@/lib/type/assignments";
 
 interface AssignmentOverviewProps {
   assignment: AssignmentResponse;

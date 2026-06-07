@@ -2,7 +2,7 @@
 
 import { ErrorState } from "@/components/common/error-state";
 import { getCourseById } from "@/lib/api/courses";
-import type { CourseResponse } from "@/lib/api/types";
+import { CourseResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Grid, Stack } from "@mui/material";
 import { useParams } from "next/navigation";
@@ -14,8 +14,8 @@ import { CourseHero } from "./course-hero";
 import { DiscountsList } from "./discounts-list";
 import { LecturersList } from "./lecturers-list";
 import { LecturesList } from "./lectures-list";
-import { StudentsList } from "./students-list";
 import { ReviewList } from "./review-list";
+import { StudentsList } from "./students-list";
 
 export default function AdminCourseDetailPage() {
   const params = useParams();

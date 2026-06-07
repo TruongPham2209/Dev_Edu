@@ -1,23 +1,23 @@
-import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 import {
-  useQuery,
-  useMutation,
-  useInfiniteQuery,
-  UseQueryOptions,
-  UseMutationOptions,
-  UseInfiniteQueryOptions,
-  InfiniteData,
-} from "@tanstack/react-query";
-import type {
   CategoryRequest,
   CategoryResponse,
   CourseRequest,
   CourseResponse,
-  CustomPaging,
-  ItemStatus,
   ReviewRequest,
   ReviewResponse,
-} from "./types";
+} from "@/lib/type/courses";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+import { CustomPaging } from "../type/api";
+import { ItemStatus } from "../type/enum";
+import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 
 // --- Courses ---
 
@@ -451,9 +451,9 @@ export function useDeleteReviewMutation(
 // Aliases for backward compatibility during refactoring
 export {
   useCategoriesQuery as useGetCategories,
-  useFeaturedCoursesQuery as useGetFeaturedCourses,
-  useCoursesQuery as useGetCourses,
   useCourseByIdQuery as useGetCourseById,
-  useCoursesInfiniteQuery as useGetInfiniteCourses,
+  useCoursesQuery as useGetCourses,
+  useFeaturedCoursesQuery as useGetFeaturedCourses,
   useCourseReviewsInfiniteQuery as useGetInfiniteCourseReviews,
+  useCoursesInfiniteQuery as useGetInfiniteCourses,
 };

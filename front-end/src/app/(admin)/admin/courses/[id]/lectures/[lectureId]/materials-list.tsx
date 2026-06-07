@@ -6,11 +6,10 @@ import { EmptyState } from "@/components/common/empty-state";
 import { MaterialFormDialog } from "@/components/dialog/material-form";
 import { getDownloadUrl } from "@/lib/api/files";
 import { useDeleteMaterialMutation } from "@/lib/api/lectures";
-import type { MaterialResponse } from "@/lib/api/types";
+import type { MaterialResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { getFileIcon } from "@/lib/util/file-utils";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Card,
@@ -19,6 +18,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { Download, File, FilePlus, Trash2 } from "lucide-react";
 import { useState } from "react";
 

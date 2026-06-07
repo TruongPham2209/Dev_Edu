@@ -9,14 +9,7 @@ import {
   useDeleteLectureCommentMutation,
   useInfiniteLectureCommentsQuery,
 } from "@/lib/api/lectures";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Divider,
-  Stack,
-  useTheme,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Stack } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -25,7 +18,6 @@ interface TabCommentsProps {
 }
 
 export function TabComments({ lectureId }: TabCommentsProps) {
-  const theme = useTheme();
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState("");
 

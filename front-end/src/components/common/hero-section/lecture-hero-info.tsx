@@ -1,9 +1,9 @@
 "use client";
 
 import { getDownloadUrl } from "@/lib/api/files";
-import type { LectureResponse } from "@/lib/api/types";
-import { formatServerDate } from "@/lib/util/date-utils";
+import type { LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Card,

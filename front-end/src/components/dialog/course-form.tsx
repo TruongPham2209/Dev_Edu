@@ -1,19 +1,18 @@
 "use client";
 
+import { FileUpload } from "@/components/common/form/file-upload";
 import { FilterSelect } from "@/components/common/form/filter-select";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
-import { FileUpload } from "@/components/common/form/file-upload";
 import { RichTextEditor } from "@/components/common/form/rich-text-editor";
 import { SearchInput } from "@/components/common/form/search-input";
 import { useCourseByIdQuery } from "@/lib/api/courses";
+import { useSearchUsersQuery } from "@/lib/api/users";
 import type {
   CategoryResponse,
   CourseRequest,
   CourseResponse,
-  UserResponse,
-} from "@/lib/api/types";
-import { useSearchUsersQuery } from "@/lib/api/users";
+} from "@/lib/type/courses";
 import {
   Box,
   Chip,

@@ -5,7 +5,7 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { AssignmentFormDialog } from "@/components/dialog/assignment-form";
 import { deleteAssignment } from "@/lib/api/assignments";
-import type { AssignmentResponse } from "@/lib/api/types";
+import { AssignmentResponse } from "@/lib/type/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {

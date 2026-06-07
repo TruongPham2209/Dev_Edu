@@ -10,8 +10,8 @@ import {
   useDeletePostVersionMutation,
   usePostVersionsByPostIdQuery,
 } from "@/lib/api/forum";
-import { PostStatus } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
+import type { PostStatus } from "@/lib/type/enum";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Box, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { Calendar, Eye, FileText, History, Trash2 } from "lucide-react";

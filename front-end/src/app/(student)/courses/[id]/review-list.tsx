@@ -1,6 +1,7 @@
 "use client";
 
-import { ReviewResponse } from "@/lib/api/types";
+import { EmptyState } from "@/components/common/empty-state";
+import type { ReviewResponse } from "@/lib/type/courses";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,
@@ -13,7 +14,6 @@ import {
   Typography,
 } from "@mui/material";
 import { MessageSquare } from "lucide-react";
-import { EmptyState } from "@/components/common/empty-state";
 
 interface ReviewListProps {
   reviews: ReviewResponse[];

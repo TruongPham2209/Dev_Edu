@@ -1,11 +1,11 @@
 "use client";
 
-import type { RoleEnum } from "@/lib/api/types";
+import { FilterSelect } from "@/components/common/form/filter-select";
+import { SearchInput } from "@/components/common/form/search-input";
+import { ROLE_OPTIONS } from "@/lib/roles";
+import type { RoleEnum } from "@/lib/type/enum";
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
-import { SearchInput } from "@/components/common/form/search-input";
-import { FilterSelect } from "@/components/common/form/filter-select";
-import { ROLE_OPTIONS } from "@/lib/roles";
 
 interface UserSearchSectionProps {
   onSearch: (keyword: string, role: RoleEnum) => void;

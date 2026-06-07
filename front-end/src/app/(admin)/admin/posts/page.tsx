@@ -31,7 +31,8 @@ import {
   usePostVersionsInfiniteQuery,
   useUpdatePostVersionMutation,
 } from "@/lib/api/forum";
-import type { PostResponse, PostStatus } from "@/lib/api/types";
+import { PostStatus } from "@/lib/type/enum";
+import { PostResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 

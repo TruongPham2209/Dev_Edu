@@ -1,7 +1,7 @@
-import { Box, Typography, Stack } from "@mui/material";
-import { getRelatedPosts } from "@/lib/api/forum";
 import { PostCard } from "@/components/card/post-card";
 import { EmptyState } from "@/components/common/empty-state";
+import { getRelatedPosts } from "@/lib/api/forum";
+import { Box, Stack, Typography } from "@mui/material";
 
 interface RelatedPostsSidebarProps {
   postId: string;
@@ -35,7 +35,7 @@ export async function RelatedPostsSidebar({
       ) : (
         <Stack spacing={2}>
           {relatedPosts.map((item) => (
-            <PostCard key={item.id} post={item} />
+            <PostCard key={item.id} post={item} showStatus={false} />
           ))}
         </Stack>
       )}

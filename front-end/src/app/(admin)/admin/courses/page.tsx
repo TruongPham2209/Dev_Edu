@@ -5,26 +5,22 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { FilterSelect } from "@/components/common/form/filter-select";
+import { SearchInput } from "@/components/common/form/search-input";
 import { HeroInfo } from "@/components/common/hero-section/hero-info";
 import { ImagePreview } from "@/components/common/image-preview";
-import { SearchInput } from "@/components/common/form/search-input";
 import { CourseFormDialog } from "@/components/dialog/course-form";
 import {
   useCategoriesQuery,
   useCoursesQuery,
   useCreateCourseMutation,
-  useUpdateCourseMutation,
   useDeleteCourseMutation,
+  useUpdateCourseMutation,
 } from "@/lib/api/courses";
 import {
   useConfirmImageUploadMutation,
   usePreSignedUploadUrlMutation,
 } from "@/lib/api/files";
-import type {
-  CategoryResponse,
-  CourseRequest,
-  CourseResponse,
-} from "@/lib/api/types";
+import type { CourseRequest, CourseResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Stack } from "@mui/material";
 import { BookOpen, Plus, RefreshCw } from "lucide-react";

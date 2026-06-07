@@ -1,6 +1,6 @@
 "use client";
 
-import type { CategoryResponse } from "@/lib/api/types";
+import type { CategoryResponse } from "@/lib/type/courses";
 import { Box, Button, Typography } from "@mui/material";
 import { Flame, LayoutGrid } from "lucide-react";
 
@@ -80,7 +80,8 @@ export const CourseCategories = ({
                 selectedCategory === null
                   ? "linear-gradient(135deg, #1e293b 0%, #475569 100%)"
                   : "#f8fafc",
-              borderColor: selectedCategory === null ? "transparent" : "#cbd5e1",
+              borderColor:
+                selectedCategory === null ? "transparent" : "#cbd5e1",
               transform: "translateY(-2px)",
               boxShadow:
                 selectedCategory === null

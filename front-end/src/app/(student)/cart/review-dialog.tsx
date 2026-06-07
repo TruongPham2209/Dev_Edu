@@ -7,7 +7,7 @@ import { useCreateReviewMutation, useMyReviewQuery } from "@/lib/api/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, CircularProgress, Rating, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import { Star, AlertCircle } from "lucide-react";
+import { AlertCircle, Star } from "lucide-react";
 import { useState } from "react";
 
 interface ReviewDialogProps {

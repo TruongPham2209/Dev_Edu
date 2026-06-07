@@ -7,16 +7,16 @@ import {
   UseMutationOptions,
 } from "@tanstack/react-query";
 import type {
-  LectureResponse,
-  LectureRequest,
-  MaterialResponse,
-  MaterialRequest,
-  ProgressSegmentRequest,
-  ProgressResponse,
   CommentPageRequest,
   LectureCommentResponse,
-  CustomPaging,
-} from "./types";
+  LectureRequest,
+  LectureResponse,
+  MaterialRequest,
+  MaterialResponse,
+  ProgressResponse,
+  ProgressSegmentRequest,
+} from "@/lib/type/lectures";
+import { CustomPaging } from "../type/api";
 
 // --- Lectures ---
 
@@ -61,9 +61,7 @@ export async function updateLectureProgress(
 export async function getMaterials(
   lectureId: string,
 ): Promise<MaterialResponse[]> {
-  return apiGet<MaterialResponse[]>(
-    `/api/v1/lectures/${lectureId}/materials`,
-  );
+  return apiGet<MaterialResponse[]>(`/api/v1/lectures/${lectureId}/materials`);
 }
 
 export async function createMaterial(
@@ -73,9 +71,7 @@ export async function createMaterial(
 }
 
 export async function deleteMaterial(materialId: string): Promise<void> {
-  return apiDelete<void>(
-    `/api/v1/lectures/materials?materialId=${materialId}`,
-  );
+  return apiDelete<void>(`/api/v1/lectures/materials?materialId=${materialId}`);
 }
 
 // --- Comments ---
@@ -94,18 +90,11 @@ export async function createLectureComment(body: {
   content: string;
   parentCommentId?: string;
 }): Promise<LectureCommentResponse> {
-  return apiPost<LectureCommentResponse>(
-    "/api/v1/lectures/comments",
-    body,
-  );
+  return apiPost<LectureCommentResponse>("/api/v1/lectures/comments", body);
 }
 
-export async function deleteLectureComment(
-  commentId: string,
-): Promise<void> {
-  return apiDelete<void>(
-    `/api/v1/lectures/comments?commentId=${commentId}`,
-  );
+export async function deleteLectureComment(commentId: string): Promise<void> {
+  return apiDelete<void>(`/api/v1/lectures/comments?commentId=${commentId}`);
 }
 
 export function useLecturesByCourseQuery(
@@ -166,11 +155,7 @@ export function useDeleteLectureMutation(
 }
 
 export function useUpdateLectureProgressMutation(
-  options?: UseMutationOptions<
-    ProgressResponse,
-    Error,
-    ProgressSegmentRequest
-  >,
+  options?: UseMutationOptions<ProgressResponse, Error, ProgressSegmentRequest>,
 ) {
   return useMutation({
     mutationFn: updateLectureProgress,

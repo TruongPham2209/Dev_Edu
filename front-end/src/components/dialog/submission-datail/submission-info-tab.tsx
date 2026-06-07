@@ -1,7 +1,10 @@
 "use client";
 
 import ButtonAction from "@/components/common/button-action";
-import type { FeedbackResponse, SubmissionResponse } from "@/lib/api/types";
+import type {
+  FeedbackResponse,
+  SubmissionResponse,
+} from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   formatBytes,
@@ -15,7 +18,6 @@ import {
   IconButton,
   Skeleton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { Download, MessageSquare, Trash2 } from "lucide-react";

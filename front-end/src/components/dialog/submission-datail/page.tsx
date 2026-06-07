@@ -5,7 +5,7 @@ import type {
   FeedbackResponse,
   SubmissionLogResponse,
   SubmissionResponse,
-} from "@/lib/api/types";
+} from "@/lib/type/assignments";
 import {
   Box,
   Dialog,

@@ -1,7 +1,7 @@
 import { EmptyState } from "@/components/common/empty-state";
 import { getForumPostById } from "@/lib/api/forum";
-import { Box, Container, Grid } from "@mui/material";
-import { ArrowLeft } from "lucide-react";
+import { Box, Breadcrumbs, Container, Grid } from "@mui/material";
+import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { PostComments } from "./post-comments";
@@ -81,7 +81,39 @@ async function PostDetailContent({ postId }: { postId: string }) {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl">
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        separator={<ChevronRight size={14} />}
+        aria-label="breadcrumb"
+        sx={{ mb: 3, "& .MuiBreadcrumbs-ol": { alignItems: "center" } }}
+      >
+        <Link href="/forum" style={{ textDecoration: "none" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              color: "#64748b",
+              "&:hover": { color: "#0d4661ff" },
+            }}
+          >
+            <ChevronLeft size={22} />
+            <Box
+              sx={{
+                color: "#64748b",
+                textDecoration: "none",
+                fontSize: "1rem",
+                fontWeight: 500,
+                "&:hover": { color: "#0d4661ff" },
+                ml: 0.8,
+              }}
+            >
+              Back to Forum
+            </Box>
+          </Box>
+        </Link>
+      </Breadcrumbs>
+
       <Grid container spacing={6}>
         {/* Left Side: Main Content */}
         <Grid size={{ xs: 12, md: 8 }}>

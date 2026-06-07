@@ -1,33 +1,27 @@
 "use client";
 
+import { CourseHeroInfo } from "@/components/common/hero-section/course-hero-info";
+import { MetricItem } from "@/components/common/hero-section/metric-item";
+import { CourseResponse } from "@/lib/type/courses";
 import {
   Box,
+  Breadcrumbs,
   Card,
   CardContent,
   Grid,
-  Typography,
-  Breadcrumbs,
-  Chip,
-  Avatar,
   Stack,
+  Typography,
   useTheme,
 } from "@mui/material";
 import {
-  ChevronRight,
   BookOpen,
-  Users,
-  Percent,
-  GraduationCap,
-  Calendar,
-  DollarSign,
+  ChevronRight,
   FileText,
+  GraduationCap,
+  Percent,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
-import { formatServerDate } from "@/lib/util/date-utils";
-import type { CourseResponse } from "@/lib/api/types";
-import { MetricItem } from "@/components/common/hero-section/metric-item";
-import Image from "next/image";
-import { CourseHeroInfo } from "@/components/common/hero-section/course-hero-info";
 
 interface CourseHeroProps {
   course: CourseResponse;

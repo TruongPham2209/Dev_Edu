@@ -4,7 +4,6 @@ import { CourseManageCard } from "@/components/card/course-manage-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { useAssignedCoursesInfiniteQuery } from "@/lib/api/courses";
-import type { CourseResponse } from "@/lib/api/types";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { LayoutGrid, RefreshCw } from "lucide-react";
@@ -33,7 +32,12 @@ export default function LecturerDashboardPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !loadingMore && !loading) {
+        if (
+          entries[0].isIntersecting &&
+          hasNextPage &&
+          !loadingMore &&
+          !loading
+        ) {
           fetchNextPage();
         }
       },
@@ -49,7 +53,7 @@ export default function LecturerDashboardPage() {
 
   useEffect(() => {
     if (error) {
-      handleError(error, "Không thể tải danh sách khóa học");
+      handleError(error, "Failed to fetch assigned courses");
     }
   }, [error, handleError]);
 

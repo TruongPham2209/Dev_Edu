@@ -2,7 +2,7 @@
 
 import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
-import type { SubmissionResponse } from "@/lib/api/types";
+import type { SubmissionResponse } from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,

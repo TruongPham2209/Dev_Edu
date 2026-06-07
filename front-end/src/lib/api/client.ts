@@ -1,3 +1,5 @@
+import { ApiError, ApiResponse } from "../type/api";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9020";
 
 /**
@@ -5,34 +7,6 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9020";
  * IMPORTANT: The backend returns HTTP 200 even on errors.
  * Always check `success` and `status` fields.
  */
-export type ApiResponse<T> = {
-  success: boolean;
-  status: string;
-  message: string;
-  data: T;
-  timestamp: number;
-};
-
-export type ApiErrorStatus =
-  | "BAD_REQUEST"
-  | "UNAUTHORIZED"
-  | "FORBIDDEN"
-  | "NOT_FOUND"
-  | "CONFLICT"
-  | "METHOD_NOT_ALLOWED"
-  | "REQUEST_TIMEOUT"
-  | "INTERNAL_SERVER_ERROR";
-
-export class ApiError extends Error {
-  constructor(
-    public status: ApiErrorStatus | string,
-    public serverMessage: string,
-    public responseData: unknown,
-  ) {
-    super(serverMessage);
-    this.name = "ApiError";
-  }
-}
 
 async function getAuthToken() {
   if (typeof window !== "undefined") {
@@ -52,7 +26,7 @@ export async function apiCall<T>(
   const url = `${BASE_URL}${endpoint}`;
   // const token = await getAuthToken();
   const token = `
-  eyJraWQiOiJlYzlkMTIwOS02NWM0LTQ2NTItODM4NC0yMDM4ZTBiNzkzZjUiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYl9jbGllbnQiLCJuYmYiOjE3ODAxMzIxODgsInNjb3BlIjpbIm9wZW5pZCIsInByb2ZpbGUiXSwicm9sZXMiOlsiQURNSU4iXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDIwIiwiZXhwIjoxNzgwMTY4MTg4LCJ0b2tlbl90eXBlIjoiYWNjZXNzIHRva2VuIiwiaWF0IjoxNzgwMTMyMTg4LCJqdGkiOiJjMjNkNzYxZS03Yjk2LTQ4NzItOWNhYS1kZWNmMjRiODgzNzAifQ.WdWNnLeOEqkT9kRuLDwciyIAmWqIuP3W6M0VBJ8WzsdfdbUpgvrB0ikggbVaucm86GJ9PzfNE0FQh5auPfHX3KDZUXtoKLGdXg3s_vYhj18ow-JaOXICiZEVGMvPOdaYqclv0XaIIqhhuV07ldCL3qYtKi2rNgPwc0PQj4tv5ZSTinSkKDzsSMODy1q6U5VOQJrTjhirIdqdfqumo78aVvQsHI7fz3SyLfJJfxG-vx7yA9up-e8hswigbA8bz6Tc7ibDKkqzcmm9mwREDzR5tx1mzgWn-WLgUoN_bjjj3WI8KnBKAtPxGOQwZLtd_aKHaFoJrvleW9-doVmLd6E5So9a86UUq-a8FrQnsNXJcSlogV6N5KfF8VFDtHzQnmsRClWkmMoob8KMu2Vn52QfFfxJOwr8sSpxSREj0sTZe9R2ev68VuYk6q7OLqN6lffZ4o-3h2YynAYpRvXdSGA39KtJ5Uj_ChjmPWmhNz9m_wOMBayhsDBZRaoccYQt8NNQ
+  eyJraWQiOiJkNDc0ZDIzZS02OGMwLTQxZDMtOWRmOS04YThlMWE2MzFhZTAiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzdHVkZW50IiwiYXVkIjoid2ViX2NsaWVudCIsIm5iZiI6MTc4MDc2MTczNywic2NvcGUiOlsicHJvZmlsZSIsIm9wZW5pZCJdLCJyb2xlcyI6WyJTVFVERU5UIl0sImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6OTAyMCIsImV4cCI6MTc4MDc5NzczNywidG9rZW5fdHlwZSI6ImFjY2VzcyB0b2tlbiIsImlhdCI6MTc4MDc2MTczNywianRpIjoiMjNjMjA1MjQtMmNkNS00OWQ2LTg5NDAtMTg0NDI3M2U4Njk4In0.Ts8y2IA0J4eTLUyQdnGCBUZsH8tjXpcBrRF-S9V2ERMg6C-ysMhUXevGC75xDWs4cgVFeqSWO18UTMpCZEzGIKpN7mXGHbkwfY-_OJKm9Pmbx84ZpoMiQ7tT-uysow6Tr6TFopBzmMnY7HuADaKQYrTz4ZNLsvOF3XunrTkueltIwo1jAJJmE7HB7U9XLcS2n2H7tKBNsJAH-QdTQ95cMfhO126bTftWS4wZKOKV2LDVcDpiqJKn57cxA8b0U9dQ8w_N58kzIH-yUe9kZ6GNEK7DR75vjjxw5fZVtc1mzQKeLOJMVawTdFs29cW4ckwSruwfK40Pqqwwu64wA1JKxFN_J16Mtu4R5oTiwjqpGjHCyqvdLVujNwSBGfz5Skq1RMK7xlb7HTIuRzPLjJfE3ClH_b0GuGkO0O_aTaNFn90ruNJEdwFcZ_voEjXAPo0rG5C7XqzmvPrJDkb4haLlfyGFYOFqN-2HalODdJenG4px79-sa8fBnGJ2FDbr4aH1
   `;
 
   const headers: Record<string, string> = {};

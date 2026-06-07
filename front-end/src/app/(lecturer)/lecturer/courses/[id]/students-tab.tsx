@@ -1,23 +1,22 @@
 "use client";
 
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Avatar,
-  CircularProgress,
-  Button,
-} from "@mui/material";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { useEnrolledUsersInfiniteQuery } from "@/lib/api/enrollments";
-import type { EnrollmentUserResponse } from "@/lib/api/types";
 import { EmptyState } from "@/components/common/empty-state";
+import { ListSkeleton } from "@/components/skeleton";
+import { useEnrolledUsersInfiniteQuery } from "@/lib/api/enrollments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
-import { ListSkeleton } from "@/components/skeleton";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { Users } from "lucide-react";
+import { useEffect, useMemo } from "react";
 
 export const StudentsTab = ({ courseId }: { courseId: string }) => {
   const { handleError } = useApiWithToast();

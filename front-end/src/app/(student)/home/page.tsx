@@ -6,43 +6,15 @@ import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { ArrowRight, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import {
+  FeaturedArticlesFallback,
+  FeaturedArticlesSection,
+} from "./featured-articles";
 
 const heroImages = [
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
   "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
   "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
-];
-
-// Mock data for featured courses
-
-const featuredArticles = [
-  {
-    id: "1",
-    title: "Tổng hợp các UI Component tốt nhất trong React năm 2026",
-    preview:
-      "Các thư viện UI Component phổ biến giúp tăng tốc độ phát triển và đảm bảo tính nhất quán cho dự án của bạn...",
-    thumbnail:
-      "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80",
-    date: "14/05/2026",
-  },
-  {
-    id: "2",
-    title: "Tại sao bạn nên chuyển sang dùng TypeScript ngay hôm nay?",
-    preview:
-      "TypeScript mang lại sự an toàn kiểu dữ liệu và cải thiện DX (Developer Experience) đáng kể so với JavaScript thuần...",
-    thumbnail:
-      "https://images.unsplash.com/photo-1623479322729-28b25c16b011?w=400&q=80",
-    date: "12/05/2026",
-  },
-  {
-    id: "3",
-    title: "Hướng dẫn tối ưu hóa hiệu suất ứng dụng Next.js",
-    preview:
-      "Những kỹ thuật cần biết để giảm thời gian load trang và cải thiện điểm số Core Web Vitals...",
-    thumbnail:
-      "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=80",
-    date: "10/05/2026",
-  },
 ];
 
 async function FeaturedCoursesSection() {
@@ -242,93 +214,9 @@ export default function HomePage() {
             </Button>
           </Link>
         </Box>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-            gap: 4,
-          }}
-        >
-          {featuredArticles.map((article) => (
-            <Link
-              key={article.id}
-              href="/forum"
-              style={{
-                textDecoration: "none",
-                color: "inherit",
-                display: "block",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: 3,
-                  p: 2,
-                  borderRadius: 3,
-                  border: "1px solid #e2e8f0",
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                    transform: "translateY(-2px)",
-                  },
-                  bgcolor: "#ffffff",
-                  height: "100%",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={article.thumbnail}
-                  sx={{
-                    width: { xs: "100%", sm: 220 },
-                    height: 140,
-                    objectFit: "cover",
-                    borderRadius: 2,
-                  }}
-                />
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      mb: 1,
-                      fontSize: "1.1rem",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {article.title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      mb: 2,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {article.preview}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{ color: "text.disabled", fontWeight: 500, mt: "auto" }}
-                  >
-                    {article.date}
-                  </Typography>
-                </Box>
-              </Box>
-            </Link>
-          ))}
-        </Box>
+        <Suspense fallback={<FeaturedArticlesFallback />}>
+          <FeaturedArticlesSection />
+        </Suspense>
       </Box>
     </Stack>
   );

@@ -2,7 +2,7 @@
 
 import { CourseCard } from "@/components/card/course-card";
 import { SkeletonCard } from "@/components/card/skeleton-card";
-import type { CourseResponse } from "@/lib/api/types";
+import type { CourseResponse } from "@/lib/type/courses";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Award, ChevronRight, Search } from "lucide-react";
 

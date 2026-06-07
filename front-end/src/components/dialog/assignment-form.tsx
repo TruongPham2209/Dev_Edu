@@ -1,14 +1,14 @@
 "use client";
 
+import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
-import { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
-import { FolderPlus, Type } from "lucide-react";
 import { RichTextEditor } from "@/components/common/form/rich-text-editor";
 import { useCreateAssignmentMutation } from "@/lib/api/assignments";
-import type { AssignmentResponse } from "@/lib/api/types";
+import type { AssignmentResponse } from "@/lib/type/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { FormDialog } from "@/components/common/form/form-dialog";
+import { Box, Typography } from "@mui/material";
+import { FolderPlus, Type } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface AssignmentFormDialogProps {
   open: boolean;

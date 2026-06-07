@@ -1,6 +1,5 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
 import {
   alpha,
   Box,
@@ -16,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ArrowUpRight, Search, X } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
 
 export interface SearchInputProps {
   value: string;

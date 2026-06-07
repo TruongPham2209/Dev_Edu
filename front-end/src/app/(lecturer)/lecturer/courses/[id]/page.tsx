@@ -16,7 +16,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LecturerCourseDetailSkeleton } from "./course-detail-skeleton";
 
-import { CourseResponse } from "@/lib/api/types";
+import { CourseResponse } from "@/lib/type/courses";
 import { CourseHero } from "./course-hero";
 import { LecturesTab } from "./lectures-tab";
 import { StudentsTab } from "./students-tab";

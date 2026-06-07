@@ -11,7 +11,10 @@ import {
   getFileMetadata,
   getPreSignedUploadUrl,
 } from "@/lib/api/files";
-import { AssignmentResponse, FeedbackResponse } from "@/lib/api/types";
+import type {
+  AssignmentResponse,
+  FeedbackResponse,
+} from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,

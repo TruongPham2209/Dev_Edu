@@ -1,7 +1,7 @@
 "use client";
 
 import { EmptyState } from "@/components/common/empty-state";
-import { LectureResponse } from "@/lib/api/types";
+import type { LectureResponse } from "@/lib/type/lectures";
 import {
   Accordion,
   AccordionDetails,

@@ -1,27 +1,21 @@
 "use client";
 
+import { CommentInput } from "@/components/common/comment-input";
+import { CommentItem } from "@/components/common/comment-item";
+import { EmptyState } from "@/components/common/empty-state";
 import { InfiniteLoadButton } from "@/components/common/infinite-load-button";
 import {
   createForumComment,
-  getForumComments,
   getForumCommentReplies,
+  getForumComments,
 } from "@/lib/api/forum";
-import type { CustomPaging, ForumCommentResponse } from "@/lib/api/types";
+import { CustomPaging } from "@/lib/type/api";
+import type { ForumCommentResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import { MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
-import { CommentItem } from "@/components/common/comment-item";
-import { CommentInput } from "@/components/common/comment-input";
 
 interface PostCommentsProps {
   postId: string;
@@ -179,9 +173,12 @@ export function PostComments({
           ))}
         </Stack>
       ) : comments.length === 0 ? (
-        <Box sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
-          <MessageSquare size={48} opacity={0.2} style={{ marginBottom: 16 }} />
-          <Typography>Be the first to comment!</Typography>
+        <Box sx={{ textAlign: "center", py: 1, color: "text.secondary" }}>
+          <EmptyState
+            title="No comments yet!"
+            subtitle="Be the first to comment."
+            icon={<MessageSquare size={24} color="#599cfaff" />}
+          />
         </Box>
       ) : (
         <Stack spacing={3}>

@@ -1,5 +1,5 @@
 import { alpha, Box, Chip, Stack, Typography } from "@mui/material";
-import { FolderTree, Layers3, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface HeroInfoProps {
   title: string;

@@ -5,10 +5,10 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ListSkeleton } from "@/components/skeleton";
 import {
-  useLecturesByCourseQuery,
   useDeleteLectureMutation,
+  useLecturesByCourseQuery,
 } from "@/lib/api/lectures";
-import type { LectureResponse } from "@/lib/api/types";
+import type { LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Avatar,

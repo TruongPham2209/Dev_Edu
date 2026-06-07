@@ -2,14 +2,7 @@
 
 import { useDownloadUrlQuery } from "@/lib/api/files";
 import { useUpdateLectureProgressMutation } from "@/lib/api/lectures";
-import {
-  alpha,
-  Box,
-  CircularProgress,
-  Paper,
-  Skeleton,
-  Typography,
-} from "@mui/material";
+import { alpha, Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 interface LectureVideoPlayerProps {
@@ -37,7 +30,7 @@ export function LectureVideoPlayer({
     videoObjectKey,
     {
       enabled: !!videoObjectKey,
-    }
+    },
   );
 
   const { mutateAsync: updateProgress } = useUpdateLectureProgressMutation();

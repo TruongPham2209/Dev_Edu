@@ -1,7 +1,7 @@
 "use client";
 
 import { CourseCard } from "@/components/card/course-card";
-import { CourseResponse } from "@/lib/api/types";
+import type { CourseResponse } from "@/lib/type/courses";
 import { Box, Grid, Paper, Skeleton, Typography } from "@mui/material";
 import { Award } from "lucide-react";
 

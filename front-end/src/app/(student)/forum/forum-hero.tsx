@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Stack, Typography } from "@mui/material";
-import { MessageSquare, Users, TrendingUp } from "lucide-react";
+import { MessageSquare, TrendingUp, Users } from "lucide-react";
 
 export function ForumHero() {
   return (

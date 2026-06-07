@@ -1,11 +1,11 @@
 "use client";
 
-import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
-import { FormInput } from "@/components/common/form/form-input";
-import { useCreateMaterialMutation } from "@/lib/api/lectures";
-import type { MaterialResponse } from "@/lib/api/types";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { FormDialog } from "@/components/common/form/form-dialog";
+import { FormInput } from "@/components/common/form/form-input";
+import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
+import { useCreateMaterialMutation } from "@/lib/api/lectures";
+import type { MaterialResponse } from "@/lib/type/lectures";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Box,
   Card,
@@ -19,11 +19,10 @@ import {
   FileArchive,
   FileText,
   Image as ImageIcon,
-  Loader2,
+  Type,
   UploadCloud,
   Video,
   X,
-  Type,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 

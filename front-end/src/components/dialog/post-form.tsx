@@ -1,15 +1,15 @@
 "use client";
 
+import { FileUpload } from "@/components/common/form/file-upload";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
-import { FileUpload } from "@/components/common/form/file-upload";
-import { ImagePreview } from "@/components/common/image-preview";
 import { RichTextEditor } from "@/components/common/form/rich-text-editor";
-import { PostRequest, PostResponse } from "@/lib/api/types";
+import { ImagePreview } from "@/components/common/image-preview";
 import { useConfirmImageUploadMutation } from "@/lib/api/files";
+import { PostRequest, PostResponse } from "@/lib/type/forums";
 import { Box, Button, FormHelperText, Typography } from "@mui/material";
-import { FileText, Save, Plus } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
+import { FileText, Plus, Save } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface PostFormDialogProps {
   open: boolean;

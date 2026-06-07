@@ -2,9 +2,7 @@
 
 import { LectureHeroInfo } from "@/components/common/hero-section/lecture-hero-info";
 import { MetricItem } from "@/components/common/hero-section/metric-item";
-import { getDownloadUrl } from "@/lib/api/files";
-import type { LectureResponse } from "@/lib/api/types";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { LectureResponse } from "@/lib/type/lectures";
 import {
   Box,
   Breadcrumbs,
@@ -15,7 +13,6 @@ import {
 } from "@mui/material";
 import { ChevronRight, ClipboardList, Clock, FileText } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 interface LectureHeroSectionProps {
   lecture: LectureResponse;
@@ -33,28 +30,6 @@ export function LectureHeroSection({
   assignmentsCount,
 }: LectureHeroSectionProps) {
   const theme = useTheme();
-  const { handleError } = useApiWithToast();
-
-  const [loadingVideo, setLoadingVideo] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-
-  const handlePlayVideo = async () => {
-    if (!lecture.videoObjectKey) return;
-    setLoadingVideo(true);
-    try {
-      const res = await getDownloadUrl(lecture.videoObjectKey);
-      const downloadUrl = res.downloadUrl || res.publicUrl;
-      if (downloadUrl) {
-        setVideoUrl(downloadUrl);
-      } else {
-        throw new Error("Could not generate video link");
-      }
-    } catch (err) {
-      handleError(err, "Could not load video");
-    } finally {
-      setLoadingVideo(false);
-    }
-  };
 
   const formatDuration = (seconds: number | undefined | null) => {
     if (!seconds) return "N/A";

@@ -1,7 +1,9 @@
 "use client";
 
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
+  alpha,
   Avatar,
   Box,
   Button,
@@ -10,11 +12,9 @@ import {
   TextField,
   Typography,
   useTheme,
-  alpha,
 } from "@mui/material";
 import { MessageSquare } from "lucide-react";
-import { useState, useEffect } from "react";
-import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { useEffect, useState } from "react";
 
 export interface CommentNodeData {
   id: string;

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import {
   Avatar,
   Box,
@@ -12,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Send } from "lucide-react";
+import React from "react";
 
 export interface CommentInputProps {
   value: string;
@@ -81,8 +81,15 @@ export function CommentInput({
 
       {/* Star Rating Section */}
       {showRating && onRatingChange && (
-        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 1.5, ml: 6 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{ alignItems: "center", mb: 1.5, ml: 6 }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: "text.secondary" }}
+          >
             {ratingLabel}
           </Typography>
           <Rating
@@ -108,7 +115,11 @@ export function CommentInput({
           sx={{
             width: 36,
             height: 36,
-            bgcolor: avatarUrl ? "transparent" : avatarColor === "success.main" ? "success.50" : "action.hover",
+            bgcolor: avatarUrl
+              ? "transparent"
+              : avatarColor === "success.main"
+                ? "success.50"
+                : "action.hover",
             color: avatarColor,
             fontWeight: 800,
             fontSize: "0.85rem",
@@ -187,7 +198,8 @@ export function CommentInput({
                 textAlign: "right",
                 mt: 0.5,
                 mr: 1.5,
-                color: value.length >= maxLength ? "error.main" : "text.secondary",
+                color:
+                  value.length >= maxLength ? "error.main" : "text.secondary",
                 fontWeight: value.length >= maxLength ? 700 : 400,
               }}
             >

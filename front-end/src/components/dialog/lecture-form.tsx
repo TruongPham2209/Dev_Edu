@@ -1,5 +1,6 @@
 "use client";
 
+import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { RichTextEditor } from "@/components/common/form/rich-text-editor";
 import {
@@ -11,11 +12,10 @@ import {
   useCreateLectureMutation,
   useUpdateLectureMutation,
 } from "@/lib/api/lectures";
-import type { LectureRequest, LectureResponse } from "@/lib/api/types";
+import type { LectureRequest, LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { FormDialog } from "@/components/common/form/form-dialog";
-import { Box, Typography, IconButton } from "@mui/material";
-import { Lock, UploadCloud, X, Type, AlignLeft } from "lucide-react";
+import { Box, IconButton, Typography } from "@mui/material";
+import { AlignLeft, Lock, Type, UploadCloud, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface LectureFormDialogProps {

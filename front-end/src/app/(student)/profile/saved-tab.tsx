@@ -2,7 +2,7 @@ import { PostCard } from "@/components/card/post-card";
 import { SkeletonCard } from "@/components/card/skeleton-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { getSavedPosts, unsavePost } from "@/lib/api/forum";
-import { SavedPostResponse } from "@/lib/api/types";
+import type { SavedPostResponse } from "@/lib/type/forums";
 import {
   Box,
   Button,

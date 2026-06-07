@@ -1,5 +1,6 @@
-import type { RegisterUser, RoleEnum } from "@/lib/api/types";
 import { useBatchCreateUsersMutation } from "@/lib/api/users";
+import type { RoleEnum } from "@/lib/type/enum";
+import type { RegisterUser } from "@/lib/type/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Alert,

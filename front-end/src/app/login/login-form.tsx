@@ -1,5 +1,7 @@
 "use client";
 
+import { loginAction, type LoginActionState } from "@/app/login/actions";
+import { getMe } from "@/lib/api/users";
 import {
   Box,
   Button,
@@ -11,14 +13,11 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Link from "next/link";
-import { useActionState, useState, useEffect } from "react";
-import { useFormStatus } from "react-dom";
-import { useRouter } from "next/navigation";
 import { Chrome, Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { loginAction, type LoginActionState } from "@/app/login/actions";
-import { setAuthSession } from "@/lib/auth-storage";
-import { getMe } from "@/lib/api/users";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
+import { useFormStatus } from "react-dom";
 
 const initialState: LoginActionState = {
   error: null,

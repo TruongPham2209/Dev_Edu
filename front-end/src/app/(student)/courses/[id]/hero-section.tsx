@@ -1,7 +1,7 @@
 "use client";
 
 import { useCategoriesQuery } from "@/lib/api/courses";
-import { CourseResponse } from "@/lib/api/types";
+import type { CourseResponse } from "@/lib/type/courses";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Avatar,

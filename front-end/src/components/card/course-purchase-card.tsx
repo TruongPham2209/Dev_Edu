@@ -1,4 +1,5 @@
-import type { CourseResponse, LectureResponse } from "@/lib/api/types";
+import type { CourseResponse } from "@/lib/type/courses";
+import type { LectureResponse } from "@/lib/type/lectures";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import {
   Award,

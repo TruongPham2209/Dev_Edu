@@ -1,5 +1,6 @@
 "use client";
 
+import { getFileAcceptString, isValidFileType } from "@/lib/util/file-utils";
 import {
   Box,
   FormHelperText,
@@ -7,15 +8,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import {
-  File as FileIcon,
-  UploadCloud,
-  X,
-  FileText,
-  Video,
-} from "lucide-react";
+import { FileText, UploadCloud, X } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
-import { getFileAcceptString, isValidFileType } from "@/lib/util/file-utils";
 
 interface FileUploadProps {
   value?: string | null; // Existing file URL from database

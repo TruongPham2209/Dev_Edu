@@ -1,24 +1,16 @@
 "use client";
 
-import type { AssignmentResponse } from "@/lib/api/types";
+import { AssignmentHeroInfo } from "@/components/common/hero-section/assignment-hero-info";
 import {
   Box,
   Breadcrumbs,
+  Link as MuiLink,
   Stack,
   Typography,
-  Link as MuiLink,
 } from "@mui/material";
-import {
-  Calendar,
-  ChevronRight,
-  ClipboardCheck,
-  FileText,
-  Home,
-  Users,
-} from "lucide-react";
+import { ChevronRight, FileText, Home } from "lucide-react";
 import Link from "next/link";
-import { formatServerDate } from "@/lib/util/date-utils";
-import { AssignmentHeroInfo } from "@/components/common/hero-section/assignment-hero-info";
+import type { AssignmentResponse } from "@/lib/type/assignments";
 
 interface AssignmentHeroSectionProps {
   assignment: AssignmentResponse;

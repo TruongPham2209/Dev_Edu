@@ -1,3 +1,11 @@
+import { CustomPaging } from "@/lib/type/api";
+import type {
+  CourseItemDetailResponse,
+  OrderDetailResponse,
+  PurchaseDetailResponse,
+  PurchaseRequest,
+} from "@/lib/type/enrollments";
+import { PaymentStatus } from "@/lib/type/enum";
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -7,18 +15,9 @@ import {
   useQuery,
   UseQueryOptions,
 } from "@tanstack/react-query";
+import { CourseDiscountRequest, CourseDiscountResponse } from "../type/courses";
+import { EnrollmentUserResponse } from "../type/users";
 import { apiDelete, apiGet, apiPost } from "./client";
-import type {
-  CourseDiscountRequest,
-  CourseDiscountResponse,
-  CourseItemDetailResponse,
-  CustomPaging,
-  EnrollmentUserResponse,
-  OrderDetailResponse,
-  PaymentStatus,
-  PurchaseDetailResponse,
-  PurchaseRequest,
-} from "./types";
 
 // --- Cart ---
 

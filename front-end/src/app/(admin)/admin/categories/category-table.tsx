@@ -1,10 +1,10 @@
 "use client";
 
+import ButtonAction from "@/components/common/button-action";
+import { ColumnDef, DataTable } from "@/components/common/data-table";
+import { CategoryResponse } from "@/lib/type/courses";
 import { Avatar, Box, Skeleton, Typography } from "@mui/material";
 import { Edit, Folder, Trash2 } from "lucide-react";
-import { DataTable, ColumnDef } from "@/components/common/data-table";
-import type { CategoryResponse } from "@/lib/api/types";
-import ButtonAction from "@/components/common/button-action";
 
 interface CategoryTableProps {
   categories: CategoryResponse[];

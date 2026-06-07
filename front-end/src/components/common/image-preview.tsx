@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import {
-  Modal,
   Backdrop,
   Box,
-  IconButton,
-  Fade,
   CircularProgress,
+  Fade,
+  IconButton,
+  Modal,
 } from "@mui/material";
 import { X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface ImagePreviewProps {
   src?: string | null;

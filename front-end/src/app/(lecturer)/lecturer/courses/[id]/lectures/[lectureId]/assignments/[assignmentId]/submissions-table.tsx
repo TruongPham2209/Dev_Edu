@@ -3,7 +3,7 @@
 import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
 import { InfiniteLoadButton } from "@/components/common/infinite-load-button";
-import type { SubmissionResponse } from "@/lib/api/types";
+import type { SubmissionResponse } from "@/lib/type/assignments";
 import {
   Avatar,
   Box,

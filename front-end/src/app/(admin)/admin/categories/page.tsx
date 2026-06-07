@@ -10,22 +10,21 @@ import { CategoryFormDialog } from "@/components/dialog/category-form";
 import {
   useCategoriesQuery,
   useCreateCategoryMutation,
-  useUpdateCategoryMutation,
   useDeleteCategoryMutation,
+  useUpdateCategoryMutation,
 } from "@/lib/api/courses";
 import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
-import type { CategoryRequest, CategoryResponse } from "@/lib/api/types";
+import type { CategoryRequest, CategoryResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Box,
   Button,
-  CardContent,
   CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
 import { ChevronDown, FolderPlus, Layers, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CategoryTable } from "./category-table";
 
 export default function AdminCategoriesPage() {

@@ -1,8 +1,9 @@
-import { FormInput } from "@/components/common/form/form-input";
 import { FilterSelect } from "@/components/common/form/filter-select";
-import type { RegisterUser, RoleEnum } from "@/lib/api/types";
+import { FormInput } from "@/components/common/form/form-input";
 import { useBatchCreateUsersMutation } from "@/lib/api/users";
 import { ROLE_OPTIONS } from "@/lib/roles";
+import type { RoleEnum } from "@/lib/type/enum";
+import type { RegisterUser } from "@/lib/type/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, FormHelperText, Grid } from "@mui/material";
 import { AtSign, Eye, EyeOff, Mail, User } from "lucide-react";

@@ -1,8 +1,8 @@
 "use client";
 
 import ButtonAction from "@/components/common/button-action";
-import { DataTable, ColumnDef } from "@/components/common/data-table";
-import type { CourseResponse } from "@/lib/api/types";
+import { ColumnDef, DataTable } from "@/components/common/data-table";
+import type { CourseResponse } from "@/lib/type/courses";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Avatar, Box, Skeleton, Typography } from "@mui/material";
 import { BookOpen, Edit, Eye, Trash2 } from "lucide-react";

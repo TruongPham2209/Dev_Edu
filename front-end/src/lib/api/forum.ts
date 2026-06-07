@@ -1,24 +1,24 @@
-import { apiGet, apiPost, apiPut, apiDelete } from "./client";
-import {
-  useQuery,
-  useMutation,
-  useInfiniteQuery,
-  UseQueryOptions,
-  UseMutationOptions,
-  UseInfiniteQueryOptions,
-  InfiniteData,
-} from "@tanstack/react-query";
 import type {
-  PostResponse,
-  PostRequest,
-  SavedPostResponse,
-  PostVersionUpdateRequest,
-  ForumCommentResponse,
   ForumCommentRequest,
-  CustomPaging,
+  ForumCommentResponse,
+  PostRequest,
+  PostResponse,
+  PostVersionUpdateRequest,
+  SavedPostResponse,
   UpdatedPostResponse,
-  PostStatus,
-} from "./types";
+} from "@/lib/type/forums";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  UseQueryOptions,
+} from "@tanstack/react-query";
+import { CustomPaging } from "../type/api";
+import { PostStatus } from "../type/enum";
+import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 
 // --- Posts ---
 
@@ -566,7 +566,7 @@ export function useDeleteForumCommentMutation(
 // Aliases for backward compatibility during refactoring
 export {
   useForumFeedQuery as useGetForumFeed,
-  useSearchForumPostsQuery as useSearchForumPosts,
   useForumPostByIdQuery as useGetForumPostById,
   useRelatedPostsQuery as useGetRelatedPosts,
+  useSearchForumPostsQuery as useSearchForumPosts,
 };

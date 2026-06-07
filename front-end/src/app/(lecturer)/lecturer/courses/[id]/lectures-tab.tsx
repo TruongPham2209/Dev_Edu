@@ -9,7 +9,7 @@ import {
   useDeleteLectureMutation,
   useLecturesByCourseQuery,
 } from "@/lib/api/lectures";
-import type { LectureResponse } from "@/lib/api/types";
+import type { LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import {

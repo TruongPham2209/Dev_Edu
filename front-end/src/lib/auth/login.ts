@@ -1,29 +1,4 @@
-export type OAuthTokenResponse = {
-  access_token: string;
-  refresh_token?: string;
-  expires_in?: number;
-  refresh_expires_in?: number;
-  refresh_token_expires_in?: number;
-  token_type?: string;
-  scope?: string;
-};
-
-export type AuthFailureReason =
-  | "invalid_credentials"
-  | "missing_config"
-  | "network_error"
-  | "server_error"
-  | "invalid_response";
-
-export class AuthError extends Error {
-  constructor(
-    public reason: AuthFailureReason,
-    message: string,
-  ) {
-    super(message);
-    this.name = "AuthError";
-  }
-}
+import { AuthError, OAuthTokenResponse } from "../type/api";
 
 export async function loginWithPasswordGrant(
   username: string,
@@ -49,7 +24,9 @@ export async function loginWithPasswordGrant(
     scope: scope ?? "",
   });
 
-  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString(
+    "base64",
+  );
 
   let response: Response;
 
