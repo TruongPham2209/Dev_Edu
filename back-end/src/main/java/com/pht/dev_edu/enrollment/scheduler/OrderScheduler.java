@@ -25,7 +25,7 @@ public class OrderScheduler {
     DeleteProcessor deleteProcessor;
 
     private static final long EXPIRED_ORDER_DELAY_DAYS = 7;
-    private static final long INVALID_CART_ITEM_DELAY_DAYS = 3;
+    // private static final long INVALID_CART_ITEM_DELAY_DAYS = 3;
 
     @Transactional
     @Scheduled(fixedDelay = 60 * 60 * 1000)
@@ -40,9 +40,7 @@ public class OrderScheduler {
                             java.util.List.of(
                                     com.pht.dev_edu.enrollment.dto.PaymentStatus.PENDING.name(),
                                     com.pht.dev_edu.enrollment.dto.PaymentStatus.FAILED.name(),
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.CANCELLED.name()
-                            )
-                    );
+                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.CANCELLED.name()));
 
                     if (deletedPaymentIds.isEmpty()) {
                         return 0;
@@ -53,13 +51,13 @@ public class OrderScheduler {
 
                     if (!deletedPaymentIds.isEmpty()) {
                         int deletedOrderItemsCount = orderItemRepository.deleteByOrderIdIn(deletedOrderIds);
-                        log.info("Deleted {} order items associated with expired payment sessions.", deletedOrderItemsCount);
+                        log.info("Deleted {} order items associated with expired payment sessions.",
+                                deletedOrderItemsCount);
                     }
 
                     return deletedPaymentIds.size();
                 },
-                "Deleted %d expired payment sessions that were cancelled."
-        );
+                "Deleted %d expired payment sessions that were cancelled.");
     }
 
     @Transactional
@@ -69,10 +67,10 @@ public class OrderScheduler {
                 CronJobConstant.CLEAN_INVALID_CART_ITEMS_JOB,
                 () -> {
                     var deletedCartItemIds = cartItemRepository.deleteInvalidCourseCartItems();
-                    // TODO: if implement subscription, need to delete invalid subscription cart items as well
+                    // TODO: if implement subscription, need to delete invalid subscription cart
+                    // items as well
                     return deletedCartItemIds.size();
                 },
-                "Deleted %d invalid cart items that were cancelled."
-        );
+                "Deleted %d invalid cart items that were cancelled.");
     }
 }

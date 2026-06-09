@@ -9,6 +9,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AssignmentSubmissionMapper {
+    @Mapping(target = "fileName", ignore = true)
+    @Mapping(target = "contentType", ignore = true)
+    @Mapping(target = "fileSize", ignore = true)
     SubmissionResponse entityToResponse(SubmissionEntity submission);
 
     @Mapping(target = "submittedAt", ignore = true)

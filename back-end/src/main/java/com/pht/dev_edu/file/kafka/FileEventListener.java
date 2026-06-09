@@ -28,11 +28,7 @@ public class FileEventListener {
 
     LectureRepository lectureRepository;
 
-    @RetryableTopic(
-            attempts = "5",
-            backoff = @Backoff(delay = 5000, multiplier = 2),
-            dltTopicSuffix = "-dlq"
-    )
+    @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 5000, multiplier = 2), dltTopicSuffix = "-dlq")
     @KafkaListener(topics = KafkaTopicConstant.FILE_DELETE_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
     public void handleFileDeleteEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, FileDeleteEvent.class);
@@ -43,11 +39,7 @@ public class FileEventListener {
     }
 
     @Transactional
-    @RetryableTopic(
-            attempts = "5",
-            backoff = @Backoff(delay = 5000, multiplier = 2),
-            dltTopicSuffix = "-dlq"
-    )
+    @RetryableTopic(attempts = "5", backoff = @Backoff(delay = 5000, multiplier = 2), dltTopicSuffix = "-dlq")
     @KafkaListener(topics = KafkaTopicConstant.VIDEO_DURATION_EVENT_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
     public void handleVideoDurationEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         var event = objectMapper.readValue(payload, GetVideoDurationEvent.class);
@@ -56,7 +48,7 @@ public class FileEventListener {
 
         switch (event.getVideoType()) {
             case LECTURE -> lectureRepository.updateLectureVideoDuration(event.getEntityId(), duration);
-//            case ASSIGNMENT -> fileService.updateAssignmentVideoDuration(event.getEntityId(), duration);
+            case ASSIGNMENT -> log.info("The assignment video duration update will be supported in the future.");
         }
 
         ack.acknowledge();

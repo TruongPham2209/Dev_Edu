@@ -14,6 +14,7 @@ public interface CategoryMapper {
     @Mapping(target = "createdBy", ignore = true)
     CategoryEntity reqToEntity(CategoryRequest req);
 
+    @Mapping(target = "totalCourses", constant = "0")
     CategoryResponse entityToRes(CategoryEntity entity);
 
     CategoryResponse projectionToRes(CategoryDetailProjection projection);

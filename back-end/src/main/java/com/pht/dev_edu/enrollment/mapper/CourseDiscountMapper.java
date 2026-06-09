@@ -1,10 +1,11 @@
 package com.pht.dev_edu.enrollment.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import com.pht.dev_edu.enrollment.dto.CourseDiscountRequest;
 import com.pht.dev_edu.enrollment.dto.CourseDiscountResponse;
 import com.pht.dev_edu.enrollment.entity.CourseDiscountEntity;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface CourseDiscountMapper {
@@ -13,6 +14,7 @@ public interface CourseDiscountMapper {
     @Mapping(target = "createdAt", ignore = true)
     CourseDiscountEntity reqToEntity(CourseDiscountRequest couponRequest);
 
+    @Mapping(target = "originalPrice", ignore = true)
     @Mapping(target = "discountDescription", source = "description")
     @Mapping(target = "courseTitle", ignore = true)
     @Mapping(target = "courseThumbnailUrl", ignore = true)

@@ -11,9 +11,12 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 @Named("forumCommentMapper")
 public interface ForumCommentMapper {
+    @Mapping(target = "isDeleted", constant = "false")
+    @Mapping(target = "isMine", constant = "true")
     @Mapping(target = "replyCount", constant = "0")
     CommentResponse entityToRes(CommentEntity entity);
 
+    @Mapping(target = "isMine", ignore = true)
     CommentResponse projectionToRes(CommentProjection projection);
 
     @Mapping(target = "rootCommentId", ignore = true)

@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface LectureMapper {
     @Mapping(target = "isCompleted", constant = "false")
+    @Mapping(target = "duration", source = "durationInSeconds")
     LectureResponse entityToResponse(LectureEntity lectureEntity);
 
     @Mapping(target = "isCompleted", source = "completed")

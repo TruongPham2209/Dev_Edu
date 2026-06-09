@@ -1,5 +1,17 @@
 package com.pht.dev_edu.file.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.server.ServerInternalException;
@@ -10,27 +22,21 @@ import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.dto.UploadStatus;
 import com.pht.dev_edu.file.entity.FileUploadEntity;
 import com.pht.dev_edu.file.repo.FileUploadRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -40,7 +46,6 @@ public class FileServiceImpl implements FileService {
     FileUploadRepository fileUploadRepository;
     S3Presigner s3Presigner;
     S3Client s3Client;
-    KafkaTemplate<String, Object> kafkaTemplate;
 
     @NonFinal
     @Value("${cloudflare.r2.public-bucket-name}")
@@ -57,7 +62,9 @@ public class FileServiceImpl implements FileService {
     private static final Duration PRIVATE_FILE_PRESIGNED_DURATION = Duration.ofMinutes(15);
     private static final Duration PUBLIC_FILE_PRESIGNED_DURATION = Duration.ofHours(30);
 
-    private static final Long MAX_EXPIRED_FILE_DURATION_MINUTES = 15L; // 15 phút, nếu quá thời gian này mà file vẫn chưa được upload thì sẽ bị xóa để tránh rác lưu trữ
+    private static final Long MAX_EXPIRED_FILE_DURATION_MINUTES = 15L; // 15 phút, nếu quá thời gian này mà file vẫn
+                                                                       // chưa được upload thì sẽ bị xóa để tránh rác
+                                                                       // lưu trữ
 
     @Override
     @Transactional
@@ -122,8 +129,8 @@ public class FileServiceImpl implements FileService {
                                 .bucket(bucket)
                                 .key(key)
                                 .build())
-                        .build()
-        ).url().toString();
+                        .build())
+                .url().toString();
 
         return FileUploadResponse.builder()
                 .contentType(head.contentType())
@@ -239,8 +246,7 @@ public class FileServiceImpl implements FileService {
 
         boolean isImage = FileContentTypeUtils.isValidContentType(
                 fileUpload.getContentType(),
-                FileContentTypeUtils.FileType.IMAGE
-        );
+                FileContentTypeUtils.FileType.IMAGE);
         if (!isImage) {
             throw new BadRequestException("File is not an image.");
         }
@@ -271,8 +277,7 @@ public class FileServiceImpl implements FileService {
                     DeleteObjectRequest.builder()
                             .bucket(bucket)
                             .key(key)
-                            .build()
-            );
+                            .build());
         } catch (NoSuchKeyException e) {
             log.error("File to delete not found: {}", fullObjectKey);
         }
@@ -301,8 +306,7 @@ public class FileServiceImpl implements FileService {
                     "-v", "error",
                     "-show_entries", "format=duration",
                     "-of", "default=noprint_wrappers=1:nokey=1",
-                    videoUrl
-            );
+                    videoUrl);
 
             pb.redirectErrorStream(true);
 
@@ -310,8 +314,7 @@ public class FileServiceImpl implements FileService {
 
             // 3. Đọc output
             BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream())
-            );
+                    new InputStreamReader(process.getInputStream()));
 
             String output = reader.readLine();
 
@@ -346,8 +349,8 @@ public class FileServiceImpl implements FileService {
                                 .bucket(bucket)
                                 .key(key)
                                 .build())
-                        .build()
-        ).url().toString();
+                        .build())
+                .url().toString();
     }
 
     private String resolvePublicUrl(String objectKey) {
@@ -367,8 +370,7 @@ public class FileServiceImpl implements FileService {
                     HeadObjectRequest.builder()
                             .bucket(bucket)
                             .key(key)
-                            .build()
-            );
+                            .build());
         } catch (NoSuchKeyException e) {
             throw new DataNotFoundException("File not found.");
         }
@@ -382,8 +384,7 @@ public class FileServiceImpl implements FileService {
         }
         return Pair.of(
                 fullObjectKey.substring(0, idx),
-                fullObjectKey.substring(idx + 1)
-        );
+                fullObjectKey.substring(idx + 1));
     }
 
     private void validateFile(HeadObjectResponse head, FileUploadEntity fileUpload) {

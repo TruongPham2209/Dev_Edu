@@ -10,6 +10,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ReviewMapper {
     @Mapping(target = "username", source = "studentUsername")
+    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "avatarUrl", ignore = true)
     ReviewResponse entityToResponse(CourseReviewEntity entity);
 
     @Mapping(target = "studentUsername", ignore = true)
