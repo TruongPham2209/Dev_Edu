@@ -23,5 +23,7 @@ public interface CourseOrderItemProjection {
 
     BigDecimal getOriginalPrice();
 
+    BigDecimal getDiscountedPrice();
+
     BigDecimal getDiscountedPercentage();
 }

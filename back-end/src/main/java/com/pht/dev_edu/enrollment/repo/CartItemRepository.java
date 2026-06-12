@@ -1,6 +1,6 @@
 package com.pht.dev_edu.enrollment.repo;
 
-import com.pht.dev_edu.enrollment.dto.CourseDiscountProjection;
+import com.pht.dev_edu.course.dto.CourseDiscountProjection;
 import com.pht.dev_edu.enrollment.dto.PurchaseEntityType;
 import com.pht.dev_edu.enrollment.entity.CartItemEntity;
 import org.springframework.data.domain.Page;

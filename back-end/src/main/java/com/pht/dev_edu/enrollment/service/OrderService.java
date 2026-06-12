@@ -1,18 +1,14 @@
 package com.pht.dev_edu.enrollment.service;
 
-import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
-import com.pht.dev_edu.enrollment.dto.OrderDetailResponse;
-import com.pht.dev_edu.enrollment.dto.PaymentStatus;
+import com.pht.dev_edu.enrollment.dto.CheckoutDetailResponse;
+import com.pht.dev_edu.enrollment.dto.CheckoutRequest;
 
 import java.util.UUID;
 
 public interface OrderService {
-    void addCourseToCart(String username, UUID courseId);
+    CheckoutDetailResponse checkout(String username, CheckoutRequest checkoutRequest);
 
-    void removeCourseFromCart(String username, UUID courseId);
+    CheckoutDetailResponse getOrderDetail(String username, UUID orderId);
 
-    CustomPaging<CourseItemDetailResponse> getCoursesInCart(String username, String nextCursor);
-
-    CustomPaging<OrderDetailResponse> getOrderHistory(String username, PaymentStatus paymentStatus, String nextCursor);
+    void cancelOrder(String username, UUID orderId);
 }

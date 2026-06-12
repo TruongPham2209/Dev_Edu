@@ -1,4 +1,4 @@
-package com.pht.dev_edu.enrollment.dto;
+package com.pht.dev_edu.course.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;

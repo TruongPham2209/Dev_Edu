@@ -33,8 +33,11 @@ public class OrderItemEntity {
     @Column(name = "item_type", nullable = false)
     PurchaseEntityType itemType;
 
-    @Column(nullable = false)
-    BigDecimal price;
+    @Column(name = "original_price", nullable = false)
+    BigDecimal originalPrice;
+
+    @Column(name = "discounted_price", nullable = false)
+    BigDecimal discountedPrice;
 
     @PrePersist
     public void prePersist() {

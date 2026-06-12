@@ -1,4 +1,4 @@
-package com.pht.dev_edu.enrollment.service;
+package com.pht.dev_edu.course.service;
 
 import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
@@ -7,11 +7,11 @@ import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountProjection;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountRequest;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountResponse;
-import com.pht.dev_edu.enrollment.mapper.CourseDiscountMapper;
-import com.pht.dev_edu.enrollment.repo.CourseDiscountRepository;
+import com.pht.dev_edu.course.dto.CourseDiscountProjection;
+import com.pht.dev_edu.course.dto.CourseDiscountRequest;
+import com.pht.dev_edu.course.dto.CourseDiscountResponse;
+import com.pht.dev_edu.course.mapper.CourseDiscountMapper;
+import com.pht.dev_edu.course.repo.CourseDiscountRepository;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

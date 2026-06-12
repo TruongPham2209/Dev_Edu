@@ -24,6 +24,7 @@ public class OrderScheduler {
     CartItemRepository cartItemRepository;
     DeleteProcessor deleteProcessor;
 
+    public static final long EXPIRATION_TIME_IN_MINUTES = 15;
     private static final long EXPIRED_ORDER_DELAY_DAYS = 7;
     // private static final long INVALID_CART_ITEM_DELAY_DAYS = 3;
 
@@ -38,9 +39,9 @@ public class OrderScheduler {
                     var deletedPaymentIds = paymentHistoryRepository.deleteByExpirationTimeBeforeAndStatuses(
                             cutoffTime,
                             java.util.List.of(
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.PENDING.name(),
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.FAILED.name(),
-                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.CANCELLED.name()));
+                                    com.pht.dev_edu.enrollment.dto.PaymentStatus.PENDING.name()
+                            )
+                    );
 
                     if (deletedPaymentIds.isEmpty()) {
                         return 0;
@@ -72,5 +73,19 @@ public class OrderScheduler {
                     return deletedCartItemIds.size();
                 },
                 "Deleted %d invalid cart items that were cancelled.");
+    }
+
+    @Transactional
+    @Scheduled(fixedDelay = 30 * 60 * 1000)
+    public void cleanExpiredOrders() {
+        var cutoffTime = java.time.LocalDateTime.now().minusMinutes(EXPIRATION_TIME_IN_MINUTES);
+        deleteProcessor.executeCleanupJob(
+                CronJobConstant.CLEAN_EXPIRED_ORDERS_JOB,
+                () -> {
+                    var deletedOrderIds = orderRepository.deleteExpiredOrders(cutoffTime);
+                    orderItemRepository.deleteByOrderIdIn(deletedOrderIds);
+                    return deletedOrderIds.size();
+                },
+                "Deleted %d expired orders that were pending.");
     }
 }

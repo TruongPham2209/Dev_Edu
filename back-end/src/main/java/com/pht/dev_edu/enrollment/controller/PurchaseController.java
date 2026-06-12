@@ -4,7 +4,7 @@ import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.enrollment.dto.PaymentMethod;
-import com.pht.dev_edu.enrollment.dto.PurchaseRequest;
+import com.pht.dev_edu.enrollment.dto.PaymentRequest;
 import com.pht.dev_edu.enrollment.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,12 +29,12 @@ public class PurchaseController {
 
     @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping
-    public ResponseEntity<?> purchase(@RequestBody @Valid PurchaseRequest purchaseRequest, HttpServletRequest request) {
+    public ResponseEntity<?> purchase(@RequestBody @Valid PaymentRequest paymentRequest, HttpServletRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         String ipAddress = getIpAddress(request);
-        purchaseRequest.setIpAddress(ipAddress);
+        paymentRequest.setIpAddress(ipAddress);
 
-        var purchase = paymentService.processPurchase(username, purchaseRequest);
+        var purchase = paymentService.processPurchase(username, paymentRequest);
         return ApiUtils.buildSuccessResponse(purchase);
     }
 

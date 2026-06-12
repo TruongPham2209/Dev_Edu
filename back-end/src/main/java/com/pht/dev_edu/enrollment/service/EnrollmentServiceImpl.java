@@ -5,9 +5,9 @@ import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.course.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.course.repo.CourseRepository;
 import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
-import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 import com.pht.dev_edu.enrollment.mapper.EnrollmentMapper;
@@ -96,7 +96,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
     @Override
     @Transactional
-    public void enrollUserInCourse(String username, List<UUID> courseIds, UUID paymentId) {
+    public void enrollUserInCourse(String username, List<UUID> courseIds, UUID orderId) {
         var activeIds = courseRepository.findActiveIdsByIdIn(courseIds);
         if (activeIds.isEmpty()) {
             log.warn("None of the provided course IDs are active: {}", courseIds);
@@ -105,7 +105,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         for (UUID courseId : activeIds) {
             var id = UuidCreator.getTimeOrderedEpoch();
-            enrollmentRepository.insertWithoutConstraintCheck(id, username, courseId, paymentId);
+            enrollmentRepository.insertWithoutConstraintCheck(id, username, courseId, orderId);
         }
     }
 }

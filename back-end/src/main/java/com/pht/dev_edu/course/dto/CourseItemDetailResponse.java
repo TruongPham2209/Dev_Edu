@@ -1,5 +1,6 @@
-package com.pht.dev_edu.enrollment.dto;
+package com.pht.dev_edu.course.dto;
 
+import com.pht.dev_edu.enrollment.dto.PaymentStatus;
 import com.pht.dev_edu.enrollment.entity.EnrollmentEntity;
 import lombok.Builder;
 import lombok.Data;

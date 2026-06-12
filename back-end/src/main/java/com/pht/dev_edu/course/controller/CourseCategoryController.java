@@ -70,7 +70,8 @@ public class CourseCategoryController {
     @PreAuthorize("permitAll()")
     @GetMapping("/courses/{courseId}/")
     public ResponseEntity<ApiResponse> getCourseById(@PathVariable UUID courseId) {
-        var course = courseService.getCourseDetails(courseId);
+        String username = SecurityContextUtils.getCurrentUsername();
+        var course = courseService.getCourseDetails(username, courseId);
         return ApiUtils.buildSuccessResponse(course);
     }
 

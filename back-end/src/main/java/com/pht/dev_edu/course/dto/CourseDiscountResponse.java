@@ -1,6 +1,6 @@
-package com.pht.dev_edu.enrollment.dto;
+package com.pht.dev_edu.course.dto;
 
-import com.pht.dev_edu.enrollment.entity.CourseDiscountEntity;
+import com.pht.dev_edu.course.entity.CourseDiscountEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

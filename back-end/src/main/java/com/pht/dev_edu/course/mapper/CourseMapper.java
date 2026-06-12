@@ -16,11 +16,11 @@ public interface CourseMapper {
     CourseEntity reqToEntity(CourseRequest req);
 
     @Mapping(target = "originalPrice", source = "price")
-    @Mapping(target = "discountedPercentage", constant = "0L")
-    @Mapping(target = "discountedPrice", constant = "0.0")
-    @Mapping(target = "avgReview", constant = "0.0")
-    @Mapping(target = "totalReview", constant = "0L")
-    @Mapping(target = "totalEnrollment", constant = "0L")
+    @Mapping(target = "discountedPercentage", ignore = true)
+    @Mapping(target = "discountedPrice", ignore = true)
+    @Mapping(target = "avgReview", ignore = true)
+    @Mapping(target = "totalReview", ignore = true)
+    @Mapping(target = "totalEnrollment", ignore = true)
     @Mapping(target = "validTo", ignore = true)
     @Mapping(target = "lecturers", expression = "java(new java.util.ArrayList<>())")
     CourseResponse entityToRes(CourseEntity entity);

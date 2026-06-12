@@ -217,7 +217,7 @@ public class MetricRepositoryImpl implements MetricRepository {
                 (SELECT COUNT(*) FROM enrollment e WHERE e.course_id = c.id) as enrollment_count,
                 (SELECT COALESCE(AVG(cr.rating), 0.0) FROM course_review cr WHERE cr.course_id = c.id) as average_rating,
                 (SELECT COUNT(*) FROM course_review cr WHERE cr.course_id = c.id) as review_count,
-                (SELECT COALESCE(SUM(oi.price), 0.0) FROM order_item oi JOIN "order" o ON oi.order_id = o.id WHERE oi.item_id = c.id AND oi.item_type = 'course' AND o.status = 'COMPLETED') as total_revenue
+                (SELECT COALESCE(SUM(oi.discounted_price), 0.0) FROM order_item oi JOIN "order" o ON oi.order_id = o.id WHERE oi.item_id = c.id AND oi.item_type = 'course' AND o.status = 'COMPLETED') as total_revenue
             FROM course c
             WHERE c.deleted_at IS NULL
             ORDER BY enrollment_count DESC, total_revenue DESC

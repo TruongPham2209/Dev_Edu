@@ -22,7 +22,7 @@ import com.pht.dev_edu.course.entity.CourseLecturerId;
 import com.pht.dev_edu.course.mapper.CourseMapper;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.CourseRepository;
-import com.pht.dev_edu.enrollment.repo.CourseDiscountRepository;
+import com.pht.dev_edu.course.repo.CourseDiscountRepository;
 import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
@@ -64,8 +64,8 @@ public class CourseServiceImpl implements CourseService {
     Executor executor;
 
     @Override
-    public CourseResponse getCourseDetails(UUID courseId) {
-        var courseDetail = courseRepository.findCourseDetail(courseId);
+    public CourseResponse getCourseDetails(String username, UUID courseId) {
+        var courseDetail = courseRepository.findCourseDetail(courseId, username);
         if (courseDetail == null) {
             throw new DataNotFoundException("Course not found");
         }

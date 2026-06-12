@@ -39,6 +39,9 @@ public class PaymentHistoryEntity {
     @Column(nullable = false)
     PaymentStatus status;
 
+    @Column(name = "order_id", nullable = false)
+    UUID orderId;
+
     @Column(name = "transaction_id", nullable = false, unique = true)
     String transactionId;
 

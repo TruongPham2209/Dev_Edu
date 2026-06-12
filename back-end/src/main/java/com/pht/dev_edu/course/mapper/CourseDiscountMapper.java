@@ -1,11 +1,12 @@
-package com.pht.dev_edu.enrollment.mapper;
+package com.pht.dev_edu.course.mapper;
 
+import com.pht.dev_edu.course.dto.CourseDiscountProjection;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.pht.dev_edu.enrollment.dto.CourseDiscountRequest;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountResponse;
-import com.pht.dev_edu.enrollment.entity.CourseDiscountEntity;
+import com.pht.dev_edu.course.dto.CourseDiscountRequest;
+import com.pht.dev_edu.course.dto.CourseDiscountResponse;
+import com.pht.dev_edu.course.entity.CourseDiscountEntity;
 
 @Mapper(componentModel = "spring")
 public interface CourseDiscountMapper {
@@ -21,5 +22,5 @@ public interface CourseDiscountMapper {
     @Mapping(target = "courseDescription", ignore = true)
     CourseDiscountResponse entityToRes(CourseDiscountEntity couponEntity);
 
-    CourseDiscountResponse projectionToRes(com.pht.dev_edu.enrollment.dto.CourseDiscountProjection projection);
+    CourseDiscountResponse projectionToRes(CourseDiscountProjection projection);
 }

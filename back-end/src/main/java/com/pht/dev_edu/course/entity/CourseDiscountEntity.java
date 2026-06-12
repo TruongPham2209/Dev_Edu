@@ -1,4 +1,4 @@
-package com.pht.dev_edu.enrollment.entity;
+package com.pht.dev_edu.course.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;

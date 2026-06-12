@@ -1,8 +1,8 @@
-package com.pht.dev_edu.enrollment.repo;
+package com.pht.dev_edu.course.repo;
 
-import com.pht.dev_edu.enrollment.dto.CourseDiscountProjection;
+import com.pht.dev_edu.course.dto.CourseDiscountProjection;
 import com.pht.dev_edu.enrollment.dto.CourseOrderItemProjection;
-import com.pht.dev_edu.enrollment.entity.CourseDiscountEntity;
+import com.pht.dev_edu.course.entity.CourseDiscountEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

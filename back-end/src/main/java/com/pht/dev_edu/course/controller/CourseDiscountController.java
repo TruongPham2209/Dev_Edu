@@ -1,9 +1,9 @@
-package com.pht.dev_edu.enrollment.controller;
+package com.pht.dev_edu.course.controller;
 
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountRequest;
-import com.pht.dev_edu.enrollment.service.CourseDiscountService;
+import com.pht.dev_edu.course.dto.CourseDiscountRequest;
+import com.pht.dev_edu.course.service.CourseDiscountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

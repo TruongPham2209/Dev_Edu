@@ -1,8 +1,8 @@
-package com.pht.dev_edu.enrollment.service;
+package com.pht.dev_edu.course.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountRequest;
-import com.pht.dev_edu.enrollment.dto.CourseDiscountResponse;
+import com.pht.dev_edu.course.dto.CourseDiscountRequest;
+import com.pht.dev_edu.course.dto.CourseDiscountResponse;
 
 import java.util.List;
 import java.util.UUID;

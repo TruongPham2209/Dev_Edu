@@ -2,14 +2,17 @@ package com.pht.dev_edu.enrollment.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
+import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.security.AccessDeniedException;
 import com.pht.dev_edu.common.util.PaymentUtils;
 import com.pht.dev_edu.enrollment.dto.*;
-import com.pht.dev_edu.enrollment.entity.OrderEntity;
 import com.pht.dev_edu.enrollment.entity.OrderItemEntity;
 import com.pht.dev_edu.enrollment.entity.PaymentHistoryEntity;
-import com.pht.dev_edu.enrollment.mapper.OrderItemMapper;
-import com.pht.dev_edu.enrollment.repo.*;
+import com.pht.dev_edu.enrollment.repo.CartItemRepository;
+import com.pht.dev_edu.enrollment.repo.OrderItemRepository;
+import com.pht.dev_edu.enrollment.repo.OrderRepository;
+import com.pht.dev_edu.enrollment.repo.PaymentHistoryRepository;
+import com.pht.dev_edu.enrollment.scheduler.OrderScheduler;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -33,57 +33,71 @@ public class PaymentServiceImpl implements PaymentService {
     OrderRepository orderRepository;
     OrderItemRepository orderItemRepository;
     PaymentHistoryRepository paymentHistoryRepository;
-    CourseDiscountRepository courseDiscountRepository;
 
-    OrderItemMapper orderItemMapper;
     EnrollmentService enrollmentService;
-
-    private static final int EXPIRATION_TIME_MINUTES = 15;
 
     @Override
     @Transactional
-    public PurchaseDetailResponse processPurchase(String username, PurchaseRequest purchaseRequest) {
-        BigDecimal totalAmount;
+    public PaymentInfoResponse processPurchase(String username, PaymentRequest paymentRequest) {
         String description = "";
 
+        var order = orderRepository.findByIdAndUsername(paymentRequest.getOrderId(), username)
+                .orElseThrow(() -> new BadRequestException("Order Not Found"));
+
+        if (order.getStatus() != PaymentStatus.PENDING) {
+            log.error("Cannot process purchase, order has been pending");
+            throw new BadRequestException("Order Not Found");
+        }
+
+        // After 15', if user wasn't checkout, get detail rejected
+        if (order.getCreatedAt().minusMinutes(OrderScheduler.EXPIRATION_TIME_IN_MINUTES).isAfter(LocalDateTime.now())) {
+            log.warn("Order has expired.");
+            throw new DataNotFoundException("Order has expired.");
+        }
+
+        var items = orderItemRepository.findByOrderId(paymentRequest.getOrderId());
+        if (items.isEmpty()) {
+            log.error("Cannot process purchase, order has been pending");
+            throw new BadRequestException("Order Not Found");
+        }
+
+        var entityType = items.getFirst().getItemType();
+        var itemIds = items.stream().map(OrderItemEntity::getItemId).toList();
+        if (entityType == PurchaseEntityType.COURSE) {
+            boolean isEligibleForPayment = orderItemRepository.hasValidOrderItemsForPayment(itemIds, order.getId(), username);
+            if (!isEligibleForPayment) {
+                log.error("Cannot process purchase, order has been pending");
+                throw new BadRequestException("Cannot process payment");
+            }
+        }
+
         var now = LocalDateTime.now();
-        var expirationTime = now.plusMinutes(EXPIRATION_TIME_MINUTES);
+        var expirationTime = now.plusMinutes(OrderScheduler.EXPIRATION_TIME_IN_MINUTES);
 
         UUID paymentId = UuidCreator.getTimeOrderedEpoch();
         PaymentHistoryEntity payment = PaymentHistoryEntity.builder()
                 .id(paymentId)
-                .paymentMethod(purchaseRequest.getPaymentMethod())
+                .paymentMethod(paymentRequest.getPaymentMethod())
                 .status(PaymentStatus.PENDING)
+                .amount(order.getTotalAmount())
                 .username(username)
+                .orderId(order.getId())
                 .transactionId(paymentId.toString())
                 .expirationTime(expirationTime)
                 .build();
 
-        OrderEntity order = OrderEntity.builder()
-                .id(paymentId)
-                .username(username)
-                .status(PaymentStatus.PENDING)
-                .build();
+        order.setStatus(PaymentStatus.PROCESSING);
 
-        var purchaseDetail = PurchaseDetailResponse.builder()
+        var purchaseDetail = PaymentInfoResponse.builder()
                 .paymentId(paymentId)
-                .entityType(purchaseRequest.getEntityType())
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .entityType(entityType)
                 .build();
 
-        switch (purchaseRequest.getEntityType()) {
+        switch (entityType) {
             case COURSE -> {
                 description = "Purchase courses: " + System.currentTimeMillis();
-                var items = orderCourses(username, paymentId, purchaseRequest.getEntityIds());
-                totalAmount = items.stream()
-                        .filter(item -> !item.isRegistered())
-                        .map(CourseItemResponse::getDiscountedPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                purchaseDetail.setItems(Collections.singletonList(items));
-                purchaseDetail.setTotalAmount(totalAmount);
-
-                payment.setAmount(totalAmount);
-                order.setTotalAmount(totalAmount);
             }
             case SUBSCRIPTION -> {
                 log.warn("Subscription purchase not implemented yet");
@@ -92,13 +106,19 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         if (payment.getAmount().compareTo(BigDecimal.ZERO) == 0) {
+            payment.setPaymentTime(now);
             payment.setStatus(PaymentStatus.COMPLETED);
             order.setStatus(PaymentStatus.COMPLETED);
 
             paymentHistoryRepository.save(payment);
             orderRepository.save(order);
 
-            confirmOrderByPaymentId(paymentId, username);
+            // TODO: remove from cart
+
+            if (entityType == PurchaseEntityType.COURSE) {
+                cartItemRepository.deleteByUsernameAndItemTypeAndItemIdIn(username, PurchaseEntityType.COURSE, itemIds);
+                enrollmentService.enrollUserInCourse(username, itemIds, order.getId());
+            }
 
             return purchaseDetail;
         }
@@ -106,12 +126,17 @@ public class PaymentServiceImpl implements PaymentService {
         paymentHistoryRepository.save(payment);
         orderRepository.save(order);
 
-        switch (purchaseRequest.getPaymentMethod()) {
+        if (entityType == PurchaseEntityType.COURSE) {
+            log.info("Deleting course items in cart: {}", items);
+            cartItemRepository.deleteByUsernameAndItemTypeAndItemIdIn(username, PurchaseEntityType.COURSE, itemIds);
+        }
+
+        switch (paymentRequest.getPaymentMethod()) {
             case VNPAY -> {
                 var vnPayParams = PaymentUtils.createVnPayPaymentParams(
                         paymentId.toString(),
                         payment.getAmount(),
-                        purchaseRequest.getIpAddress(),
+                        paymentRequest.getIpAddress(),
                         description,
                         expirationTime
                 );
@@ -121,8 +146,8 @@ public class PaymentServiceImpl implements PaymentService {
                 return purchaseDetail;
             }
             default -> {
-                log.warn("Unsupported payment method: {}", purchaseRequest.getPaymentMethod());
-                throw new UnsupportedOperationException("Unsupported payment method: " + purchaseRequest.getPaymentMethod());
+                log.warn("Unsupported payment method: {}", paymentRequest.getPaymentMethod());
+                throw new UnsupportedOperationException("Unsupported payment method: " + paymentRequest.getPaymentMethod());
             }
         }
 
@@ -145,10 +170,11 @@ public class PaymentServiceImpl implements PaymentService {
                     return;
                 }
 
+                payment.setPaymentTime(LocalDateTime.now());
                 payment.setStatus(status);
                 paymentHistoryRepository.save(payment);
 
-                var order = orderRepository.findById(payment.getId())
+                var order = orderRepository.findById(payment.getOrderId())
                         .orElse(null);
                 if (order == null) {
                     log.warn("Order not found for VNPAY return: orderId={}", payment.getId());
@@ -162,7 +188,7 @@ public class PaymentServiceImpl implements PaymentService {
                     return;
                 }
 
-                confirmOrderByPaymentId(paymentId, payment.getUsername());
+                confirmOrder(paymentId, payment.getUsername());
             }
             default -> {
                 log.warn("Unsupported payment method in return handling: {}", method);
@@ -204,61 +230,10 @@ public class PaymentServiceImpl implements PaymentService {
         // TODO: call payment gateway API to cancel payment if necessary (production)
     }
 
-    private List<CourseItemResponse> orderCourses(String username, UUID orderId, List<UUID> courseIds) {
-        if (orderItemRepository.existsByUsernameAndItem(username, PurchaseEntityType.COURSE.name(), courseIds)) {
-            log.warn("User {} already has pending or completed order for courses: {}", username, courseIds);
-            throw new BadRequestException("You already have a pending or completed order for some of these courses");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(now)
-                .orElse(null);
-        var globalDiscount = globalDiscountEntity == null
-                ? BigDecimal.ZERO
-                : globalDiscountEntity.getDiscountPercentage();
-
-        var courseItems = courseDiscountRepository.findDiscountedCoursesForUser(username, courseIds, now)
-                .stream()
-                .map(c -> {
-                    var discountPercentage = globalDiscount.max(c.getDiscountedPercentage());
-                    var discountRate = discountPercentage
-                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-
-                    var discountedPrice = c.getOriginalPrice()
-                            .multiply(BigDecimal.ONE.subtract(discountRate))
-                            .setScale(2, RoundingMode.HALF_UP);
-
-                    var item = orderItemMapper.courseProjectionToCourseItem(c);
-                    item.setDiscountedPrice(discountedPrice);
-
-                    return item;
-                })
-                .toList();
-
-        if (courseIds.size() != courseItems.size()) {
-            log.warn("Some courses not found or not available for purchase: requested={}, found={}", courseIds, courseItems.stream().map(CourseItemResponse::getId).toList());
-            throw new BadRequestException("Some courses not found or not available for purchase");
-        }
-
-        var orderItems = courseItems.stream()
-                .filter(item -> !item.isRegistered())
-                .map(c -> OrderItemEntity.builder()
-                        .orderId(orderId)
-                        .itemType(PurchaseEntityType.COURSE)
-                        .itemId(c.getId())
-                        .price(c.getDiscountedPrice())
-                        .build())
-                .toList();
-        orderItemRepository.saveAll(orderItems);
-
-        cartItemRepository.deleteByUsernameAndItemTypeAndItemIdIn(username, PurchaseEntityType.COURSE, courseIds);
-        return courseItems;
-    }
-
-    private void confirmOrderByPaymentId(UUID paymentId, String username) {
-        var items = orderItemRepository.findByOrderId(paymentId);
+    private void confirmOrder(UUID orderId, String username) {
+        var items = orderItemRepository.findByOrderId(orderId);
         if (items.isEmpty()) {
-            log.warn("No order items found for VNPAY return: orderId={}", paymentId);
+            log.warn("No order items found for VNPAY return: orderId={}", orderId);
             return;
         }
 
@@ -268,7 +243,7 @@ public class PaymentServiceImpl implements PaymentService {
                 var courseIds = items.stream()
                         .map(OrderItemEntity::getItemId)
                         .toList();
-                enrollmentService.enrollUserInCourse(username, courseIds, paymentId);
+                enrollmentService.enrollUserInCourse(username, courseIds, orderId);
             }
             case SUBSCRIPTION -> {
                 log.warn("Subscription return handling not implemented yet");

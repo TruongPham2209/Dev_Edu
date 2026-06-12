@@ -3,7 +3,7 @@ package com.pht.dev_edu.enrollment.controller;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
-import com.pht.dev_edu.enrollment.service.OrderService;
+import com.pht.dev_edu.enrollment.service.OrderItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class CartItemController {
-    OrderService orderService;
+    OrderItemService orderItemService;
 
     @PreAuthorize("hasAuthority('STUDENT')")
     @PostMapping("/items/courses")
@@ -32,7 +32,7 @@ public class CartItemController {
         }
         UUID courseId = UUID.fromString(courseIdStr);
         String username = SecurityContextUtils.getCurrentUsernameForController();
-        orderService.addCourseToCart(username, courseId);
+        orderItemService.addCourseToCart(username, courseId);
         return ApiUtils.buildSuccessResponse("Course added to cart successfully.");
     }
 
@@ -40,7 +40,7 @@ public class CartItemController {
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<?> removeCourseFromCart(@RequestParam("courseId") UUID courseId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
-        orderService.removeCourseFromCart(username, courseId);
+        orderItemService.removeCourseFromCart(username, courseId);
         return ApiUtils.buildSuccessResponse("Course removed from cart successfully.");
     }
 
@@ -50,7 +50,7 @@ public class CartItemController {
             @RequestParam(required = false) String nextCursor
     ) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
-        var cartItems = orderService.getCoursesInCart(username, nextCursor);
+        var cartItems = orderItemService.getCoursesInCart(username, nextCursor);
         return ApiUtils.buildSuccessResponse(cartItems);
     }
 }

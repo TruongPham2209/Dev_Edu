@@ -1,19 +1,21 @@
 package com.pht.dev_edu.enrollment.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.common.dto.TimeStampCursor;
-import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.exception.data.BadRequestException;
+import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.course.repo.CourseDiscountRepository;
 import com.pht.dev_edu.enrollment.dto.*;
 import com.pht.dev_edu.enrollment.entity.OrderEntity;
-import com.pht.dev_edu.enrollment.repo.*;
+import com.pht.dev_edu.enrollment.entity.OrderItemEntity;
+import com.pht.dev_edu.enrollment.mapper.OrderItemMapper;
+import com.pht.dev_edu.enrollment.repo.OrderItemRepository;
+import com.pht.dev_edu.enrollment.repo.OrderRepository;
+import com.pht.dev_edu.enrollment.scheduler.OrderScheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,133 +29,150 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class OrderServiceImpl implements OrderService {
     CourseDiscountRepository courseDiscountRepository;
-    CartItemRepository cartItemRepository;
-    EnrollmentRepository enrollmentRepository;
     OrderRepository orderRepository;
     OrderItemRepository orderItemRepository;
 
+    OrderItemMapper orderItemMapper;
+
     @Override
     @Transactional
-    public void addCourseToCart(String username, UUID courseId) {
-        if (enrollmentRepository.existsByStudentUsernameAndCourseId(username, courseId)) {
-            log.warn("User {} already enrolled in course {}, skipping add to cart", username, courseId);
+    public CheckoutDetailResponse checkout(String username, CheckoutRequest checkoutRequest) {
+        var order = OrderEntity.builder()
+                .id(UuidCreator.getTimeOrderedEpoch())
+                .status(PaymentStatus.PENDING)
+                .username(username)
+                .build();
+
+        if (checkoutRequest.getEntityType() != PurchaseEntityType.COURSE) {
+            log.warn("Checkout request is not of type COURSE");
+            throw new BadRequestException("Checkout request is not of type COURSE");
+        }
+
+        List<CourseItemResponse> orderItems = checkoutCourses(username, order.getId(), checkoutRequest.getEntityIds());
+        var totalAmount = orderItems.stream()
+                .map(CourseItemResponse::getDiscountedPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.setTotalAmount(totalAmount);
+        orderRepository.save(order);
+
+        return CheckoutDetailResponse.builder()
+                .items(orderItems)
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .entityType(checkoutRequest.getEntityType())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public CheckoutDetailResponse getOrderDetail(String username, UUID orderId) {
+        var order = orderRepository.findByIdAndUsername(orderId, username).orElseThrow(
+                () -> new DataNotFoundException("Order not found.")
+        );
+
+        if (order.getStatus() != PaymentStatus.PENDING) {
+            log.warn("Checkout request is not of type PENDING");
+            throw new BadRequestException("Order not found.");
+        }
+
+        // After 15', if user wasn't checkout, get detail rejected
+        if (order.getCreatedAt().minusMinutes(OrderScheduler.EXPIRATION_TIME_IN_MINUTES).isAfter(LocalDateTime.now())) {
+            log.warn("Order has expired.");
+            throw new DataNotFoundException("Order has expired.");
+        }
+
+        // TODO: update if implements another entityType
+        var projections = orderItemRepository.getOrderItemsByOrderIds(List.of(order.getId()));
+        if (projections.isEmpty()) {
+            throw new DataNotFoundException("Order not found.");
+        }
+        var items = projections.stream()
+                .map(orderItemMapper::courseProjectionToCourseItem)
+                .toList();
+
+        return CheckoutDetailResponse.builder()
+                .items(items)
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .entityType(PurchaseEntityType.COURSE)
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrder(String username, UUID orderId) {
+        var orderOpt = orderRepository.findByIdAndUsername(orderId, username);
+        if (orderOpt.isEmpty()) {
+            log.warn("Order not found.");
             return;
         }
 
-        UUID id = UuidCreator.getTimeOrderedEpoch();
-        cartItemRepository.insertCartItemWithoutConstraintCheck(
-                id,
-                username,
-                PurchaseEntityType.COURSE.name(),
-                courseId
-        );
+        var order = orderOpt.get();
+        if (order.getStatus() != PaymentStatus.PENDING) {
+            log.warn("Order is not of type PENDING");
+            return;
+        }
+
+        order.setStatus(PaymentStatus.CANCELLED);
+        orderRepository.save(order);
     }
 
-    @Override
-    @Transactional
-    public void removeCourseFromCart(String username, UUID courseId) {
-        cartItemRepository.deleteByUsernameAndItemTypeAndItemIdIn(
-                username,
-                PurchaseEntityType.COURSE,
-                List.of(courseId)
-        );
+    private List<CourseItemResponse> checkoutCourses(String username, UUID orderId, List<UUID> courseIds) {
+        if (orderItemRepository.existsByUsernameAndItems(username, PurchaseEntityType.COURSE.name(), courseIds)) {
+            log.warn("User {} already has processing or completed order for courses: {}", username, courseIds);
+            throw new BadRequestException("You already have a pending or completed order for some of these courses");
+        }
+
+        var courseItems = getCourseItemDetails(username, courseIds);
+
+        if (courseItems.stream().anyMatch(CourseItemResponse::isRegistered)) {
+            log.error("Course {} has already been registered", courseIds);
+            throw new BadRequestException("Course has already been registered");
+        }
+
+        if (courseIds.size() != courseItems.size()) {
+            log.warn("Some courses not found or not available for purchase: requested={}, found={}", courseIds, courseItems.stream().map(CourseItemResponse::getId).toList());
+            throw new BadRequestException("Some courses not found or not available for purchase");
+        }
+
+        var orderItems = courseItems.stream()
+                .filter(item -> !item.isRegistered())
+                .map(c -> OrderItemEntity.builder()
+                        .orderId(orderId)
+                        .itemType(PurchaseEntityType.COURSE)
+                        .itemId(c.getId())
+                        .originalPrice(c.getOriginalPrice())
+                        .discountedPrice(c.getDiscountedPrice())
+                        .build())
+                .toList();
+        orderItemRepository.saveAll(orderItems);
+
+        return courseItems;
     }
 
-    @Override
-    public CustomPaging<CourseItemDetailResponse> getCoursesInCart(String username, String nextCursor) {
-        var pageable = PageRequest.of(0, 11);
-        var timeCursor = resolveTimeStampCursor(nextCursor);
-
-        var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(LocalDateTime.now()).orElse(null);
-        var globalDiscountPercentage = globalDiscountEntity == null
+    private List<CourseItemResponse> getCourseItemDetails(String username, List<UUID> courseIds) {
+        LocalDateTime now = LocalDateTime.now();
+        var globalDiscountEntity = courseDiscountRepository.getGlobalActiveDiscount(now)
+                .orElse(null);
+        var globalDiscount = globalDiscountEntity == null
                 ? BigDecimal.ZERO
                 : globalDiscountEntity.getDiscountPercentage();
-        var cartItemPage = cartItemRepository.findCoursesInCartByStudentUsernameAndCursor(username, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
-        return PagingUtils.getPagedWithCursor(
-                cartItemPage,
-                ci -> {
-                    var discountPercentage = globalDiscountPercentage.max(ci.getDiscountPercentage() != null ? ci.getDiscountPercentage() : BigDecimal.ZERO);
-                    var discountedPrice = discountPercentage.compareTo(BigDecimal.ZERO) == 0
-                            ? ci.getOriginalPrice()
-                            : ci.getOriginalPrice()
-                              .multiply(BigDecimal.ONE.subtract(
-                                      discountPercentage.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP)
-                              ))
-                              .setScale(2, RoundingMode.HALF_UP);
 
-                    return CourseItemDetailResponse.builder()
-                            .id(ci.getId())
-                            .courseId(ci.getCourseId())
-                            .title(ci.getCourseTitle())
-                            .description(ci.getCourseDescription())
-                            .thumbnailUrl(ci.getCourseThumbnailUrl())
-                            .originalPrice(ci.getOriginalPrice())
-                            .discountedPrice(discountedPrice)
-                            .build();
-                },
-                CourseDiscountProjection::getCreatedAt,
-                CourseDiscountProjection::getId,
-                pageable.getPageSize() - 1
-        );
-    }
+        return courseDiscountRepository.findDiscountedCoursesForUser(username, courseIds, now)
+                .stream()
+                .map(c -> {
+                    var discountPercentage = globalDiscount.max(c.getDiscountedPercentage());
+                    var discountRate = discountPercentage
+                            .divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
 
-    @Override
-    public CustomPaging<OrderDetailResponse> getOrderHistory(String username, PaymentStatus paymentStatus, String nextCursor) {
-        var pageable = PageRequest.of(0, 11);
-        var timeCursor = resolveTimeStampCursor(nextCursor);
+                    var discountedPrice = c.getOriginalPrice()
+                            .multiply(BigDecimal.ONE.subtract(discountRate))
+                            .setScale(2, RoundingMode.HALF_UP);
 
-        var orderPage = orderRepository.findByUsernameAndStatus(
-                username,
-                paymentStatus.name(),
-                timeCursor.getTimeStamp(),
-                timeCursor.getId(),
-                pageable
-        );
+                    var item = orderItemMapper.courseProjectionToCourseItem(c);
+                    item.setDiscountedPrice(discountedPrice);
 
-        var orderPaged = PagingUtils.getPagedWithCursor(
-                orderPage,
-                oe -> OrderDetailResponse.builder()
-                        .id(oe.getId())
-                        .totalAmount(oe.getTotalAmount())
-                        .status(oe.getStatus())
-                        .createdAt(oe.getCreatedAt())
-                        .build(),
-                OrderEntity::getCreatedAt,
-                OrderEntity::getId,
-                pageable.getPageSize() - 1
-        );
-
-        var orderIds = orderPage.getContent().stream()
-                .limit(pageable.getPageSize() - 1)
-                .map(OrderEntity::getId)
-                .toList();
-
-        var items = orderItemRepository.getOrderItemsByOrderIds(orderIds).stream()
-                .collect(java.util.stream.Collectors.groupingBy(CourseOrderItemProjection::getOrderId));
-
-        orderPaged.setContents(
-                orderPaged.getContents().stream()
-                        .peek(order -> {
-                            var itemProjections = items.getOrDefault(order.getId(), List.of());
-                            var orderItems = itemProjections.stream()
-                                    .map(ip -> CourseItemDetailResponse.builder()
-                                            .courseId(ip.getCourseId())
-                                            .title(ip.getTitle())
-                                            .description(ip.getDescription())
-                                            .thumbnailUrl(ip.getThumbnailUrl())
-                                            .originalPrice(ip.getOriginalPrice())
-                                            .build())
-                                    .toList();
-                            order.setItems(orderItems);
-                        })
-                        .toList()
-        );
-        return orderPaged;
-    }
-
-    private TimeStampCursor resolveTimeStampCursor(String nextCursor) {
-        return StringUtils.hasText(nextCursor)
-                ? PagingUtils.decodeTimeStampCursor(nextCursor)
-                : TimeStampCursor.getDefaultCursor(true);
+                    return item;
+                }).toList();
     }
 }

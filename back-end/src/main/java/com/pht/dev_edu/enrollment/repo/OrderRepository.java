@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
@@ -35,4 +36,15 @@ public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
             """
             , nativeQuery = true)
     Page<OrderEntity> findByUsernameAndStatus(String username, String status, LocalDateTime lastCreatedAt, UUID lastId, Pageable pageable);
+
+    Optional<OrderEntity> findByIdAndUsername(UUID id, String username);
+
+    @Modifying
+    @Query(value = """
+            DELETE FROM "order"
+            WHERE   status      = 'PENDING'
+            AND     created_at  < :cutoffTime
+            RETURNING id
+            """, nativeQuery = true)
+    List<UUID> deleteExpiredOrders(LocalDateTime cutoffTime);
 }

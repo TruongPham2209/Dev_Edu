@@ -1,7 +1,7 @@
 package com.pht.dev_edu.enrollment.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
-import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
+import com.pht.dev_edu.course.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 
 import java.util.List;
@@ -14,5 +14,5 @@ public interface EnrollmentService {
 
     CustomPaging<EnrollmentUserResponse> getEnrolledUsers(UUID courseId, String nextCursor);
 
-    void enrollUserInCourse(String username, List<UUID> courseIds, UUID paymentId);
+    void enrollUserInCourse(String username, List<UUID> courseIds, UUID orderId);
 }

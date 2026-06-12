@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CourseService {
-    CourseResponse getCourseDetails(UUID courseId);
+    CourseResponse getCourseDetails(String username, UUID courseId);
 
     // For cache and validate
     CourseResponse getCourseById(UUID courseId);

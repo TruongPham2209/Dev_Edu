@@ -1,5 +1,6 @@
 package com.pht.dev_edu.enrollment.dto;
 
+import com.pht.dev_edu.course.dto.CourseItemDetailResponse;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;

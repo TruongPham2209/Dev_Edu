@@ -30,6 +30,7 @@ public class CourseResponse {
     BigDecimal discountedPrice;
     LocalDateTime validTo;
 
+    Boolean registered;
     BigDecimal avgReview;
     Long totalReview;
     Long totalEnrollment;

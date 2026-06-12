@@ -3,7 +3,7 @@ package com.pht.dev_edu.enrollment.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.pht.dev_edu.enrollment.dto.CourseItemDetailResponse;
+import com.pht.dev_edu.course.dto.CourseItemDetailResponse;
 import com.pht.dev_edu.enrollment.dto.EnrolledCourseProjection;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserProjection;
 import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;

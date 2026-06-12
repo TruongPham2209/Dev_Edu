@@ -11,10 +11,9 @@ import java.util.UUID;
 @Data
 @Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class PurchaseDetailResponse {
-    UUID paymentId;
-    String paymentUrl;
+public class CheckoutDetailResponse {
+    UUID orderId;
     BigDecimal totalAmount;
     PurchaseEntityType entityType;
-    List<Object> items; // TODO: create specific response for course and bundle
+    List<?> items; // TODO: create specific response for course and bundle
 }

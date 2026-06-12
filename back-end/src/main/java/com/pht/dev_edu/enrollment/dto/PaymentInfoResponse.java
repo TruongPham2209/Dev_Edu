@@ -10,12 +10,10 @@ import java.util.UUID;
 @Data
 @Builder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class CourseItemResponse {
-    UUID id;
-    boolean registered;
-    BigDecimal originalPrice;
-    BigDecimal discountedPrice;
-    String title;
-    String description;
-    String thumbnailUrl;
+public class PaymentInfoResponse {
+    UUID paymentId;
+    UUID orderId;
+    PurchaseEntityType entityType;
+    String paymentUrl;
+    BigDecimal totalAmount;
 }

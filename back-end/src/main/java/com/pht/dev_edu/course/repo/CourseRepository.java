@@ -27,6 +27,13 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             
                     cd.discount_percentage              AS discountedPercentage,
                     cd.valid_to                         AS validTo,
+
+                    EXISTS (
+                        SELECT 1
+                        FROM enrollment en
+                        WHERE   en.course_id = :id
+                        AND     en.student_username = :username
+                    )                                   AS registered,
             
                     COALESCE(e.total_enrollment, 0)     AS totalEnrollment,
                     COALESCE(r.total_review, 0)         AS totalReview,
@@ -49,7 +56,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             WHERE   c.id            = :id
             AND     c.deleted_at    IS NULL
             """, nativeQuery = true)
-    CourseDetailProjection findCourseDetail(UUID id);
+    CourseDetailProjection findCourseDetail(UUID id, String username);
 
     @Query(value = """
             SELECT  c.id                                            AS id,

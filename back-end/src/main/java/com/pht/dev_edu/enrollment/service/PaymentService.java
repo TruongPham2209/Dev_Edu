@@ -1,13 +1,13 @@
 package com.pht.dev_edu.enrollment.service;
 
+import com.pht.dev_edu.enrollment.dto.PaymentInfoResponse;
 import com.pht.dev_edu.enrollment.dto.PaymentMethod;
-import com.pht.dev_edu.enrollment.dto.PurchaseDetailResponse;
-import com.pht.dev_edu.enrollment.dto.PurchaseRequest;
+import com.pht.dev_edu.enrollment.dto.PaymentRequest;
 
 import java.util.UUID;
 
 public interface PaymentService {
-    PurchaseDetailResponse processPurchase(String username, PurchaseRequest purchaseRequest);
+    PaymentInfoResponse processPurchase(String username, PaymentRequest paymentRequest);
 
     void handlePaymentReturn(PaymentMethod method, String txnRef, String responseCode);
 

@@ -37,4 +37,6 @@ public interface CourseDetailProjection {
     String getCreatedBy();
 
     LocalDateTime getCreatedAt();
+
+    Boolean registered();
 }
