@@ -14,6 +14,7 @@ import {
   useMutation,
   UseMutationOptions,
   useQuery,
+  useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
@@ -154,18 +155,28 @@ export function useAssignmentByIdQuery(
 export function useCreateAssignmentMutation(
   options?: UseMutationOptions<AssignmentResponse, Error, AssignmentRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createAssignment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteAssignmentMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteAssignment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -216,18 +227,28 @@ export function useSubmissionsInfiniteQuery(
 export function useCreateSubmissionMutation(
   options?: UseMutationOptions<SubmissionResponse, Error, SubmissionRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createSubmission,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteSubmissionMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteSubmission,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -267,24 +288,27 @@ export function useFeedbacksQuery(
 export function useCreateFeedbackMutation(
   options?: UseMutationOptions<FeedbackResponse, Error, FeedbackRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createFeedback,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteFeedbackMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteFeedback,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useAssignmentsQuery as useGetAssignments,
-  useFeedbacksQuery as useGetFeedbacks,
-  useSubmissionsQuery as useGetSubmissions,
-};

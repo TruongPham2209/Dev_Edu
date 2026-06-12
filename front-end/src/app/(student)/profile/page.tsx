@@ -4,7 +4,7 @@ import { Box } from "@mui/material";
 // import { useAuth } from "@/lib/use-auth";
 import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { EmptyState } from "@/components/common/empty-state";
-import { useGetMe } from "@/lib/api/users";
+import { useMeQuery } from "@/lib/api/users";
 import { AuthUser } from "@/lib/auth-storage";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { CircularProgress } from "@mui/material";
@@ -19,7 +19,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"posted" | "saved">("posted");
   const { handleError } = useApiWithToast();
 
-  const { data: userData, isLoading, error } = useGetMe();
+  const { data: userData, isLoading, error } = useMeQuery();
 
   useEffect(() => {
     if (userData) {

@@ -24,12 +24,10 @@ import type { CourseRequest, CourseResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Stack } from "@mui/material";
 import { BookOpen, Plus, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CourseTable } from "./course-table";
 
 export default function AdminCoursesPage() {
-  const router = useRouter();
   const { handleError, showSuccess } = useApiWithToast();
 
   // Dialog States

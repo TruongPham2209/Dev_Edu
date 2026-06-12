@@ -1,75 +1,55 @@
-import { getCourseById, getCourses } from "@/lib/api/courses";
-import { getEnrollments } from "@/lib/api/enrollments";
-import { getLecturesByCourse } from "@/lib/api/lectures";
-import { Box, Container, Grid, Stack } from "@mui/material";
-import { cookies } from "next/headers";
+"use client";
+
+import { useCourseByIdQuery, useCoursesQuery } from "@/lib/api/courses";
+import { useLecturesByCourseQuery } from "@/lib/api/lectures";
+import { Box, CircularProgress, Container, Grid, Stack } from "@mui/material";
 import { notFound } from "next/navigation";
+import { use } from "react";
 import { CourseAbout } from "./course-about";
 import { CourseContent } from "./course-content";
 import { CoursePurchaseSection } from "./course-purchase-section";
 import { CourseReviewsSection } from "./course-reviews-section";
 import { HeroSection } from "./hero-section";
 import { RelatedCourseList } from "./related-course-list";
-import { LectureResponse } from "@/lib/type/lectures";
-import { CourseResponse } from "@/lib/type/courses";
 
 interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function CourseDetailPage({
+export default function CourseDetailPage({
   params,
 }: CourseDetailPageProps) {
-  const { id: courseId } = await params;
+  const { id: courseId } = use(params);
 
   if (!courseId) {
     notFound();
   }
 
-  let course;
-  try {
-    course = await getCourseById(courseId);
-  } catch (error) {
-    console.error("Course not found:", error);
+  const {
+    data: course,
+    isLoading: loadingCourse,
+    error: courseError,
+  } = useCourseByIdQuery(courseId);
+
+  const { data: lectures = [] } = useLecturesByCourseQuery(courseId);
+
+  const { data: allCoursesData } = useCoursesQuery();
+
+  if (loadingCourse) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8, minHeight: "100vh" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (courseError || !course) {
     notFound();
   }
 
-  if (!course) {
-    notFound();
-  }
-
-  let lectures: LectureResponse[] = [];
-  try {
-    lectures = await getLecturesByCourse(courseId);
-  } catch (error) {
-    console.error("Lectures fetch failed:", error);
-  }
-
-  let relatedCourses: CourseResponse[] = [];
-  try {
-    const relatedCoursesData = await getCourses();
-    relatedCourses = (relatedCoursesData?.contents || [])
-      .filter((c) => c.id !== courseId)
-      .slice(0, 3);
-  } catch (error) {
-    console.error("Related courses fetch failed:", error);
-  }
-
-  let isEnrolled = false;
-  let isLoggedIn = false;
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
-    if (token) {
-      isLoggedIn = true;
-      const enrollmentsData = await getEnrollments();
-      isEnrolled = (enrollmentsData?.contents || []).some(
-        (c) => c.courseId === courseId || c.id === courseId,
-      );
-    }
-  } catch (error) {
-    console.error("Enrollment check failed:", error);
-  }
+  const relatedCourses = (allCoursesData?.contents || [])
+    .filter((c) => c.id !== courseId)
+    .slice(0, 3);
 
   return (
     <Box
@@ -94,9 +74,8 @@ export default async function CourseDetailPage({
             <Box sx={{ display: { xs: "block", md: "none" }, mb: 6 }}>
               <CoursePurchaseSection
                 course={course}
-                isEnrolled={isEnrolled}
+                isEnrolled={course.registered}
                 lectures={lectures}
-                isLoggedIn={isLoggedIn}
               />
             </Box>
 
@@ -131,9 +110,8 @@ export default async function CourseDetailPage({
           >
             <CoursePurchaseSection
               course={course}
-              isEnrolled={isEnrolled}
+              isEnrolled={course.registered}
               lectures={lectures}
-              isLoggedIn={isLoggedIn}
             />
           </Grid>
         </Grid>

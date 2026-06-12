@@ -33,6 +33,7 @@ export type CourseResponse = {
   discountedPrice: number | null;
   validTo: string | null;
 
+  registered: boolean;
   avgReview: number;
   totalReview: number;
   totalEnrollment: number;

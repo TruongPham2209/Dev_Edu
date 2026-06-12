@@ -121,7 +121,6 @@ export default function StudentLecturePage() {
           segmentStart: 0,
           segmentEnd: 0,
         });
-        refetchLectures();
       }
 
       if (nextLecture) {

@@ -1,12 +1,10 @@
 "use client";
 
 import { ErrorState } from "@/components/common/error-state";
-import { getCourseById } from "@/lib/api/courses";
-import { CourseResponse } from "@/lib/type/courses";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
+import { useCourseByIdQuery } from "@/lib/api/courses";
 import { Box, Grid, Stack } from "@mui/material";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { AdminCourseDetailSkeleton } from "./course-detail-skeleton";
 
 // Custom Admin Course Detail Page Components
@@ -20,44 +18,19 @@ import { StudentsList } from "./students-list";
 export default function AdminCourseDetailPage() {
   const params = useParams();
   const courseId = params.id as string;
-  const { handleError } = useApiWithToast();
-
-  const [course, setCourse] = useState<CourseResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const {
+    data: course,
+    isLoading: loading,
+    error,
+    refetch: fetchCourseDetails,
+  } = useCourseByIdQuery(courseId, {
+    enabled: !!courseId,
+  });
 
   // Re-calculated metrics counts updated by list components dynamically
   const [lecturesCount, setLecturesCount] = useState(0);
   const [studentsCount, setStudentsCount] = useState(0);
   const [discountsCount, setDiscountsCount] = useState(0);
-
-  // Prevent multiple parallel initial API calls
-  const isFetchingCourseRef = useRef(false);
-
-  const fetchCourseDetails = useCallback(async () => {
-    if (!courseId || isFetchingCourseRef.current) return;
-    isFetchingCourseRef.current = true;
-    setLoading(true);
-    setError(false);
-    try {
-      const data = await getCourseById(courseId);
-      if (data) {
-        setCourse(data as CourseResponse);
-      } else {
-        throw new Error("Failed to fetch course details.");
-      }
-    } catch (err) {
-      setError(true);
-      handleError(err, "Failed to fetch course details.");
-    } finally {
-      setLoading(false);
-      isFetchingCourseRef.current = false;
-    }
-  }, [courseId, handleError]);
-
-  useEffect(() => {
-    fetchCourseDetails();
-  }, [fetchCourseDetails]);
 
   // Loading Skeleton State
   if (loading) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { PostHistoryModal } from "@/components/dialog/post-history";
-import { savePost, unsavePost } from "@/lib/api/forum";
+import { PostHistoryModal } from "@/components/dialog/post-history/page";
+import { useSavePostMutation, useUnsavePostMutation } from "@/lib/api/forum";
 import type { PostResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
@@ -12,7 +12,7 @@ import {
   IconButton,
   Stack,
   Tooltip,
-  Typography
+  Typography,
 } from "@mui/material";
 import {
   Bookmark,
@@ -38,6 +38,9 @@ export function PostHeader({
   const { isAuthenticated } = useAuth();
   const { handleError, showSuccess } = useApiWithToast();
 
+  const { mutateAsync: savePostMutate } = useSavePostMutation();
+  const { mutateAsync: unsavePostMutate } = useUnsavePostMutation();
+
   const handleToggleSave = async () => {
     if (!isAuthenticated) {
       handleError(new Error("You need to login to save this post"));
@@ -50,10 +53,10 @@ export function PostHeader({
 
     try {
       if (prevSaved) {
-        await unsavePost(post.id);
+        await unsavePostMutate(post.id);
         showSuccess("Unsaved post successfully");
       } else {
-        await savePost(post.id);
+        await savePostMutate(post.id);
         showSuccess("Saved post successfully");
       }
     } catch (error) {

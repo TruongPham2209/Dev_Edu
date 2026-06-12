@@ -1,9 +1,11 @@
 import { CustomPaging } from "@/lib/type/api";
 import type {
+  CheckoutDetailResponse,
+  CheckoutRequest,
   CourseItemDetailResponse,
   OrderDetailResponse,
-  PurchaseDetailResponse,
-  PurchaseRequest,
+  PaymentRequest,
+  PaymentResponse,
 } from "@/lib/type/enrollments";
 import { PaymentStatus } from "@/lib/type/enum";
 import {
@@ -14,6 +16,7 @@ import {
   UseMutationOptions,
   useQuery,
   UseQueryOptions,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { CourseDiscountRequest, CourseDiscountResponse } from "../type/courses";
 import { EnrollmentUserResponse } from "../type/users";
@@ -41,12 +44,30 @@ export async function removeFromCart(courseId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/cart/items/courses?courseId=${courseId}`);
 }
 
-// --- Enrollment / Purchase ---
+// --- Checkout / Order ---
 
-export async function createPurchase(
-  purchase: PurchaseRequest,
-): Promise<PurchaseDetailResponse> {
-  return apiPost<PurchaseDetailResponse>("/api/v1/enrollments", purchase);
+export async function checkout(
+  purchase: CheckoutRequest,
+): Promise<CheckoutDetailResponse> {
+  return apiPost<CheckoutDetailResponse>("/api/v1/orders/checkout", purchase);
+}
+
+export async function getOrderDetail(
+  orderId: string,
+): Promise<CheckoutDetailResponse> {
+  return apiGet<CheckoutDetailResponse>(`/api/v1/orders?orderId=${orderId}`);
+}
+
+export async function cancelOrder(orderId: string): Promise<void> {
+  return apiDelete<void>(`/api/v1/orders/cancel?orderId=${orderId}`);
+}
+
+// --- Enrollment / Payment ---
+
+export async function createPayment(
+  payment: PaymentRequest,
+): Promise<PaymentResponse> {
+  return apiPost<PaymentResponse>("/api/v1/enrollments", payment);
 }
 
 export async function cancelPayment(paymentId: string): Promise<void> {
@@ -189,36 +210,99 @@ export function useOrderHistoryInfinateQuery(
 export function useAddToCartMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: addToCart,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useRemoveFromCartMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: removeFromCart,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useOrderDetailQuery(
+  orderId: string,
+  options?: Omit<
+    UseQueryOptions<CheckoutDetailResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["order", orderId],
+    queryFn: () => getOrderDetail(orderId),
+    enabled: !!orderId,
     ...options,
   });
 }
 
-export function useCreatePurchaseMutation(
-  options?: UseMutationOptions<PurchaseDetailResponse, Error, PurchaseRequest>,
+export function useCancelOrderMutation(
+  options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createPurchase,
+    mutationFn: cancelOrder,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useCreatePaymentMutation(
+  options?: UseMutationOptions<PaymentResponse, Error, PaymentRequest>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createPayment,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useCheckoutMutation(
+  options?: UseMutationOptions<CheckoutDetailResponse, Error, CheckoutRequest>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: checkout,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useCancelPaymentMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: cancelPayment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -355,26 +439,27 @@ export function useCreateCourseDiscountMutation(
     CourseDiscountRequest
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createCourseDiscount,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteCourseDiscountMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteCourseDiscount,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useCartItemsQuery as useGetCartItems,
-  useCourseDiscountsByCourseQuery as useGetCourseDiscountsByCourse,
-  useEnrolledUsersQuery as useGetEnrolledUsers,
-  useEnrollmentsQuery as useGetEnrollments,
-  useGlobalCourseDiscountsQuery as useGetGlobalCourseDiscounts,
-};

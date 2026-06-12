@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetCategories, useGetInfiniteCourses } from "@/lib/api/courses";
+import { useCategoriesQuery, useCoursesInfiniteQuery } from "@/lib/api/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Stack } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -23,7 +23,7 @@ export default function CourseDetailPage() {
   }, [searchKeyword]);
 
   // Use React Query
-  const { data: categoriesData, error: catError } = useGetCategories();
+  const { data: categoriesData, error: catError } = useCategoriesQuery();
 
   const {
     data: coursesData,
@@ -32,7 +32,7 @@ export default function CourseDetailPage() {
     hasNextPage,
     fetchNextPage,
     error: coursesError,
-  } = useGetInfiniteCourses({
+  } = useCoursesInfiniteQuery({
     keyword: debouncedKeyword || undefined,
     categoryId: selectedCategory || undefined,
   });

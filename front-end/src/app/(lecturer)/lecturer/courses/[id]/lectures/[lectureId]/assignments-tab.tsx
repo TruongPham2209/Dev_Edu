@@ -4,15 +4,16 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { AssignmentFormDialog } from "@/components/dialog/assignment-form";
-import { deleteAssignment, getAssignments } from "@/lib/api/assignments";
-import type { AssignmentResponse } from "@/lib/type/assignments";
+import {
+  useAssignmentsQuery,
+  useDeleteAssignmentMutation,
+} from "@/lib/api/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Card,
   CardContent,
-  Collapse,
   IconButton,
   Stack,
   Tooltip,
@@ -43,29 +44,14 @@ export function AssignmentsTab({
   const { handleError, showSuccess } = useApiWithToast();
   const router = useRouter();
 
-  const [assignments, setAssignments] = useState<AssignmentResponse[]>([]);
-  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Delete State
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [exitingIds, setExitingIds] = useState<string[]>([]);
 
-  const loadAssignments = async () => {
-    try {
-      setLoading(true);
-      const data = await getAssignments(lectureId);
-      setAssignments(data);
-    } catch (err) {
-      handleError(err, "Failed to load assignments");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAssignments();
-  }, [lectureId]);
+  const { data: assignments = [], isLoading: loading } =
+    useAssignmentsQuery(lectureId);
+  const { mutateAsync: deleteAssignmentMutate } = useDeleteAssignmentMutation();
 
   useEffect(() => {
     onCountChange?.(assignments.length);
@@ -79,21 +65,13 @@ export function AssignmentsTab({
     if (!deletingId) return;
 
     try {
-      await deleteAssignment(deletingId);
+      await deleteAssignmentMutate(deletingId);
       showSuccess("Deleted assignment successfully");
-
-      // Smooth exit animation
-      setExitingIds((prev) => [...prev, deletingId]);
     } catch (err) {
       handleError(err, "Failed to delete assignment");
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const handleAnimationExited = (id: string) => {
-    setAssignments((prev) => prev.filter((a) => a.id !== id));
-    setExitingIds((prev) => prev.filter((exId) => exId !== id));
   };
 
   const handleOpenDialog = () => {
@@ -231,145 +209,137 @@ export function AssignmentsTab({
         ) : (
           <Stack spacing={2}>
             {assignments.map((assignment) => {
-              const isExiting = exitingIds.includes(assignment.id);
-
               return (
-                <Collapse
+                <Card
                   key={assignment.id}
-                  in={!isExiting}
-                  timeout={300}
-                  onExited={() => handleAnimationExited(assignment.id)}
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 1,
+                    borderColor: "divider",
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      borderColor: "primary.light",
+                      boxShadow: "0 4px 12px rgba(37, 99, 235, 0.03)",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
                 >
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 1,
-                      borderColor: "divider",
-                      transition: "all 0.2s ease-in-out",
-                      "&:hover": {
-                        borderColor: "primary.light",
-                        boxShadow: "0 4px 12px rgba(37, 99, 235, 0.03)",
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ p: 2 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          gap: 3,
-                        }}
-                      >
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            sx={{ alignItems: "center", mb: 1 }}
-                          >
-                            <Box
-                              sx={{
-                                p: 0.75,
-                                borderRadius: 1,
-                                bgcolor: "rgba(37, 99, 235, 0.06)",
-                                color: "primary.main",
-                                display: "flex",
-                                flexShrink: 0,
-                              }}
-                            >
-                              <FileText size={18} />
-                            </Box>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                fontWeight: 750,
-                                color: "#1e293b",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {assignment.title}
-                            </Typography>
-
-                            <Stack
-                              direction="row"
-                              spacing={0.75}
-                              sx={{
-                                alignItems: "center",
-                                color: "text.secondary",
-                                mx: 1,
-                                border: "1px solid",
-                                borderColor: "divider",
-                                borderRadius: 1,
-                                px: 1,
-                                py: 0.5,
-                              }}
-                            >
-                              <Calendar size={16} />
-                              <Typography variant="caption">
-                                {formatServerDate(
-                                  assignment.createdAt,
-                                  "datetime",
-                                )}
-                              </Typography>
-                            </Stack>
-                          </Stack>
-
-                          {/* Description render */}
-                          <Box
-                            sx={{
-                              color: "text.secondary",
-                              fontSize: "0.875rem",
-                              lineHeight: 1.6,
-                              mb: 2,
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitBoxOrient: "vertical",
-                              WebkitLineClamp: 2,
-                              "& p": { m: 0 },
-                            }}
-                            dangerouslySetInnerHTML={{
-                              __html: assignment.description,
-                            }}
-                          />
-
-                          <Stack
-                            direction="row"
-                            spacing={2}
-                            sx={{ alignItems: "center", flexWrap: "wrap" }}
-                          ></Stack>
-                        </Box>
-
+                  <CardContent sx={{ p: 2 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 3,
+                      }}
+                    >
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Stack
                           direction="row"
                           spacing={1}
-                          sx={{ flexShrink: 0, alignItems: "center" }}
+                          sx={{ alignItems: "center", mb: 1 }}
                         >
-                          <ButtonAction
-                            onClick={() =>
-                              router.push(
-                                `/lecturer/courses/${courseId}/lectures/${lectureId}/assignments/${assignment.id}`,
-                              )
-                            }
-                            color="primary"
-                            variant="soft"
-                            icon={<Eye size={18} />}
-                            tooltip="View & Manage"
-                          />
-                          <ButtonAction
-                            color="error"
-                            variant="soft"
-                            icon={<Trash2 size={18} />}
-                            tooltip="Delete"
-                            onClick={() => handleDeleteClick(assignment.id)}
-                          />
+                          <Box
+                            sx={{
+                              p: 0.75,
+                              borderRadius: 1,
+                              bgcolor: "rgba(37, 99, 235, 0.06)",
+                              color: "primary.main",
+                              display: "flex",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <FileText size={18} />
+                          </Box>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: 750,
+                              color: "#1e293b",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {assignment.title}
+                          </Typography>
+
+                          <Stack
+                            direction="row"
+                            spacing={0.75}
+                            sx={{
+                              alignItems: "center",
+                              color: "text.secondary",
+                              mx: 1,
+                              border: "1px solid",
+                              borderColor: "divider",
+                              borderRadius: 1,
+                              px: 1,
+                              py: 0.5,
+                            }}
+                          >
+                            <Calendar size={16} />
+                            <Typography variant="caption">
+                              {formatServerDate(
+                                assignment.createdAt,
+                                "datetime",
+                              )}
+                            </Typography>
+                          </Stack>
                         </Stack>
+
+                        {/* Description render */}
+                        <Box
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "0.875rem",
+                            lineHeight: 1.6,
+                            mb: 2,
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            "& p": { m: 0 },
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: assignment.description,
+                          }}
+                        />
+
+                        <Stack
+                          direction="row"
+                          spacing={2}
+                          sx={{ alignItems: "center", flexWrap: "wrap" }}
+                        ></Stack>
                       </Box>
-                    </CardContent>
-                  </Card>
-                </Collapse>
+
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ flexShrink: 0, alignItems: "center" }}
+                      >
+                        <ButtonAction
+                          onClick={() =>
+                            router.push(
+                              `/lecturer/courses/${courseId}/lectures/${lectureId}/assignments/${assignment.id}`,
+                            )
+                          }
+                          color="primary"
+                          variant="soft"
+                          icon={<Eye size={18} />}
+                          tooltip="View & Manage"
+                        />
+                        <ButtonAction
+                          color="error"
+                          variant="soft"
+                          icon={<Trash2 size={18} />}
+                          tooltip="Delete"
+                          onClick={() => handleDeleteClick(assignment.id)}
+                        />
+                      </Stack>
+                    </Box>
+                  </CardContent>
+                </Card>
               );
             })}
           </Stack>
@@ -381,9 +351,6 @@ export function AssignmentsTab({
         open={dialogOpen}
         onClose={handleCloseDialog}
         lectureId={lectureId}
-        onSuccess={(newAssignment) => {
-          setAssignments((prev) => [newAssignment, ...prev]);
-        }}
       />
 
       {/* Confirmation Dialog */}

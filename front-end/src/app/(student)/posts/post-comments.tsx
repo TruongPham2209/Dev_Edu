@@ -5,9 +5,9 @@ import { CommentItem } from "@/components/common/comment-item";
 import { EmptyState } from "@/components/common/empty-state";
 import { InfiniteLoadButton } from "@/components/common/infinite-load-button";
 import {
-  createForumComment,
   getForumCommentReplies,
   getForumComments,
+  useCreateForumCommentMutation,
 } from "@/lib/api/forum";
 import { CustomPaging } from "@/lib/type/api";
 import type { ForumCommentResponse } from "@/lib/type/forums";
@@ -58,6 +58,8 @@ export function PostComments({
   const [commentInput, setCommentInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const { mutateAsync: createCommentMutate } = useCreateForumCommentMutation();
+
   const loadComments = async (cursor?: string) => {
     try {
       const response = onFetchComments
@@ -86,7 +88,7 @@ export function PostComments({
     try {
       const newComment = onCreateComment
         ? await onCreateComment(postId, commentInput.trim())
-        : await createForumComment({
+        : await createCommentMutate({
             postId,
             content: commentInput.trim(),
           });
@@ -198,7 +200,7 @@ export function PostComments({
                   const res = await onCreateReply(comment.id, content);
                   return res as any;
                 } else {
-                  const res = await createForumComment({
+                  const res = await createCommentMutate({
                     postId,
                     content,
                     repliedToCommentId: replyToId,

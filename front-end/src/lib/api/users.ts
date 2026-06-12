@@ -3,13 +3,14 @@ import {
   useMutation,
   UseMutationOptions,
   useQuery,
+  useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
 import { RoleEnum } from "../type/enum";
 import { apiGet, apiPost, apiPut } from "./client";
 
-// --- Users ---
+// --- Call API ---
 
 export async function getMe(): Promise<UserResponse> {
   return apiGet("/api/v1/me");
@@ -74,9 +75,14 @@ export function useMeQuery(
 export function useRegisterMutation(
   options?: UseMutationOptions<string, Error, RegisterUser>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: register,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -87,28 +93,28 @@ export function useChangePasswordMutation(
     { oldPassword: string; newPassword: string }
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ oldPassword, newPassword }) =>
       changePassword(oldPassword, newPassword),
     ...options,
-  });
-}
-
-export function useBatchCreateUsersMutation(
-  options?: UseMutationOptions<string, Error, RegisterUser[]>,
-) {
-  return useMutation({
-    mutationFn: batchCreateUsers,
-    ...options,
+    onSuccess: (...args) => {
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useUpdateAvatarMutation(
   options?: UseMutationOptions<string, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateAvatar,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -119,9 +125,14 @@ export function useSetUsernameFromGoogleMutation(
     { email: string; username: string }
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ email, username }) => setUsernameFromGoogle(email, username),
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -140,12 +151,3 @@ export function useSearchUsersQuery(
     ...options,
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useChangePasswordMutation as useChangePassword,
-  useMeQuery as useGetMe,
-  useRegisterMutation as useRegister,
-  useSearchUsersQuery as useSearchUsers,
-  useUpdateAvatarMutation as useUpdateAvatar,
-};

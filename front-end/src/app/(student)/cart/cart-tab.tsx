@@ -3,7 +3,7 @@
 import { EmptyState } from "@/components/common/empty-state";
 import {
   useCartItemsInfiniteQuery,
-  useCreatePurchaseMutation,
+  useCheckoutMutation,
   useRemoveFromCartMutation,
 } from "@/lib/api/enrollments";
 import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
@@ -51,7 +51,7 @@ export function CartTabContent() {
   } = useCartItemsInfiniteQuery();
 
   const { mutateAsync: removeFromCartMutate } = useRemoveFromCartMutation();
-  const { mutateAsync: createPurchaseMutate } = useCreatePurchaseMutation();
+  const { mutateAsync: createCheckoutMutate } = useCheckoutMutation();
 
   const items = useMemo(() => {
     return data?.pages.flatMap((page) => page.contents) || [];
@@ -143,13 +143,12 @@ export function CartTabContent() {
     setIsCheckoutLoading(true);
     try {
       const purchaseIds = Array.from(selectedIds);
-      const res = await createPurchaseMutate({
+      const res = await createCheckoutMutate({
         entityIds: purchaseIds,
         entityType: "COURSE",
-        paymentMethod: "VNPAY", // Default or let checkout page handle
       });
-      if (res.paymentId) {
-        router.push(`/checkout?paymentId=${res.paymentId}`);
+      if (res.orderId) {
+        router.push(`/checkout?orderId=${res.orderId}`);
       }
     } catch (error) {
       handleError(error, "Failed to create order");

@@ -2,8 +2,7 @@
 
 import ButtonAction from "@/components/common/button-action";
 import { EmptyState } from "@/components/common/empty-state";
-import { getAssignments } from "@/lib/api/assignments";
-import type { AssignmentResponse } from "@/lib/type/assignments";
+import { useAssignmentsQuery } from "@/lib/api/assignments";
 import {
   alpha,
   Box,
@@ -24,26 +23,16 @@ interface TabAssignmentsProps {
 
 export function TabAssignments({ lectureId }: TabAssignmentsProps) {
   const theme = useTheme();
-  const [assignments, setAssignments] = useState<AssignmentResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedAssignment, setSelectedAssignment] =
-    useState<AssignmentResponse | null>(null);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<
+    string | null
+  >(null);
 
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      setLoading(true);
-      try {
-        const data = await getAssignments(lectureId);
-        setAssignments(data);
-      } catch (err) {
-        console.error("Failed to fetch assignments", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: assignments = [], isLoading: loading } =
+    useAssignmentsQuery(lectureId);
 
-    fetchAssignments();
-  }, [lectureId]);
+  const selectedAssignment = assignments.find(
+    (a) => a.id === selectedAssignmentId,
+  );
 
   if (loading) {
     return (
@@ -175,7 +164,7 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
                 }
                 variant={assignment.submittedAt ? "soft-dark" : "contained"}
                 color="primary"
-                onClick={() => setSelectedAssignment(assignment)}
+                onClick={() => setSelectedAssignmentId(assignment.id)}
               />
             </Stack>
           </Paper>
@@ -185,17 +174,8 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
       {selectedAssignment && (
         <AssignmentModal
           open={!!selectedAssignment}
-          onClose={() => setSelectedAssignment(null)}
+          onClose={() => setSelectedAssignmentId(null)}
           assignment={selectedAssignment}
-          onSuccess={() => {
-            // Refresh assignments to update status
-            getAssignments(lectureId).then((data) => {
-              setAssignments(data);
-              // Update selectedAssignment to reflect new status (e.g. submittedAt)
-              const updated = data.find((a) => a.id === selectedAssignment?.id);
-              if (updated) setSelectedAssignment(updated);
-            });
-          }}
         />
       )}
     </>

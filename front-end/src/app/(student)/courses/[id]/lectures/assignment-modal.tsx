@@ -2,14 +2,14 @@
 
 import { FileUpload } from "@/components/common/form/file-upload";
 import {
-  createSubmission,
-  deleteSubmission,
-  getFeedbacks,
+  useCreateSubmissionMutation,
+  useDeleteSubmissionMutation,
+  useFeedbacksQuery,
 } from "@/lib/api/assignments";
 import {
   getDownloadUrl,
-  getFileMetadata,
-  getPreSignedUploadUrl,
+  useFileMetadataQuery,
+  usePreSignedUploadUrlMutation,
 } from "@/lib/api/files";
 import type {
   AssignmentResponse,
@@ -47,78 +47,47 @@ interface AssignmentModalProps {
   open: boolean;
   onClose: () => void;
   assignment: AssignmentResponse;
-  onSuccess: () => void;
 }
 
 export function AssignmentModal({
   open,
   onClose,
   assignment,
-  onSuccess,
 }: AssignmentModalProps) {
   const theme = useTheme();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
-  const [loadingDetails, setLoadingDetails] = useState(false);
+  const { data: feedbacks = [], isLoading: isLoadingFeedbacks } =
+    useFeedbacksQuery(assignment.id, undefined, { enabled: open });
 
   // Undo Logic
   const [isDeleting, setIsDeleting] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [lastDeletedId, setLastDeletedId] = useState<string | null>(null);
-  const [submissionMetadata, setSubmissionMetadata] = useState<{
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    objectKey: string;
-  } | null>(null);
   const undoIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    if (open) {
-      loadDetails();
-    }
-  }, [open, assignment]);
+  const { data: fileMetadata, isLoading: isLoadingMetadata } =
+    useFileMetadataQuery(assignment.fileObjectKey || "", {
+      enabled: open && !!assignment.submittedAt && !!assignment.fileObjectKey,
+    });
 
-  const loadDetails = async () => {
-    setLoadingDetails(true);
-
-    try {
-      const promises: Promise<any>[] = [
-        // 1. Load Feedbacks
-        getFeedbacks(assignment.id)
-          .then(setFeedbacks)
-          .catch((err) => console.error("Failed to load feedbacks", err)),
-      ];
-
-      // 2. Load Metadata if submitted
-      if (assignment.submittedAt && assignment.fileObjectKey) {
-        promises.push(
-          getFileMetadata(assignment.fileObjectKey)
-            .then((meta) =>
-              setSubmissionMetadata({
-                id: assignment.id,
-                name: meta.originalFileName,
-                size: meta.fileSize || 0,
-                type: meta.contentType,
-                objectKey: assignment.fileObjectKey!,
-              }),
-            )
-            .catch((err) =>
-              console.error("Failed to load submission metadata", err),
-            ),
-        );
+  const submissionMetadata = fileMetadata
+    ? {
+        id: assignment.id,
+        name: fileMetadata.originalFileName,
+        size: fileMetadata.fileSize || 0,
+        type: fileMetadata.contentType,
+        objectKey: assignment.fileObjectKey!,
       }
+    : null;
 
-      await Promise.all(promises);
-    } catch (err) {
-      console.error("Failed to load details", err);
-    } finally {
-      setLoadingDetails(false);
-    }
-  };
+  const loadingDetails = isLoadingFeedbacks || isLoadingMetadata;
+
+  const { mutateAsync: createSubmissionMutate } = useCreateSubmissionMutation();
+  const { mutateAsync: deleteSubmissionMutate } = useDeleteSubmissionMutation();
+  const { mutateAsync: getPreSignedUploadUrlMutate } =
+    usePreSignedUploadUrlMutation();
 
   const handleFileChange = (selectedFile: File | null) => {
     setFile(selectedFile);
@@ -131,7 +100,7 @@ export function AssignmentModal({
     setUploadProgress(10);
     try {
       // 1. Get Pre-signed URL
-      const preSigned = await getPreSignedUploadUrl({
+      const preSigned = await getPreSignedUploadUrlMutate({
         fileName: file.name,
         contentType: file.type,
         fileSize: file.size,
@@ -155,13 +124,12 @@ export function AssignmentModal({
       setUploadProgress(80);
 
       // 3. Create Submission
-      await createSubmission({
+      await createSubmissionMutate({
         assignmentId: assignment.id,
         fileObjectKey: preSigned.objectKey,
       });
 
       setUploadProgress(100);
-      onSuccess();
       setFile(null);
     } catch (err) {
       console.error("Upload failed", err);
@@ -190,10 +158,9 @@ export function AssignmentModal({
     setLastDeletedId(assignment.id);
 
     undoIntervalRef.current = setTimeout(() => {
-      deleteSubmission(assignment.id).then(() => {
+      deleteSubmissionMutate(assignment.id).then(() => {
         setIsDeleting(false);
         setSnackbarOpen(false);
-        onSuccess();
       });
     }, 5000);
   };

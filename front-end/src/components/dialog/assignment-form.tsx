@@ -14,7 +14,7 @@ interface AssignmentFormDialogProps {
   open: boolean;
   onClose: () => void;
   lectureId: string;
-  onSuccess: (assignment: AssignmentResponse) => void;
+  onSuccess?: (assignment: AssignmentResponse) => void;
 }
 
 export function AssignmentFormDialog({
@@ -80,7 +80,7 @@ export function AssignmentFormDialog({
       });
 
       showSuccess("Added assignment successfully");
-      onSuccess(newAssignment);
+      onSuccess?.(newAssignment);
       onClose();
     } catch (err) {
       handleError(err, "Cannot add assignment");

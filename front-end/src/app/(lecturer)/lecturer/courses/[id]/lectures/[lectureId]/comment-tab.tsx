@@ -30,17 +30,10 @@ export function TabComments({ lectureId }: TabCommentsProps) {
   } = useInfiniteLectureCommentsQuery({ lectureId });
 
   const { mutateAsync: createCommentMutate, isPending: submitting } =
-    useCreateLectureCommentMutation({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["lectures", "comments"] });
-      },
-    });
+    useCreateLectureCommentMutation();
 
-  const { mutateAsync: deleteCommentMutate } = useDeleteLectureCommentMutation({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["lectures", "comments"] });
-    },
-  });
+  const { mutateAsync: deleteCommentMutate } =
+    useDeleteLectureCommentMutation();
 
   const comments = commentsData?.pages.flatMap((page) => page.contents) || [];
   const rootComments = comments.filter((c) => !c.parentCommentId);

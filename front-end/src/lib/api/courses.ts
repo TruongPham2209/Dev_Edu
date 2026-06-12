@@ -14,6 +14,7 @@ import {
   UseMutationOptions,
   useQuery,
   UseQueryOptions,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
 import { ItemStatus } from "../type/enum";
@@ -209,27 +210,42 @@ export function useCategoriesQuery(
 export function useCreateCategoryMutation(
   options?: UseMutationOptions<CategoryResponse, Error, CategoryRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createCategory,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useUpdateCategoryMutation(
   options?: UseMutationOptions<CategoryResponse, Error, CategoryRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateCategory,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteCategoryMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteCategory,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -366,27 +382,42 @@ export function useAllAdminCoursesQuery(
 export function useCreateCourseMutation(
   options?: UseMutationOptions<CourseResponse, Error, CourseRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createCourse,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useUpdateCourseMutation(
   options?: UseMutationOptions<CourseResponse, Error, CourseRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateCourse,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteCourseMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteCourse,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -433,27 +464,27 @@ export function useCourseReviewsInfiniteQuery(
 export function useCreateReviewMutation(
   options?: UseMutationOptions<ReviewResponse, Error, ReviewRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createReview,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteReviewMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteReview,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useCategoriesQuery as useGetCategories,
-  useCourseByIdQuery as useGetCourseById,
-  useCoursesQuery as useGetCourses,
-  useFeaturedCoursesQuery as useGetFeaturedCourses,
-  useCourseReviewsInfiniteQuery as useGetInfiniteCourseReviews,
-  useCoursesInfiniteQuery as useGetInfiniteCourses,
-};

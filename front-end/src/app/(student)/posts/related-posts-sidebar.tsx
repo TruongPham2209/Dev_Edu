@@ -1,6 +1,7 @@
 import { PostCard } from "@/components/card/post-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { getRelatedPosts } from "@/lib/api/forum";
+import type { PostResponse } from "@/lib/type/forums";
 import { Box, Stack, Typography } from "@mui/material";
 
 interface RelatedPostsSidebarProps {
@@ -10,7 +11,7 @@ interface RelatedPostsSidebarProps {
 export async function RelatedPostsSidebar({
   postId,
 }: RelatedPostsSidebarProps) {
-  let relatedPosts: any[] = [];
+  let relatedPosts: PostResponse[] = [];
   try {
     relatedPosts = await getRelatedPosts(postId);
   } catch (error) {

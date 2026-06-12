@@ -15,6 +15,7 @@ import {
   UseMutationOptions,
   useQuery,
   UseQueryOptions,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
 import { PostStatus } from "../type/enum";
@@ -185,27 +186,42 @@ export async function deleteForumComment(commentId: string): Promise<void> {
 export function useCreateForumPostMutation(
   options?: UseMutationOptions<PostResponse, Error, PostRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createForumPost,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useUpdateForumPostMutation(
   options?: UseMutationOptions<PostResponse, Error, PostRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateForumPost,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteForumPostMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteForumPost,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -393,18 +409,28 @@ export function useUpdatePostVersionMutation(
     PostVersionUpdateRequest
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updatePostVersion,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeletePostVersionMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deletePostVersion,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -446,18 +472,28 @@ export function useSavedPostsInfiniteQuery(
 export function useSavePostMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: savePost,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useUnsavePostMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: unsavePost,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -548,18 +584,28 @@ export function useCreateForumCommentMutation(
     ForumCommentRequest
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createForumComment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteForumCommentMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteForumComment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["forum"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 

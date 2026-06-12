@@ -1,7 +1,8 @@
 "use client";
 
 import { loginAction, type LoginActionState } from "@/app/login/actions";
-import { getMe } from "@/lib/api/users";
+import { useMeQuery } from "@/lib/api/users";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
   Box,
   Button,
@@ -45,6 +46,9 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const { refetch: fetchMe } = useMeQuery({ enabled: false });
+  const { handleError } = useApiWithToast();
+
   useEffect(() => {
     async function syncAuth() {
       if (state.success && state.token) {
@@ -58,14 +62,16 @@ export default function LoginForm() {
         let avatarUrl = undefined;
 
         try {
-          const me = await getMe();
+          const meResult = await fetchMe();
+          if (!meResult.data) throw new Error("Failed to fetch me");
+          const me = meResult.data;
           role = me.role;
           fullName = me.fullName || me.username || fullName;
           id = me.id || "";
           email = me.email || "";
           avatarUrl = me.avatarUrl;
         } catch (e) {
-          console.error("Failed to fetch user info, using fallback.", e);
+          handleError(e, "Failed to fetch user info");
         }
 
         const decoded = decodeJwt(state.token);
@@ -91,7 +97,7 @@ export default function LoginForm() {
     }
 
     syncAuth();
-  }, [state, router]);
+  }, [state, router, fetchMe, handleError]);
 
   return (
     <Box

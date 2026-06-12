@@ -5,6 +5,7 @@ import {
   useInfiniteQuery,
   UseQueryOptions,
   UseMutationOptions,
+  useQueryClient,
 } from "@tanstack/react-query";
 import type {
   CommentPageRequest,
@@ -130,27 +131,42 @@ export function useLectureByIdQuery(
 export function useCreateLectureMutation(
   options?: UseMutationOptions<LectureResponse, Error, LectureRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLecture,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useUpdateLectureMutation(
   options?: UseMutationOptions<LectureResponse, Error, LectureRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateLecture,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteLectureMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteLecture,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -160,6 +176,9 @@ export function useUpdateLectureProgressMutation(
   return useMutation({
     mutationFn: updateLectureProgress,
     ...options,
+    onSuccess: (...args) => {
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -181,18 +200,28 @@ export function useMaterialsQuery(
 export function useCreateMaterialMutation(
   options?: UseMutationOptions<MaterialResponse, Error, MaterialRequest>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createMaterial,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteMaterialMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteMaterial,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
@@ -234,18 +263,28 @@ export function useCreateLectureCommentMutation(
     { lectureId: string; content: string; parentCommentId?: string }
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLectureComment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useDeleteLectureCommentMutation(
   options?: UseMutationOptions<void, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: deleteLectureComment,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["lectures"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 

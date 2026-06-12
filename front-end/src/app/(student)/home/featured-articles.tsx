@@ -2,14 +2,22 @@ import { getForumFeed } from "@/lib/api/forum";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Box, Skeleton, Typography } from "@mui/material";
 import Link from "next/link";
+import { ErrorState } from "@/components/common/error-state";
+import type { PostResponse } from "@/lib/type/forums";
 
 export async function FeaturedArticlesSection() {
-  let articles: any[] = [];
+  let articles: PostResponse[] = [];
   try {
     const data = await getForumFeed();
     articles = data?.contents || [];
   } catch (error) {
     console.error("Failed to fetch featured articles:", error);
+    return (
+      <ErrorState
+        title="Failed to load featured articles"
+        subtitle="Please try again later"
+      />
+    );
   }
 
   return (

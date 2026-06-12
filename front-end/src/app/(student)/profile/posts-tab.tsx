@@ -1,13 +1,13 @@
 import { PostCard } from "@/components/card/post-card";
 import { SkeletonCard } from "@/components/card/skeleton-card";
 import { EmptyState } from "@/components/common/empty-state";
-import { PostHistoryModal } from "@/components/dialog/post-history";
+import { PostHistoryModal } from "@/components/dialog/post-history/page";
 import { getPreSignedUploadUrl } from "@/lib/api/files";
 import {
-  createForumPost,
-  deleteForumPost,
-  deletePostVersion,
-  updateForumPost,
+  useCreateForumPostMutation,
+  useDeleteForumPostMutation,
+  useDeletePostVersionMutation,
+  useUpdateForumPostMutation,
 } from "@/lib/api/forum";
 import type { PostRequest, PostResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
@@ -29,7 +29,6 @@ import {
 } from "@/components/common/form/filter-select";
 import { usePostedPostsInfiniteQuery } from "@/lib/api/forum";
 import { PostStatus } from "@/lib/type/enum";
-import { useQueryClient } from "@tanstack/react-query";
 
 const FILTER_ITEMS: FilterItem[] = [
   { id: "APPROVED", title: "Approved" },
@@ -40,7 +39,11 @@ const FILTER_ITEMS: FilterItem[] = [
 export function PostedPostsTab() {
   const [statusFilter, setStatusFilter] = useState<string>("APPROVED");
   const [debouncedStatus, setDebouncedStatus] = useState<string>("APPROVED");
-  const queryClient = useQueryClient();
+
+  const { mutateAsync: createPostMutate } = useCreateForumPostMutation();
+  const { mutateAsync: updatePostMutate } = useUpdateForumPostMutation();
+  const { mutateAsync: deletePostMutate } = useDeleteForumPostMutation();
+  const { mutateAsync: deleteVersionMutate } = useDeletePostVersionMutation();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -86,13 +89,10 @@ export function PostedPostsTab() {
       // Actually delete from API if not undone
       try {
         if (postToRemove.status === "APPROVED") {
-          await deleteForumPost(postToRemove.id);
+          await deletePostMutate(postToRemove.id);
         } else {
-          await deletePostVersion(postToRemove.id);
+          await deleteVersionMutate(postToRemove.id);
         }
-        queryClient.invalidateQueries({
-          queryKey: ["forum", "posted-infinite"],
-        });
       } catch (e) {
         console.error("Delete failed", e);
       }
@@ -144,13 +144,12 @@ export function PostedPostsTab() {
       }
 
       if (finalPayload.postId) {
-        await updateForumPost(finalPayload);
+        await updatePostMutate(finalPayload);
         showSuccess("Post updated successfully");
       } else {
-        await createForumPost(finalPayload);
+        await createPostMutate(finalPayload);
         showSuccess("Post created successfully");
       }
-      queryClient.invalidateQueries({ queryKey: ["forum", "posted-infinite"] });
       setEditPost(null);
       setIsCreatingPost(false);
     } catch (error) {

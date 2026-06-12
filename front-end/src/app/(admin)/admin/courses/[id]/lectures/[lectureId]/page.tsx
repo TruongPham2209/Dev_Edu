@@ -106,13 +106,9 @@ export default function AdminLectureDetailPage() {
               onMaterialDeleted={handleMaterialDeleted}
             />
 
-            {/* Assignments Section */}
             <AssignmentsList
-              assignments={assignments}
               courseId={courseId}
               lectureId={lectureId}
-              onAssignmentCreated={handleAssignmentCreated}
-              onAssignmentDeleted={handleAssignmentDeleted}
             />
           </>
         )}

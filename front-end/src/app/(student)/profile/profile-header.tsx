@@ -2,8 +2,14 @@ import { FileUpload } from "@/components/common/form/file-upload";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { ImagePreview } from "@/components/common/image-preview";
-import { confirmImageUpload, getPreSignedUploadUrl } from "@/lib/api/files";
-import { changePassword, updateAvatar } from "@/lib/api/users";
+import {
+  useConfirmImageUploadMutation,
+  usePreSignedUploadUrlMutation,
+} from "@/lib/api/files";
+import {
+  useChangePasswordMutation,
+  useUpdateAvatarMutation,
+} from "@/lib/api/users";
 import type { AuthUser } from "@/lib/auth-storage";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Avatar, Box, Button, Paper, Stack, Typography } from "@mui/material";
@@ -30,6 +36,11 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
   const [file, setFile] = useState<File | null>(null);
 
   const { handleError, showSuccess } = useApiWithToast();
+
+  const { mutateAsync: changePasswordMutate } = useChangePasswordMutation();
+  const { mutateAsync: updateAvatarMutate } = useUpdateAvatarMutation();
+  const { mutateAsync: getPreSignedUploadUrlMutate } = usePreSignedUploadUrlMutation();
+  const { mutateAsync: confirmImageUploadMutate } = useConfirmImageUploadMutation();
 
   const isNewPasswordValid = newPassword
     ? PASSWORD_REGEX.test(newPassword)
@@ -59,7 +70,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
     }
 
     try {
-      await changePassword(oldPassword, newPassword);
+      await changePasswordMutate({ oldPassword, newPassword });
       showSuccess("Changed password successfully!");
       handleClosePassword();
     } catch (err: any) {
@@ -71,7 +82,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
   const handleUploadAvatar = async () => {
     if (!file) return;
     try {
-      const preSignRes = await getPreSignedUploadUrl({
+      const preSignRes = await getPreSignedUploadUrlMutate({
         fileName: file.name,
         contentType: file.type,
         fileSize: file.size,
@@ -87,8 +98,8 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
         },
       });
 
-      await confirmImageUpload(preSignRes.objectKey);
-      await updateAvatar(preSignRes.objectKey);
+      await confirmImageUploadMutate(preSignRes.objectKey);
+      await updateAvatarMutate(preSignRes.objectKey);
 
       onAvatarChange(preSignRes.publicUrl || preSignRes.downloadUrl || "");
       showSuccess("Updated avatar successfully!");

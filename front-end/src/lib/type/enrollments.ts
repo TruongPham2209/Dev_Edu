@@ -17,19 +17,16 @@ export type CourseItemDetailResponse = {
   status?: PaymentStatus;
 };
 
-export type PurchaseRequest = {
+export type CheckoutRequest = {
   entityIds: string[];
   entityType: EntityType;
-  paymentMethod: PaymentMethod;
-  ipAddress?: string;
 };
 
-export type PurchaseDetailResponse = {
-  paymentId: string;
-  paymentUrl: string | null;
+export type CheckoutDetailResponse = {
+  orderId: string;
   totalAmount: number;
   entityType: string;
-  items: CourseItemResponse[] | null; // TODO: Update if implements subscription
+  items: CourseItemResponse[];
 };
 
 export type OrderDetailResponse = {
@@ -47,4 +44,17 @@ export type CourseItemResponse = {
   discountedPrice: number | null;
   title: string;
   thumbnailUrl: string | null;
+};
+
+export type PaymentRequest = {
+  orderId: string;
+  paymentMethod: PaymentMethod;
+};
+
+export type PaymentResponse = {
+  paymentId: string;
+  orderId: string;
+  entityType: EntityType;
+  paymentUrl: string;
+  totalAmount: number;
 };

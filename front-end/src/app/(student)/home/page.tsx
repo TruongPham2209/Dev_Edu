@@ -1,7 +1,4 @@
 import { HeroSlideshow } from "@/app/(student)/home/hero-slideshow";
-import { CourseCard } from "@/components/card/course-card";
-import { SkeletonCard } from "@/components/card/skeleton-card";
-import { getFeaturedCourses } from "@/lib/api/courses";
 import { Box, Button, Divider, Stack, Typography } from "@mui/material";
 import { ArrowRight, BookOpen, Star } from "lucide-react";
 import Link from "next/link";
@@ -10,58 +7,16 @@ import {
   FeaturedArticlesFallback,
   FeaturedArticlesSection,
 } from "./featured-articles";
+import {
+  FeaturedCoursesFallback,
+  FeaturedCoursesSection,
+} from "./featured-courses";
 
 const heroImages = [
   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
   "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
   "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
 ];
-
-async function FeaturedCoursesSection() {
-  const featuredCourses = await getFeaturedCourses();
-
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(2, 1fr)",
-          md: "repeat(3, 1fr)",
-          lg: "repeat(4, 1fr)",
-          xl: "repeat(5, 1fr)",
-        },
-        gap: 3,
-      }}
-    >
-      {featuredCourses.map((course) => (
-        <CourseCard key={course.id} course={course} />
-      ))}
-    </Box>
-  );
-}
-
-function FeaturedCoursesFallback() {
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(2, 1fr)",
-          md: "repeat(3, 1fr)",
-          lg: "repeat(4, 1fr)",
-          xl: "repeat(5, 1fr)",
-        },
-        gap: 3,
-      }}
-    >
-      {Array.from({ length: 5 }).map((_, index) => (
-        <SkeletonCard key={index} />
-      ))}
-    </Box>
-  );
-}
 
 export default function HomePage() {
   return (

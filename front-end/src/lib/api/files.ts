@@ -7,6 +7,7 @@ import {
   UseMutationOptions,
   useQuery,
   UseQueryOptions,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { apiGet, apiPost } from "./client";
 
@@ -78,18 +79,28 @@ export function usePreSignedUploadUrlMutation(
     FilePreSignUploadRequest
   >,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: getPreSignedUploadUrl,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
 export function useConfirmImageUploadMutation(
   options?: UseMutationOptions<string, Error, string>,
 ) {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: confirmImageUpload,
     ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 

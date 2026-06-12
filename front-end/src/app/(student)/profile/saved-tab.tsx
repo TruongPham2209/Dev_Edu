@@ -1,7 +1,10 @@
 import { PostCard } from "@/components/card/post-card";
 import { SkeletonCard } from "@/components/card/skeleton-card";
 import { EmptyState } from "@/components/common/empty-state";
-import { getSavedPosts, unsavePost } from "@/lib/api/forum";
+import {
+  useSavedPostsInfiniteQuery,
+  useUnsavePostMutation,
+} from "@/lib/api/forum";
 import type { SavedPostResponse } from "@/lib/type/forums";
 import {
   Box,
@@ -14,53 +17,26 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 export function SavedPostsTab() {
-  const [posts, setPosts] = useState<SavedPostResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useSavedPostsInfiniteQuery();
+  const { mutateAsync: unsavePostMutate } = useUnsavePostMutation();
+
+  const rawPosts = data?.pages.flatMap((page) => page.contents) || [];
 
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
   const [undoQueue, setUndoQueue] = useState<
     { post: SavedPostResponse; timeoutId: NodeJS.Timeout }[]
   >([]);
 
-  useEffect(() => {
-    let mounted = true;
-    getSavedPosts()
-      .then((res) => {
-        if (mounted) {
-          setPosts(res.contents);
-          setNextCursor(res.nextCursor || null);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        if (mounted) setLoading(false);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleLoadMore = async () => {
-    if (!nextCursor || loadingMore) return;
-    setLoadingMore(true);
-    try {
-      const res = await getSavedPosts(nextCursor);
-      setPosts((prev) => [...prev, ...(res.contents || [])]);
-      setNextCursor(res.nextCursor || null);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+  const posts = rawPosts.filter((p) => !removedIds.has(p.id));
 
   const handleRemove = (postToUnsave: SavedPostResponse) => {
     setDeletingIds((prev) => new Set(prev).add(postToUnsave.id));
   };
 
   const finalizeRemoval = (postToRemove: SavedPostResponse) => {
-    setPosts((prev) => prev.filter((p) => p.id !== postToRemove.id));
+    setRemovedIds((prev) => new Set(prev).add(postToRemove.id));
     setDeletingIds((prev) => {
       const next = new Set(prev);
       next.delete(postToRemove.id);
@@ -69,7 +45,7 @@ export function SavedPostsTab() {
 
     const timeoutId = setTimeout(async () => {
       try {
-        await unsavePost(postToRemove.postId);
+        await unsavePostMutate(postToRemove.postId);
       } catch (err) {
         console.error("Failed to unsave", err);
       }
@@ -85,8 +61,10 @@ export function SavedPostsTab() {
     const lastItem = undoQueue[undoQueue.length - 1];
     clearTimeout(lastItem.timeoutId);
 
-    setPosts((prev) => {
-      return [lastItem.post, ...prev];
+    setRemovedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(lastItem.post.id);
+      return next;
     });
 
     setUndoQueue((prev) => prev.slice(0, -1));
@@ -95,12 +73,12 @@ export function SavedPostsTab() {
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!nextCursor || loadingMore || !sentinelRef.current) return;
+    if (!hasNextPage || isFetchingNextPage || !sentinelRef.current) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          handleLoadMore();
+          fetchNextPage();
         }
       },
       { threshold: 0.1 },
@@ -108,9 +86,9 @@ export function SavedPostsTab() {
 
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [nextCursor, loadingMore]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <SkeletonCard />
@@ -150,7 +128,7 @@ export function SavedPostsTab() {
           alignItems: "center",
         }}
       >
-        {loadingMore && <CircularProgress size={24} />}
+        {isFetchingNextPage && <CircularProgress size={24} />}
       </Box>
 
       <Snackbar

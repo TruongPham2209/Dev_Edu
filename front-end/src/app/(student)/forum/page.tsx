@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { PostFormDialog } from "@/components/dialog/post-form";
 import { getPreSignedUploadUrl } from "@/lib/api/files";
 import {
-  createForumPost,
+  useCreateForumPostMutation,
   useForumFeedInfiniteQuery,
   useSearchForumPostsInfiniteQuery,
 } from "@/lib/api/forum";
@@ -22,7 +22,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
 import { MessageSquare, Sparkles, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -33,9 +32,10 @@ import { TrendingTopics } from "./trending-topics";
 
 export default function ForumPage() {
   const { handleError, showSuccess } = useApiWithToast();
-  const queryClient = useQueryClient();
   const { isAuthenticated, roles } = useAuth();
   const router = useRouter();
+
+  const createPostMutation = useCreateForumPostMutation();
 
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
@@ -79,9 +79,8 @@ export default function ForumPage() {
         finalPayload.thumbObjectKey = presignRes.objectKey;
       }
 
-      await createForumPost(finalPayload);
+      await createPostMutation.mutateAsync(finalPayload);
       showSuccess("Post created successfully");
-      queryClient.invalidateQueries({ queryKey: ["forum"] });
       setIsCreatingPost(false);
     } catch (error) {
       handleError(error, "Failed to save post");

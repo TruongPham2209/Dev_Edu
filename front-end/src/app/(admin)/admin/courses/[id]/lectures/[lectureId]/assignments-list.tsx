@@ -4,18 +4,13 @@ import ButtonAction from "@/components/common/button-action";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { AssignmentFormDialog } from "@/components/dialog/assignment-form";
-import { deleteAssignment } from "@/lib/api/assignments";
-import { AssignmentResponse } from "@/lib/type/assignments";
+import {
+  useAssignmentsQuery,
+  useDeleteAssignmentMutation,
+} from "@/lib/api/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
-import {
-  Box,
-  Card,
-  CardContent,
-  Collapse,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import {
   Calendar,
   ClipboardList,
@@ -28,29 +23,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface AssignmentsListProps {
-  assignments: AssignmentResponse[];
   courseId: string;
   lectureId: string;
-  onAssignmentCreated: (newAssignment: AssignmentResponse) => void;
-  onAssignmentDeleted: (deletedId: string) => void;
 }
 
-export function AssignmentsList({
-  assignments,
-  courseId,
-  lectureId,
-  onAssignmentCreated,
-  onAssignmentDeleted,
-}: AssignmentsListProps) {
+export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
   const router = useRouter();
   const { handleError, showSuccess } = useApiWithToast();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletingTitle, setDeletingTitle] = useState<string>("");
-  const [exitingIds, setExitingIds] = useState<string[]>([]);
+  const { data: assignments = [] } = useAssignmentsQuery(lectureId);
+  const { mutateAsync: deleteAssignmentMutate } = useDeleteAssignmentMutation();
 
-  const handleDeleteClick = (assignment: AssignmentResponse) => {
+  const handleDeleteClick = (assignment: any) => {
     setDeletingId(assignment.id);
     setDeletingTitle(assignment.title);
   };
@@ -59,21 +46,13 @@ export function AssignmentsList({
     if (!deletingId) return;
 
     try {
-      await deleteAssignment(deletingId);
+      await deleteAssignmentMutate(deletingId);
       showSuccess(`Deleted ${deletingTitle} successfully`);
-
-      // Exit animation
-      setExitingIds((prev) => [...prev, deletingId]);
     } catch (err) {
       handleError(err, "Cannot delete assignment");
     } finally {
       setDeletingId(null);
     }
-  };
-
-  const handleAnimationExited = (id: string) => {
-    onAssignmentDeleted(id);
-    setExitingIds((prev) => prev.filter((exId) => exId !== id));
   };
 
   return (
@@ -119,160 +98,148 @@ export function AssignmentsList({
         ) : (
           <Stack spacing={2}>
             {assignments.map((assignment) => {
-              const isExiting = exitingIds.includes(assignment.id);
-
               return (
-                <Collapse
+                <Card
                   key={assignment.id}
-                  in={!isExiting}
-                  timeout={300}
-                  onExited={() => handleAnimationExited(assignment.id)}
+                  variant="outlined"
+                  sx={{
+                    borderRadius: 1,
+                    borderColor: "divider",
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
+                      borderColor: "primary.light",
+                      boxShadow: "0 4px 12px rgba(37, 99, 235, 0.03)",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
                 >
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 1,
-                      borderColor: "divider",
-                      transition: "all 0.2s ease-in-out",
-                      "&:hover": {
-                        borderColor: "primary.light",
-                        boxShadow: "0 4px 12px rgba(37, 99, 235, 0.03)",
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    <CardContent sx={{ p: 3 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "flex-start",
-                          gap: 3,
-                        }}
-                      >
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            sx={{
-                              alignItems: "center",
-                              mb: 1,
-                              flexWrap: "wrap",
-                              gap: 1,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                p: 0.75,
-                                borderRadius: 1.5,
-                                bgcolor: "rgba(37, 99, 235, 0.06)",
-                                color: "primary.main",
-                                display: "flex",
-                                flexShrink: 0,
-                              }}
-                            >
-                              <FileText size={18} />
-                            </Box>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                fontWeight: 750,
-                                color: "#1e293b",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {assignment.title}
-                            </Typography>
-
-                            <Stack
-                              direction="row"
-                              spacing={0.75}
-                              sx={{
-                                alignItems: "center",
-                                color: "text.secondary",
-                                border: "1px solid",
-                                borderColor: "divider",
-                                borderRadius: 1.5,
-                                px: 1.25,
-                                py: 0.25,
-                              }}
-                            >
-                              <Calendar size={13} className="text-slate-400" />
-                              <Typography
-                                variant="caption"
-                                sx={{ fontWeight: 550 }}
-                              >
-                                Created at:{" "}
-                                {formatServerDate(
-                                  assignment.createdAt,
-                                  "datetime",
-                                )}
-                              </Typography>
-                            </Stack>
-                          </Stack>
-
-                          {/* Description render (TipTap html output) */}
-                          <Box
-                            sx={{
-                              color: "text.secondary",
-                              fontSize: "0.875rem",
-                              lineHeight: 1.6,
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitBoxOrient: "vertical",
-                              WebkitLineClamp: 2,
-                              "& p": { m: 0 },
-                            }}
-                            dangerouslySetInnerHTML={{
-                              __html: assignment.description,
-                            }}
-                          />
-                        </Box>
-
+                  <CardContent sx={{ p: 3 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 3,
+                      }}
+                    >
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Stack
                           direction="row"
                           spacing={1}
-                          sx={{ flexShrink: 0, alignItems: "center" }}
+                          sx={{
+                            alignItems: "center",
+                            mb: 1,
+                            flexWrap: "wrap",
+                            gap: 1,
+                          }}
                         >
-                          <ButtonAction
-                            onClick={() =>
-                              router.push(
-                                `/admin/courses/${courseId}/lectures/${lectureId}/assignments/${assignment.id}`,
-                              )
-                            }
-                            tooltip="Detail"
-                            icon={<Eye size={18} />}
-                            variant="soft"
-                            color="primary"
-                          />
-                          <ButtonAction
-                            tooltip="Delete assignment"
-                            icon={<Trash2 size={18} />}
-                            variant="soft"
-                            color="error"
-                            onClick={() => handleDeleteClick(assignment)}
-                          />
+                          <Box
+                            sx={{
+                              p: 0.75,
+                              borderRadius: 1.5,
+                              bgcolor: "rgba(37, 99, 235, 0.06)",
+                              color: "primary.main",
+                              display: "flex",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <FileText size={18} />
+                          </Box>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: 750,
+                              color: "#1e293b",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {assignment.title}
+                          </Typography>
+
+                          <Stack
+                            direction="row"
+                            spacing={0.75}
+                            sx={{
+                              alignItems: "center",
+                              color: "text.secondary",
+                              border: "1px solid",
+                              borderColor: "divider",
+                              borderRadius: 1.5,
+                              px: 1.25,
+                              py: 0.25,
+                            }}
+                          >
+                            <Calendar size={13} className="text-slate-400" />
+                            <Typography
+                              variant="caption"
+                              sx={{ fontWeight: 550 }}
+                            >
+                              Created at:{" "}
+                              {formatServerDate(
+                                assignment.createdAt,
+                                "datetime",
+                              )}
+                            </Typography>
+                          </Stack>
                         </Stack>
+
+                        {/* Description render (TipTap html output) */}
+                        <Box
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "0.875rem",
+                            lineHeight: 1.6,
+                            overflow: "hidden",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 2,
+                            "& p": { m: 0 },
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: assignment.description,
+                          }}
+                        />
                       </Box>
-                    </CardContent>
-                  </Card>
-                </Collapse>
+
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{ flexShrink: 0, alignItems: "center" }}
+                      >
+                        <ButtonAction
+                          onClick={() =>
+                            router.push(
+                              `/admin/courses/${courseId}/lectures/${lectureId}/assignments/${assignment.id}`,
+                            )
+                          }
+                          tooltip="Detail"
+                          icon={<Eye size={18} />}
+                          variant="soft"
+                          color="primary"
+                        />
+                        <ButtonAction
+                          tooltip="Delete assignment"
+                          icon={<Trash2 size={18} />}
+                          variant="soft"
+                          color="error"
+                          onClick={() => handleDeleteClick(assignment)}
+                        />
+                      </Stack>
+                    </Box>
+                  </CardContent>
+                </Card>
               );
             })}
           </Stack>
         )}
       </CardContent>
 
-      {/* Create Dialog */}
       <AssignmentFormDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         lectureId={lectureId}
-        onSuccess={(newAssignment) => {
-          onAssignmentCreated(newAssignment);
-        }}
       />
 
       {/* Confirm Delete Dialog */}

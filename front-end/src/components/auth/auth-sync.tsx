@@ -7,7 +7,8 @@ import {
   setAuthSession,
   clearAuthSession,
 } from "@/lib/auth-storage";
-import { getMe } from "@/lib/api/users";
+import { useMeQuery } from "@/lib/api/users";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { decodeJwt } from "@/lib/auth/jwt";
 import { getPrimaryRole } from "@/lib/auth/constants";
 
@@ -16,6 +17,9 @@ interface AuthSyncProps {
 }
 
 export function AuthSync({ serverToken }: AuthSyncProps) {
+  const { refetch: fetchMe } = useMeQuery({ enabled: false });
+  const { handleError } = useApiWithToast();
+
   useEffect(() => {
     async function sync() {
       try {
@@ -26,24 +30,24 @@ export function AuthSync({ serverToken }: AuthSyncProps) {
           const localUser = getStoredUser();
 
           if (localToken !== token || !localUser) {
-            // Token mismatch or not set in localStorage, let's sync it!
             localStorage.setItem("auth_token", token);
 
-            // Fetch profile and store in auth session
-            const me = await getMe();
-             const decoded = decodeJwt(token);
-             const roles = decoded?.roles || [me.role as any];
-             const primaryRole = getPrimaryRole(roles);
+            const meResult = await fetchMe();
+            if (!meResult.data) throw new Error("No user data");
+            const me = meResult.data;
+            const decoded = decodeJwt(token);
+            const roles = decoded?.roles || [me.role as any];
+            const primaryRole = getPrimaryRole(roles);
 
-             setAuthSession(token, {
-               id: me.id || "",
-               username: me.username || "User",
-               fullName: me.fullName || me.username || "User",
-               role: primaryRole,
-               roles: roles,
-               email: me.email || "",
-               avatarUrl: me.avatarUrl,
-             });
+            setAuthSession(token, {
+              id: me.id || "",
+              username: me.username || "User",
+              fullName: me.fullName || me.username || "User",
+              role: primaryRole,
+              roles: roles,
+              email: me.email || "",
+              avatarUrl: me.avatarUrl,
+            });
           }
         } else {
           // No token in cookies, clear localStorage too if present
@@ -52,12 +56,12 @@ export function AuthSync({ serverToken }: AuthSyncProps) {
           }
         }
       } catch (err) {
-        console.error("Failed to sync profile in AuthSync:", err);
+        handleError(err, "Failed to sync profile");
       }
     }
 
     sync();
-  }, [serverToken]);
+  }, [serverToken, fetchMe, handleError]);
 
   return null;
 }
