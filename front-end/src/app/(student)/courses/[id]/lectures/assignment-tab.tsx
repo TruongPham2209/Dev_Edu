@@ -14,7 +14,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { ClipboardList, Eye, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AssignmentModal } from "./assignment-modal";
 
 interface TabAssignmentsProps {

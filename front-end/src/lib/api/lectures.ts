@@ -1,12 +1,3 @@
-import { apiGet, apiPost, apiPut, apiDelete } from "./client";
-import {
-  useQuery,
-  useMutation,
-  useInfiniteQuery,
-  UseQueryOptions,
-  UseMutationOptions,
-  useQueryClient,
-} from "@tanstack/react-query";
 import type {
   CommentPageRequest,
   LectureCommentResponse,
@@ -17,7 +8,16 @@ import type {
   ProgressResponse,
   ProgressSegmentRequest,
 } from "@/lib/type/lectures";
+import {
+  useInfiniteQuery,
+  useMutation,
+  UseMutationOptions,
+  useQuery,
+  useQueryClient,
+  UseQueryOptions,
+} from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
+import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 
 // --- Lectures ---
 
@@ -290,8 +290,8 @@ export function useDeleteLectureCommentMutation(
 
 // Aliases for backward compatibility during refactoring
 export {
-  useLecturesByCourseQuery as useGetLecturesByCourse,
   useLectureByIdQuery as useGetLectureById,
-  useMaterialsQuery as useGetMaterials,
   useLectureCommentsQuery as useGetLectureComments,
+  useLecturesByCourseQuery as useGetLecturesByCourse,
+  useMaterialsQuery as useGetMaterials,
 };

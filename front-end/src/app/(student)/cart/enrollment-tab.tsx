@@ -114,11 +114,7 @@ export function EnrollmentTabContent() {
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Stack spacing={3}>
           {items.map((item) => (
-            <CourseOrderItem
-              key={item.courseId || item.id}
-              item={item}
-              tabContext="enrolled"
-            />
+            <CourseOrderItem key={item.id} item={item} tabContext="enrolled" />
           ))}
         </Stack>
 

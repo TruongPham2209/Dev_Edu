@@ -1,20 +1,20 @@
 "use client";
 
-import { register } from "@/lib/api/users";
+import { FormInput } from "@/components/common/form/form-input";
+import { AuthLayout } from "@/components/layout/auth/auth-layout";
+import { useRegisterMutation } from "@/lib/api/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import {
+  Alert,
   Box,
   Button,
-  Card,
-  CardContent,
-  Divider,
-  InputAdornment,
+  CircularProgress,
   Stack,
-  TextField,
   Typography,
+  alpha,
 } from "@mui/material";
-import { Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,13 +23,23 @@ export default function RegisterPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { handleError, showSuccess } = useApiWithToast();
+
+  const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
     fullName: "",
   });
-  const [loading, setLoading] = useState(false);
+
+  const [fieldErrors, setFieldErrors] = useState<{
+    fullName?: string;
+    username?: string;
+    email?: string;
+    password?: string;
+  }>({});
+
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -37,202 +47,260 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, router]);
 
+  const registerMutation = useRegisterMutation({
+    onSuccess: () => {
+      showSuccess(
+        "Account registration successful! Redirecting to login page...",
+      );
+      setTimeout(() => {
+        router.push("/login");
+      }, 1000);
+    },
+    onError: (error) => {
+      handleError(error, "Account registration failed");
+      setErrorMsg(
+        error.message ||
+          "Account registration failed. Please check your information.",
+      );
+    },
+  });
+
   const handleChange =
     (field: keyof typeof form) =>
-    (event: React.ChangeEvent<HTMLInputElement>) =>
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({ ...prev, [field]: event.target.value }));
+      if (fieldErrors[field]) {
+        setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+      }
+    };
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const validate = () => {
+    const errors: typeof fieldErrors = {};
+
+    if (!form.fullName.trim()) {
+      errors.fullName = "Please enter your full name.";
+    } else if (form.fullName.trim().length < 2) {
+      errors.fullName = "Full name must be at least 2 characters.";
+    }
+
+    if (!form.username.trim()) {
+      errors.username = "Please enter username.";
+    } else if (form.username.trim().length < 3) {
+      errors.username = "Username must be at least 3 characters.";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(form.username)) {
+      errors.username =
+        "Username can only contain letters, numbers and underscores.";
+    }
+
+    if (!form.email.trim()) {
+      errors.email = "Please enter email.";
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      errors.email = "Email is not valid.";
+    }
+
+    if (!form.password) {
+      errors.password = "Please enter your password.";
+    } else if (form.password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true);
-    try {
-      await register(form);
-      showSuccess("Đăng ký thành công");
-      router.push("/login");
-    } catch (error) {
-      handleError(error, "Không thể đăng ký");
-    } finally {
-      setLoading(false);
+    setErrorMsg(null);
+
+    if (validate()) {
+      registerMutation.mutate(form);
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", lg: "1.1fr 0.9fr" },
-      }}
+    <AuthLayout
+      title="Create account"
+      subtitle="Start your learning journey and build your career with DevEdu."
     >
-      <Box
-        sx={{
-          display: { xs: "none", lg: "flex" },
-          flexDirection: "column",
-          justifyContent: "center",
-          px: 8,
-          py: 6,
-          background:
-            "radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 45%), radial-gradient(circle at 70% 20%, rgba(124, 58, 237, 0.12), transparent 50%), linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #f8fafc 100%)",
-        }}
-      >
-        <Typography variant="overline" sx={{ letterSpacing: "0.3em", mb: 2 }}>
-          SkillForge
-        </Typography>
-        <Typography variant="h2" sx={{ fontWeight: 800, mb: 2 }}>
-          Ship faster with structured learning.
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ color: "text.secondary", maxWidth: 460 }}
+      <Stack spacing={3.5} component="form" onSubmit={handleSubmit} noValidate>
+        {errorMsg && (
+          <Alert
+            severity="error"
+            sx={{ borderRadius: "12px", fontWeight: 550 }}
+          >
+            {errorMsg}
+          </Alert>
+        )}
+
+        {/* Group 1: Basic Profile Info */}
+        <Stack spacing={2.5}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: "#166534",
+              fontWeight: 800,
+              fontSize: "0.8rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              borderBottom: "1px solid rgba(15, 23, 42, 0.05)",
+              pb: 1,
+            }}
+          >
+            Personal Information
+          </Typography>
+
+          <FormInput
+            label="Full name"
+            name="fullName"
+            value={form.fullName}
+            onChange={handleChange("fullName")}
+            error={Boolean(fieldErrors.fullName)}
+            helperText={fieldErrors.fullName}
+            placeholder="Nguyen Van A"
+            icon={<User size={18} />}
+            disabled={registerMutation.isPending}
+          />
+
+          <FormInput
+            label="Username"
+            name="username"
+            value={form.username}
+            onChange={handleChange("username")}
+            error={Boolean(fieldErrors.username)}
+            helperText={fieldErrors.username}
+            placeholder="nguyenvana_dev"
+            icon={<ShieldCheck size={18} />}
+            disabled={registerMutation.isPending}
+          />
+        </Stack>
+
+        {/* Group 2: Account Security Info */}
+        <Stack spacing={2.5}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: "#166534",
+              fontWeight: 800,
+              fontSize: "0.8rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              borderBottom: "1px solid rgba(15, 23, 42, 0.05)",
+              pb: 1,
+            }}
+          >
+            Account Security
+          </Typography>
+
+          <FormInput
+            label="Email"
+            name="email"
+            type="email"
+            value={form.email}
+            onChange={handleChange("email")}
+            error={Boolean(fieldErrors.email)}
+            helperText={fieldErrors.email}
+            placeholder="nguyenvana@gmail.com"
+            icon={<Mail size={18} />}
+            disabled={registerMutation.isPending}
+          />
+
+          <FormInput
+            label="Password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={form.password}
+            onChange={handleChange("password")}
+            error={Boolean(fieldErrors.password)}
+            helperText={fieldErrors.password}
+            placeholder="Your password..."
+            icon={
+              showPassword ? (
+                <EyeOff size={18} strokeWidth={2.2} />
+              ) : (
+                <Eye size={18} strokeWidth={2.2} />
+              )
+            }
+            iconPosition="end"
+            disabled={registerMutation.isPending}
+            onIconClick={() => setShowPassword((prev) => !prev)}
+          />
+        </Stack>
+
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={registerMutation.isPending}
+          sx={{
+            py: 1.5,
+            fontSize: "1rem",
+            fontWeight: 700,
+            borderRadius: "14px",
+            bgcolor: "#16a34a",
+            color: "#ffffff",
+            boxShadow: "0 4px 14px rgba(22, 163, 74, 0.25)",
+            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            "&:hover": {
+              bgcolor: "#15803d",
+              transform: "translateY(-1px)",
+              boxShadow: "0 6px 20px rgba(22, 163, 74, 0.35)",
+            },
+            "&:active": {
+              transform: "translateY(0)",
+            },
+            "&.Mui-disabled": {
+              bgcolor: alpha("#16a34a", 0.4),
+              color: alpha("#ffffff", 0.8),
+            },
+            mt: 2,
+          }}
         >
-          Xây dựng hồ sơ kỹ thuật và theo dõi tiến độ học tập trong một
-          workspace duy nhất.
-        </Typography>
+          {registerMutation.isPending ? (
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              <CircularProgress size={18} color="inherit" thickness={5} />
+              <span>Creating account...</span>
+            </Stack>
+          ) : (
+            "Create Account"
+          )}
+        </Button>
+
         <Box
           sx={{
-            mt: 6,
-            p: 3,
-            borderRadius: 4,
-            border: "1px solid rgba(15, 23, 42, 0.08)",
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 1,
           }}
         >
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            Verified security • SOC2-ready
-          </Typography>
-          <Typography variant="body1" sx={{ mt: 1, fontWeight: 600 }}>
-            Zero spam. Zero fluff. Just outcomes.
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 500,
+            }}
+          >
+            Already have an account?{" "}
+            <Typography
+              component={Link}
+              href="/login"
+              sx={{
+                color: "#16a34a",
+                fontWeight: 700,
+                textDecoration: "none",
+                transition: "color 0.2s ease",
+                display: "inline-block",
+                "&:hover": {
+                  color: "#15803d",
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Sign in now
+            </Typography>
           </Typography>
         </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          px: 3,
-          py: 6,
-        }}
-      >
-        <Card
-          sx={{
-            maxWidth: 480,
-            width: "100%",
-            borderRadius: 4,
-            border: "1px solid rgba(15, 23, 42, 0.08)",
-            backgroundColor: "rgba(255, 255, 255, 0.92)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 20px 40px rgba(15, 23, 42, 0.08)",
-          }}
-        >
-          <CardContent>
-            <Stack spacing={3} component="form" onSubmit={handleSubmit}>
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-                  Create account
-                </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  Bắt đầu hành trình học tập cùng SkillForge.
-                </Typography>
-              </Box>
-
-              <Stack spacing={2}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: "text.secondary" }}
-                >
-                  Basic Information
-                </Typography>
-                <TextField
-                  label="Họ và tên"
-                  value={form.fullName}
-                  onChange={handleChange("fullName")}
-                  fullWidth
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <User size={18} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-                <TextField
-                  label="Username"
-                  value={form.username}
-                  onChange={handleChange("username")}
-                  fullWidth
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <ShieldCheck size={18} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              </Stack>
-
-              <Stack spacing={2}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{ color: "text.secondary" }}
-                >
-                  Account Information
-                </Typography>
-                <TextField
-                  label="Email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange("email")}
-                  fullWidth
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Mail size={18} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-                <TextField
-                  label="Password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange("password")}
-                  fullWidth
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Lock size={18} />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              </Stack>
-
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-              >
-                {loading ? "Đang tạo..." : "Create account"}
-              </Button>
-              <Divider />
-              <Button component={Link} href="/login" size="small">
-                Đã có tài khoản? Đăng nhập
-              </Button>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Box>
-    </Box>
+      </Stack>
+    </AuthLayout>
   );
 }

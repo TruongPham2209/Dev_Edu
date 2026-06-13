@@ -5,6 +5,8 @@ import { PostStatus } from "./enum";
 export type PostResponse = {
   id: string;
   title: string;
+  isMine: boolean;
+  isSaved: boolean;
   authorUsername: string;
   authorFullName: string;
   authorAvatarUrl: string | null;
@@ -36,6 +38,7 @@ export type SavedPostResponse = {
   title: string;
   shortDescription: string;
   savedAt: string;
+  postedDate: string;
 };
 
 export type UpdatedPostResponse = {
@@ -55,7 +58,9 @@ export type PostVersionUpdateRequest = {
 
 export type ForumCommentResponse = {
   id: string;
-  author: string;
+  authorUsername: string;
+  authorFullName: string;
+  authorAvatarUrl: string;
   content: string | null;
   replyCount: number;
   repliedToCommentId: string | null;

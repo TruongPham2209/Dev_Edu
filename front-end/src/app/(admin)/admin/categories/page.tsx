@@ -16,14 +16,8 @@ import {
 import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
 import type { CategoryRequest, CategoryResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { ChevronDown, FolderPlus, Layers, RefreshCw } from "lucide-react";
+import { Box, Stack, Typography } from "@mui/material";
+import { FolderPlus, Layers, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { CategoryTable } from "./category-table";
 
@@ -56,10 +50,6 @@ export default function AdminCategoriesPage() {
   // Delete State
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [deleteTargetName, setDeleteTargetName] = useState("");
-
-  // Client-side Load More pagination controls
-  const [rowsToShow, setRowsToShow] = useState(5);
-  const [loadingMore, setLoadingMore] = useState(false);
 
   // Preview Image State
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -136,17 +126,6 @@ export default function AdminCategoriesPage() {
     }
   };
 
-  // Simulate smooth Load More client-side interaction
-  const hasMore = categories.length > rowsToShow;
-  const handleLoadMore = () => {
-    if (loadingMore || !hasMore) return;
-    setLoadingMore(true);
-    setTimeout(() => {
-      setRowsToShow((prev) => prev + 5);
-      setLoadingMore(false);
-    }, 500); // 500ms artificial delay for high fidelity feedback
-  };
-
   return (
     <Stack spacing={3} sx={{ width: "100%", overflowX: "hidden" }}>
       {/* Hero / Header Section */}
@@ -177,7 +156,7 @@ export default function AdminCategoriesPage() {
 
         <Box sx={{ display: "flex", gap: 1 }}>
           <ButtonAction
-            tooltip="Tải lại dữ liệu"
+            tooltip="Refresh Data"
             onClick={() => loadCategories()}
             variant="soft"
             color="info"
@@ -192,8 +171,8 @@ export default function AdminCategoriesPage() {
       </Box>
 
       <CategoryTable
-        categories={categories.slice(0, rowsToShow)}
-        loading={loading || loadingMore}
+        categories={categories}
+        loading={loading}
         onEdit={(cat) => openDialog(cat)}
         onDelete={(id, name) => {
           setConfirmId(id);
@@ -203,10 +182,10 @@ export default function AdminCategoriesPage() {
         errorState={
           error ? (
             <ErrorState
-              title="Không thể tải danh mục"
+              title="Failed to load categories"
               subtitle={error}
               onRetry={loadCategories}
-              actionLabel="Thử lại"
+              actionLabel="Retry"
             />
           ) : undefined
         }
@@ -219,51 +198,6 @@ export default function AdminCategoriesPage() {
           />
         }
       />
-
-      {/* Load More Trigger Button */}
-      {hasMore && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Button
-            variant="outlined"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-            startIcon={
-              loadingMore ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : (
-                <ChevronDown size={16} />
-              )
-            }
-            sx={{
-              borderRadius: 999,
-              px: 4,
-              py: 1,
-              borderColor: "rgba(15, 23, 42, 0.12)",
-              color: "text.primary",
-              fontWeight: 600,
-              textTransform: "none",
-              transition: "all 0.2s",
-              "&:hover": {
-                borderColor: "text.primary",
-                bgcolor: "rgba(15, 23, 42, 0.03)",
-              },
-            }}
-          >
-            {loadingMore ? "Loading Categories..." : "Load More Categories"}
-          </Button>
-        </Box>
-      )}
-
-      {!hasMore && categories.length > 5 && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Typography
-            variant="body2"
-            sx={{ color: "text.secondary", fontWeight: 500 }}
-          >
-            All categories loaded
-          </Typography>
-        </Box>
-      )}
 
       {/* Category Creation & Update Dialog Modal Component */}
       <CategoryFormDialog

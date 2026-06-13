@@ -117,7 +117,7 @@ function ChartSkeleton({
 // 1. USER GROWTH CHART
 export function UserGrowthChart() {
   const { handleError } = useApiWithToast();
-  const [period, setPeriod] = useState<MetricPeriod>("DAILY");
+  const [period, setPeriod] = useState<MetricPeriod>("MONTHLY");
   const { data, isLoading, error, refetch } = useUserGrowth(period);
 
   useEffect(() => {
@@ -306,7 +306,7 @@ export function UserGrowthChart() {
 // 2. COURSE GROWTH CHART
 export function CourseGrowthChart() {
   const { handleError } = useApiWithToast();
-  const [period, setPeriod] = useState<MetricPeriod>("DAILY");
+  const [period, setPeriod] = useState<MetricPeriod>("MONTHLY");
   const { data, isLoading, error, refetch } = useCourseGrowth(period);
 
   useEffect(() => {
@@ -495,7 +495,7 @@ export function CourseGrowthChart() {
 // 3. REVENUE GROWTH CHART
 export function RevenueGrowthChart() {
   const { handleError } = useApiWithToast();
-  const [period, setPeriod] = useState<MetricPeriod>("DAILY");
+  const [period, setPeriod] = useState<MetricPeriod>("MONTHLY");
   const { data, isLoading, error, refetch } = useRevenueGrowth(period);
 
   useEffect(() => {

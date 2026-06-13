@@ -9,6 +9,7 @@ import {
   useDeleteLectureCommentMutation,
   useInfiniteLectureCommentsQuery,
 } from "@/lib/api/lectures";
+import { LectureCommentResponse } from "@/lib/type/lectures";
 import { Box, Button, CircularProgress, Divider, Stack } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -86,10 +87,8 @@ export function TabComments({ lectureId }: TabCommentsProps) {
                 key={comment.id}
                 id={comment.id}
                 content={comment.content}
-                // @ts-ignore - Assuming LectureCommentResponse might have author info later, fallback if not
                 authorUsername={comment.authorUsername}
-                // @ts-ignore
-                authorAvatar={comment.authorAvatar}
+                authorAvatarUrl={comment.authorAvatarUrl}
                 isDeleted={comment.isDeleted}
                 isMine={comment.isMine}
                 createdAt={comment.createdAt}
@@ -110,7 +109,7 @@ export function TabComments({ lectureId }: TabCommentsProps) {
                     content,
                     parentCommentId: replyToId,
                   });
-                  return res as any;
+                  return res as LectureCommentResponse;
                 }}
                 onLoadReply={async (parentId, nextCursor) => {
                   const res = await queryClient.fetchQuery({
@@ -130,7 +129,7 @@ export function TabComments({ lectureId }: TabCommentsProps) {
                       }),
                   });
                   return {
-                    contents: res.contents as any[],
+                    contents: res.contents as LectureCommentResponse[],
                     nextCursor: res.nextCursor,
                   };
                 }}

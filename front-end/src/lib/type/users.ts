@@ -23,5 +23,6 @@ export type EnrollmentUserResponse = {
   id: string;
   username: string;
   fullName: string;
+  avatarUrl: string | null;
   enrolledAt: string | null;
 };

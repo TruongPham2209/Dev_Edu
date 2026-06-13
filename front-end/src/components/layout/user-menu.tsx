@@ -51,7 +51,9 @@ export function UserMenu() {
   return (
     <Box>
       <IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
-        <Avatar sx={{ width: 36, height: 36 }}>{initials}</Avatar>
+        <Avatar src={user?.avatarUrl} sx={{ width: 36, height: 36 }}>
+          {initials}
+        </Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl}

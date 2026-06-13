@@ -1,56 +1,46 @@
 "use client";
 
-import { loginAction, type LoginActionState } from "@/app/login/actions";
-import { useMeQuery } from "@/lib/api/users";
+import { useLoginMutation, useMeQuery } from "@/lib/api/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
+  Alert,
   Box,
   Button,
-  Card,
-  CardContent,
+  CircularProgress,
   Divider,
-  InputAdornment,
   Stack,
-  TextField,
   Typography,
+  alpha,
 } from "@mui/material";
-import { Chrome, Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Chrome, Eye, EyeOff, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
 
+import { AuthLayout } from "@/components/layout/auth/auth-layout";
+import { FormInput } from "@/components/common/form/form-input";
 import { setAuthSession } from "@/lib/auth-storage";
-import { decodeJwt } from "@/lib/auth/jwt";
 import { getPrimaryRole, getRedirectPathForRoles } from "@/lib/auth/constants";
-
-const initialState: LoginActionState = {
-  error: null,
-  fieldErrors: {},
-};
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" variant="contained" size="large" disabled={pending}>
-      {pending ? "Signing In..." : "Sign In"}
-    </Button>
-  );
-}
+import { decodeJwt } from "@/lib/auth/jwt";
+import { useToast } from "@/lib/toast-context";
 
 export default function LoginForm() {
   const router = useRouter();
-  const [state, formAction] = useActionState(loginAction, initialState);
+  const toast = useToast();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    username?: string;
+    password?: string;
+  }>({});
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const { refetch: fetchMe } = useMeQuery({ enabled: false });
-  const { handleError } = useApiWithToast();
+  const { handleError, showSuccess } = useApiWithToast();
 
-  useEffect(() => {
-    async function syncAuth() {
+  const loginMutation = useLoginMutation({
+    onSuccess: async (state) => {
       if (state.success && state.token) {
         // Temporarily set token so apiCall can authorize the /me request
         localStorage.setItem("auth_token", state.token);
@@ -63,7 +53,7 @@ export default function LoginForm() {
 
         try {
           const meResult = await fetchMe();
-          if (!meResult.data) throw new Error("Failed to fetch me");
+          if (!meResult.data) throw new Error("Failed to fetch user info");
           const me = meResult.data;
           role = me.role;
           fullName = me.fullName || me.username || fullName;
@@ -88,179 +78,239 @@ export default function LoginForm() {
           avatarUrl,
         });
 
-        // Role-based routing using priorities: ADMIN > LECTURER > STUDENT
-        const redirectPath = getRedirectPathForRoles(roles);
-        router.push(redirectPath);
+        showSuccess(`Welcome back, ${fullName}!`);
 
-        router.refresh();
+        // Role-based routing: ADMIN > LECTURER > STUDENT
+        const redirectPath = getRedirectPathForRoles(roles);
+        window.location.href = redirectPath;
+      } else if (state.error) {
+        setErrorMsg(state.error);
       }
+    },
+    onError: (error) => {
+      setErrorMsg(
+        error.message || "Email or password is not correct. Please try again.",
+      );
+    },
+  });
+
+  const validate = () => {
+    const errors: { username?: string; password?: string } = {};
+    if (!username.trim()) {
+      errors.username = "Please enter your username or email";
     }
 
-    syncAuth();
-  }, [state, router, fetchMe, handleError]);
+    if (!password) {
+      errors.password = "Please enter your password";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    setErrorMsg(null);
+
+    if (validate()) {
+      loginMutation.mutate({ username, password });
+    }
+  };
+
+  const handleForgotPassword = () => {
+    toast.warning("Forgot password is not implemented yet.");
+  };
+
+  const handleGoogleLogin = () => {
+    toast.warning("Google authentication is not implemented yet.");
+  };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateColumns: { xs: "1fr", lg: "1.1fr 0.9fr" },
-      }}
+    <AuthLayout
+      title="Sign in"
+      subtitle="Sign in to continue your learning journey with DevEdu."
     >
-      <Box
-        sx={{
-          display: { xs: "none", lg: "flex" },
-          flexDirection: "column",
-          justifyContent: "center",
-          px: 8,
-          py: 6,
-          background:
-            "radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 45%), radial-gradient(circle at 70% 20%, rgba(124, 58, 237, 0.12), transparent 50%), linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #f8fafc 100%)",
-        }}
-      >
-        <Typography variant="overline" sx={{ letterSpacing: "0.3em", mb: 2 }}>
-          SkillForge
-        </Typography>
-        <Typography variant="h2" sx={{ fontWeight: 800, mb: 2 }}>
-          Build developer skills that ship.
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ color: "text.secondary", maxWidth: 460 }}
+      <Stack spacing={3.5} component="form" onSubmit={handleSubmit} noValidate>
+        {errorMsg && (
+          <Alert
+            severity="error"
+            sx={{ borderRadius: "12px", fontWeight: 550 }}
+          >
+            {errorMsg}
+          </Alert>
+        )}
+
+        <FormInput
+          label="Email Address"
+          name="username"
+          type="text"
+          value={username}
+          onChange={(event) => {
+            setUsername(event.target.value);
+            if (fieldErrors.username) {
+              setFieldErrors((prev) => ({ ...prev, username: undefined }));
+            }
+          }}
+          error={Boolean(fieldErrors.username)}
+          helperText={fieldErrors.username}
+          placeholder="yourname@domain.com"
+          icon={<Mail size={18} />}
+          disabled={loginMutation.isPending}
+        />
+
+        <FormInput
+          label="Password"
+          name="password"
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            if (fieldErrors.password) {
+              setFieldErrors((prev) => ({ ...prev, password: undefined }));
+            }
+          }}
+          error={Boolean(fieldErrors.password)}
+          helperText={fieldErrors.password}
+          placeholder="Your password..."
+          icon={
+            showPassword ? (
+              <EyeOff size={18} strokeWidth={2.2} />
+            ) : (
+              <Eye size={18} strokeWidth={2.2} />
+            )
+          }
+          iconPosition="end"
+          onIconClick={() => setShowPassword((prev) => !prev)}
+          disabled={loginMutation.isPending}
+        />
+
+        <Button
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={loginMutation.isPending}
+          sx={{
+            py: 1.5,
+            fontSize: "1rem",
+            fontWeight: 700,
+            borderRadius: "14px",
+            bgcolor: "#16a34a",
+            color: "#ffffff",
+            boxShadow: "0 4px 14px rgba(22, 163, 74, 0.25)",
+            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            "&:hover": {
+              bgcolor: "#15803d",
+              transform: "translateY(-1px)",
+              boxShadow: "0 6px 20px rgba(22, 163, 74, 0.35)",
+            },
+            "&:active": {
+              transform: "translateY(0)",
+            },
+            "&.Mui-disabled": {
+              bgcolor: alpha("#16a34a", 0.4),
+              color: alpha("#ffffff", 0.8),
+            },
+          }}
         >
-          Học tập theo lộ trình kỹ thuật, không gian học tập tối ưu cho lập
-          trình viên và kỹ sư.
-        </Typography>
+          {loginMutation.isPending ? (
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              <CircularProgress size={18} color="inherit" thickness={5} />
+              <span>Signing In...</span>
+            </Stack>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+
+        <Divider
+          sx={{
+            "&::before, &::after": {
+              borderColor: "rgba(15, 23, 42, 0.08)",
+            },
+            color: "text.secondary",
+            fontSize: "0.85rem",
+            fontWeight: 500,
+          }}
+        >
+          or continue with
+        </Divider>
+
+        <Button
+          variant="outlined"
+          size="large"
+          startIcon={<Chrome size={18} />}
+          onClick={handleGoogleLogin}
+          disabled={loginMutation.isPending}
+          sx={{
+            py: 1.3,
+            borderRadius: "14px",
+            borderColor: "rgba(15, 23, 42, 0.08)",
+            color: "#475569",
+            fontWeight: 600,
+            transition: "all 0.2s ease",
+            "&:hover": {
+              borderColor: "#0f172a",
+              bgcolor: "rgba(15, 23, 42, 0.03)",
+              color: "#0f172a",
+            },
+          }}
+        >
+          Google Account
+        </Button>
+
         <Box
           sx={{
-            mt: 6,
-            p: 3,
-            borderRadius: 4,
-            border: "1px solid rgba(15, 23, 42, 0.08)",
-            backgroundColor: "rgba(255, 255, 255, 0.8)",
-            fontFamily: "var(--font-geist-mono)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 1,
           }}
         >
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            $ skillforge login --username dev
+          <Typography
+            variant="body2"
+            component={Link}
+            href="/register"
+            sx={{
+              color: "#16a34a",
+              fontWeight: 700,
+              textDecoration: "none",
+              transition: "color 0.2s ease",
+              "&:hover": {
+                color: "#15803d",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Register now
           </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            ✔ Authenticated. Workspace synced.
+
+          <Typography
+            variant="body2"
+            component="button"
+            type="button"
+            onClick={handleForgotPassword}
+            sx={{
+              background: "none",
+              border: "none",
+              p: 0,
+              cursor: "pointer",
+              color: "text.secondary",
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              fontFamily: "inherit",
+              transition: "color 0.2s ease",
+              "&:hover": {
+                color: "#0f172a",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Forgot password?
           </Typography>
         </Box>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          px: 3,
-          py: 6,
-        }}
-      >
-        <Card
-          sx={{
-            maxWidth: 460,
-            width: "100%",
-            borderRadius: 4,
-            border: "1px solid rgba(15, 23, 42, 0.08)",
-            backgroundColor: "rgba(255, 255, 255, 0.92)",
-            backdropFilter: "blur(14px)",
-            boxShadow: "0 20px 40px rgba(15, 23, 42, 0.08)",
-          }}
-        >
-          <CardContent>
-            <Stack spacing={3} component="form" action={formAction}>
-              <Box>
-                <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-                  Sign in
-                </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  Đăng nhập để tiếp tục học tập.
-                </Typography>
-              </Box>
-              {state.error ? (
-                <Typography color="error" variant="body2">
-                  {state.error}
-                </Typography>
-              ) : null}
-              <TextField
-                label="Email"
-                name="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                fullWidth
-                error={Boolean(state.fieldErrors?.username)}
-                helperText={state.fieldErrors?.username}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Mail size={18} />
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-              <TextField
-                label="Password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                fullWidth
-                error={Boolean(state.fieldErrors?.password)}
-                helperText={state.fieldErrors?.password}
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock size={18} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Button
-                          variant="text"
-                          size="small"
-                          type="button"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          sx={{ minWidth: "auto" }}
-                        >
-                          {showPassword ? (
-                            <EyeOff size={16} />
-                          ) : (
-                            <Eye size={16} />
-                          )}
-                        </Button>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
-              <SubmitButton />
-              <Divider>or</Divider>
-              <Button
-                variant="outlined"
-                size="large"
-                startIcon={<Chrome size={18} />}
-                type="button"
-              >
-                Continue with Google
-              </Button>
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Button component={Link} href="/register" size="small">
-                  Tạo tài khoản
-                </Button>
-                <Button size="small" type="button">
-                  Quên mật khẩu
-                </Button>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Box>
-    </Box>
+      </Stack>
+    </AuthLayout>
   );
 }

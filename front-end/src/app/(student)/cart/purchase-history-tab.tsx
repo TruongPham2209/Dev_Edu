@@ -194,7 +194,7 @@ export function PurchaseHistoryTabContent() {
               >
                 {order.items.map((item) => (
                   <CourseOrderItem
-                    key={item.id}
+                    key={item.courseId}
                     item={item}
                     tabContext="order"
                     orderStatus={order.status}

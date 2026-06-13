@@ -63,6 +63,9 @@ export type LectureCommentResponse = {
   id: string;
   rootCommentId: string | null;
   parentCommentId: string | null;
+  authorUsername: string;
+  authorFullName: string;
+  authorAvatarUrl: string;
   content: string | null;
   createdAt: string;
   isDeleted: boolean;

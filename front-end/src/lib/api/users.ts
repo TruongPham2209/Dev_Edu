@@ -9,6 +9,7 @@ import {
 import { CustomPaging } from "../type/api";
 import { RoleEnum } from "../type/enum";
 import { apiGet, apiPost, apiPut } from "./client";
+import { loginAction, type LoginActionState } from "@/app/login/actions";
 
 // --- Call API ---
 
@@ -72,12 +73,48 @@ export function useMeQuery(
   });
 }
 
+export function useLoginMutation(
+  options?: UseMutationOptions<
+    LoginActionState,
+    Error,
+    { username: string; password: string }
+  >,
+) {
+  return useMutation({
+    mutationFn: async ({ username, password }) => {
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("password", password);
+      const res = await loginAction({ error: null }, formData);
+      if (res.error) {
+        throw new Error(res.error);
+      }
+      return res;
+    },
+    ...options,
+  });
+}
+
 export function useRegisterMutation(
   options?: UseMutationOptions<string, Error, RegisterUser>,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: register,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useBatchCreateUsersMutation(
+  options?: UseMutationOptions<string, Error, RegisterUser[]>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: batchCreateUsers,
     ...options,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });

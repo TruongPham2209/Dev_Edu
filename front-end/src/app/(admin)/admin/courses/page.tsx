@@ -11,7 +11,7 @@ import { ImagePreview } from "@/components/common/image-preview";
 import { CourseFormDialog } from "@/components/dialog/course-form";
 import {
   useCategoriesQuery,
-  useCoursesQuery,
+  useCoursesInfiniteQuery,
   useCreateCourseMutation,
   useDeleteCourseMutation,
   useUpdateCourseMutation,
@@ -22,9 +22,9 @@ import {
 } from "@/lib/api/files";
 import type { CourseRequest, CourseResponse } from "@/lib/type/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { Box, Stack } from "@mui/material";
+import { Box, CircularProgress, Stack } from "@mui/material";
 import { BookOpen, Plus, RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CourseTable } from "./course-table";
 
 export default function AdminCoursesPage() {
@@ -44,20 +44,17 @@ export default function AdminCoursesPage() {
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
 
-  // Server Pagination States
-  const [page, setPage] = useState(0);
+  // Observer target ref
+  const observerTargetRef = useRef<HTMLDivElement | null>(null);
 
   // Queries & Mutations
   const { data: categories = [] } = useCategoriesQuery("ACTIVE");
 
   const queryParams = useMemo(() => {
     const params: {
-      page: number;
       keyword?: string;
       categoryId?: string;
-    } = {
-      page,
-    };
+    } = {};
 
     if (query.trim() !== "") {
       params.keyword = query.trim();
@@ -65,18 +62,22 @@ export default function AdminCoursesPage() {
       params.categoryId = categoryFilter;
     }
     return params;
-  }, [page, query, categoryFilter]);
+  }, [query, categoryFilter]);
 
   const {
     data: coursesData,
     isLoading: loading,
+    isFetchingNextPage: loadingMore,
+    hasNextPage,
+    fetchNextPage,
     error: coursesErrorObj,
     refetch: fetchCourses,
-  } = useCoursesQuery(queryParams);
+  } = useCoursesInfiniteQuery(queryParams);
 
-  const courses = coursesData?.contents ?? [];
-  const totalPages = coursesData?.totalPages ?? 0;
-  const totalElements = coursesData?.totalElements ?? 0;
+  const courses = useMemo(() => {
+    return coursesData?.pages.flatMap((page) => page.contents) ?? [];
+  }, [coursesData]);
+
   const coursesError = Boolean(coursesErrorObj);
 
   const { mutateAsync: createCourseMutate } = useCreateCourseMutation();
@@ -88,37 +89,48 @@ export default function AdminCoursesPage() {
   const { mutateAsync: confirmImageUploadMutate } =
     useConfirmImageUploadMutation();
 
-  // Adjust page state to match what is returned by the server
-  useEffect(() => {
-    if (coursesData && coursesData.currentPage !== page) {
-      setPage(coursesData.currentPage);
-    }
-  }, [coursesData, page]);
+  // Load More Handler
+  const handleLoadMore = useCallback(() => {
+    if (loading || loadingMore || !hasNextPage) return;
+    fetchNextPage();
+  }, [loading, loadingMore, hasNextPage, fetchNextPage]);
 
-  // Handle pagination navigation
-  const handlePageChange = (nextPage: number) => {
-    if (nextPage < 0 || nextPage >= totalPages || loading) return;
-    setPage(nextPage);
-  };
+  // Auto Infinite scroll using IntersectionObserver
+  useEffect(() => {
+    const currentTarget = observerTargetRef.current;
+    if (!currentTarget || !hasNextPage || loading || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(currentTarget);
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [hasNextPage, loading, loadingMore, handleLoadMore]);
 
   // Handle Category Filter change
   const handleCategorySelect = (categoryId: string) => {
     setCategoryFilter(categoryId);
     setQuery(""); // Do NOT send keyword simultaneously
-    setPage(0);
   };
 
   // Handle Search Keyword execution
   const handleSearch = (keyword: string) => {
     setQuery(keyword);
-    setPage(0);
   };
 
   // Handle Search Reset console action
   const handleResetSearch = () => {
     setQuery("");
     setCategoryFilter("ALL");
-    setPage(0);
   };
 
   // Handle Create Course Trigger
@@ -145,7 +157,7 @@ export default function AdminCoursesPage() {
         });
 
         if (!preSignRes.uploadUrl || !preSignRes.objectKey) {
-          throw new Error("Không thể lấy URL tải lên.");
+          throw new Error("Failed to get presigned upload URL");
         }
 
         // Upload to pre-signed URL (PUT request to Amazon S3/Cloud Storage)
@@ -169,15 +181,15 @@ export default function AdminCoursesPage() {
 
       if (editingCourse) {
         await updateCourseMutate(finalPayload);
-        showSuccess("Cập nhật khóa học thành công");
+        showSuccess("Update course successfully");
       } else {
         await createCourseMutate(finalPayload);
-        showSuccess("Tạo khóa học thành công");
+        showSuccess("Create course successfully");
       }
       setDialogOpen(false);
       fetchCourses();
     } catch (error) {
-      handleError(error, "Không thể lưu khóa học");
+      handleError(error, "Failed to save course");
     }
   };
 
@@ -186,12 +198,11 @@ export default function AdminCoursesPage() {
     if (!confirmId || deleting) return;
     try {
       await deleteCourseMutate(confirmId);
-      showSuccess("Đã xóa khóa học thành công");
+      showSuccess("Deleted course successfully");
       setConfirmId(null);
-      setPage(0);
       fetchCourses();
     } catch (error) {
-      handleError(error, "Không thể xóa khóa học");
+      handleError(error, "Failed to delete course");
     }
   };
 
@@ -315,11 +326,7 @@ export default function AdminCoursesPage() {
         {/* Core responsive table rendering */}
         <CourseTable
           courses={courses}
-          page={page}
-          totalPages={totalPages}
-          totalElements={totalElements}
-          loading={loading}
-          onPageChange={handlePageChange}
+          loading={loading || loadingMore}
           onPreviewImage={setPreviewImage}
           onEditCourse={(course) => {
             setEditingCourse(course);
@@ -349,6 +356,22 @@ export default function AdminCoursesPage() {
             />
           }
         />
+
+        {/* Hidden trigger for IntersectionObserver to load more when scrolling */}
+        {hasNextPage && (
+          <Box
+            ref={observerTargetRef}
+            sx={{
+              height: 20,
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              mt: 2,
+            }}
+          >
+            {loadingMore && <CircularProgress size={24} />}
+          </Box>
+        )}
       </Stack>
 
       {/* Reusable Form Dialog for Create & Update */}

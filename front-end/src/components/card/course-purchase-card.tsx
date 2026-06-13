@@ -18,7 +18,7 @@ export interface CoursePurchaseCardProps {
   handleBuyNow: () => void;
   handleAddToCart: () => void;
   loadingAction: "buy" | "cart" | null;
-  isLoggedIn?: boolean;
+  showPurchase?: boolean;
 }
 
 export function CoursePurchaseCard({
@@ -28,7 +28,7 @@ export function CoursePurchaseCard({
   handleBuyNow,
   handleAddToCart,
   loadingAction,
-  isLoggedIn = true,
+  showPurchase = true,
 }: CoursePurchaseCardProps) {
   const isFree =
     course.originalPrice === 0 ||
@@ -151,7 +151,9 @@ export function CoursePurchaseCard({
               letterSpacing: "-0.02em",
             }}
           >
-            {isFree ? "Free" : `${displayPrice ? formatPrice(displayPrice) : "0"}đ`}
+            {isFree
+              ? "Free"
+              : `${displayPrice ? formatPrice(displayPrice) : "0"}đ`}
           </Typography>
           {!isFree &&
             course.originalPrice &&
@@ -202,7 +204,7 @@ export function CoursePurchaseCard({
                 fullWidth
                 size="large"
                 onClick={handleBuyNow}
-                disabled={loadingAction !== null || !isLoggedIn}
+                disabled={loadingAction !== null || !showPurchase}
                 sx={{
                   py: 1.5,
                   borderRadius: 3,
@@ -230,7 +232,7 @@ export function CoursePurchaseCard({
                 fullWidth
                 size="large"
                 onClick={handleAddToCart}
-                disabled={loadingAction !== null || !isLoggedIn}
+                disabled={loadingAction !== null || !showPurchase}
                 sx={{
                   py: 1.75,
                   borderRadius: 3,
@@ -259,7 +261,7 @@ export function CoursePurchaseCard({
               >
                 {loadingAction === "cart" ? "Processing..." : "Add to cart"}
               </Button>
-              {!isLoggedIn && (
+              {!showPurchase && (
                 <Typography
                   sx={{
                     textAlign: "center",
@@ -269,7 +271,7 @@ export function CoursePurchaseCard({
                     mt: 2,
                   }}
                 >
-                  Please login to buy this course
+                  Please login with student account to buy this course
                 </Typography>
               )}
             </>

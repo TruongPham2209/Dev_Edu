@@ -161,11 +161,14 @@ function CheckoutContent() {
       { orderId: id, paymentMethod: selectedMethod },
       {
         onSuccess: (res) => {
-          showSuccess("Redirecting to payment gateway...");
           if (res.paymentUrl) {
+            showSuccess("Redirecting to payment gateway...");
             window.location.href = res.paymentUrl;
           } else {
-            router.push(`/payment-success?paymentId=${res.paymentId}`);
+            showSuccess(
+              "Enrollment successfull, please check your cart to see details",
+            );
+            router.push(`/cart`);
           }
         },
         onError: (err) => {

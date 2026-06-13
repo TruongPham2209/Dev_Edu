@@ -8,6 +8,7 @@ import {
   getForumCommentReplies,
   getForumComments,
   useCreateForumCommentMutation,
+  useDeleteForumCommentMutation,
 } from "@/lib/api/forum";
 import { CustomPaging } from "@/lib/type/api";
 import type { ForumCommentResponse } from "@/lib/type/forums";
@@ -48,7 +49,7 @@ export function PostComments({
   title,
   placeholder,
 }: PostCommentsProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, roles } = useAuth();
   const { handleError, showSuccess } = useApiWithToast();
 
   const [comments, setComments] = useState<ForumCommentResponse[]>([]);
@@ -59,6 +60,7 @@ export function PostComments({
   const [submitting, setSubmitting] = useState(false);
 
   const { mutateAsync: createCommentMutate } = useCreateForumCommentMutation();
+  const { mutateAsync: deleteCommentMutate } = useDeleteForumCommentMutation();
 
   const loadComments = async (cursor?: string) => {
     try {
@@ -189,12 +191,14 @@ export function PostComments({
               key={comment.id}
               id={comment.id}
               content={comment.content}
-              authorUsername={comment.author}
+              authorUsername={comment.authorUsername}
+              authorAvatarUrl={comment.authorAvatarUrl}
               createdAt={comment.createdAt}
               isDeleted={comment.isDeleted}
+              isMine={comment.isMine}
               replyCount={comment.replyCount}
               maxDepth={1}
-              canDelete={false} // Delete not implemented in forum comments yet
+              canDelete={comment.isMine || roles.includes("ADMIN")}
               onAddReply={async (content, replyToId) => {
                 if (onCreateReply) {
                   const res = await onCreateReply(comment.id, content);
@@ -205,7 +209,7 @@ export function PostComments({
                     content,
                     repliedToCommentId: replyToId,
                   });
-                  return res as any;
+                  return res as ForumCommentResponse;
                 }
               }}
               onLoadReply={async (parentId, cursor) => {
@@ -215,7 +219,7 @@ export function PostComments({
                     cursor || undefined,
                   );
                   return {
-                    contents: res.contents as any[],
+                    contents: res.contents as ForumCommentResponse[],
                     nextCursor: res.nextCursor,
                   };
                 } else {
@@ -224,10 +228,14 @@ export function PostComments({
                     cursor || undefined,
                   );
                   return {
-                    contents: res.contents as any[],
+                    contents: res.contents as ForumCommentResponse[],
                     nextCursor: res.nextCursor,
                   };
                 }
+              }}
+              onDelete={async (id) => {
+                await deleteCommentMutate(id);
+                await loadComments();
               }}
             />
           ))}

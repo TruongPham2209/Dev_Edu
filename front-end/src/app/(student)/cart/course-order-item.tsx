@@ -16,6 +16,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { ReviewDialog } from "./review-dialog";
 
+const stripHtml = (html: string = "") => {
+  return html.replace(/<[^>]*>/g, "").trim();
+};
+
 interface CourseOrderItemProps {
   item: CourseItemDetailResponse | any;
   tabContext: "cart" | "order" | "enrolled";
@@ -163,10 +167,7 @@ export function CourseOrderItem({
                     lineHeight: 1.6,
                   }}
                 >
-                  <Box
-                    sx={{ display: "flex", flexDirection: "column" }}
-                    dangerouslySetInnerHTML={{ __html: item.description }}
-                  />
+                  {stripHtml(item.description)}
                 </Typography>
               )}
             </Box>

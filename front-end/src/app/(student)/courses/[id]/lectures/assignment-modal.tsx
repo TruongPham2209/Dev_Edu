@@ -11,10 +11,7 @@ import {
   useFileMetadataQuery,
   usePreSignedUploadUrlMutation,
 } from "@/lib/api/files";
-import type {
-  AssignmentResponse,
-  FeedbackResponse,
-} from "@/lib/type/assignments";
+import type { AssignmentResponse } from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
@@ -41,7 +38,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface AssignmentModalProps {
   open: boolean;

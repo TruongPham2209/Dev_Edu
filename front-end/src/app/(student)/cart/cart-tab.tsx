@@ -264,10 +264,10 @@ export function CartTabContent() {
         <Stack spacing={3}>
           {visibleItems.map((item) => (
             <CourseOrderItem
-              key={item.courseId || item.id}
+              key={item.id}
               item={item}
               tabContext="cart"
-              selected={selectedIds.has(item.courseId || item.id)}
+              selected={selectedIds.has(item.id)}
               onSelect={handleSelect}
               onRemove={() => handleRemoveClick(item)}
             />

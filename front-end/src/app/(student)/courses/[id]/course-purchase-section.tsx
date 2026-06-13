@@ -5,9 +5,9 @@ import {
   useAddToCartMutation,
   useCheckoutMutation,
 } from "@/lib/api/enrollments";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import type { CourseResponse } from "@/lib/type/courses";
 import type { LectureResponse } from "@/lib/type/lectures";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,7 +23,8 @@ export function CoursePurchaseSection({
   isEnrolled,
   lectures,
 }: CoursePurchaseSectionProps) {
-  const { isAuthenticated: isLoggedIn } = useAuth();
+  const { isAuthenticated, roles } = useAuth();
+  const showPurchase = isAuthenticated && roles?.includes("STUDENT");
   const router = useRouter();
   const { handleError, showSuccess } = useApiWithToast();
   const [loadingAction, setLoadingAction] = useState<"buy" | "cart" | null>(
@@ -33,11 +34,10 @@ export function CoursePurchaseSection({
   const { mutateAsync: checkoutMutate } = useCheckoutMutation();
 
   const handleBuyNow = async () => {
-    if (!isLoggedIn) {
+    if (!showPurchase) {
       router.push(`/login?redirect=/courses/${course.id}`);
       return;
     }
-
     setLoadingAction("buy");
     try {
       const res = await checkoutMutate({
@@ -71,7 +71,7 @@ export function CoursePurchaseSection({
       handleBuyNow={handleBuyNow}
       handleAddToCart={handleAddToCart}
       loadingAction={loadingAction}
-      isLoggedIn={isLoggedIn}
+      showPurchase={showPurchase}
     />
   );
 }

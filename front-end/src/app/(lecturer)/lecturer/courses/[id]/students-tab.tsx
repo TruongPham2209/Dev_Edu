@@ -78,42 +78,59 @@ export const StudentsTab = ({ courseId }: { courseId: string }) => {
             subtitle="Share your course to start getting students."
           />
         ) : (
-          <Stack spacing={2}>
-            {students.map((student) => (
-              <Box
-                key={student.id}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  p: 1,
-                  borderRadius: 1,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  "&:hover": { bgcolor: "grey.50" },
-                  transition: "background-color 0.2s",
-                }}
-              >
-                <Avatar sx={{ width: 48, height: 48, bgcolor: "primary.main" }}>
-                  {student.fullName
-                    ? student.fullName.charAt(0).toUpperCase()
-                    : student.username.charAt(0).toUpperCase()}
-                </Avatar>
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontWeight: 600 }}>
-                    {student.fullName || student.username}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    @{student.username}
-                  </Typography>
+          <Stack spacing={3}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+                gap: 2,
+              }}
+            >
+              {students.map((student) => (
+                <Box
+                  key={student.id}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    p: 1,
+                    borderRadius: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    "&:hover": { bgcolor: "grey.50" },
+                    transition: "background-color 0.2s",
+                  }}
+                >
+                  <Avatar
+                    src={student.avatarUrl || undefined}
+                    sx={{ width: 48, height: 48, bgcolor: "primary.main" }}
+                  >
+                    {student.fullName
+                      ? student.fullName.charAt(0).toUpperCase()
+                      : student.username.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontWeight: 600 }}>
+                      {student.fullName || student.username}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      @{student.username}
+                    </Typography>
+                  </Box>
+                  {student.enrolledAt && (
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Enrolled on {formatServerDate(student.enrolledAt)}
+                    </Typography>
+                  )}
                 </Box>
-                {student.enrolledAt && (
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Enrolled on {formatServerDate(student.enrolledAt)}
-                  </Typography>
-                )}
-              </Box>
-            ))}
+              ))}
+            </Box>
 
             {hasMore && (
               <Box

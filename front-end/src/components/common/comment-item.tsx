@@ -1,6 +1,7 @@
 "use client";
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import { useAuth } from "@/lib/use-auth";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   alpha,
@@ -20,7 +21,7 @@ export interface CommentNodeData {
   id: string;
   content: string | null;
   authorUsername?: string;
-  authorAvatar?: string;
+  authorAvatarUrl?: string;
   isDeleted?: boolean;
   isMine?: boolean;
   createdAt: string | Date;
@@ -33,7 +34,7 @@ export interface CommentItemProps {
   id: string;
   content: string | null;
   authorUsername?: string;
-  authorAvatar?: string;
+  authorAvatarUrl?: string;
   isDeleted?: boolean;
   isMine?: boolean;
   createdAt: string | Date;
@@ -59,7 +60,7 @@ export function CommentItem({
   id,
   content,
   authorUsername,
-  authorAvatar,
+  authorAvatarUrl,
   isDeleted,
   isMine,
   createdAt,
@@ -75,12 +76,13 @@ export function CommentItem({
   onChildAddReply,
 }: CommentItemProps) {
   const theme = useTheme();
+  const { isAuthenticated, roles } = useAuth();
 
   const [commentState, setCommentState] = useState<CommentNodeData>({
     id,
     content,
     authorUsername,
-    authorAvatar,
+    authorAvatarUrl,
     isDeleted,
     isMine,
     createdAt,
@@ -93,7 +95,7 @@ export function CommentItem({
       id,
       content,
       authorUsername,
-      authorAvatar,
+      authorAvatarUrl,
       isDeleted,
       isMine,
       createdAt,
@@ -104,7 +106,7 @@ export function CommentItem({
     id,
     content,
     authorUsername,
-    authorAvatar,
+    authorAvatarUrl,
     isDeleted,
     isMine,
     createdAt,
@@ -253,7 +255,7 @@ export function CommentItem({
           }}
         >
           <Avatar
-            src={commentState.authorAvatar}
+            src={commentState.authorAvatarUrl}
             sx={{
               width: level === 0 ? 36 : 28,
               height: level === 0 ? 36 : 28,
@@ -263,7 +265,7 @@ export function CommentItem({
               zIndex: 1,
             }}
           >
-            {!commentState.authorAvatar &&
+            {!commentState.authorAvatarUrl &&
               (commentState.isMine
                 ? "Y"
                 : commentState.authorUsername?.[0]?.toUpperCase() || "A")}
@@ -346,7 +348,7 @@ export function CommentItem({
               {formatServerDate(commentState.createdAt)}
             </Typography>
 
-            {!commentState.isDeleted && (
+            {isAuthenticated && !commentState.isDeleted && (
               <Typography
                 variant="caption"
                 sx={{
@@ -361,7 +363,7 @@ export function CommentItem({
               </Typography>
             )}
 
-            {canDelete && !commentState.isDeleted && (
+            {isAuthenticated && canDelete && !commentState.isDeleted && (
               <Typography
                 variant="caption"
                 sx={{
@@ -377,45 +379,47 @@ export function CommentItem({
             )}
           </Stack>
 
-          <Collapse in={isReplying}>
-            <Box sx={{ mt: 1.5, ml: 1, minWidth: 300, maxWidth: "100%" }}>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Write a reply..."
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                multiline
-                minRows={1}
-                maxRows={4}
-                sx={{
-                  "& .MuiOutlinedInput-root": { borderRadius: "18px" },
-                }}
-              />
-              <Stack
-                direction="row"
-                spacing={1}
-                sx={{ mt: 1, justifyContent: "flex-end" }}
-              >
-                <Button
+          {isAuthenticated && (
+            <Collapse in={isReplying}>
+              <Box sx={{ mt: 1.5, ml: 1, minWidth: 300, maxWidth: "100%" }}>
+                <TextField
+                  fullWidth
                   size="small"
-                  onClick={() => setIsReplying(false)}
-                  sx={{ borderRadius: 2 }}
+                  placeholder="Write a reply..."
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  multiline
+                  minRows={1}
+                  maxRows={4}
+                  sx={{
+                    "& .MuiOutlinedInput-root": { borderRadius: "18px" },
+                  }}
+                />
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{ mt: 1, justifyContent: "flex-end" }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  size="small"
-                  variant="contained"
-                  disabled={!replyContent.trim() || submitting}
-                  onClick={handleReply}
-                  sx={{ borderRadius: 2 }}
-                >
-                  Send
-                </Button>
-              </Stack>
-            </Box>
-          </Collapse>
+                  <Button
+                    size="small"
+                    onClick={() => setIsReplying(false)}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    disabled={!replyContent.trim() || submitting}
+                    onClick={handleReply}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    Send
+                  </Button>
+                </Stack>
+              </Box>
+            </Collapse>
+          )}
 
           {((commentState.replyCount || 0) > 0 || replies.length > 0) && (
             <Box sx={{ mt: 1, width: "100%" }}>
@@ -462,7 +466,7 @@ export function CommentItem({
                       id={reply.id}
                       content={reply.content}
                       authorUsername={reply.authorUsername}
-                      authorAvatar={reply.authorAvatar}
+                      authorAvatarUrl={reply.authorAvatarUrl}
                       isDeleted={reply.isDeleted}
                       isMine={reply.isMine}
                       createdAt={reply.createdAt}

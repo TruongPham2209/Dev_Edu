@@ -31,7 +31,7 @@ export async function FeaturedArticlesSection() {
       {articles.map((article) => (
         <Link
           key={article.id}
-          href={`/forum/${article.id}`}
+          href={`/posts?id=${article.id}`}
           style={{
             textDecoration: "none",
             color: "inherit",

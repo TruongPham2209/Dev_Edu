@@ -3,6 +3,7 @@
 import { useDownloadUrlQuery } from "@/lib/api/files";
 import { useUpdateLectureProgressMutation } from "@/lib/api/lectures";
 import { alpha, Box, CircularProgress, Paper, Typography } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
 interface LectureVideoPlayerProps {
@@ -18,6 +19,7 @@ export function LectureVideoPlayer({
   onCompleted,
   isInitiallyCompleted = false,
 }: LectureVideoPlayerProps) {
+  const queryClient = useQueryClient();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -103,6 +105,7 @@ export function LectureVideoPlayer({
               });
 
               if (res.completed) {
+                queryClient.invalidateQueries({ queryKey: ["lectures"] });
                 setIsCompleted(true);
                 onCompleted?.();
                 clearInterval(interval);

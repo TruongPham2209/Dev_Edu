@@ -35,7 +35,7 @@ interface DataTableProps<T> {
   minWidth?: number | string;
 
   // Data Table Modes
-  mode?: "all" | "infinite" | "pagination";
+  mode?: "infinite" | "pagination";
 
   // Pagination
   page?: number;
@@ -135,9 +135,7 @@ export function DataTable<T>({
   // Check if we should render full table as skeletons
   const isFullSkeleton =
     loading &&
-    (mode === "pagination" ||
-      mode === "all" ||
-      (mode === "infinite" && data.length === 0));
+    (mode === "pagination" || (mode === "infinite" && data.length === 0));
 
   return (
     <>

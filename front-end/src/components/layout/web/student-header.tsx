@@ -228,7 +228,7 @@ export function StudentHeader() {
                     display: { xs: "none", sm: "flex" },
                   }}
                 >
-                  Đăng nhập
+                  Log in
                 </Button>
                 <Button
                   component={Link}
@@ -244,7 +244,7 @@ export function StudentHeader() {
                     "&:hover": { bgcolor: "#15803d" },
                   }}
                 >
-                  Đăng ký
+                  Sign up
                 </Button>
               </Box>
             )}

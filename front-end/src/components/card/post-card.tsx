@@ -112,9 +112,9 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
     navId = props.post.postId;
     title = props.post.title;
     content = props.post.shortDescription;
-    date = props.post.savedAt;
-    authorName = "DevEdu Member";
-    authorAvatarUrl = undefined;
+    date = props.post.postedDate;
+    authorName = props.post.authorFullName;
+    authorAvatarUrl = props.post.authorAvatarUrl || undefined;
     thumbUrl = props.post.thumbUrl;
     status = undefined;
   } else {
@@ -206,7 +206,7 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                     gap: 0.5,
                   }}
                 >
-                  <Clock size={12} /> {formatServerDate(date)}
+                  <Clock size={12} /> {formatServerDate(date, "datetime")}
                 </Typography>
               </Box>
             </Box>

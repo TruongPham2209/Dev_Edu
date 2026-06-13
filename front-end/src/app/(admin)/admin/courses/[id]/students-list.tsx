@@ -183,6 +183,7 @@ export const StudentsList = ({
                       sx={{ alignItems: "center" }}
                     >
                       <Avatar
+                        src={student.avatarUrl || undefined}
                         sx={{
                           bgcolor: color,
                           color: "white",

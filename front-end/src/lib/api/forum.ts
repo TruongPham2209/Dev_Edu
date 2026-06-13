@@ -51,7 +51,7 @@ export async function getPostedPosts(
 ): Promise<CustomPaging<PostResponse>> {
   const query = new URLSearchParams();
   query.append("status", status);
-  if (nextCursor) query.append("nextCursor", nextCursor);
+  if (nextCursor) query.append("lastCursor", nextCursor);
 
   const qs = query.toString();
   return apiGet<CustomPaging<PostResponse>>(`/api/v1/forum/posts/posted?${qs}`);

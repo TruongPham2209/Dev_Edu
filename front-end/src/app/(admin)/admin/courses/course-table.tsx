@@ -14,11 +14,7 @@ const stripHtml = (html: string = "") => {
 
 interface CourseTableProps {
   courses: CourseResponse[];
-  page: number;
-  totalPages: number;
-  totalElements: number;
   loading: boolean;
-  onPageChange: (nextPage: number) => void;
   onPreviewImage: (url: string) => void;
   onEditCourse: (course: CourseResponse) => void;
   onDeleteCourse: (id: string) => void;
@@ -28,11 +24,7 @@ interface CourseTableProps {
 
 export function CourseTable({
   courses,
-  page,
-  totalPages,
-  totalElements,
   loading,
-  onPageChange,
   onPreviewImage,
   onEditCourse,
   onDeleteCourse,
@@ -198,12 +190,9 @@ export function CourseTable({
       columns={columns}
       data={courses}
       loading={loading}
+      mode="infinite"
       skeletonRowCount={4}
       keyExtractor={(course) => course.id}
-      page={page}
-      totalPages={totalPages}
-      totalElements={totalElements}
-      onPageChange={onPageChange}
       errorState={errorState}
       emptyState={emptyState}
     />

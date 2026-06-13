@@ -13,6 +13,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  alpha,
 } from "@mui/material";
 import {
   Bookmark,
@@ -21,22 +22,22 @@ import {
   History,
   MessageSquare,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface PostHeaderProps {
   post: PostResponse;
-  initialSavedState?: boolean;
 }
 
-export function PostHeader({
-  post,
-  initialSavedState = false,
-}: PostHeaderProps) {
+export function PostHeader({ post }: PostHeaderProps) {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [isSaved, setIsSaved] = useState(initialSavedState);
+  const [isSaved, setIsSaved] = useState(post.isSaved);
   const [isSaving, setIsSaving] = useState(false);
   const { isAuthenticated } = useAuth();
   const { handleError, showSuccess } = useApiWithToast();
+
+  useEffect(() => {
+    setIsSaved(post.isSaved);
+  }, [post.id, post.isSaved]);
 
   const { mutateAsync: savePostMutate } = useSavePostMutation();
   const { mutateAsync: unsavePostMutate } = useUnsavePostMutation();
@@ -95,7 +96,7 @@ export function PostHeader({
               </Typography>
               <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                 <Typography variant="body2" color="text.secondary">
-                  {formatServerDate(post.createdAt)}
+                  {formatServerDate(post.createdAt, "datetime")}
                 </Typography>
                 <Box
                   sx={{
@@ -142,16 +143,20 @@ export function PostHeader({
               <IconButton
                 onClick={handleToggleSave}
                 disabled={isSaving}
-                sx={{
-                  bgcolor: isSaved ? "primary.light" : "background.paper",
-                  color: isSaved ? "primary.main" : "inherit",
+                sx={(theme) => ({
+                  bgcolor: isSaved
+                    ? alpha(theme.palette.primary.main, 0.1)
+                    : "background.paper",
+                  color: isSaved ? "primary.main" : "text.secondary",
                   boxShadow: 1,
                   "&:hover": {
-                    bgcolor: isSaved ? "primary.light" : "action.hover",
+                    bgcolor: isSaved
+                      ? alpha(theme.palette.primary.main, 0.2)
+                      : "action.hover",
                   },
                   transition: "all 0.2s",
                   transform: isSaving ? "scale(0.9)" : "scale(1)",
-                }}
+                })}
               >
                 {isSaved ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
               </IconButton>
