@@ -16,8 +16,12 @@ import java.util.UUID;
 public class SavedPostResponse {
     UUID id;
     UUID postId;
+    String authorUsername;
+    String authorFullName;
+    String authorAvatarUrl;
     String thumbUrl;
     String title;
     String shortDescription;
+    LocalDateTime postedDate;
     LocalDateTime savedAt;
 }

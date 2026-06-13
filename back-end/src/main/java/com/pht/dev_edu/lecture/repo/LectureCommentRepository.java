@@ -46,18 +46,29 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                 WHERE   lc.root_comment_id  = c.id
                                 AND     lc.deleted_at       IS NULL
                             )
+                        ),
+                        replyCounts AS (
+                            SELECT  lc.root_comment_id      AS id,
+                                    COUNT(*)                AS replyCount
+                            FROM lecture_comment lc
+                            WHERE   lc.lecture_id   = :lectureId
+                            AND     lc.deleted_at   IS NULL
+                            GROUP BY lc.root_comment_id
                         )
-                        SELECT      vc.id                   AS id,
-                                    vc.content              AS content,
-                                    vc.createdAt            AS createdAt,
+                        SELECT      vc.id                           AS id,
+                                    vc.content                      AS content,
+                                    vc.createdAt                    AS createdAt,
                                     CASE WHEN vc.deletedAt IS NOT NULL THEN true
-                                    ELSE false END          AS isDeleted,
-                                    vc.author               AS author,
-                                    COUNT(lc.id)            AS replyCount
+                                    ELSE false END                  AS isDeleted,
+                                    u.username                      AS authorUsername,
+                                    u.full_name                     AS authorFullName,
+                                    u.avatar_url                    AS authorAvatarUrl,
+                                    COALESCE(rc.replyCount, 0)      AS replyCount
                         FROM validComments vc
-                        LEFT JOIN lecture_comment lc
-                            ON vc.id = lc.parent_comment_id
-                        GROUP BY vc.id, vc.content, vc.createdAt, vc.deletedAt, vc.author
+                        LEFT JOIN replyCounts rc
+                            ON vc.id = rc.id
+                        LEFT JOIN "user" u
+                            ON u.username = vc.author
                         ORDER BY vc.createdAt DESC, vc.id DESC
             """, countQuery = """
                         WITH validComments AS (
@@ -134,20 +145,31 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                 WHERE   lc.parent_comment_id    = c.id
                                 AND     lc.deleted_at           IS NULL
                             )
+                        ),
+                        replyCounts AS (
+                            SELECT  lc.parent_comment_id    AS id,
+                                    COUNT(*)                AS replyCount
+                            FROM lecture_comment lc
+                            WHERE   lc.parent_comment_id    = :parentCommentId
+                            AND     lc.deleted_at           IS NULL
+                            GROUP BY lc.parent_comment_id
                         )
-                        SELECT      vc.id                   AS id,
-                                    vc.content              AS content,
-                                    vc.createdAt            AS createdAt,
+                        SELECT      vc.id                           AS id,
+                                    vc.content                      AS content,
+                                    vc.createdAt                    AS createdAt,
                                     CASE WHEN vc.deletedAt IS NOT NULL THEN true
-                                    ELSE false END          AS isDeleted,
-                                    vc.rootCommentId        AS rootCommentId,
-                                    vc.parentCommentId      AS parentCommentId,
-                                    vc.author               AS author,
-                                    COUNT(lc.id)            AS replyCount
+                                    ELSE false END                  AS isDeleted,
+                                    vc.rootCommentId                AS rootCommentId,
+                                    vc.parentCommentId              AS parentCommentId,
+                                    u.username                      AS authorUsername,
+                                    u.full_name                     AS authorFullName,
+                                    u.avatar_url                    AS authorAvatarUrl,
+                                    COALESCE(rc.replyCount, 0)      AS replyCount
                         FROM validComments vc
-                        LEFT JOIN lecture_comment lc
-                            ON vc.id = lc.parent_comment_id
-                        GROUP BY vc.id, vc.content, vc.createdAt, vc.deletedAt, vc.author, vc.rootCommentId, vc.parentCommentId
+                        LEFT JOIN replyCounts rc
+                            ON vc.id = rc.id
+                        LEFT JOIN "user" u
+                            ON u.username = vc.author
                         ORDER BY vc.createdAt DESC, vc.id DESC
             """, countQuery = """
                         WITH validComments AS (
@@ -195,10 +217,14 @@ public interface LectureCommentRepository extends JpaRepository<LectureCommentEn
                                     lc.root_comment_id      AS rootCommentId,
                                     lc.parent_comment_id    AS parentCommentId,
                                     lc.created_at           AS createdAt,
-                                    lc.username             AS author,
+                                    lc.username             AS authorUsername,
+                                    u.full_name             AS authorFullName,
+                                    u.avatar_url            AS authorAvatarUrl,
                                     false                   AS isDeleted,
                                     0                       AS replyCount
                         FROM  lecture_comment lc
+                        INNER JOIN "user" u
+                            ON lc.username = u.username
                         WHERE   lc.parent_comment_id    = :parentCommentId
                         AND     lc.deleted_at           IS NULL
                         AND     lc.depth                = 2

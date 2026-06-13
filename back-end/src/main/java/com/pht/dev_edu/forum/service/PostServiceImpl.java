@@ -20,6 +20,7 @@ import com.pht.dev_edu.forum.mapper.PostVersionMapper;
 import com.pht.dev_edu.forum.repo.PostQueryRepository;
 import com.pht.dev_edu.forum.repo.PostRepository;
 import com.pht.dev_edu.forum.repo.PostVersionRepository;
+import com.pht.dev_edu.forum.repo.SavedPostRepository;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,6 +45,7 @@ public class PostServiceImpl implements PostService {
     PostVersionRepository postVersionRepository;
     PostQueryRepository postQueryRepository;
     PostRepository postRepository;
+    SavedPostRepository savedPostRepository;
 
     FileService fileService;
     PostMapper postMapper;
@@ -128,6 +130,12 @@ public class PostServiceImpl implements PostService {
 
         var detailResponse = postMapper.projectionToRes(post);
         detailResponse.setIsMine(post.getAuthorUsername().equals(actor));
+        if (StringUtils.hasText(actor)) {
+            detailResponse.setIsSaved(savedPostRepository.existsByUsernameAndPostId(actor, postId));
+        } else {
+            detailResponse.setIsSaved(false);
+        }
+
         return detailResponse;
     }
 

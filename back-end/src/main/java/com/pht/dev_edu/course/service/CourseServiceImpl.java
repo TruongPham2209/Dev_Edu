@@ -12,17 +12,17 @@ import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.*;
+import com.pht.dev_edu.course.dto.CourseCursorRequest;
 import com.pht.dev_edu.course.dto.CourseDetailProjection;
-import com.pht.dev_edu.course.dto.CoursePageRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.dto.CourseResponse;
 import com.pht.dev_edu.course.entity.CourseEntity;
 import com.pht.dev_edu.course.entity.CourseLecturerEntity;
 import com.pht.dev_edu.course.entity.CourseLecturerId;
 import com.pht.dev_edu.course.mapper.CourseMapper;
+import com.pht.dev_edu.course.repo.CourseDiscountRepository;
 import com.pht.dev_edu.course.repo.CourseLecturerRepository;
 import com.pht.dev_edu.course.repo.CourseRepository;
-import com.pht.dev_edu.course.repo.CourseDiscountRepository;
 import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
@@ -30,7 +30,6 @@ import com.pht.dev_edu.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,7 +63,7 @@ public class CourseServiceImpl implements CourseService {
     Executor executor;
 
     @Override
-    public CourseResponse getCourseDetails(String username, UUID courseId) {
+    public CourseResponse getCourseDetail(String username, UUID courseId) {
         var courseDetail = courseRepository.findCourseDetail(courseId, username);
         if (courseDetail == null) {
             throw new DataNotFoundException("Course not found");
@@ -122,42 +121,38 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CoursePageRequest req) {
+    public CustomPaging<CourseResponse> getCourses(UUID categoryId, String keyword, CourseCursorRequest req) {
         if (req.getStatus() == null) {
             req.setStatus(ItemStatus.ACTIVE);
         }
 
-        Function<TimeStampCursor, Page<CourseDetailProjection>> queryFn;
-        var pageable = req.toPageable();
-        int limit = StringUtils.hasText(req.getNextCursor())
-                ? pageable.getPageSize() - 1
-                : pageable.getPageSize();
+        Function<TimeStampCursor, List<CourseDetailProjection>> queryFn;
+        int limit = req.getSize() + 1;
 
         if (categoryId != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit);
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit);
                 case ALL ->
-                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit);
             };
         } else if (keyword != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
                 case DELETED ->
-                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
                 case ALL ->
-                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
             };
         } else {
             queryFn = cursor -> switch (req.getStatus()) {
-                case ACTIVE ->
-                        courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                case ACTIVE -> courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit, pageable);
-                case ALL -> courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), limit, pageable);
+                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
+                case ALL -> courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
             };
         }
 
@@ -166,27 +161,21 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private CustomPaging<CourseResponse> executeCoursePaging(
-            CoursePageRequest pageRequest,
-            Function<TimeStampCursor, Page<CourseDetailProjection>> queryFn
+            CourseCursorRequest pageRequest,
+            Function<TimeStampCursor, List<CourseDetailProjection>> queryFn
     ) {
         var cursor = resolveCursor(pageRequest.getNextCursor());
         var coursePage = queryFn.apply(cursor);
 
         var globalDiscount = getGlobalDiscountPercentage();
 
-        var pageResult = PagingUtils.getPagedWithCursor(
+        return PagingUtils.getPagedWithCursor(
                 coursePage,
                 c -> convertProjectionToRes(c, globalDiscount),
                 CourseDetailProjection::getCreatedAt,
                 CourseDetailProjection::getId,
                 pageRequest.getSize()
         );
-
-        if (StringUtils.hasText(pageRequest.getNextCursor())) {
-            pageResult.setCurrentPage(pageRequest.getPage());
-        }
-
-        return pageResult;
     }
 
     private TimeStampCursor resolveCursor(String nextCursor) {
@@ -246,10 +235,11 @@ public class CourseServiceImpl implements CourseService {
         validateLecturerUsername(course.getLecturerUsernames());
 
         var updatedCourse = courseMapper.reqToEntity(course);
-        boolean isNewThumbnail = existingCourse.getThumbnailObjectKey().equals(course.getThumbnailObjectKey());
+        var existingThumbnailObjectKey = existingCourse.getThumbnailObjectKey();
+        boolean isNewThumbnail = !existingCourse.getThumbnailObjectKey().equals(course.getThumbnailObjectKey());
         String thumbnailUrl = isNewThumbnail
-                ? existingCourse.getThumbnailUrl()
-                : getThumbnailUrl(author, course.getThumbnailObjectKey());
+                ? getThumbnailUrl(author, course.getThumbnailObjectKey())
+                : existingCourse.getThumbnailUrl();
         updatedCourse.setThumbnailUrl(thumbnailUrl);
         updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
         updatedCourse.setCreatedAt(existingCourse.getCreatedAt());
@@ -278,6 +268,10 @@ public class CourseServiceImpl implements CourseService {
                     .details("Course updated with id: " + existingCourse.getId())
                     .build();
             KafkaUtils.sendTrackingEvent(tracking);
+
+            if (isNewThumbnail) {
+                KafkaUtils.sendDeleteFileEvent(existingThumbnailObjectKey);
+            }
         }, executor);
 
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + course.getId());

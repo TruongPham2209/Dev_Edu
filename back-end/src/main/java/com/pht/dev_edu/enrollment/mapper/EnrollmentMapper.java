@@ -12,6 +12,7 @@ import com.pht.dev_edu.enrollment.dto.EnrollmentUserResponse;
 public interface EnrollmentMapper {
     @Mapping(target = "username", source = "studentUsername")
     @Mapping(target = "fullName", source = "studentFullName")
+    @Mapping(target = "avatarUrl", source = "studentAvatarUrl")
     EnrollmentUserResponse toEnrollmentUserResponse(EnrollmentUserProjection projection);
 
     @Mapping(target = "status", ignore = true)

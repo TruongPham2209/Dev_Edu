@@ -38,5 +38,5 @@ public interface CourseDetailProjection {
 
     LocalDateTime getCreatedAt();
 
-    Boolean registered();
+    Boolean getRegistered();
 }

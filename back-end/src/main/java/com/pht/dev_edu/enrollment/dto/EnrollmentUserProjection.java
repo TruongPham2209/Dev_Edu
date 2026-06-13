@@ -15,5 +15,7 @@ public interface EnrollmentUserProjection {
 
     String getStudentFullName();
 
+    String getStudentAvatarUrl();
+
     LocalDateTime getEnrolledAt();
 }

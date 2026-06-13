@@ -62,7 +62,7 @@ public interface PostRepository extends JpaRepository<PostEntity, UUID> {
     LEFT JOIN "user" u
         ON p.author = u.username
     WHERE   p.author                = :username
-    AND     (p.updated_at, p.id)    < (:lastUpdatedAt, :lastId)
+    AND     (p.updated_at, p.id)    <= (:lastUpdatedAt, :lastId)
     AND     p.deleted_at            IS NULL
     AND     p.current_version_id    IS NOT NULL
     ORDER BY p.updated_at DESC, p.id DESC

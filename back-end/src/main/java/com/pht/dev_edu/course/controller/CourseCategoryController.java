@@ -7,7 +7,7 @@ import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.common.validation.CreateValidation;
 import com.pht.dev_edu.common.validation.UpdateValidation;
-import com.pht.dev_edu.course.dto.CoursePageRequest;
+import com.pht.dev_edu.course.dto.CourseCursorRequest;
 import com.pht.dev_edu.course.dto.CourseRequest;
 import com.pht.dev_edu.course.service.CourseService;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +42,13 @@ public class CourseCategoryController {
         if (authorities.contains(RoleEnum.ADMIN.name())) {
             size = 10;
         } else {
-            size = 12;
+            size = 15;
             status = ItemStatus.ACTIVE;
         }
 
-        CoursePageRequest pageRequest = CoursePageRequest.builder()
+        CourseCursorRequest pageRequest = CourseCursorRequest.builder()
                 .status(status)
                 .size(size)
-                .page(page)
                 .nextCursor(nextCursor)
                 .sortBy(sortBy)
                 .build();
@@ -71,7 +70,7 @@ public class CourseCategoryController {
     @GetMapping("/courses/{courseId}/")
     public ResponseEntity<ApiResponse> getCourseById(@PathVariable UUID courseId) {
         String username = SecurityContextUtils.getCurrentUsername();
-        var course = courseService.getCourseDetails(username, courseId);
+        var course = courseService.getCourseDetail(username, courseId);
         return ApiUtils.buildSuccessResponse(course);
     }
 

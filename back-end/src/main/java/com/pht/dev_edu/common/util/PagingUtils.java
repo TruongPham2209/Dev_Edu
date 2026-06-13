@@ -77,11 +77,10 @@ public class PagingUtils {
     }
 
     public static <T> String getNextTimeCursor(
-            Page<T> page,
+            List<T> content,
             Function<T, LocalDateTime> getTime,
             Function<T, UUID> getId
     ) {
-        var content = page.getContent();
         if (content.isEmpty()) return null;
 
         var lastItem = content.getLast();
@@ -115,7 +114,34 @@ public class PagingUtils {
         result.setTotalElements(page.getTotalElements());
 
         if (hasNext) {
-            var nextCursor = PagingUtils.getNextTimeCursor(page, getTime, getId);
+            var nextCursor = PagingUtils.getNextTimeCursor(content, getTime, getId);
+            result.setNextCursor(nextCursor);
+        }
+
+        return result;
+    }
+
+    public static <T, R> CustomPaging<R> getPagedWithCursor(
+            List<T> content,
+            Function<T, R> mapper,
+            Function<T, LocalDateTime> getTime,
+            Function<T, UUID> getId,
+            int requestedPageSize // Truyền vào số lượng item thực tế user muốn (n)
+    ) {
+        boolean hasNext = content.size() > requestedPageSize;
+        List<T> finalContent = hasNext
+                ? content.subList(0, requestedPageSize)
+                : content;
+
+        Pageable newPageable = PageRequest.of(
+                0,
+                requestedPageSize
+        );
+
+        var result = new CustomPaging<>(finalContent, mapper, newPageable);
+
+        if (hasNext) {
+            var nextCursor = PagingUtils.getNextTimeCursor(content, getTime, getId);
             result.setNextCursor(nextCursor);
         }
 

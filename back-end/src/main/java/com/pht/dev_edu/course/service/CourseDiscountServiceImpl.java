@@ -41,8 +41,8 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
     public CustomPaging<CourseDiscountResponse> getAllScheduledDiscounts(String nextCursor) {
         var cursor = StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
-                : TimeStampCursor.getDefaultCursor(true);
-        var pageable = PageRequest.of(0, 21);
+                : TimeStampCursor.getDefaultCursor(false);
+        var pageable = PageRequest.of(0, 11);
 
         var validStartTime = LocalDate.now().atStartOfDay();
         var discountPage = discountRepository.getAllScheduledDiscountsWithCursor(validStartTime, cursor.getId(), cursor.getTimeStamp(), pageable);
@@ -50,7 +50,7 @@ public class CourseDiscountServiceImpl implements CourseDiscountService {
         return PagingUtils.getPagedWithCursor(
                 discountPage,
                 discountMapper::projectionToRes,
-                CourseDiscountProjection::getCreatedAt,
+                CourseDiscountProjection::getValidFrom,
                 CourseDiscountProjection::getId,
                 pageable.getPageSize() - 1
         );

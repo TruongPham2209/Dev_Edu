@@ -23,6 +23,7 @@ public class PostResponse {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 
+    Boolean isSaved;
     Boolean isMine;
     String authorUsername;
     String authorFullName;

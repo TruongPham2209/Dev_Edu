@@ -186,7 +186,7 @@ public class CommentServiceImpl implements CommentService {
 
     private CommentResponse convertProjectionToResponse(CommentProjection projection, String actor) {
         var content = projection.getIsDeleted() ? "This comment has been deleted" : projection.getContent();
-        boolean isMine = projection.getAuthor().equals(actor);
+        boolean isMine = projection.getAuthorUsername().equals(actor);
         var commentResponse = commentMapper.projectionToRes(projection);
         commentResponse.setContent(content);
         commentResponse.setIsMine(isMine);

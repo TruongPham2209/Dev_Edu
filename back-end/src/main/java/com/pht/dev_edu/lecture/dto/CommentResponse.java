@@ -16,6 +16,12 @@ import java.util.UUID;
 public class CommentResponse {
     UUID id;
 
+    String authorUsername;
+
+    String authorFullName;
+
+    String authorAvatarUrl;
+
     UUID rootCommentId;
 
     UUID parentCommentId;

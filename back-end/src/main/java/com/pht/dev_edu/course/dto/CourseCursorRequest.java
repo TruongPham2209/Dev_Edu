@@ -1,6 +1,6 @@
 package com.pht.dev_edu.course.dto;
 
-import com.pht.dev_edu.common.dto.AbstractPageRequest;
+import com.pht.dev_edu.common.dto.AbstractCursorRequest;
 import com.pht.dev_edu.common.dto.ItemStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +16,7 @@ import org.springframework.data.domain.Sort;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
-public class CoursePageRequest extends AbstractPageRequest {
+public class CourseCursorRequest extends AbstractCursorRequest {
     ItemStatus status;
 
     @Override

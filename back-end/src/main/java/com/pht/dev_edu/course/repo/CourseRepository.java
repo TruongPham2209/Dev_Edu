@@ -2,8 +2,6 @@ package com.pht.dev_edu.course.repo;
 
 import com.pht.dev_edu.course.dto.CourseDetailProjection;
 import com.pht.dev_edu.course.entity.CourseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,7 +25,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
             
                     cd.discount_percentage              AS discountedPercentage,
                     cd.valid_to                         AS validTo,
-
+            
                     EXISTS (
                         SELECT 1
                         FROM enrollment en
@@ -146,11 +144,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(id)
-            FROM    course
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> findByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -170,7 +165,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 LEFT JOIN course_discount cd
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
-                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                WHERE   (c.created_at, c.id)    <= (:lastCreatedAt, :lastId)
                 AND     c.deleted_at            IS NULL
                 ORDER BY c.created_at DESC, c.id DESC
                 LIMIT :limit
@@ -191,12 +186,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(c.id)
-            FROM    course c
-            WHERE   c.deleted_at IS NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> findActiveCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -216,7 +207,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 LEFT JOIN course_discount cd
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
-                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                WHERE   (c.created_at, c.id)    <= (:lastCreatedAt, :lastId)
                 AND     deleted_at              IS NOT NULL
                 ORDER BY c.created_at DESC, c.id DESC
                 LIMIT :limit
@@ -237,12 +228,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(id)
-            FROM    course
-            WHERE   deleted_at IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> findDeletedCoursesByCursor(UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -263,7 +250,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
                 WHERE   c.category_id           = :categoryId
-                AND     (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                AND     (c.created_at, c.id)    <= (:lastCreatedAt, :lastId)
                 ORDER BY c.created_at DESC, c.id DESC
                 LIMIT :limit
             )
@@ -283,12 +270,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(id)
-            FROM    course c
-            WHERE   c.category_id = :categoryId
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> findByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -308,7 +291,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 LEFT JOIN course_discount cd
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
-                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                WHERE   (c.created_at, c.id)    <= (:lastCreatedAt, :lastId)
                 AND     c.category_id           = :categoryId
                 AND     c.deleted_at            IS NULL
                 ORDER BY c.created_at DESC, c.id DESC
@@ -330,13 +313,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(id)
-            FROM    course c
-            WHERE   c.category_id   = :categoryId
-            AND     c.deleted_at    IS NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> findActiveCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -356,7 +334,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 LEFT JOIN course_discount cd
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
-                WHERE   (c.created_at, c.id)    < (:lastCreatedAt, :lastId)
+                WHERE   (c.created_at, c.id)    <= (:lastCreatedAt, :lastId)
                 AND     c.category_id           = :categoryId
                 AND     c.deleted_at            IS NOT NULL
                 ORDER BY c.created_at DESC, c.id DESC
@@ -378,13 +356,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(id)
-            FROM    course c
-            WHERE   c.category_id   = :categoryId
-            AND     c.deleted_at    IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> findDeletedCoursesByCategoryIdAndCursor(UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -405,7 +378,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
                 WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-                AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                AND     (c.created_at, c.id)            <= (:lastCreatedAt, :lastId)
                 ORDER BY c.created_at DESC, c.id DESC
                 LIMIT :limit
             )
@@ -425,12 +398,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(*)
-            FROM    course c
-            WHERE   immutable_unaccent(c.title) ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
             """, nativeQuery = true)
-    Page<CourseDetailProjection> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> searchCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -451,7 +420,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
                 WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-                AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                AND     (c.created_at, c.id)            <= (:lastCreatedAt, :lastId)
                 AND     c.deleted_at                    IS NULL
                 ORDER BY c.created_at DESC, c.id DESC
                 LIMIT :limit
@@ -472,13 +441,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(*)
-            FROM    course c
-            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.deleted_at                    IS NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> searchActiveCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     @Query(value = """
             WITH valid_courses AS (
@@ -499,7 +463,7 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                     ON c.id = cd.course_id
                     AND now() BETWEEN cd.valid_from AND cd.valid_to
                 WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-                AND     (c.created_at, c.id)            < (:lastCreatedAt, :lastId)
+                AND     (c.created_at, c.id)            <= (:lastCreatedAt, :lastId)
                 AND     c.deleted_at                    IS NOT NULL
                 ORDER BY c.created_at DESC, c.id DESC
                 LIMIT :limit
@@ -520,13 +484,8 @@ public interface CourseRepository extends JpaRepository<CourseEntity, UUID> {
                 FROM    course_review r
                 WHERE   r.course_id = vc.id
             ) r ON true
-            """, countQuery = """
-            SELECT  COUNT(*)
-            FROM    course c
-            WHERE   immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
-            AND     c.deleted_at                    IS NOT NULL
             """, nativeQuery = true)
-    Page<CourseDetailProjection> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit, Pageable pageable);
+    List<CourseDetailProjection> searchDeletedCoursesByCursor(String keyword, UUID lastId, LocalDateTime lastCreatedAt, int limit);
 
     boolean existsByCategoryIdAndDeletedAtIsNull(UUID categoryId);
 

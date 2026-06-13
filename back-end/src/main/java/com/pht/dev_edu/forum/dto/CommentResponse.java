@@ -15,7 +15,9 @@ import java.util.UUID;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class CommentResponse {
     UUID id;
-    String author;
+    String authorUsername;
+    String authorFullName;
+    String authorAvatarUrl;
     String content;
     int replyCount;
     UUID repliedToCommentId;

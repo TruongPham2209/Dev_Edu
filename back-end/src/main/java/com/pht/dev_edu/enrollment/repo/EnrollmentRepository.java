@@ -22,7 +22,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                                 e.enrolled_at           AS enrolledAt,
                                 oi.discounted_price     AS discountedPrice
                         FROM enrollment e
-                        LEFT JOIN course c
+                        INNER JOIN course c
                             ON e.course_id = c.id
                         LEFT JOIN "order" o
                             ON e.order_id = o.id
@@ -31,6 +31,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                             AND oi.item_id  = c.id
                         WHERE   e.student_username      = :studentUsername
                         AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
+                        AND     c.deleted_at            IS NULL
                         ORDER BY e.enrolled_at DESC, e.id DESC
             """, countQuery = """
                         SELECT COUNT(e.course_id)
@@ -49,10 +50,11 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                                 c.created_at            AS enrolledAt,
                                 c.price                 AS discountedPrice
                         FROM course_lecturer cl
-                        LEFT JOIN course c
+                        INNER JOIN course c
                             ON cl.course_id = c.id
-                        WHERE   cl.lecturer_username  = :lecturerUsername
-                        AND     (c.created_at, c.id) < (:lastUpdatedAt, :lastId)
+                        WHERE   cl.lecturer_username    = :lecturerUsername
+                        AND     c.deleted_at            IS NULL
+                        AND     (c.created_at, c.id)    < (:lastUpdatedAt, :lastId)
                         ORDER BY c.created_at DESC, c.id DESC
             """, countQuery = """
                         SELECT  COUNT(c.id)
@@ -66,10 +68,11 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
 
 
     @Query(value = """
-                        SELECT  e.id                 AS id,
-                                u.username           AS studentUsername,
-                                u.full_name          AS studentFullName,
-                                e.enrolled_at        AS enrolledAt
+                        SELECT  e.id                    AS id,
+                                u.username              AS studentUsername,
+                                u.full_name             AS studentFullName,
+                                u.avatar_url            AS studentAvatarUrl,
+                                e.enrolled_at           AS enrolledAt
                         FROM enrollment e
                         LEFT JOIN "user" u
                             ON e.student_username = u.username

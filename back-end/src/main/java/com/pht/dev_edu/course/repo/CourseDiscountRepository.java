@@ -31,17 +31,15 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
                 FROM course_discount cd
                 LEFT JOIN course c
                     ON c.id = cd.course_id
-                WHERE   (cd.valid_from, cd.id)  < (:lastValidFrom, :lastId)
+                WHERE   (cd.valid_from, cd.id)  >= (:lastValidFrom, :lastId)
                 AND     cd.valid_from           >= :validStartTime
-                ORDER BY cd.created_at DESC, cd.id DESC
+                ORDER BY cd.valid_from, cd.id
             """, countQuery = """
                 SELECT  COUNT(*)
                 FROM course_discount cd
-                LEFT JOIN course c
-                    ON c.id = cd.course_id
                 WHERE   cd.valid_from >= :validStartTime
             """, nativeQuery = true)
-    Page<CourseDiscountProjection> getAllScheduledDiscountsWithCursor(LocalDateTime validStartTime, UUID lastId, LocalDateTime lastValidFrom, Pageable pageable);
+    Page<CourseDiscountProjection>  getAllScheduledDiscountsWithCursor(LocalDateTime validStartTime, UUID lastId, LocalDateTime lastValidFrom, Pageable pageable);
 
     @Query(value = """
                 SELECT  c.id                        AS courseId,
@@ -62,7 +60,7 @@ public interface CourseDiscountRepository extends JpaRepository<CourseDiscountEn
                     ON c.id = cd.course_id
                 WHERE   cd.course_id    = :courseId
                 AND     cd.valid_from   >= :validStartTime
-                ORDER BY cd.created_at DESC, cd.id DESC
+                ORDER BY cd.valid_from
             """, nativeQuery = true)
     List<CourseDiscountProjection> getAllScheduledDiscountsByCourseId(LocalDateTime validStartTime, UUID courseId);
 

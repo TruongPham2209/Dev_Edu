@@ -11,6 +11,14 @@ public interface SavedPostProjection {
 
     UUID getPostId();
 
+    LocalDateTime getPostedDate();
+
+    String getAuthorUsername();
+
+    String getAuthorFullName();
+
+    String getAuthorAvatarUrl();
+
     String getTitle();
 
     String getShortDescription();

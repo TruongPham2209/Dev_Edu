@@ -10,6 +10,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Component
@@ -41,6 +42,7 @@ public class KafkaUtils {
 
     public static void sendSyncPostEvent(PostVersionEntity entity, String username) {
         if (entity != null) {
+            var zoneId = ZoneId.systemDefault();
             var document = PostDocument.builder()
                     .id(entity.getPostId())
                     .title(entity.getTitle())
@@ -48,6 +50,8 @@ public class KafkaUtils {
                     .shortDescription(entity.getShortDescription())
                     .thumbUrl(entity.getThumbUrl())
                     .authorUsername(username)
+                    .createdAt(entity.getCreatedAt().atZone(zoneId).toInstant())
+                    .updatedAt(entity.getUpdatedAt().atZone(zoneId).toInstant())
                     .build();
             kafkaTemplate.send(KafkaTopicConstant.POST_ELASTIC_DATA_UPDATE_TOPIC, document);
         }

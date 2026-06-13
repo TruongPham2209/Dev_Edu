@@ -30,7 +30,11 @@ public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID
                     pv.title                AS title,
                     pv.short_description    AS shortDescription,
                     pv.thumb_url            AS thumbUrl,
-                    sv.saved_at             AS savedAt
+                    sv.saved_at             AS savedAt,
+                    p.updated_at            AS postedDate,
+                    u.username              AS authorUsername,
+                    u.full_name             AS authorFullName,
+                    u.avatar_url            AS authorAvatarUrl
             FROM saved_post sv
             JOIN forum_post p
                 ON  sv.post_id              = p.id
@@ -38,8 +42,10 @@ public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID
                 AND p.current_version_id    IS NOT NULL
             LEFT JOIN forum_post_version pv
                 ON  p.current_version_id = pv.id
+            LEFT JOIN "user" u
+                ON sv.username = u.username
             WHERE   sv.username             = :username
-            AND     (sv.saved_at, sv.id)    < (:lastSavedAt, :lastId)
+            AND     (sv.saved_at, sv.id)    <= (:lastSavedAt, :lastId)
             ORDER BY sv.saved_at DESC, sv.id DESC
             """, countQuery = """
             SELECT COUNT(sv.post_id)
@@ -63,4 +69,6 @@ public interface SavedPostRepository extends JpaRepository<SavedPostEntity, UUID
             RETURNING sp.id
             """, nativeQuery = true)
     List<UUID> deleteByInvalidPostReference();
+
+    boolean existsByUsernameAndPostId(String username, UUID postId);
 }

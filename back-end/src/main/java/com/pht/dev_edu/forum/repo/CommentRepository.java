@@ -42,20 +42,30 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
                     WHERE   fc.root_comment_id  = c.id
                     AND     fc.deleted_at       IS NULL
                 )
+            ),
+            replyCounts AS (
+                SELECT  fc.root_comment_id  AS commentId,
+                        COUNT(*)            AS replyCount
+                FROM forum_comment fc
+                WHERE   fc.post_id           = :postId
+                AND     fc.deleted_at        IS NULL
+                GROUP BY fc.root_comment_id
             )
             SELECT  vc.id                           AS id,
-                    vc.author                       AS author,
+                    vc.author                       AS authorUsername,
+                    u.full_name                     AS authorFullName,
+                    u.avatar_url                    AS authorAvatarUrl,
                     vc.content                      AS content,
                     NULL                            AS repliedToCommentId,
                     vc.createdAt                    AS createdAt,
-                    COUNT(r.id)                     AS replyCount,
+                    rc.replyCount                   AS replyCount,
                     (vc.deletedAt IS NOT NULL)      AS isDeleted
             FROM validComments vc
-            LEFT JOIN forum_comment r
-                ON  r.root_comment_id   = vc.id
-                AND r.deleted_at        IS NULL
+            LEFT JOIN replyCounts rc
+                ON rc.commentId = vc.id
+            INNER JOIN "user" u
+                ON  u.username = vc.author
             WHERE (vc.createdAt, vc.id) < (:lastCreatedAt, :lastId)
-            GROUP BY vc.id, vc.author, vc.content, vc.createdAt, vc.deletedAt
             ORDER BY vc.createdAt DESC, vc.id DESC
             """, countQuery = """
             WITH validComments AS (
@@ -93,18 +103,22 @@ public interface CommentRepository extends JpaRepository<CommentEntity, UUID> {
     Page<CommentProjection> findRootCommentsByPostIdAndCursor(UUID postId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
-            SELECT  id                      AS id,
-                    author                  AS author,
-                    content                 AS content,
-                    root_comment_id         AS repliedToCommentId,
-                    created_at              AS createdAt,
-                    0                       AS replyCount,
-                    FALSE                   AS isDeleted
-            FROM forum_comment
-            WHERE   root_comment_id     = :rootCommentId
-            AND     (created_at, id)    < (:lastCreatedAt, :lastId)
-            AND     deleted_at          IS NULL
-            ORDER BY created_at DESC, id DESC
+            SELECT  fc.id                       AS id,
+                    fc.author                   AS authorUsername,
+                    u.full_name                 AS authorFullName,
+                    u.avatar_url                AS authorAvatarUrl,
+                    fc.content                  AS content,
+                    fc.root_comment_id          AS repliedToCommentId,
+                    fc.created_at               AS createdAt,
+                    0                           AS replyCount,
+                    FALSE                       AS isDeleted
+            FROM forum_comment fc
+            INNER JOIN "user" u
+                ON  u.username = fc.author
+            WHERE   fc.root_comment_id      = :rootCommentId
+            AND     (fc.created_at, fc.id)  < (:lastCreatedAt, :lastId)
+            AND     fc.deleted_at           IS NULL
+            ORDER BY fc.created_at DESC, fc.id DESC
             """, countQuery = """
             SELECT  COUNT(id)
             FROM forum_comment

@@ -18,5 +18,6 @@ public class EnrollmentUserResponse {
     UUID id;
     String username;
     String fullName;
+    String avatarUrl;
     LocalDateTime enrolledAt;
 }

@@ -11,7 +11,11 @@ public interface CommentProjection {
 
     String getContent();
 
-    String getAuthor();
+    String getAuthorUsername();
+
+    String getAuthorAvatarUrl();
+
+    String getAuthorFullName();
 
     UUID getParentCommentId();
 
