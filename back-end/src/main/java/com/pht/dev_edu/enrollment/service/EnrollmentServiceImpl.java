@@ -51,12 +51,16 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     }
 
     @Override
-    public CustomPaging<CourseItemDetailResponse> findCoursesAssignedToLecturer(String lecturerUsername, String nextCursor) {
+    public CustomPaging<CourseItemDetailResponse> findCoursesAssignedToLecturer(String lecturerUsername, String keyword, UUID categoryId, String nextCursor) {
         var pageable = buildCoursePageable();
         var timeCursor = resolveTimeStampCursor(nextCursor);
 
         // Only need course info, can ignore enrollment info
-        var enrollmentPage = enrollmentRepository.findCoursesAssignedToLecturerByCursor(lecturerUsername, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
+        var enrollmentPage = categoryId == null
+                ? enrollmentRepository
+                    .findCoursesAssignedToLecturerByCursor(lecturerUsername, keyword, timeCursor.getId(), timeCursor.getTimeStamp(), pageable)
+                : enrollmentRepository
+                  .findCoursesAssignedToLecturerByCursor(lecturerUsername, keyword, categoryId, timeCursor.getId(), timeCursor.getTimeStamp(), pageable);
         return PagingUtils.getPagedWithCursor(
                 enrollmentPage,
                 enrollmentMapper::toEnrolledCourseResponse,

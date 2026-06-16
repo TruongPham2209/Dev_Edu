@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,10 +35,13 @@ public class EnrollmentController {
     @PreAuthorize("hasAuthority('LECTURER')")
     @GetMapping("/assigned-courses")
     public ResponseEntity<?> getAssignedCourses(
-            @RequestParam(required = false) String nextCursor
+            @RequestParam(required = false) String nextCursor,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UUID categoryId
     ) {
         String lecturerUsername = SecurityContextUtils.getCurrentUsernameForController();
-        var assignedCourses = enrollmentService.findCoursesAssignedToLecturer(lecturerUsername, nextCursor);
+        keyword = StringUtils.hasText(keyword) ? keyword.trim() : "";
+        var assignedCourses = enrollmentService.findCoursesAssignedToLecturer(lecturerUsername, keyword, categoryId, nextCursor);
         return ApiUtils.buildSuccessResponse(assignedCourses);
     }
 

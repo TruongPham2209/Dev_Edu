@@ -36,8 +36,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public List<FeedbackResponse> getFeedbacksByAssignment(Set<String> authorities, String actor, UUID assignmentId, String studentUsername) {
         assignmentPermissionService.checkViewAssignmentPermissionByAssignment(authorities, actor, assignmentId);
-        var feedbacks = feedbackRepository.findByAssignmentIdAndStudentUsernameOrderByCreatedAtDesc(assignmentId, studentUsername);
-        return feedbacks.stream().map(feedbackMapper::entityToRes).toList();
+        var feedbacks = feedbackRepository.findByAssignmentIdAndStudentUsername(assignmentId, studentUsername);
+        return feedbacks.stream().map(feedbackMapper::projectionToRes).toList();
     }
 
     @Override

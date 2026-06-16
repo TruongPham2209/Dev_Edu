@@ -30,7 +30,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                             ON  o.id        = oi.order_id
                             AND oi.item_id  = c.id
                         WHERE   e.student_username      = :studentUsername
-                        AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
+                        AND     (e.enrolled_at, e.id)   <= (:lastUpdatedAt, :lastId)
                         AND     c.deleted_at            IS NULL
                         ORDER BY e.enrolled_at DESC, e.id DESC
             """, countQuery = """
@@ -52,9 +52,10 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         FROM course_lecturer cl
                         INNER JOIN course c
                             ON cl.course_id = c.id
-                        WHERE   cl.lecturer_username    = :lecturerUsername
-                        AND     c.deleted_at            IS NULL
-                        AND     (c.created_at, c.id)    < (:lastUpdatedAt, :lastId)
+                        WHERE   cl.lecturer_username            = :lecturerUsername
+                        AND     immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+                        AND     (c.created_at, c.id)            <= (:lastCreatedAt, :lastId)
+                        AND     c.deleted_at                    IS NULL
                         ORDER BY c.created_at DESC, c.id DESC
             """, countQuery = """
                         SELECT  COUNT(c.id)
@@ -64,7 +65,38 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         WHERE   cl.lecturer_username  = :lecturerUsername
             """,
             nativeQuery = true)
-    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
+    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+
+    @Query(value = """
+                        WITH filteredCourses AS (
+                            SELECT *
+                            FROM course c
+                            WHERE   c.category_id = :categoryId
+                        )
+                        SELECT  c.id                    AS id,
+                                c.id                    AS courseId,
+                                c.title                 AS title,
+                                c.description           AS description,
+                                c.thumbnail_url         AS thumbnailUrl,
+                                c.created_at            AS enrolledAt,
+                                c.price                 AS discountedPrice
+                        FROM course_lecturer cl
+                        INNER JOIN filteredCourses c
+                            ON cl.course_id = c.id
+                        WHERE   cl.lecturer_username            = :lecturerUsername
+                        AND     immutable_unaccent(c.title)     ILIKE immutable_unaccent(CONCAT('%', :keyword, '%'))
+                        AND     (c.created_at, c.id)            <= (:lastCreatedAt, :lastId)
+                        AND     c.deleted_at                    IS NULL
+                        ORDER BY c.created_at DESC, c.id DESC
+            """, countQuery = """
+                        SELECT  COUNT(c.id)
+                        FROM course_lecturer cl
+                        LEFT JOIN course c
+                            ON cl.course_id = c.id
+                        WHERE   cl.lecturer_username  = :lecturerUsername
+            """,
+            nativeQuery = true)
+    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, String keyword, UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
 
     @Query(value = """
@@ -77,7 +109,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         LEFT JOIN "user" u
                             ON e.student_username = u.username
                         WHERE   e.course_id             = :courseId
-                        AND     (e.enrolled_at, e.id)   < (:lastUpdatedAt, :lastId)
+                        AND     (e.enrolled_at, e.id)   <= (:lastUpdatedAt, :lastId)
                         ORDER BY e.enrolled_at DESC, e.id DESC
             """, countQuery = """
                         SELECT COUNT(e.student_username)

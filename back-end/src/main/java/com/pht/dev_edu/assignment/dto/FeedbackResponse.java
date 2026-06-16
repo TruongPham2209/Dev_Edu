@@ -17,5 +17,7 @@ public class FeedbackResponse {
     UUID id;
     String feedback;
     String lecturer;
+    String lecturerFullName;
+    String lecturerAvatar;
     LocalDateTime createdAt;
 }

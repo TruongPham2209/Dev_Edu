@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface EnrollmentService {
     CustomPaging<CourseItemDetailResponse> getEnrolledCourses(String username, String nextCursor);
 
-    CustomPaging<CourseItemDetailResponse> findCoursesAssignedToLecturer(String lecturerUsername, String nextCursor);
+    CustomPaging<CourseItemDetailResponse> findCoursesAssignedToLecturer(String lecturerUsername, String keyword, UUID categoryId, String nextCursor);
 
     CustomPaging<EnrollmentUserResponse> getEnrolledUsers(UUID courseId, String nextCursor);
 
