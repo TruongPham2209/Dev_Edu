@@ -230,7 +230,6 @@ export function SubmissionDetailsDialog({
                 } as React.FormEvent)
               }
               submitting={submittingFeedback}
-              avatarLabel="GV"
               avatarColor="success.main"
             />
           </Box>

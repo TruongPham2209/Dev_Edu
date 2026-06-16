@@ -11,89 +11,87 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { MetricPeriod } from "../type/enum";
 import { apiGet } from "./client";
 
-export const metricsApi = {
-  getDashboard: async (): Promise<DashboardOverviewResponse> => {
-    return apiGet<DashboardOverviewResponse>("/api/metrics/dashboard");
-  },
+// --- Metrics ---
 
-  getUserGrowth: async (params?: {
-    period?: MetricPeriod;
-  }): Promise<UserGrowthResponse[]> => {
-    const query = new URLSearchParams();
-    if (params?.period) {
-      query.append("period", params.period);
-    }
-    const qs = query.toString();
-    return apiGet<UserGrowthResponse[]>(
-      `/api/metrics/users-growth${qs ? "?" + qs : ""}`,
-    );
-  },
+async function getDashboard(): Promise<DashboardOverviewResponse> {
+  return apiGet<DashboardOverviewResponse>("/api/metrics/dashboard");
+}
 
-  getCourseGrowth: async (params?: {
-    period?: MetricPeriod;
-  }): Promise<CourseGrowthResponse[]> => {
-    const query = new URLSearchParams();
-    if (params?.period) {
-      query.append("period", params.period);
-    }
-    const qs = query.toString();
-    return apiGet<CourseGrowthResponse[]>(
-      `/api/metrics/courses-growth${qs ? "?" + qs : ""}`,
-    );
-  },
+async function getUserGrowth(params?: {
+  period?: MetricPeriod;
+}): Promise<UserGrowthResponse[]> {
+  const query = new URLSearchParams();
+  if (params?.period) {
+    query.append("period", params.period);
+  }
+  const qs = query.toString();
+  return apiGet<UserGrowthResponse[]>(
+    `/api/metrics/users-growth${qs ? "?" + qs : ""}`,
+  );
+}
 
-  getRevenueGrowth: async (params?: {
-    period?: MetricPeriod;
-  }): Promise<RevenueGrowthResponse[]> => {
-    const query = new URLSearchParams();
-    if (params?.period) {
-      query.append("period", params.period);
-    }
-    const qs = query.toString();
-    return apiGet<RevenueGrowthResponse[]>(
-      `/api/metrics/revenue-growth${qs ? "?" + qs : ""}`,
-    );
-  },
+async function getCourseGrowth(params?: {
+  period?: MetricPeriod;
+}): Promise<CourseGrowthResponse[]> {
+  const query = new URLSearchParams();
+  if (params?.period) {
+    query.append("period", params.period);
+  }
+  const qs = query.toString();
+  return apiGet<CourseGrowthResponse[]>(
+    `/api/metrics/courses-growth${qs ? "?" + qs : ""}`,
+  );
+}
 
-  getActivity: async (params?: {
-    days?: number;
-  }): Promise<ActivityResponse> => {
-    const query = new URLSearchParams();
-    if (params?.days !== undefined) {
-      query.append("days", String(params.days));
-    }
-    const qs = query.toString();
-    return apiGet<ActivityResponse>(
-      `/api/metrics/activity${qs ? "?" + qs : ""}`,
-    );
-  },
+async function getRevenueGrowth(params?: {
+  period?: MetricPeriod;
+}): Promise<RevenueGrowthResponse[]> {
+  const query = new URLSearchParams();
+  if (params?.period) {
+    query.append("period", params.period);
+  }
+  const qs = query.toString();
+  return apiGet<RevenueGrowthResponse[]>(
+    `/api/metrics/revenue-growth${qs ? "?" + qs : ""}`,
+  );
+}
 
-  getTopCourses: async (params?: {
-    limit?: number;
-  }): Promise<TopCourseResponse[]> => {
-    const query = new URLSearchParams();
-    if (params?.limit !== undefined) {
-      query.append("limit", String(params.limit));
-    }
-    const qs = query.toString();
-    return apiGet<TopCourseResponse[]>(
-      `/api/metrics/top-courses${qs ? "?" + qs : ""}`,
-    );
-  },
+async function getActivity(params?: {
+  days?: number;
+}): Promise<ActivityResponse> {
+  const query = new URLSearchParams();
+  if (params?.days !== undefined) {
+    query.append("days", String(params.days));
+  }
+  const qs = query.toString();
+  return apiGet<ActivityResponse>(`/api/metrics/activity${qs ? "?" + qs : ""}`);
+}
 
-  getTopUsers: async (params?: {
-    limit?: number;
-  }): Promise<TopUsersResponse> => {
-    const query = new URLSearchParams();
-    if (params?.limit !== undefined) {
-      query.append("limit", String(params.limit));
-    }
-    const qs = query.toString();
-    return apiGet<TopUsersResponse>(
-      `/api/metrics/top-users${qs ? "?" + qs : ""}`,
-    );
-  },
-};
+async function getTopCourses(params?: {
+  limit?: number;
+}): Promise<TopCourseResponse[]> {
+  const query = new URLSearchParams();
+  if (params?.limit !== undefined) {
+    query.append("limit", String(params.limit));
+  }
+  const qs = query.toString();
+  return apiGet<TopCourseResponse[]>(
+    `/api/metrics/top-courses${qs ? "?" + qs : ""}`,
+  );
+}
+
+async function getTopUsers(params?: {
+  limit?: number;
+}): Promise<TopUsersResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit !== undefined) {
+    query.append("limit", String(params.limit));
+  }
+  const qs = query.toString();
+  return apiGet<TopUsersResponse>(
+    `/api/metrics/top-users${qs ? "?" + qs : ""}`,
+  );
+}
 
 // --- React Query Hooks ---
 
@@ -105,7 +103,7 @@ export function useDashboardMetrics(
 ) {
   return useQuery({
     queryKey: ["metrics", "dashboard"],
-    queryFn: metricsApi.getDashboard,
+    queryFn: getDashboard,
     ...options,
   });
 }
@@ -119,7 +117,7 @@ export function useUserGrowth(
 ) {
   return useQuery({
     queryKey: ["metrics", "user-growth", period],
-    queryFn: () => metricsApi.getUserGrowth({ period }),
+    queryFn: () => getUserGrowth({ period }),
     ...options,
   });
 }
@@ -133,7 +131,7 @@ export function useCourseGrowth(
 ) {
   return useQuery({
     queryKey: ["metrics", "course-growth", period],
-    queryFn: () => metricsApi.getCourseGrowth({ period }),
+    queryFn: () => getCourseGrowth({ period }),
     ...options,
   });
 }
@@ -147,7 +145,7 @@ export function useRevenueGrowth(
 ) {
   return useQuery({
     queryKey: ["metrics", "revenue-growth", period],
-    queryFn: () => metricsApi.getRevenueGrowth({ period }),
+    queryFn: () => getRevenueGrowth({ period }),
     ...options,
   });
 }
@@ -161,7 +159,7 @@ export function useActivity(
 ) {
   return useQuery({
     queryKey: ["metrics", "activity", days],
-    queryFn: () => metricsApi.getActivity({ days }),
+    queryFn: () => getActivity({ days }),
     ...options,
   });
 }
@@ -175,7 +173,7 @@ export function useTopCourses(
 ) {
   return useQuery({
     queryKey: ["metrics", "top-courses", limit],
-    queryFn: () => metricsApi.getTopCourses({ limit }),
+    queryFn: () => getTopCourses({ limit }),
     ...options,
   });
 }
@@ -189,7 +187,7 @@ export function useTopUsers(
 ) {
   return useQuery({
     queryKey: ["metrics", "top-users", limit],
-    queryFn: () => metricsApi.getTopUsers({ limit }),
+    queryFn: () => getTopUsers({ limit }),
     ...options,
   });
 }

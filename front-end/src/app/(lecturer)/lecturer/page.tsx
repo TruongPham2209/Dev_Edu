@@ -3,28 +3,58 @@
 import { CourseManageCard } from "@/components/card/course-manage-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { useAssignedCoursesInfiniteQuery } from "@/lib/api/courses";
+import { SearchInput } from "@/components/common/form/search-input";
+import {
+  FilterItem,
+  FilterSelect,
+} from "@/components/common/form/filter-select";
+import { useDebounce } from "@/hooks/use-debounce";
+import {
+  useAssignedCoursesInfiniteQuery,
+  useCategoriesQuery,
+} from "@/lib/api/courses";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { LayoutGrid, RefreshCw } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CourseManageGridSkeleton } from "./course-manage-grid-skeleton";
 
 export default function LecturerDashboardPage() {
   const { handleError } = useApiWithToast();
 
+  const [keyword, setKeyword] = useState("");
+  const [categoryId, setCategoryId] = useState("ALL");
+
+  const debouncedKeyword = useDebounce(keyword, 500);
+  const debouncedCategoryId = useDebounce(categoryId, 500);
+
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = useCategoriesQuery();
+
   const {
     data: coursesData,
-    isLoading: loading,
+    isLoading: loadingCourses,
     isFetchingNextPage: loadingMore,
     hasNextPage,
     fetchNextPage,
-    error,
-    refetch,
-  } = useAssignedCoursesInfiniteQuery();
+    error: coursesError,
+    refetch: refetchCourses,
+  } = useAssignedCoursesInfiniteQuery(
+    debouncedKeyword || undefined,
+    debouncedCategoryId !== "ALL" ? debouncedCategoryId : undefined,
+  );
 
   const courses = coursesData?.pages.flatMap((page) => page.contents) || [];
   const nextCursor = hasNextPage ? "has_more" : null;
+
+  const categoryItems: FilterItem[] =
+    categoriesData?.map((cat) => ({
+      id: cat.id,
+      title: cat.name,
+    })) || [];
 
   // Intersection observer for infinite scroll
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -36,7 +66,7 @@ export default function LecturerDashboardPage() {
           entries[0].isIntersecting &&
           hasNextPage &&
           !loadingMore &&
-          !loading
+          !loadingCourses
         ) {
           fetchNextPage();
         }
@@ -49,16 +79,10 @@ export default function LecturerDashboardPage() {
     }
 
     return () => observer.disconnect();
-  }, [hasNextPage, loadingMore, loading, fetchNextPage]);
-
-  useEffect(() => {
-    if (error) {
-      handleError(error, "Failed to fetch assigned courses");
-    }
-  }, [error, handleError]);
+  }, [hasNextPage, loadingMore, loadingCourses, fetchNextPage]);
 
   const handleRetry = () => {
-    refetch();
+    refetchCourses();
   };
 
   return (
@@ -148,48 +172,40 @@ export default function LecturerDashboardPage() {
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={3} sx={{ alignItems: "center" }}>
-              <Stack
-                direction="row"
-                spacing={3}
-                sx={{
-                  borderRight: "1px solid",
-                  borderColor: "rgba(15, 23, 42, 0.08)",
-                  pr: 3,
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "#94a3b8",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      display: "block",
-                    }}
-                  >
-                    Total Courses
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    sx={{ fontWeight: 800, color: "#0f172a" }}
-                  >
-                    {loading ? "..." : courses.length}
-                  </Typography>
-                </Box>
-              </Stack>
+            {/* Search bar */}
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              sx={{ width: { xs: "100%", md: "auto" } }}
+            >
+              <SearchInput
+                value={keyword}
+                onChange={(val) => setKeyword(val)}
+                onSearch={(val) => setKeyword(val)}
+                placeholder="Search courses..."
+                onClear={() => setKeyword("")}
+                maxWidth={320}
+              />
+              <FilterSelect
+                label="Category"
+                value={categoryId}
+                onChange={setCategoryId}
+                items={categoryItems}
+                defaultLabel="All Categories"
+                defaultValue="ALL"
+              />
             </Stack>
           </Box>
         </Box>
 
         {/* Content Section */}
-        {error ? (
+        {coursesError ? (
           <ErrorState
             title="An error occurred"
             subtitle="Could not connect to the server. Please check your connection."
             onRetry={handleRetry}
           />
-        ) : loading && courses.length === 0 ? (
+        ) : loadingCourses && courses.length === 0 ? (
           <CourseManageGridSkeleton />
         ) : courses.length === 0 ? (
           <EmptyState

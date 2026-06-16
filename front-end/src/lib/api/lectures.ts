@@ -21,37 +21,35 @@ import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 
 // --- Lectures ---
 
-export async function getLecturesByCourse(
+async function getLecturesByCourse(
   courseId: string,
 ): Promise<LectureResponse[]> {
   return apiGet<LectureResponse[]>(`/api/v1/lectures?courseId=${courseId}`);
 }
 
-export async function getLectureById(
-  lectureId: string,
-): Promise<LectureResponse> {
+async function getLectureById(lectureId: string): Promise<LectureResponse> {
   return apiGet<LectureResponse>(`/api/v1/lectures/${lectureId}`);
 }
 
-export async function createLecture(
+async function createLecture(
   lecture: LectureRequest,
 ): Promise<LectureResponse> {
   return apiPost<LectureResponse>("/api/v1/lectures", lecture);
 }
 
-export async function updateLecture(
+async function updateLecture(
   lecture: LectureRequest,
 ): Promise<LectureResponse> {
   return apiPut<LectureResponse>("/api/v1/lectures", lecture);
 }
 
-export async function deleteLecture(lectureId: string): Promise<void> {
+async function deleteLecture(lectureId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/lectures?lectureId=${lectureId}`);
 }
 
 // --- Progress ---
 
-export async function updateLectureProgress(
+async function updateLectureProgress(
   request: ProgressSegmentRequest,
 ): Promise<ProgressResponse> {
   return apiPut<ProgressResponse>("/api/v1/lectures/progress", request);
@@ -59,19 +57,17 @@ export async function updateLectureProgress(
 
 // --- Materials ---
 
-export async function getMaterials(
-  lectureId: string,
-): Promise<MaterialResponse[]> {
+async function getMaterials(lectureId: string): Promise<MaterialResponse[]> {
   return apiGet<MaterialResponse[]>(`/api/v1/lectures/${lectureId}/materials`);
 }
 
-export async function createMaterial(
+async function createMaterial(
   material: MaterialRequest,
 ): Promise<MaterialResponse> {
   return apiPost<MaterialResponse>("/api/v1/lectures/materials", material);
 }
 
-export async function deleteMaterial(materialId: string): Promise<void> {
+async function deleteMaterial(materialId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/lectures/materials?materialId=${materialId}`);
 }
 
@@ -86,7 +82,7 @@ export async function getLectureComments(
   );
 }
 
-export async function createLectureComment(body: {
+async function createLectureComment(body: {
   lectureId: string;
   content: string;
   parentCommentId?: string;
@@ -225,21 +221,6 @@ export function useDeleteMaterialMutation(
   });
 }
 
-export function useLectureCommentsQuery(
-  request: CommentPageRequest,
-  options?: Omit<
-    UseQueryOptions<CustomPaging<LectureCommentResponse>, Error>,
-    "queryKey" | "queryFn"
-  >,
-) {
-  return useQuery({
-    queryKey: ["lectures", "comments", request],
-    queryFn: () => getLectureComments(request),
-    enabled: !!request.lectureId,
-    ...options,
-  });
-}
-
 export function useInfiniteLectureCommentsQuery(
   request: Omit<CommentPageRequest, "nextCursor">,
 ) {
@@ -287,11 +268,3 @@ export function useDeleteLectureCommentMutation(
     },
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useLectureByIdQuery as useGetLectureById,
-  useLectureCommentsQuery as useGetLectureComments,
-  useLecturesByCourseQuery as useGetLecturesByCourse,
-  useMaterialsQuery as useGetMaterials,
-};

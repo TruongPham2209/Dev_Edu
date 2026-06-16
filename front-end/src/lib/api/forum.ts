@@ -608,11 +608,3 @@ export function useDeleteForumCommentMutation(
     },
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useForumFeedQuery as useGetForumFeed,
-  useForumPostByIdQuery as useGetForumPostById,
-  useRelatedPostsQuery as useGetRelatedPosts,
-  useSearchForumPostsQuery as useSearchForumPosts,
-};

@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/lib/use-auth";
 import {
   Avatar,
   Box,
@@ -18,8 +19,6 @@ export interface CommentInputProps {
   onChange: (val: string) => void;
   onSubmit: () => void | Promise<void>;
   placeholder?: string;
-  avatarUrl?: string | null;
-  avatarLabel?: string; // Initials or short label to show on avatar
   avatarColor?: string; // Bg color for avatar
   submitting?: boolean;
   disabled?: boolean;
@@ -36,9 +35,7 @@ export function CommentInput({
   value,
   onChange,
   onSubmit,
-  placeholder = "Viết bình luận...",
-  avatarUrl,
-  avatarLabel = "GV",
+  placeholder = "Write a comment...",
   avatarColor = "success.main",
   submitting = false,
   disabled = false,
@@ -47,9 +44,10 @@ export function CommentInput({
   showRating = false,
   rating = 5,
   onRatingChange,
-  ratingLabel = "Đánh giá:",
+  ratingLabel = "Write your rating",
   title,
 }: CommentInputProps) {
+  const { user } = useAuth();
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (submitOnEnter && e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -111,11 +109,11 @@ export function CommentInput({
       <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
         {/* Avatar */}
         <Avatar
-          src={avatarUrl || undefined}
+          src={user?.avatarUrl || undefined}
           sx={{
             width: 36,
             height: 36,
-            bgcolor: avatarUrl
+            bgcolor: user?.avatarUrl
               ? "transparent"
               : avatarColor === "success.main"
                 ? "success.50"
@@ -123,10 +121,12 @@ export function CommentInput({
             color: avatarColor,
             fontWeight: 800,
             fontSize: "0.85rem",
-            border: avatarUrl ? "1px solid rgba(15, 23, 42, 0.08)" : "none",
+            border: user?.avatarUrl
+              ? "1px solid rgba(15, 23, 42, 0.08)"
+              : "none",
           }}
         >
-          {avatarLabel ? avatarLabel.slice(0, 2).toUpperCase() : ""}
+          {user?.username?.slice(0, 2).toUpperCase()}
         </Avatar>
 
         {/* Input Container */}

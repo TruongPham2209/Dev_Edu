@@ -94,6 +94,10 @@ export function PostComments({
             postId,
             content: commentInput.trim(),
           });
+      newComment.authorAvatarUrl = user?.avatarUrl || "";
+      newComment.isMine = true;
+      newComment.isDeleted = false;
+
       showSuccess("Comment created successfully");
       setComments((prev) => [newComment, ...prev]);
       setCommentInput("");
@@ -128,8 +132,6 @@ export function PostComments({
           onSubmit={handleSubmitComment}
           disabled={!isAuthenticated}
           submitting={submitting}
-          avatarUrl={user?.avatarUrl}
-          avatarLabel={user?.fullName || user?.username || "U"}
           avatarColor="primary.main"
         />
       </Box>

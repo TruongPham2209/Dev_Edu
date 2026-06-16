@@ -60,8 +60,6 @@ export function AssignmentModal({
 
   // Undo Logic
   const [isDeleting, setIsDeleting] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [lastDeletedId, setLastDeletedId] = useState<string | null>(null);
   const undoIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: fileMetadata, isLoading: isLoadingMetadata } =
@@ -151,13 +149,10 @@ export function AssignmentModal({
     // Optimistic UI: we can't easily undo state across parents without complex lifting,
     // but we can close the feedback/submission view and show toast.
     setIsDeleting(true);
-    setSnackbarOpen(true);
-    setLastDeletedId(assignment.id);
 
     undoIntervalRef.current = setTimeout(() => {
       deleteSubmissionMutate(assignment.id).then(() => {
         setIsDeleting(false);
-        setSnackbarOpen(false);
       });
     }, 5000);
   };
@@ -165,7 +160,6 @@ export function AssignmentModal({
   const handleUndo = () => {
     if (undoIntervalRef.current) clearTimeout(undoIntervalRef.current);
     setIsDeleting(false);
-    setSnackbarOpen(false);
   };
 
   return (
@@ -636,9 +630,25 @@ export function AssignmentModal({
                           fontSize: "0.875rem",
                           flexShrink: 0,
                           mt: 0.5,
+                          overflow: "hidden",
                         }}
                       >
-                        {fb.lecturer.charAt(0)}
+                        {fb.lecturerAvatar ? (
+                          <Box
+                            component="img"
+                            src={fb.lecturerAvatar}
+                            alt={fb.lecturerFullName || fb.lecturer}
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          (fb.lecturerFullName || fb.lecturer)
+                            .charAt(0)
+                            .toUpperCase()
+                        )}
                       </Box>
 
                       <Box
@@ -668,7 +678,7 @@ export function AssignmentModal({
                               mb: 0.25,
                             }}
                           >
-                            {fb.lecturer}
+                            {fb.lecturerFullName || fb.lecturer}
                           </Typography>
                           <Typography
                             variant="body2"

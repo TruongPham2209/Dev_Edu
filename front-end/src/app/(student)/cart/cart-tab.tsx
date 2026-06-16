@@ -267,7 +267,7 @@ export function CartTabContent() {
               key={item.id}
               item={item}
               tabContext="cart"
-              selected={selectedIds.has(item.id)}
+              selected={selectedIds.has(item.courseId || item.id)}
               onSelect={handleSelect}
               onRemove={() => handleRemoveClick(item)}
             />

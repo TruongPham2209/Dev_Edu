@@ -116,11 +116,15 @@ export default function StudentLecturePage() {
     try {
       // If text lecture and not completed, mark as completed first
       if (!activeLecture.videoObjectKey && !activeLecture.isCompleted) {
-        await updateProgress({
+        const res = await updateProgress({
           lectureId: activeLecture.id,
           segmentStart: 0,
           segmentEnd: 0,
         });
+        if (res.completed) {
+          activeLecture.isCompleted = true;
+          refetchLectures();
+        }
       }
 
       if (nextLecture) {

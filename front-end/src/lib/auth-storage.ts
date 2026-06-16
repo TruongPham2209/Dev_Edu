@@ -45,6 +45,18 @@ export function setAuthSession(token: string, user: AuthUser) {
   window.dispatchEvent(new Event("auth-updated"));
 }
 
+export function updateStoredUser(updates: Partial<AuthUser>) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const user = getStoredUser();
+  if (user) {
+    const updatedUser = { ...user, ...updates };
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(updatedUser));
+    window.dispatchEvent(new Event("auth-updated"));
+  }
+}
+
 export function clearAuthSession() {
   if (typeof window === "undefined") {
     return;

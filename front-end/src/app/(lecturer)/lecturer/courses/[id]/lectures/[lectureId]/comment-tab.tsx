@@ -10,6 +10,7 @@ import {
   useInfiniteLectureCommentsQuery,
 } from "@/lib/api/lectures";
 import { LectureCommentResponse } from "@/lib/type/lectures";
+import { useAuth } from "@/lib/use-auth";
 import { Box, Button, CircularProgress, Divider, Stack } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -19,6 +20,7 @@ interface TabCommentsProps {
 }
 
 export function TabComments({ lectureId }: TabCommentsProps) {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState("");
 
@@ -109,6 +111,12 @@ export function TabComments({ lectureId }: TabCommentsProps) {
                     content,
                     parentCommentId: replyToId,
                   });
+                  if (user) {
+                    res.authorAvatarUrl = user.avatarUrl || "";
+                    res.isDeleted = false;
+                    res.authorUsername = user.username;
+                    res.isMine = true;
+                  }
                   return res as LectureCommentResponse;
                 }}
                 onLoadReply={async (parentId, nextCursor) => {

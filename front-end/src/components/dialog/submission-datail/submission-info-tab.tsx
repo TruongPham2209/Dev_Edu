@@ -254,6 +254,7 @@ export function SubmissionInfoTab({
               }}
             >
               <Avatar
+                src={fb.lecturerAvatar}
                 sx={{
                   width: 32,
                   height: 32,
@@ -277,7 +278,7 @@ export function SubmissionInfoTab({
                     variant="subtitle2"
                     sx={{ fontWeight: 700, color: "text.primary" }}
                   >
-                    Giảng viên: {fb.lecturer}
+                    {fb.lecturerFullName}
                   </Typography>
                   <Typography
                     variant="caption"

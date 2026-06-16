@@ -5,7 +5,7 @@ import { Box } from "@mui/material";
 import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { EmptyState } from "@/components/common/empty-state";
 import { useMeQuery } from "@/lib/api/users";
-import { AuthUser } from "@/lib/auth-storage";
+import { AuthUser, updateStoredUser } from "@/lib/auth-storage";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { CircularProgress } from "@mui/material";
 import { Bookmark, FileText } from "lucide-react";
@@ -47,6 +47,7 @@ export default function ProfilePage() {
 
   const handleAvatarChange = (newAvatarUrl: string) => {
     setUser((prev) => (prev ? { ...prev, avatarUrl: newAvatarUrl } : null));
+    updateStoredUser({ avatarUrl: newAvatarUrl });
   };
 
   return (

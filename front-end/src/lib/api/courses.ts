@@ -13,8 +13,8 @@ import {
   useMutation,
   UseMutationOptions,
   useQuery,
-  UseQueryOptions,
   useQueryClient,
+  UseQueryOptions,
 } from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
 import { ItemStatus } from "../type/enum";
@@ -22,11 +22,12 @@ import { apiDelete, apiGet, apiPost, apiPut } from "./client";
 
 // --- Courses ---
 
+// Server Component home page
 export async function getFeaturedCourses(): Promise<CourseResponse[]> {
   return apiGet<CourseResponse[]>("/api/v1/courses/highlighted");
 }
 
-export async function getCourses(params?: {
+async function getCourses(params?: {
   sortBy?: string;
   nextCursor?: string;
   categoryId?: string;
@@ -61,12 +62,15 @@ export async function getCourses(params?: {
   return response;
 }
 
-/** Lecturer assigned courses (cursor-paginated) */
-export async function getAssignedCourses(
+async function getAssignedCourses(
   nextCursor?: string,
+  keyword?: string,
+  categoryId?: string,
 ): Promise<CustomPaging<CourseResponse>> {
   const query = new URLSearchParams();
   if (nextCursor) query.append("nextCursor", nextCursor);
+  if (categoryId) query.append("categoryId", categoryId);
+  if (keyword) query.append("keyword", keyword);
 
   const qs = query.toString();
   const response = await apiGet<CustomPaging<CourseResponse> | null>(
@@ -87,51 +91,26 @@ export async function getAssignedCourses(
   return response;
 }
 
+// Server Component course detail page
 export async function getCourseById(courseId: string): Promise<CourseResponse> {
   return apiGet<CourseResponse>(`/api/v1/courses/${courseId}/`);
 }
 
-export async function getAllAdminCourses(params?: {
-  status?: ItemStatus;
-  sortBy?: string;
-}): Promise<CourseResponse[]> {
-  const items: CourseResponse[] = [];
-  let nextCursor: string | undefined;
-  let hasMore = true;
-
-  while (hasMore) {
-    const response = await getCourses({
-      status: params?.status,
-      sortBy: params?.sortBy,
-      nextCursor,
-    });
-    items.push(...response.contents);
-    nextCursor = response.nextCursor ?? undefined;
-    hasMore = Boolean(nextCursor);
-  }
-
-  return items;
-}
-
-export async function createCourse(
-  course: CourseRequest,
-): Promise<CourseResponse> {
+async function createCourse(course: CourseRequest): Promise<CourseResponse> {
   return apiPost<CourseResponse>("/api/v1/courses", course);
 }
 
-export async function updateCourse(
-  course: CourseRequest,
-): Promise<CourseResponse> {
+async function updateCourse(course: CourseRequest): Promise<CourseResponse> {
   return apiPut<CourseResponse>("/api/v1/courses", course);
 }
 
-export async function deleteCourse(courseId: string): Promise<void> {
+async function deleteCourse(courseId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/courses?courseId=${courseId}`);
 }
 
 // --- Reviews ---
 
-export async function getCourseReviews(
+async function getCourseReviews(
   courseId: string,
   nextCursor?: string,
 ): Promise<CustomPaging<ReviewResponse>> {
@@ -144,9 +123,7 @@ export async function getCourseReviews(
   );
 }
 
-export async function getMyReview(
-  courseId: string,
-): Promise<ReviewResponse | null> {
+async function getMyReview(courseId: string): Promise<ReviewResponse | null> {
   const query = new URLSearchParams();
   query.append("courseId", courseId);
 
@@ -155,21 +132,17 @@ export async function getMyReview(
   );
 }
 
-export async function createReview(
-  review: ReviewRequest,
-): Promise<ReviewResponse> {
+async function createReview(review: ReviewRequest): Promise<ReviewResponse> {
   return apiPost<ReviewResponse>("/api/v1/courses/reviews", review);
 }
 
-export async function deleteReview(reviewId: string): Promise<void> {
+async function deleteReview(reviewId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/courses/reviews?reviewId=${reviewId}`);
 }
 
 // --- Categories ---
 
-export async function getCategories(
-  status?: ItemStatus,
-): Promise<CategoryResponse[]> {
+async function getCategories(status?: ItemStatus): Promise<CategoryResponse[]> {
   const query = new URLSearchParams();
   if (status) query.append("status", status);
 
@@ -177,19 +150,19 @@ export async function getCategories(
   return apiGet<CategoryResponse[]>(`/api/v1/categories${qs ? "?" + qs : ""}`);
 }
 
-export async function createCategory(
+async function createCategory(
   category: CategoryRequest,
 ): Promise<CategoryResponse> {
   return apiPost<CategoryResponse>("/api/v1/categories", category);
 }
 
-export async function updateCategory(
+async function updateCategory(
   category: CategoryRequest,
 ): Promise<CategoryResponse> {
   return apiPut<CategoryResponse>("/api/v1/categories", category);
 }
 
-export async function deleteCategory(categoryId: string): Promise<void> {
+async function deleteCategory(categoryId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/categories/${categoryId}`);
 }
 
@@ -246,19 +219,6 @@ export function useDeleteCategoryMutation(
       queryClient.invalidateQueries({ queryKey: ["courses"] });
       options?.onSuccess?.(...args);
     },
-  });
-}
-
-export function useFeaturedCoursesQuery(
-  options?: Omit<
-    UseQueryOptions<CourseResponse[], Error>,
-    "queryKey" | "queryFn"
-  >,
-) {
-  return useQuery({
-    queryKey: ["courses", "featured"],
-    queryFn: getFeaturedCourses,
-    ...options,
   });
 }
 
@@ -342,6 +302,8 @@ export function useCoursesInfiniteQuery(
 }
 
 export function useAssignedCoursesInfiniteQuery(
+  keyword?: string,
+  categoryId?: string,
   options?: Omit<
     UseInfiniteQueryOptions<
       CustomPaging<CourseResponse>,
@@ -354,27 +316,11 @@ export function useAssignedCoursesInfiniteQuery(
   >,
 ) {
   return useInfiniteQuery({
-    queryKey: ["courses", "assigned-infinite"],
-    queryFn: ({ pageParam }) => getAssignedCourses(pageParam || undefined),
+    queryKey: ["courses", "assigned-infinite", keyword, categoryId],
+    queryFn: ({ pageParam }) =>
+      getAssignedCourses(pageParam || undefined, keyword, categoryId),
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor || null,
-    ...options,
-  });
-}
-
-export function useAllAdminCoursesQuery(
-  params?: {
-    status?: ItemStatus;
-    sortBy?: string;
-  },
-  options?: Omit<
-    UseQueryOptions<CourseResponse[], Error>,
-    "queryKey" | "queryFn"
-  >,
-) {
-  return useQuery({
-    queryKey: ["courses", "admin-all", params],
-    queryFn: () => getAllAdminCourses(params),
     ...options,
   });
 }
@@ -418,22 +364,6 @@ export function useDeleteCourseMutation(
       queryClient.invalidateQueries({ queryKey: ["courses"] });
       options?.onSuccess?.(...args);
     },
-  });
-}
-
-export function useCourseReviewsQuery(
-  courseId: string,
-  nextCursor?: string,
-  options?: Omit<
-    UseQueryOptions<CustomPaging<ReviewResponse>, Error>,
-    "queryKey" | "queryFn"
-  >,
-) {
-  return useQuery({
-    queryKey: ["reviews", "course", courseId, nextCursor],
-    queryFn: () => getCourseReviews(courseId, nextCursor),
-    enabled: !!courseId,
-    ...options,
   });
 }
 

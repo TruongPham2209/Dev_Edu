@@ -1,3 +1,4 @@
+import { loginAction, type LoginActionState } from "@/app/login/actions";
 import { RegisterUser, UserResponse } from "@/lib/type/users";
 import {
   useMutation,
@@ -9,19 +10,18 @@ import {
 import { CustomPaging } from "../type/api";
 import { RoleEnum } from "../type/enum";
 import { apiGet, apiPost, apiPut } from "./client";
-import { loginAction, type LoginActionState } from "@/app/login/actions";
 
 // --- Call API ---
 
-export async function getMe(): Promise<UserResponse> {
+async function getMe(): Promise<UserResponse> {
   return apiGet("/api/v1/me");
 }
 
-export async function register(user: RegisterUser): Promise<string> {
+async function register(user: RegisterUser): Promise<string> {
   return apiPost<string>("/api/v1/users/register", user);
 }
 
-export async function changePassword(
+async function changePassword(
   oldPassword: string,
   newPassword: string,
 ): Promise<string> {
@@ -31,22 +31,22 @@ export async function changePassword(
   });
 }
 
-export async function batchCreateUsers(users: RegisterUser[]): Promise<string> {
+async function batchCreateUsers(users: RegisterUser[]): Promise<string> {
   return apiPost<string>("/api/v1/users/batch-users", users);
 }
 
-export async function updateAvatar(avatarObjectKey: string): Promise<string> {
+async function updateAvatar(avatarObjectKey: string): Promise<string> {
   return apiPut<string>("/api/v1/users/avatar", { avatarObjectKey });
 }
 
-export async function setUsernameFromGoogle(
+async function setUsernameFromGoogle(
   email: string,
   username: string,
 ): Promise<string> {
   return apiPut<string>("/api/v1/users/username", { email, username });
 }
 
-export async function searchUsers(
+async function searchUsers(
   page: number,
   keyword: string,
   role: RoleEnum,
@@ -130,7 +130,6 @@ export function useChangePasswordMutation(
     { oldPassword: string; newPassword: string }
   >,
 ) {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ oldPassword, newPassword }) =>
       changePassword(oldPassword, newPassword),

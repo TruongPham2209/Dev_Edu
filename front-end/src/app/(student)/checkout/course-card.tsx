@@ -59,46 +59,17 @@ export function CourseCard({ course }: CourseCardProps) {
         }}
       >
         <Box>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ mb: 1.5, flexWrap: "wrap", gap: 1 }}
-          >
-            {/* <Chip
-              size="small"
-              icon={<Tag size={12} />}
-              label={category}
-              sx={{
-                borderRadius: 1.5,
-                fontWeight: 600,
-                bgcolor: "action.hover",
-              }}
-            /> */}
-          </Stack>
           <Typography
             variant="h6"
-            sx={{ fontWeight: 800, mb: 1.5, lineHeight: 1.3 }}
+            color="text.primary"
+            sx={{
+              fontWeight: 800,
+              mb: 1.5,
+              lineHeight: 1.3,
+            }}
           >
             {title}
           </Typography>
-          <Stack
-            direction="row"
-            spacing={3}
-            sx={{ color: "text.secondary", mb: 2, flexWrap: "wrap", rowGap: 1 }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <User size={16} />
-              {/* <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {instructor}
-              </Typography> */}
-            </Box>
-            {/* <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-              <PlayCircle size={16} />
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {lessons} lessons
-              </Typography>
-            </Box> */}
-          </Stack>
         </Box>
 
         <Box
@@ -109,11 +80,7 @@ export function CourseCard({ course }: CourseCardProps) {
             flexWrap: "wrap",
           }}
         >
-          <Typography
-            variant="h6"
-            color="primary.main"
-            sx={{ fontWeight: 900 }}
-          >
+          <Typography variant="h6" color="primary" sx={{ fontWeight: 900 }}>
             {discountedPrice?.toLocaleString("vi-VN")}đ
           </Typography>
           {originalPrice && originalPrice > (discountedPrice || 0) && (

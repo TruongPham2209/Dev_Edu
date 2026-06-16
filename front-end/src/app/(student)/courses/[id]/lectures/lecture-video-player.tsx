@@ -215,7 +215,7 @@ export function LectureVideoPlayer({
     >
       <video
         ref={videoRef}
-        src={videoUrl || ""}
+        src={videoUrl || undefined}
         controls
         style={{ width: "100%", height: "100%", display: "block" }}
         onEnded={() => {

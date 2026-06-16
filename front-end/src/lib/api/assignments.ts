@@ -22,7 +22,7 @@ import { apiDelete, apiGet, apiPost } from "./client";
 
 // --- Assignments ---
 
-export async function getAssignments(
+async function getAssignments(
   lectureId: string,
 ): Promise<AssignmentResponse[]> {
   return apiGet<AssignmentResponse[]>(
@@ -30,7 +30,7 @@ export async function getAssignments(
   );
 }
 
-export async function getAssignmentById(
+async function getAssignmentById(
   assignmentId: string,
 ): Promise<AssignmentResponse> {
   return apiGet<AssignmentResponse>(
@@ -38,19 +38,19 @@ export async function getAssignmentById(
   );
 }
 
-export async function createAssignment(
+async function createAssignment(
   assignment: AssignmentRequest,
 ): Promise<AssignmentResponse> {
   return apiPost<AssignmentResponse>("/api/v1/assignments", assignment);
 }
 
-export async function deleteAssignment(assignmentId: string): Promise<void> {
+async function deleteAssignment(assignmentId: string): Promise<void> {
   return apiDelete<void>(`/api/v1/assignments?assignmentId=${assignmentId}`);
 }
 
 // --- Submissions ---
 
-export async function getSubmissions(
+async function getSubmissions(
   assignmentId: string,
   page: number = 0,
   size: number = 10,
@@ -60,7 +60,7 @@ export async function getSubmissions(
   );
 }
 
-export async function createSubmission(
+async function createSubmission(
   submission: SubmissionRequest,
 ): Promise<SubmissionResponse> {
   return apiPost<SubmissionResponse>(
@@ -69,8 +69,7 @@ export async function createSubmission(
   );
 }
 
-/** Delete submission uses assignmentId per API docs */
-export async function deleteSubmission(assignmentId: string): Promise<void> {
+async function deleteSubmission(assignmentId: string): Promise<void> {
   return apiDelete<void>(
     `/api/v1/assignments/submissions?assignmentId=${assignmentId}`,
   );
@@ -78,7 +77,7 @@ export async function deleteSubmission(assignmentId: string): Promise<void> {
 
 // --- Submission Tracking ---
 
-export async function getSubmissionTracking(
+async function getSubmissionTracking(
   assignmentId: string,
   studentUsername?: string,
   page: number = 0,
@@ -95,7 +94,7 @@ export async function getSubmissionTracking(
 
 // --- Feedbacks ---
 
-export async function getFeedbacks(
+async function getFeedbacks(
   assignmentId: string,
   studentUsername?: string,
 ): Promise<FeedbackResponse[]> {
@@ -108,13 +107,13 @@ export async function getFeedbacks(
   );
 }
 
-export async function createFeedback(
+async function createFeedback(
   feedback: FeedbackRequest,
 ): Promise<FeedbackResponse> {
   return apiPost<FeedbackResponse>("/api/v1/assignments/feedbacks", feedback);
 }
 
-export async function deleteFeedback(feedbackId: string): Promise<void> {
+async function deleteFeedback(feedbackId: string): Promise<void> {
   return apiDelete<void>(
     `/api/v1/assignments/feedbacks?feedbackId=${feedbackId}`,
   );
@@ -177,23 +176,6 @@ export function useDeleteAssignmentMutation(
       queryClient.invalidateQueries({ queryKey: ["assignments"] });
       options?.onSuccess?.(...args);
     },
-  });
-}
-
-export function useSubmissionsQuery(
-  assignmentId: string,
-  page: number = 0,
-  size: number = 10,
-  options?: Omit<
-    UseQueryOptions<CustomPaging<SubmissionResponse>, Error>,
-    "queryKey" | "queryFn"
-  >,
-) {
-  return useQuery({
-    queryKey: ["submissions", assignmentId, page, size],
-    queryFn: () => getSubmissions(assignmentId, page, size),
-    enabled: !!assignmentId,
-    ...options,
   });
 }
 

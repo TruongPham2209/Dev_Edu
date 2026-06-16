@@ -49,6 +49,8 @@ export type FeedbackResponse = {
   id: string;
   feedback: string;
   lecturer: string;
+  lecturerFullName: string;
+  lecturerAvatar: string;
   isMine: boolean;
   createdAt: string;
 };

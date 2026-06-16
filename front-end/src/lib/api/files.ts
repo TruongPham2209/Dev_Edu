@@ -6,8 +6,8 @@ import {
   useMutation,
   UseMutationOptions,
   useQuery,
-  UseQueryOptions,
   useQueryClient,
+  UseQueryOptions,
 } from "@tanstack/react-query";
 import { apiGet, apiPost } from "./client";
 
@@ -17,9 +17,7 @@ export async function getPreSignedUploadUrl(
   return apiPost<FileUploadResponse>("/api/v1/files/pre-signed-url", request);
 }
 
-export async function confirmImageUpload(
-  fullObjectKey: string,
-): Promise<string> {
+async function confirmImageUpload(fullObjectKey: string): Promise<string> {
   return apiPost<string>(
     `/api/v1/files/confirm-image-upload?fullObjectKey=${encodeURIComponent(fullObjectKey)}`,
     {},
@@ -34,7 +32,7 @@ export async function getDownloadUrl(
   );
 }
 
-export async function getFileMetadata(
+async function getFileMetadata(
   fullObjectKey: string,
 ): Promise<FileUploadResponse> {
   return apiGet<FileUploadResponse>(
@@ -103,9 +101,3 @@ export function useConfirmImageUploadMutation(
     },
   });
 }
-
-// Aliases for backward compatibility during refactoring
-export {
-  useDownloadUrlQuery as useGetDownloadUrl,
-  useFileMetadataQuery as useGetFileMetadata,
-};
