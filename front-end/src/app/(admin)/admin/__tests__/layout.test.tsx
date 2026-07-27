@@ -32,9 +32,8 @@
  * Unit test for Admin Layout.
  */
 
-import React from "react";
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import Layout from "../layout";
 
 vi.mock("@/components/layout/admin/page", () => ({
