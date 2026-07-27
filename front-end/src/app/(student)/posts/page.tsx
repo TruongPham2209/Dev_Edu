@@ -68,7 +68,7 @@ export default async function PostDetailPage(props: PageProps) {
   );
 }
 
-async function PostDetailContent({ postId }: { postId: string }) {
+export async function PostDetailContent({ postId }: { postId: string }) {
   let post;
   try {
     post = await getForumPostById(postId);

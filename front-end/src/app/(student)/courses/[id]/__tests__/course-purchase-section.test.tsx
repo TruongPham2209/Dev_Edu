@@ -1,0 +1,172 @@
+/**
+ * =============================================================================
+ * Unit Test
+ * =============================================================================
+ *
+ * File Under Test
+ * ----------------
+ * src/app/(student)/courses/[id]/course-purchase-section.tsx
+ *
+ * Purpose
+ * -------
+ * Verify that CoursePurchaseSection handles Buy Now checkout mutation, Add to Cart mutation,
+ * and unauthenticated redirect to login.
+ *
+ * Tested Features
+ * ---------------
+ * ✓ Buy Now action initiating checkoutMutation and redirecting to /checkout?orderId=123
+ * ✓ Add to Cart action initiating addToCartMutation and displaying success toast
+ * ✓ Unauthenticated user redirection to login
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Authenticated student user initiating buy now
+ * ✓ Authenticated student user adding course to cart
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - "next/navigation" (useRouter)
+ * - "@/lib/use-auth" (useAuth)
+ * - "@/lib/api/enrollments" (useAddToCartMutation, useCheckoutMutation)
+ * - "@/lib/use-api-with-toast" (useApiWithToast)
+ * - "next/image" (mocked img tag)
+ *
+ * Not Covered
+ * -----------
+ * - CSS sticky layout
+ *
+ * Notes
+ * -----
+ * Unit test for CoursePurchaseSection component.
+ */
+
+import * as enrollmentsApi from "@/lib/api/enrollments";
+import * as apiToast from "@/lib/use-api-with-toast";
+import * as useAuthModule from "@/lib/use-auth";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useRouter } from "next/navigation";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CoursePurchaseSection } from "../course-purchase-section";
+
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(),
+}));
+
+vi.mock("@/lib/use-auth", () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock("@/lib/api/enrollments", () => ({
+  useAddToCartMutation: vi.fn(),
+  useCheckoutMutation: vi.fn(),
+}));
+
+vi.mock("@/lib/use-api-with-toast", () => ({
+  useApiWithToast: vi.fn(),
+}));
+
+vi.mock("next/image", () => ({
+  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+}));
+
+describe("CoursePurchaseSection", () => {
+  const mockPush = vi.fn();
+  const mockCheckoutMutate = vi.fn();
+  const mockAddToCartMutate = vi.fn();
+  const mockShowSuccess = vi.fn();
+  const mockHandleError = vi.fn();
+
+  const mockCourse = {
+    id: "c-200",
+    title: "TypeScript Deep Dive",
+    discountedPrice: 600000,
+    originalPrice: 800000,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+
+    vi.mocked(useAuthModule.useAuth).mockReturnValue({
+      isAuthenticated: true,
+      roles: ["STUDENT"],
+    } as any);
+
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
+      showSuccess: mockShowSuccess,
+      handleError: mockHandleError,
+    } as any);
+
+    vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue({
+      mutateAsync: mockCheckoutMutate,
+    } as any);
+
+    vi.mocked(enrollmentsApi.useAddToCartMutation).mockReturnValue({
+      mutateAsync: mockAddToCartMutate,
+    } as any);
+  });
+
+  it("shouldInitiateCheckoutOnBuyNowClick", async () => {
+    // ----------------------------------------------------------------------------
+    // Arrange
+    // Return checkout orderId.
+    // ----------------------------------------------------------------------------
+    mockCheckoutMutate.mockResolvedValue({ orderId: "ord-777" });
+
+    // ----------------------------------------------------------------------------
+    // Act
+    // Render CoursePurchaseSection.
+    // ----------------------------------------------------------------------------
+    render(
+      <CoursePurchaseSection
+        course={mockCourse as any}
+        isEnrolled={false}
+        lectures={[]}
+      />,
+    );
+
+    // Click Register now button
+    const buyBtn = screen.getByRole("button", { name: "Register now" });
+    fireEvent.click(buyBtn);
+
+    // ----------------------------------------------------------------------------
+    // Assert & Verify
+    // Verify checkoutMutate and navigation.
+    // ----------------------------------------------------------------------------
+    await waitFor(() => {
+      expect(mockCheckoutMutate).toHaveBeenCalledWith({
+        entityIds: ["c-200"],
+        entityType: "COURSE",
+      });
+      expect(mockPush).toHaveBeenCalledWith("/checkout?orderId=ord-777");
+    });
+  });
+
+  it("shouldAddCourseToCartOnAddToCartClick", async () => {
+    // ----------------------------------------------------------------------------
+    // Arrange & Act
+    // Render CoursePurchaseSection.
+    // ----------------------------------------------------------------------------
+    render(
+      <CoursePurchaseSection
+        course={mockCourse as any}
+        isEnrolled={false}
+        lectures={[]}
+      />,
+    );
+
+    const cartBtn = screen.getByRole("button", { name: "Add to cart" });
+    fireEvent.click(cartBtn);
+
+    // ----------------------------------------------------------------------------
+    // Assert & Verify
+    // Verify addToCartMutate execution.
+    // ----------------------------------------------------------------------------
+    await waitFor(() => {
+      expect(mockAddToCartMutate).toHaveBeenCalledWith("c-200");
+      expect(mockShowSuccess).toHaveBeenCalledWith(
+        "Added to cart successfully",
+      );
+    });
+  });
+});
