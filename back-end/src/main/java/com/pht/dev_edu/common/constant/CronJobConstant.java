@@ -18,4 +18,6 @@ public class CronJobConstant {
     public static final String CLEAN_EXPIRED_PAYMENT_SESSIONS_JOB = "cleanExpiredPaymentSessionsJob";
     public static final String CLEAN_INVALID_CART_ITEMS_JOB = "cleanInvalidCartItemsJob";
     public static final String CLEAN_EXPIRED_ORDERS_JOB = "cleanExpiredOrdersJob";
+
+    public static final String UPDATE_QUIZ_STATUS_JOB = "updateQuizStatusJob";
 }
