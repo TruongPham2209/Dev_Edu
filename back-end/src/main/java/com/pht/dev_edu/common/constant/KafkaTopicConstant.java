@@ -20,4 +20,8 @@ public class KafkaTopicConstant {
     public static final String POST_ELASTIC_DATA_UPDATE_TOPIC = "post-elastic-data-update-topic";
     public static final String POST_INTERACT_ELASTIC_DATA_UPDATE_TOPIC = "post-interactive-elastic-data-update-topic";
     public static final String POST_ELASTIC_DATA_DELETE_TOPIC = "post-elastic-data-delete-topic";
+
+    // Quiz Logging Topics
+    public static final String QUIZ_AUDIT_LOG_TOPIC = "quiz-audit-log-topic";
+    public static final String QUIZ_AUTOSAVE_LOG_TOPIC = "quiz-autosave-log-topic";
 }
