@@ -1,11 +1,12 @@
 package com.pht.dev_edu.quiz.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
+import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,12 +14,12 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "quiz_assignments")
+@Table(name = "quiz_questions")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QuizAssignmentEntity {
+public class QuizQuestionEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
@@ -26,30 +27,18 @@ public class QuizAssignmentEntity {
     @Column(name = "quiz_id", nullable = false)
     UUID quizId;
 
-    @Column(name = "start_time", nullable = false)
-    LocalDateTime startTime;
-
-    @Column(name = "end_time")
-    LocalDateTime endTime;
-
-    @Column(name = "duration_minutes", nullable = false)
-    Integer durationMinutes;
-
-    @Column(name = "shuffle_questions", nullable = false)
-    Boolean shuffleQuestions;
-
-    @Column(name = "shuffle_options", nullable = false)
-    Boolean shuffleOptions;
-
-    @Column(name = "max_attempts", nullable = false)
-    Integer maxAttempts;
-
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    AssignmentStatus status;
+    @Column(name = "question_type", nullable = false)
+    QuestionType questionType;
 
-    @Column(name = "created_by", nullable = false)
-    String createdBy;
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
+    String content;
+
+    @Column(name = "points", nullable = false, precision = 6, scale = 2)
+    BigDecimal points;
+
+    @Column(name = "order_index", nullable = false)
+    Integer orderIndex;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
@@ -74,17 +63,8 @@ public class QuizAssignmentEntity {
         if (updatedAt == null) {
             updatedAt = LocalDateTime.now();
         }
-        if (shuffleQuestions == null) {
-            shuffleQuestions = false;
-        }
-        if (shuffleOptions == null) {
-            shuffleOptions = false;
-        }
-        if (maxAttempts == null) {
-            maxAttempts = 1;
-        }
-        if (status == null) {
-            status = AssignmentStatus.SCHEDULED;
+        if (orderIndex == null) {
+            orderIndex = 0;
         }
     }
 

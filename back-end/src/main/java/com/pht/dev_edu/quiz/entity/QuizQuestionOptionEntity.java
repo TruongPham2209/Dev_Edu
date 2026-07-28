@@ -1,7 +1,6 @@
 package com.pht.dev_edu.quiz.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
-import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,58 +12,27 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-@Table(name = "quizzes")
+@Table(name = "quiz_question_options")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class QuizEntity {
+public class QuizQuestionOptionEntity {
     @Id
     @Column(nullable = false, updatable = false)
     UUID id;
 
-    @Column(name = "course_id", nullable = false)
-    UUID courseId;
+    @Column(name = "question_id", nullable = false)
+    UUID questionId;
 
-    @Column(name = "title", nullable = false)
-    String title;
+    @Column(name = "option_text", nullable = false, columnDefinition = "TEXT")
+    String optionText;
 
-    @Column(name = "description")
-    String description;
+    @Column(name = "is_correct", nullable = false)
+    Boolean isCorrect;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    QuizStatus status;
-
-    @Column(name = "created_by", nullable = false)
-    String createdBy;
-
-    @Column(name = "submitted_by")
-    String submittedBy;
-
-    @Column(name = "submitted_at")
-    LocalDateTime submittedAt;
-
-    @Column(name = "approved_by")
-    String approvedBy;
-
-    @Column(name = "approved_at")
-    LocalDateTime approvedAt;
-
-    @Column(name = "rejected_by")
-    String rejectedBy;
-
-    @Column(name = "rejected_at")
-    LocalDateTime rejectedAt;
-
-    @Column(name = "rejection_reason")
-    String rejectionReason;
-
-    @Column(name = "reviewed_by")
-    String reviewedBy;
-
-    @Column(name = "reviewed_at")
-    LocalDateTime reviewedAt;
+    @Column(name = "order_index", nullable = false)
+    Integer orderIndex;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
@@ -89,8 +57,11 @@ public class QuizEntity {
         if (updatedAt == null) {
             updatedAt = LocalDateTime.now();
         }
-        if (status == null) {
-            status = QuizStatus.DRAFT;
+        if (isCorrect == null) {
+            isCorrect = false;
+        }
+        if (orderIndex == null) {
+            orderIndex = 0;
         }
     }
 
