@@ -19,6 +19,7 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
 
     List<QuizAssignmentEntity> findByQuizIdAndDeletedAtIsNull(UUID quizId);
 
+    // TODO: update get only active assignment
     @Query(value = """
             SELECT *
             FROM quiz_assignments
@@ -26,9 +27,12 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
                 SELECT id
                 FROM quizzes
                 WHERE course_id = :courseId
-            )   AND deleted_at IS NULL
+            )
+            AND deleted_at  IS NULL
+            AND start_time  >= :startTime
+            AND status      IN :statuses
             """, nativeQuery = true)
-    List<QuizAssignmentEntity> findByCourseIdAndDeletedAtIsNull(UUID courseId);
+    List<QuizAssignmentEntity> findByCourseIdAndDeletedAtIsNullAndStartTimeAndStatuses(UUID courseId, LocalDateTime startTime, List<String> statuses);
 
     Page<QuizAssignmentEntity> findByQuizIdAndDeletedAtIsNull(UUID quizId, Pageable pageable);
 

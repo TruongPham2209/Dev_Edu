@@ -92,9 +92,12 @@ public class QuizAssignmentServiceImpl implements QuizAssignmentService {
     }
 
     @Override
-    public List<QuizAssignmentResponse> getAssignmentsByCourseId(UUID courseId, String username, Set<String> authorities) {;
+    public List<QuizAssignmentResponse> getAssignmentsByCourseId(UUID courseId, String username, Set<String> authorities) {
         quizAccessService.validateAccessByCourse(username, authorities, courseId);
-        return assignmentRepo.findByCourseIdAndDeletedAtIsNull(courseId).stream()
+        var now = LocalDateTime.now();
+        var filteredStatues = List.of(AssignmentStatus.SCHEDULED.name(), AssignmentStatus.ACTIVE.name());
+        return assignmentRepo.findByCourseIdAndDeletedAtIsNullAndStartTimeAndStatuses(courseId, now, filteredStatues)
+                .stream()
                 .map(quizMapper::toResponse)
                 .collect(Collectors.toList());
     }
