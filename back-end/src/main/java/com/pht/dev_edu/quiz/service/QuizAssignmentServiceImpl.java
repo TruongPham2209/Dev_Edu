@@ -1,7 +1,9 @@
 package com.pht.dev_edu.quiz.service;
 
+import com.pht.dev_edu.common.constant.RedisDurationConstant;
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
-import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
 import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
 import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
@@ -11,7 +13,6 @@ import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.QuizAssignmentRepo;
-import com.pht.dev_edu.quiz.repo.QuizRepo;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,15 +32,17 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class QuizAssignmentServiceImpl implements QuizAssignmentService {
     QuizAssignmentRepo assignmentRepo;
-    QuizRepo quizRepo;
+
     QuizMapper quizMapper;
+    QuizService quizService;
+    QuizAccessService quizAccessService;
     QuizAuditService auditService;
 
     @Override
     @Transactional
-    public QuizAssignmentResponse createAssignment(CreateAssignmentRequest request, String username) {
-        QuizEntity quiz = quizRepo.findByIdAndDeletedAtIsNull(request.getQuizId())
-                .orElseThrow(() -> new DataNotFoundException("Quiz not found with ID: " + request.getQuizId()));
+    public QuizAssignmentResponse createAssignment(CreateAssignmentRequest request, String username, Set<String> authorities) {
+        quizAccessService.validateAccessByQuiz(username, authorities, request.getQuizId());
+        QuizEntity quiz = quizService.getQuizEntityOrThrow(request.getQuizId());
 
         if (quiz.getStatus() != QuizStatus.APPROVED) {
             throw new BadRequestException("Quiz must be APPROVED before creating an assignment.");
@@ -73,16 +77,33 @@ public class QuizAssignmentServiceImpl implements QuizAssignmentService {
     }
 
     @Override
-    public List<QuizAssignmentResponse> getAssignmentsByQuiz(UUID quizId) {
+    public List<QuizAssignmentResponse> getAssignmentsByQuiz(UUID quizId, String username, Set<String> authorities) {
+        quizAccessService.validateAccessByQuiz(username, authorities, quizId);
         return assignmentRepo.findByQuizIdAndDeletedAtIsNull(quizId).stream()
                 .map(quizMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public QuizAssignmentResponse getAssignmentById(UUID assignmentId) {
-        QuizAssignmentEntity assignment = assignmentRepo.findByIdAndDeletedAtIsNull(assignmentId)
-                .orElseThrow(() -> new DataNotFoundException("Assignment not found with ID: " + assignmentId));
+    public QuizAssignmentResponse getAssignmentById(UUID assignmentId, String username, Set<String> authorities) {
+        QuizAssignmentEntity assignment = getAssignmentEntity(assignmentId);
+        quizAccessService.validateAccessByQuiz(username, authorities, assignment.getQuizId());
         return quizMapper.toResponse(assignment);
+    }
+
+    @Override
+    public List<QuizAssignmentResponse> getAssignmentsByCourseId(UUID courseId, String username, Set<String> authorities) {;
+        quizAccessService.validateAccessByCourse(username, authorities, courseId);
+        return assignmentRepo.findByCourseIdAndDeletedAtIsNull(courseId).stream()
+                .map(quizMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    private QuizAssignmentEntity getAssignmentEntity(UUID assignmentId) {
+        return RedisUtils.getOptionalDataFromCacheOrDb(
+                RedisPrefixConstant.QUIZ_ASSIGNMENT_PREFIX + assignmentId,
+                QuizAssignmentEntity.class,
+                () -> assignmentRepo.findByIdAndDeletedAtIsNull(assignmentId),
+                RedisDurationConstant.QUIZ_DATA_DURATION);
     }
 }

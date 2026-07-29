@@ -5,6 +5,7 @@ import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,17 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
     Optional<QuizAssignmentEntity> findByIdAndDeletedAtIsNull(UUID id);
 
     List<QuizAssignmentEntity> findByQuizIdAndDeletedAtIsNull(UUID quizId);
+
+    @Query(value = """
+            SELECT *
+            FROM quiz_assignments
+            WHERE quiz_id IN (
+                SELECT id
+                FROM quizzes
+                WHERE course_id = :courseId
+            )   AND deleted_at IS NULL
+            """, nativeQuery = true)
+    List<QuizAssignmentEntity> findByCourseIdAndDeletedAtIsNull(UUID courseId);
 
     Page<QuizAssignmentEntity> findByQuizIdAndDeletedAtIsNull(UUID quizId, Pageable pageable);
 

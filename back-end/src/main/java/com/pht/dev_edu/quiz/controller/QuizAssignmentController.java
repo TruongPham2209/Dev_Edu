@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RestController("QuizAssignmentController")
@@ -22,25 +23,47 @@ import java.util.UUID;
 public class QuizAssignmentController {
     QuizAssignmentService assignmentService;
 
+    // Create assignment for quiz
     @PostMapping
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> createAssignment(@Valid @RequestBody CreateAssignmentRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
-        var result = assignmentService.createAssignment(request, username);
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        var result = assignmentService.createAssignment(request, username, authorities);
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Get assignment by quiz
     @GetMapping("/quiz/{quizId}")
-    @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> getAssignmentsByQuiz(@PathVariable("quizId") UUID quizId) {
-        var result = assignmentService.getAssignmentsByQuiz(quizId);
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        var result = assignmentService.getAssignmentsByQuiz(quizId, username, authorities);
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Get assignment detail
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> getAssignmentById(@PathVariable("id") UUID id) {
-        var result = assignmentService.getAssignmentById(id);
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        var result = assignmentService.getAssignmentById(id, username, authorities);
+        return ApiUtils.buildSuccessResponse(result);
+    }
+
+    // Student get all assignment by course
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
+    public ResponseEntity<ApiResponse> getAssignmentsByCourseId(@RequestParam UUID courseId) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        var result = assignmentService.getAssignmentsByCourseId(courseId, username, authorities);
         return ApiUtils.buildSuccessResponse(result);
     }
 }
