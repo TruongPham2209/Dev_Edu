@@ -26,11 +26,7 @@ public interface QuizAttemptRepo extends JpaRepository<QuizAttemptEntity, UUID> 
 
     Optional<QuizAttemptEntity> findByAssignmentIdAndStudentUsernameAndStatus(UUID assignmentId, String studentUsername, AttemptStatus status);
 
-    List<QuizAttemptEntity> findByAssignmentIdAndStudentUsername(UUID assignmentId, String studentUsername);
-
     List<QuizAttemptEntity> findByStatusAndExpiresAtLessThanEqual(AttemptStatus status, LocalDateTime time);
 
     Page<QuizAttemptEntity> findByStatus(AttemptStatus status, Pageable pageable);
-
-    Page<QuizAttemptEntity> findByStudentUsername(String studentUsername, Pageable pageable);
 }

@@ -15,9 +15,9 @@ public interface QuizQuestionRepo extends JpaRepository<QuizQuestionEntity, UUID
 
     Optional<QuizQuestionEntity> findByIdAndDeletedAtIsNull(UUID id);
 
+    List<QuizQuestionEntity> findByIdInAndDeletedAtIsNull(List<UUID> ids);
+
     int countByQuizIdAndQuestionTypeAndDeletedAtIsNull(UUID quizId, QuestionType questionType);
 
     boolean existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(UUID quizId, QuestionType questionType);
-
-    boolean existsByQuizIdAndDeletedAtIsNull(UUID quizId);
 }

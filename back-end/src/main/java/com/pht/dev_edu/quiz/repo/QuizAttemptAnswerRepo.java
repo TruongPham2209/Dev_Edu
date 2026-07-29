@@ -16,6 +16,4 @@ public interface QuizAttemptAnswerRepo extends JpaRepository<QuizAttemptAnswerEn
     Optional<QuizAttemptAnswerEntity> findByAttemptIdAndQuestionId(UUID attemptId, UUID questionId);
 
     int countByAttemptIdAndQuestionTypeAndAwardedPointsIsNull(UUID attemptId, QuestionType questionType);
-
-    List<QuizAttemptAnswerEntity> findByAttemptIdAndQuestionTypeAndAwardedPointsIsNull(UUID attemptId, QuestionType questionType);
 }

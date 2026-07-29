@@ -10,8 +10,6 @@ public interface QuizAttemptService {
 
     AutosaveResponse autosaveAnswer(UUID attemptId, AutosaveRequest request, String username);
 
-    StartAttemptResponse resumeAttempt(UUID assignmentId, String username, String sessionToken);
-
     SubmitAttemptResponse submitAttempt(UUID attemptId, String username);
 
     void heartbeat(UUID attemptId, HeartbeatRequest request, String username);

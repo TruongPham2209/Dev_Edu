@@ -3,10 +3,10 @@ package com.pht.dev_edu.quiz.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
+import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.security.AccessDeniedException;
-import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
 import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
@@ -39,13 +39,13 @@ import java.util.stream.Collectors;
 public class QuizAttemptServiceImpl implements QuizAttemptService {
     QuizAttemptRepo attemptRepo;
     QuizAssignmentRepo assignmentRepo;
-    QuizRepo quizRepo;
     QuizQuestionRepo questionRepo;
     QuizQuestionOptionRepo optionRepo;
     QuizAttemptAnswerRepo answerRepo;
     QuizAttemptAnswerLogRepo answerLogRepo;
-    EnrollmentRepository enrollmentRepository;
+
     QuizMapper quizMapper;
+    QuizAccessService quizAccessService;
     QuizAuditService auditService;
     ObjectMapper objectMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
@@ -55,15 +55,10 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     public StartAttemptResponse startAttempt(UUID assignmentId, String username, String sessionToken) {
         QuizAssignmentEntity assignment = assignmentRepo.findByIdAndDeletedAtIsNull(assignmentId)
                 .orElseThrow(() -> new DataNotFoundException("Assignment not found with ID: " + assignmentId));
-
-        QuizEntity quiz = quizRepo.findByIdAndDeletedAtIsNull(assignment.getQuizId())
-                .orElseThrow(() -> new DataNotFoundException("Quiz not found with ID: " + assignment.getQuizId()));
+        UUID quizId = assignment.getQuizId();
 
         // Step 1: Check enrollment
-        boolean isEnrolled = enrollmentRepository.existsByStudentUsernameAndCourseId(username, quiz.getCourseId());
-        if (!isEnrolled) {
-            throw new AccessDeniedException("Student is not enrolled in course ID: " + quiz.getCourseId());
-        }
+        quizAccessService.validateAccessByQuiz(username, Set.of(RoleEnum.STUDENT.name()), assignment.getQuizId());
 
         // Step 2: Check assignment active and within [startTime, endTime]
         LocalDateTime now = LocalDateTime.now();
@@ -74,22 +69,30 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         // Step 3: Count existing attempts
         int existingAttemptCount = attemptRepo.countByAssignmentIdAndStudentUsername(assignmentId, username);
-        if (existingAttemptCount >= assignment.getMaxAttempts()) {
+        if (existingAttemptCount > assignment.getMaxAttempts()) {
             throw new BadRequestException("Maximum attempt limit of " + assignment.getMaxAttempts() + " reached.");
         }
 
         // Step 4: Check if student has IN_PROGRESS attempt -> Resume
-        Optional<QuizAttemptEntity> inProgressOpt = attemptRepo.findByAssignmentIdAndStudentUsernameAndStatus(assignmentId, username, AttemptStatus.IN_PROGRESS);
+        Optional<QuizAttemptEntity> inProgressOpt = attemptRepo
+                .findByAssignmentIdAndStudentUsernameAndStatus(assignmentId, username, AttemptStatus.IN_PROGRESS);
         if (inProgressOpt.isPresent()) {
             return resumeAttemptInternal(inProgressOpt.get(), sessionToken);
         }
 
+        // Double check
+        if (existingAttemptCount >= assignment.getMaxAttempts()) {
+            throw new BadRequestException("You have reached the maximum number of attempts for this quiz.");
+        }
+
         // Step 5: Create new attempt
-        List<QuizQuestionEntity> questions = questionRepo.findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(quiz.getId());
+        List<QuizQuestionEntity> questions = questionRepo
+                .findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(quizId);
         if (questions.isEmpty()) {
             throw new BadRequestException("Quiz has no questions.");
         }
 
+        // Shuffle questions order
         if (Boolean.TRUE.equals(assignment.getShuffleQuestions())) {
             Collections.shuffle(questions);
         }
@@ -109,7 +112,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         QuizAttemptEntity attempt = QuizAttemptEntity.builder()
                 .assignmentId(assignmentId)
-                .quizId(quiz.getId())
+                .quizId(quizId)
                 .studentUsername(username)
                 .attemptNumber(existingAttemptCount + 1)
                 .status(AttemptStatus.IN_PROGRESS)
@@ -123,14 +126,15 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .build();
 
         attemptRepo.save(attempt);
-        auditService.log("ATTEMPT", attempt.getId(), QuizAuditAction.START_ATTEMPT, username, null, attempt, "Started new quiz attempt");
+        auditService.log("ATTEMPT", attempt.getId(), QuizAuditAction.START_ATTEMPT, username, null, attempt,
+                "Started new quiz attempt");
 
         List<QuizQuestionResponse> questionDtos = buildQuestionsForStudent(questions, assignment.getShuffleOptions());
 
         return StartAttemptResponse.builder()
                 .attemptId(attempt.getId())
                 .assignmentId(assignmentId)
-                .quizId(quiz.getId())
+                .quizId(quizId)
                 .studentUsername(username)
                 .attemptNumber(attempt.getAttemptNumber())
                 .status(attempt.getStatus())
@@ -152,23 +156,28 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .orElseThrow(() -> new DataNotFoundException("Attempt not found with ID: " + attemptId));
 
         if (!attempt.getStudentUsername().equals(username)) {
-            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false).message("Unauthorized attempt owner.").build();
+            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false)
+                    .message("Unauthorized attempt owner.").build();
         }
 
         if (attempt.getStatus() != AttemptStatus.IN_PROGRESS) {
-            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false).message("Attempt is not IN_PROGRESS.").build();
+            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false)
+                    .message("Attempt is not IN_PROGRESS.").build();
         }
 
         if (!request.getSessionToken().equals(attempt.getActiveSessionToken())) {
-            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false).message("Invalid active session token.").build();
+            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false)
+                    .message("Invalid active session token.").build();
         }
 
         if (now.isAfter(attempt.getExpiresAt())) {
-            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false).message("Attempt duration expired.").build();
+            return AutosaveResponse.builder().attemptId(attemptId).questionId(request.getQuestionId()).saved(false)
+                    .message("Attempt duration expired.").build();
         }
 
         // Check sequence number
-        Optional<QuizAttemptAnswerLogEntity> latestLog = answerLogRepo.findFirstByAttemptIdAndQuestionIdOrderByClientSeqDesc(attemptId, request.getQuestionId());
+        Optional<QuizAttemptAnswerLogEntity> latestLog = answerLogRepo
+                .findFirstByAttemptIdAndQuestionIdOrderByClientSeqDesc(attemptId, request.getQuestionId());
         if (latestLog.isPresent() && latestLog.get().getClientSeq() > request.getClientSeq()) {
             return AutosaveResponse.builder()
                     .attemptId(attemptId)
@@ -202,7 +211,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                     .message("Autosave event sent to Kafka processing queue.")
                     .build();
         } catch (Exception e) {
-            log.error("Failed to publish autosave event to Kafka for attemptId={}, questionId={}: {}", attemptId, request.getQuestionId(), e.getMessage(), e);
+            log.error("Failed to publish autosave event to Kafka for attemptId={}, questionId={}: {}", attemptId,
+                    request.getQuestionId(), e.getMessage(), e);
             return AutosaveResponse.builder()
                     .attemptId(attemptId)
                     .questionId(request.getQuestionId())
@@ -210,15 +220,6 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                     .message("Autosave failed due to internal error.")
                     .build();
         }
-    }
-
-    @Override
-    @Transactional
-    public StartAttemptResponse resumeAttempt(UUID assignmentId, String username, String sessionToken) {
-        QuizAttemptEntity attempt = attemptRepo.findByAssignmentIdAndStudentUsernameAndStatus(assignmentId, username, AttemptStatus.IN_PROGRESS)
-                .orElseThrow(() -> new DataNotFoundException("No active attempt found for assignment ID: " + assignmentId));
-
-        return resumeAttemptInternal(attempt, sessionToken);
     }
 
     private StartAttemptResponse resumeAttemptInternal(QuizAttemptEntity attempt, String sessionToken) {
@@ -232,28 +233,24 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         // Soft-lock check (Flow 9)
         if (!sessionToken.equals(attempt.getActiveSessionToken())) {
-            if (attempt.getLastHeartbeatAt() != null && Duration.between(attempt.getLastHeartbeatAt(), now).getSeconds() < 60) {
-                throw new AccessDeniedException("Bạn đang làm bài ở thiết bị/tab khác");
+            if (attempt.getLastHeartbeatAt() != null
+                    && Duration.between(attempt.getLastHeartbeatAt(), now).getSeconds() < 60) {
+                throw new AccessDeniedException("Session has been expired");
             }
             // Steal lock if old session is dead
             attempt.setActiveSessionToken(sessionToken);
             attempt.setLockAcquiredAt(now);
-            attempt.setLastHeartbeatAt(now);
-            attemptRepo.save(attempt);
-        } else {
-            attempt.setLastHeartbeatAt(now);
-            attemptRepo.save(attempt);
         }
+        attempt.setLastHeartbeatAt(now);
+        attemptRepo.save(attempt);
 
         // Parse question order snapshot
         List<UUID> questionIds = parseQuestionOrder(attempt.getQuestionOrder());
-        List<QuizQuestionEntity> questions = new ArrayList<>();
-        for (UUID qId : questionIds) {
-            questionRepo.findByIdAndDeletedAtIsNull(qId).ifPresent(questions::add);
-        }
+        List<QuizQuestionEntity> questions = questionRepo.findByIdInAndDeletedAtIsNull(questionIds);
 
         QuizAssignmentEntity assignment = assignmentRepo.findByIdAndDeletedAtIsNull(attempt.getAssignmentId())
-                .orElseThrow(() -> new DataNotFoundException("Assignment not found with ID: " + attempt.getAssignmentId()));
+                .orElseThrow(
+                        () -> new DataNotFoundException("Assignment not found with ID: " + attempt.getAssignmentId()));
 
         List<QuizQuestionResponse> questionDtos = buildQuestionsForStudent(questions, assignment.getShuffleOptions());
 
@@ -312,10 +309,18 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         Map<UUID, QuizAttemptAnswerEntity> answerMap = savedAnswers.stream()
                 .collect(Collectors.toMap(QuizAttemptAnswerEntity::getQuestionId, a -> a));
 
-        List<QuizQuestionEntity> questions = questionRepo.findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(attempt.getQuizId());
         BigDecimal autoTotalScore = BigDecimal.ZERO;
         boolean hasEssayQuestion = false;
 
+        List<QuizQuestionEntity> questions = questionRepo
+                .findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(attempt.getQuizId());
+        List<UUID> allQuestionIds = questions.stream().map(QuizQuestionEntity::getId).toList();
+        List<QuizQuestionOptionEntity> allCorrectOptions = optionRepo
+                .findByQuestionIdInAndIsCorrectTrueAndDeletedAtIsNull(allQuestionIds);
+        Map<UUID, List<QuizQuestionOptionEntity>> correctOptionsMap = allCorrectOptions.stream()
+                .collect(Collectors.groupingBy(QuizQuestionOptionEntity::getQuestionId));
+
+        // Grading
         for (QuizQuestionEntity q : questions) {
             if (q.getQuestionType() == QuestionType.ESSAY) {
                 hasEssayQuestion = true;
@@ -327,8 +332,9 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 continue;
             }
 
-            List<QuizQuestionOptionEntity> correctOptions = optionRepo.findByQuestionIdAndIsCorrectTrueAndDeletedAtIsNull(q.getId());
-            Set<UUID> correctOptionIds = correctOptions.stream().map(QuizQuestionOptionEntity::getId).collect(Collectors.toSet());
+            List<QuizQuestionOptionEntity> correctOptions = correctOptionsMap.get(q.getId());
+            Set<UUID> correctOptionIds = correctOptions.stream().map(QuizQuestionOptionEntity::getId)
+                    .collect(Collectors.toSet());
 
             List<UUID> selectedOptionIds = parseOptionIdsJson(answer.getSelectedOptionIds());
             Set<UUID> selectedSet = new HashSet<>(selectedOptionIds);
@@ -356,17 +362,18 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             autoTotalScore = autoTotalScore.add(awardedPoints);
         }
 
+        // If have essay question, set status to GRADING
         if (hasEssayQuestion) {
             attempt.setStatus(AttemptStatus.GRADING);
-            attempt.setTotalScore(autoTotalScore);
         } else {
             attempt.setStatus(AttemptStatus.GRADED);
             attempt.setGradedAt(now);
-            attempt.setTotalScore(autoTotalScore);
         }
+        attempt.setTotalScore(autoTotalScore);
 
         attemptRepo.save(attempt);
-        auditService.log("ATTEMPT", attemptId, QuizAuditAction.SUBMIT, username, null, attempt, "Submitted quiz attempt");
+        auditService.log("ATTEMPT", attemptId, QuizAuditAction.SUBMIT, username, null, attempt,
+                "Submitted quiz attempt");
 
         return SubmitAttemptResponse.builder()
                 .attemptId(attemptId)
@@ -397,8 +404,9 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             attempt.setLastHeartbeatAt(now);
             attemptRepo.save(attempt);
         } else {
-            if (attempt.getLastHeartbeatAt() != null && Duration.between(attempt.getLastHeartbeatAt(), now).getSeconds() < 60) {
-                throw new AccessDeniedException("Bạn đang làm bài ở thiết bị/tab khác");
+            if (attempt.getLastHeartbeatAt() != null
+                    && Duration.between(attempt.getLastHeartbeatAt(), now).getSeconds() < 60) {
+                throw new AccessDeniedException("You are currently taking this quiz on another device/tab.");
             }
             attempt.setActiveSessionToken(request.getSessionToken());
             attempt.setLockAcquiredAt(now);
@@ -421,14 +429,25 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             throw new BadRequestException("Results are not available until grading is complete.");
         }
 
-        List<QuizQuestionEntity> questions = questionRepo.findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(attempt.getQuizId());
+        List<QuizQuestionEntity> questions = questionRepo
+                .findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(attempt.getQuizId());
+        var questionIds = questions.stream()
+                .map(QuizQuestionEntity::getId)
+                .collect(Collectors.toList());
+
         List<QuizAttemptAnswerEntity> answers = answerRepo.findByAttemptId(attemptId);
-        Map<UUID, QuizAttemptAnswerEntity> answerMap = answers.stream().collect(Collectors.toMap(QuizAttemptAnswerEntity::getQuestionId, a -> a));
+        Map<UUID, QuizAttemptAnswerEntity> answerMap = answers.stream()
+                .collect(Collectors.toMap(QuizAttemptAnswerEntity::getQuestionId, a -> a));
+
+        List<QuizQuestionOptionEntity> allOptions = optionRepo
+                .findByQuestionIdInAndDeletedAtIsNullOrderByOrderIndexAsc(questionIds);
 
         List<AttemptAnswerResultDto> answerResults = new ArrayList<>();
         for (QuizQuestionEntity q : questions) {
             QuizAttemptAnswerEntity ans = answerMap.get(q.getId());
-            List<QuizQuestionOptionEntity> options = optionRepo.findByQuestionIdAndDeletedAtIsNullOrderByOrderIndexAsc(q.getId());
+            List<QuizQuestionOptionEntity> options = allOptions.stream()
+                    .filter(o -> o.getQuestionId().equals(q.getId()))
+                    .toList();
 
             // Expose is_correct on options ONLY when status is GRADED
             List<QuizQuestionOptionResponse> optionResponses = quizMapper.toOptionResponseList(options);
@@ -468,11 +487,18 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .build();
     }
 
-    private List<QuizQuestionResponse> buildQuestionsForStudent(List<QuizQuestionEntity> questions, Boolean shuffleOptions) {
+    // TODO: kiểm tra lại cơ chế sắp xếp option câu hỏi nếu resume
+    private List<QuizQuestionResponse> buildQuestionsForStudent(List<QuizQuestionEntity> questions,
+                                                                Boolean shuffleOptions) {
+        var questionIds = questions.stream().map(QuizQuestionEntity::getId).toList();
+        var optionsMap = optionRepo.findByQuestionIdInAndDeletedAtIsNullOrderByOrderIndexAsc(questionIds)
+                .stream()
+                .collect(Collectors.groupingBy(QuizQuestionOptionEntity::getQuestionId));
+
         List<QuizQuestionResponse> list = new ArrayList<>();
         for (QuizQuestionEntity q : questions) {
             QuizQuestionResponse dto = quizMapper.toResponse(q);
-            List<QuizQuestionOptionEntity> options = optionRepo.findByQuestionIdAndDeletedAtIsNullOrderByOrderIndexAsc(q.getId());
+            List<QuizQuestionOptionEntity> options = optionsMap.getOrDefault(q.getId(), new ArrayList<>());
             if (Boolean.TRUE.equals(shuffleOptions) && !options.isEmpty()) {
                 options = new ArrayList<>(options);
                 Collections.shuffle(options);
@@ -494,7 +520,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     }
 
     private List<UUID> parseQuestionOrder(String json) {
-        if (json == null || json.isBlank()) return Collections.emptyList();
+        if (json == null || json.isBlank())
+            return Collections.emptyList();
         try {
             return objectMapper.readValue(json, new TypeReference<List<UUID>>() {
             });
@@ -505,7 +532,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
     }
 
     private List<UUID> parseOptionIdsJson(String json) {
-        if (json == null || json.isBlank()) return Collections.emptyList();
+        if (json == null || json.isBlank())
+            return Collections.emptyList();
         try {
             return objectMapper.readValue(json, new TypeReference<List<UUID>>() {
             });

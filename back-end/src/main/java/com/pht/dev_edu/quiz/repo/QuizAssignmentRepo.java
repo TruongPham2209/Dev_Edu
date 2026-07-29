@@ -2,8 +2,6 @@ package com.pht.dev_edu.quiz.repo;
 
 import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
 import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -19,7 +17,6 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
 
     List<QuizAssignmentEntity> findByQuizIdAndDeletedAtIsNull(UUID quizId);
 
-    // TODO: update get only active assignment
     @Query(value = """
             SELECT *
             FROM quiz_assignments
@@ -33,8 +30,6 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
             AND status      IN :statuses
             """, nativeQuery = true)
     List<QuizAssignmentEntity> findByCourseIdAndDeletedAtIsNullAndStartTimeAndStatuses(UUID courseId, LocalDateTime startTime, List<String> statuses);
-
-    Page<QuizAssignmentEntity> findByQuizIdAndDeletedAtIsNull(UUID quizId, Pageable pageable);
 
     boolean existsByQuizIdAndDeletedAtIsNull(UUID quizId);
 

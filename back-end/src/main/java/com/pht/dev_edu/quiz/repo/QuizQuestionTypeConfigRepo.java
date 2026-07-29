@@ -14,6 +14,4 @@ public interface QuizQuestionTypeConfigRepo extends JpaRepository<QuizQuestionTy
     List<QuizQuestionTypeConfigEntity> findByQuizId(UUID quizId);
 
     Optional<QuizQuestionTypeConfigEntity> findByQuizIdAndQuestionType(UUID quizId, QuestionType questionType);
-
-    boolean existsByQuizIdAndQuestionType(UUID quizId, QuestionType questionType);
 }

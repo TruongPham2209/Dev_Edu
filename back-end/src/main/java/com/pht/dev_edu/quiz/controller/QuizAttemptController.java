@@ -24,6 +24,7 @@ import java.util.UUID;
 public class QuizAttemptController {
     QuizAttemptService attemptService;
 
+    // Start assignment or resume assignment (update service ten remove endpoint resume)
     @PostMapping("/quiz-assignments/{assignmentId}/start")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> startAttempt(
@@ -39,6 +40,7 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Autosave answer
     @PostMapping("/quiz-attempts/{attemptId}/autosave")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> autosaveAnswer(
@@ -49,21 +51,7 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
-    @GetMapping("/quiz-assignments/{assignmentId}/current-attempt")
-    @PreAuthorize("hasAuthority('STUDENT')")
-    public ResponseEntity<ApiResponse> resumeAttempt(
-            @PathVariable("assignmentId") UUID assignmentId,
-            @RequestHeader(name = "X-Session-Token", required = false) String sessionTokenHeader,
-            @RequestParam(name = "sessionToken", required = false) String sessionTokenParam) {
-        String username = SecurityContextUtils.getCurrentUsernameForController();
-        String sessionToken = sessionTokenHeader != null ? sessionTokenHeader : sessionTokenParam;
-        if (sessionToken == null || sessionToken.isBlank()) {
-            sessionToken = UUID.randomUUID().toString();
-        }
-        var result = attemptService.resumeAttempt(assignmentId, username, sessionToken);
-        return ApiUtils.buildSuccessResponse(result);
-    }
-
+    // Submit attempt and auto grade
     @PostMapping("/quiz-attempts/{attemptId}/submit")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> submitAttempt(@PathVariable("attemptId") UUID attemptId) {
@@ -72,6 +60,7 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Heartbeat to validate duplicate devices
     @PostMapping("/quiz-attempts/{attemptId}/heartbeat")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> heartbeat(
@@ -82,11 +71,13 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse("Heartbeat acknowledged");
     }
 
+    // Get attempt result
     @GetMapping("/quiz-attempts/{attemptId}/result")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> getAttemptResult(@PathVariable("attemptId") UUID attemptId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
         boolean isStaff = authorities.contains("LECTURER") || authorities.contains("ADMIN");
         var result = attemptService.getAttemptResult(attemptId, username, isStaff);
         return ApiUtils.buildSuccessResponse(result);

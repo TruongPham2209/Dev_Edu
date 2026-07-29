@@ -39,8 +39,7 @@ public class QuizAuditServiceImpl implements QuizAuditService {
                     .createdAt(LocalDateTime.now())
                     .build();
 
-            String payload = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send(KafkaTopicConstant.QUIZ_AUDIT_LOG_TOPIC, payload);
+            kafkaTemplate.send(KafkaTopicConstant.QUIZ_AUDIT_LOG_TOPIC, event);
             log.debug("Sent quiz audit log event to Kafka for entityId={}", entityId);
         } catch (Exception e) {
             log.error("Failed to publish quiz audit log event to Kafka for entityType={}, entityId={}, action={}: {}",
