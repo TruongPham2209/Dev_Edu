@@ -1,35 +1,33 @@
 package com.pht.dev_edu.quiz.service;
 
-import com.pht.dev_edu.quiz.dto.request.*;
-import com.pht.dev_edu.quiz.dto.response.*;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.quiz.dto.request.QuizRequest;
+import com.pht.dev_edu.quiz.dto.request.QuizReviewRequest;
+import com.pht.dev_edu.quiz.dto.request.QuizTypeConfigRequest;
+import com.pht.dev_edu.quiz.dto.response.QuizDetailResponse;
+import com.pht.dev_edu.quiz.dto.response.QuizResponse;
+import com.pht.dev_edu.quiz.dto.response.QuizTypeConfigResponse;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface QuizManagementService {
-    QuizResponse createQuiz(QuizRequest request, String username);
+    QuizResponse createQuiz(QuizRequest request, String username, Set<String> authorities);
 
-    QuizResponse updateQuiz(UUID quizId, QuizRequest request, String username);
+    QuizResponse updateQuiz(UUID quizId, QuizRequest request, String username, Set<String> authorities);
 
-    QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username);
+    QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username, Set<String> authorities);
 
-    List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId);
+    List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, Set<String> authorities);
 
-    QuizQuestionResponse addQuestion(UUID quizId, QuizQuestionRequest request, String username);
-
-    QuizQuestionResponse updateQuestion(UUID quizId, UUID questionId, QuizQuestionRequest request, String username);
-
-    void deleteQuestion(UUID quizId, UUID questionId, String username);
-
-    QuizResponse submitQuizForApproval(UUID quizId, String username);
+    QuizResponse submitQuizForApproval(UUID quizId, String username, Set<String> authorities);
 
     QuizResponse reviewQuiz(UUID quizId, QuizReviewRequest request, String username);
 
-    QuizDetailResponse getQuizDetail(UUID quizId);
+    QuizDetailResponse getQuizDetail(UUID quizId, String username, Set<String> authorities);
 
-    Page<QuizResponse> getQuizzesByCourse(UUID courseId, Pageable pageable);
+    CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, String nextCursor, String username, Set<String> authorities);
 
-    Page<QuizResponse> getPendingQuizzes(Pageable pageable);
+    CustomPaging<QuizResponse> getPendingQuizzes(String nextCursor);
 }

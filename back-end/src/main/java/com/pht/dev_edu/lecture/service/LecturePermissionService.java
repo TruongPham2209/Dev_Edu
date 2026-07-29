@@ -9,4 +9,6 @@ public interface LecturePermissionService {
     void checkModifyPermissionByLecture(Set<String> authorities, String actor, UUID lectureId);
 
     void checkModifyPermissionByCourse(Set<String> authorities, String actor, UUID courseId);
+
+    void checkViewPermissionByCourse(Set<String> authorities, String actor, UUID courseId);
 }

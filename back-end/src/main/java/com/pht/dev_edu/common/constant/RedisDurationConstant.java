@@ -17,4 +17,6 @@ public class RedisDurationConstant {
     public static final Duration LECTURE_PROGRESS_DURATION = Duration.ofDays(7);
 
     public static final Duration POST_DATA_DURATION = Duration.ofHours(1);
+
+    public static final Duration QUIZ_DATA_DURATION = Duration.ofHours(3);
 }
