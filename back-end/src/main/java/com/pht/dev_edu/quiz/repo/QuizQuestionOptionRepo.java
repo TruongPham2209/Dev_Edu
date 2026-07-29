@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface QuizQuestionOptionRepo extends JpaRepository<QuizQuestionOptionEntity, UUID> {
-    List<QuizQuestionOptionEntity> findByQuestionIdAndDeletedAtIsNullOrderByOrderIndexAsc(UUID questionId);
+    List<QuizQuestionOptionEntity> findByQuestionIdInAndDeletedAtIsNullOrderByOrderIndexAsc(List<UUID> questionIds);
 
     List<QuizQuestionOptionEntity> findByQuestionIdInAndDeletedAtIsNull(Collection<UUID> questionIds);
 
