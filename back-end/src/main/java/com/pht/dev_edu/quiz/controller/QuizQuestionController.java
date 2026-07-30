@@ -40,7 +40,7 @@ public class QuizQuestionController {
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> updateQuestion(
             @PathVariable("id") UUID quizId,
-            @PathVariable("questionId") UUID questionId,
+            @PathVariable UUID questionId,
             @Valid @RequestBody QuizQuestionRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
@@ -54,11 +54,11 @@ public class QuizQuestionController {
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> deleteQuestion(
             @PathVariable("id") UUID quizId,
-            @PathVariable("questionId") UUID questionId) {
+            @PathVariable UUID questionId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
-        quizQuestionService .deleteQuestion(quizId, questionId, username, authorities);
+        quizQuestionService.deleteQuestion(quizId, questionId, username, authorities);
         return ApiUtils.buildSuccessResponse("Question deleted successfully");
     }
 }

@@ -97,7 +97,8 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
     @Override
     @Transactional
-    public QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username, Set<String> authorities) {
+    public QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username,
+            Set<String> authorities) {
         QuizEntity quiz = quizService.getQuizEntityOrThrow(quizId);
         quizAccessService.validateAccessByQuiz(username, authorities, quizId);
 
@@ -135,9 +136,31 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, Set<String> authorities) {
+    public List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, String username, Set<String> authorities) {
+        quizAccessService.validateAccessByQuiz(username, authorities, quizId);
         quizService.getQuizEntityOrThrow(quizId);
         return quizMapper.toTypeConfigResponseList(typeConfigRepo.findByQuizId(quizId));
+    }
+
+    @Override
+    public void deleteTypeConfigs(UUID quizId, UUID typeConfigId, String username, Set<String> authorities) {
+        quizAccessService.validateAccessByQuiz(username, authorities, quizId);
+        QuizEntity quiz = quizService.getQuizEntityOrThrow(quizId);
+        checkCanEditQuizStructure(quiz);
+
+        QuizQuestionTypeConfigEntity typeConfigEntity = typeConfigRepo.findById(typeConfigId).orElseThrow(
+                () -> new BadRequestException("Type config not found"));
+        if (typeConfigEntity.getQuizId().equals(quizId)) {
+            throw new BadRequestException("Type config not found for this quiz");
+        }
+
+        if (questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, typeConfigEntity.getQuestionType())) {
+            throw new BadRequestException("Cannot delete type config because questions of type "
+                    + typeConfigEntity.getQuestionType() + " already exist.");
+        }
+
+        typeConfigRepo.delete(typeConfigEntity);
+        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
     }
 
     @Override
@@ -222,32 +245,33 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, String nextCursor, String username, Set<String> authorities) {
+    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, String nextCursor, String username,
+            Set<String> authorities) {
         quizAccessService.validateAccessByCourse(username, authorities, courseId);
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, cursor.getId(), cursor.getTimeStamp(), QUIZ_PAGE_SIZE + 1);
+        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, cursor.getId(), cursor.getTimeStamp(),
+                QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
                 quizzes,
                 quizMapper::toResponse,
                 QuizEntity::getCreatedAt,
                 QuizEntity::getId,
-                QUIZ_PAGE_SIZE
-        );
+                QUIZ_PAGE_SIZE);
     }
 
     @Override
     public CustomPaging<QuizResponse> getPendingQuizzes(String nextCursor) {
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByStatusAndDeletedAtIsNull(QuizStatus.PENDING, cursor.getId(), cursor.getTimeStamp(), QUIZ_PAGE_SIZE + 1);
+        var quizzes = quizRepo.findByStatusAndDeletedAtIsNull(QuizStatus.PENDING, cursor.getId(), cursor.getTimeStamp(),
+                QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
                 quizzes,
                 quizMapper::toResponse,
                 QuizEntity::getCreatedAt,
                 QuizEntity::getId,
-                QUIZ_PAGE_SIZE
-        );
+                QUIZ_PAGE_SIZE);
     }
 
     private void checkCanEditQuizStructure(QuizEntity quiz) {

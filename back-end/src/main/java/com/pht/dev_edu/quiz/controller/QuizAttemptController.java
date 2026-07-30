@@ -28,7 +28,7 @@ public class QuizAttemptController {
     @PostMapping("/quiz-assignments/{assignmentId}/start")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> startAttempt(
-            @PathVariable("assignmentId") UUID assignmentId,
+            @PathVariable UUID assignmentId,
             @RequestHeader(name = "X-Session-Token", required = false) String sessionTokenHeader,
             @RequestParam(name = "sessionToken", required = false) String sessionTokenParam) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
@@ -44,7 +44,7 @@ public class QuizAttemptController {
     @PostMapping("/quiz-attempts/{attemptId}/autosave")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> autosaveAnswer(
-            @PathVariable("attemptId") UUID attemptId,
+            @PathVariable UUID attemptId,
             @Valid @RequestBody AutosaveRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         var result = attemptService.autosaveAnswer(attemptId, request, username);
@@ -54,7 +54,7 @@ public class QuizAttemptController {
     // Submit attempt and auto grade
     @PostMapping("/quiz-attempts/{attemptId}/submit")
     @PreAuthorize("hasAuthority('STUDENT')")
-    public ResponseEntity<ApiResponse> submitAttempt(@PathVariable("attemptId") UUID attemptId) {
+    public ResponseEntity<ApiResponse> submitAttempt(@PathVariable UUID attemptId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         var result = attemptService.submitAttempt(attemptId, username);
         return ApiUtils.buildSuccessResponse(result);
@@ -64,7 +64,7 @@ public class QuizAttemptController {
     @PostMapping("/quiz-attempts/{attemptId}/heartbeat")
     @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<ApiResponse> heartbeat(
-            @PathVariable("attemptId") UUID attemptId,
+            @PathVariable UUID attemptId,
             @Valid @RequestBody HeartbeatRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         attemptService.heartbeat(attemptId, request, username);
@@ -74,7 +74,7 @@ public class QuizAttemptController {
     // Get attempt result
     @GetMapping("/quiz-attempts/{attemptId}/result")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
-    public ResponseEntity<ApiResponse> getAttemptResult(@PathVariable("attemptId") UUID attemptId) {
+    public ResponseEntity<ApiResponse> getAttemptResult(@PathVariable UUID attemptId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 

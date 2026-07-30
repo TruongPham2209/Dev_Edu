@@ -3,6 +3,7 @@ package com.pht.dev_edu.quiz.repo;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,4 +15,7 @@ public interface QuizQuestionTypeConfigRepo extends JpaRepository<QuizQuestionTy
     List<QuizQuestionTypeConfigEntity> findByQuizId(UUID quizId);
 
     Optional<QuizQuestionTypeConfigEntity> findByQuizIdAndQuestionType(UUID quizId, QuestionType questionType);
+
+    @Modifying
+    void deleteByIdAndQuizId(UUID id, UUID quizId);
 }

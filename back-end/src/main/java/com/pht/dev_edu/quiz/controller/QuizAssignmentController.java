@@ -37,7 +37,7 @@ public class QuizAssignmentController {
     // Get assignment by quiz
     @GetMapping("/quiz/{quizId}")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
-    public ResponseEntity<ApiResponse> getAssignmentsByQuiz(@PathVariable("quizId") UUID quizId) {
+    public ResponseEntity<ApiResponse> getAssignmentsByQuiz(@PathVariable UUID quizId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
@@ -48,7 +48,7 @@ public class QuizAssignmentController {
     // Get assignment detail
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
-    public ResponseEntity<ApiResponse> getAssignmentById(@PathVariable("id") UUID id) {
+    public ResponseEntity<ApiResponse> getAssignmentById(@PathVariable UUID id) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 

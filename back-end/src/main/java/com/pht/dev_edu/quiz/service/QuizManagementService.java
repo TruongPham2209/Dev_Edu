@@ -19,7 +19,9 @@ public interface QuizManagementService {
 
     QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username, Set<String> authorities);
 
-    List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, Set<String> authorities);
+    List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, String username, Set<String> authorities);
+
+    void deleteTypeConfigs(UUID quizId, UUID typeConfigId, String username, Set<String> authorities);
 
     QuizResponse submitQuizForApproval(UUID quizId, String username, Set<String> authorities);
 

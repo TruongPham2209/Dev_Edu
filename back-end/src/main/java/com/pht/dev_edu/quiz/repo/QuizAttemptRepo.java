@@ -3,8 +3,6 @@ package com.pht.dev_edu.quiz.repo;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.entity.QuizAttemptEntity;
 import jakarta.persistence.LockModeType;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -28,5 +26,14 @@ public interface QuizAttemptRepo extends JpaRepository<QuizAttemptEntity, UUID> 
 
     List<QuizAttemptEntity> findByStatusAndExpiresAtLessThanEqual(AttemptStatus status, LocalDateTime time);
 
-    Page<QuizAttemptEntity> findByStatus(AttemptStatus status, Pageable pageable);
+    @Query(value = """
+            SELECT *
+            FROM quiz_attempts
+            WHERE   quiz_id             = :quizId
+            AND     status              = :status
+            AND     (submitted_at, id)  <= (:lastTimestamp, :lastId)
+            ORDER BY submitted_at DESC, id DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<QuizAttemptEntity> findByQuizIdAndStatusAndCursor(UUID quizId, String status, UUID lastId, LocalDateTime lastTimestamp, int limit);
 }

@@ -25,6 +25,9 @@ import java.util.UUID;
 public class QuizController {
     QuizManagementService quizManagementService;
 
+    // =============================================
+    // ------------------Quiz-----------------------
+    // =============================================
     // Create new quiz with DRAFT status
     @PostMapping
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
@@ -61,15 +64,19 @@ public class QuizController {
     @GetMapping("/course/{courseId}")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> getQuizzesByCourse(
-            @PathVariable("courseId") UUID courseId,
-            @RequestParam(name = "nextCursor") String nextCursor) {
+            @PathVariable UUID courseId,
+            @RequestParam(name = "nextCursor", required = false) String nextCursor) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
-        var pageResult = quizManagementService.getQuizzesByCourse(courseId, nextCursor, username,  authorities);
+        var pageResult = quizManagementService.getQuizzesByCourse(courseId, nextCursor, username, authorities);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
 
+
+    // =============================================
+    // -------------Type Config---------------------
+    // =============================================
     // Config quiz structure
     @PostMapping("/{id}/type-configs")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
@@ -86,12 +93,27 @@ public class QuizController {
     @GetMapping("/{id}/type-configs")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> getTypeConfigs(@PathVariable("id") UUID quizId) {
+        var username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
-        var result = quizManagementService.getTypeConfigs(quizId, authorities);
+        var result = quizManagementService.getTypeConfigs(quizId, username, authorities);
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    @DeleteMapping("/{id}/type-configs/{typeConfigId}")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
+    public ResponseEntity<ApiResponse> deleteTypeConfig(@PathVariable("id") UUID quizId, @PathVariable UUID typeConfigId) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        quizManagementService.deleteTypeConfigs(quizId, typeConfigId, username, authorities);
+        return ApiUtils.buildSuccessResponse("Deleted type config successfully!");
+    }
+
+
+    // =============================================
+    // ---------------Quiz Approval-----------------
+    // =============================================
     // Pending quiz for approval
     @PostMapping("/{id}/submit")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
@@ -106,7 +128,7 @@ public class QuizController {
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse> getPendingQuizzes(
-            @RequestParam(name = "nextCursor") String nextCursor) {
+            @RequestParam(name = "nextCursor", required = false) String nextCursor) {
         var pageResult = quizManagementService.getPendingQuizzes(nextCursor);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
