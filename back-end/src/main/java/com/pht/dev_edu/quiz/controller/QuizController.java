@@ -1,8 +1,10 @@
 package com.pht.dev_edu.quiz.controller;
 
 import com.pht.dev_edu.common.dto.ApiResponse;
+import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.ApiUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
+import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
 import com.pht.dev_edu.quiz.dto.request.QuizRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizReviewRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizTypeConfigRequest;
@@ -65,11 +67,13 @@ public class QuizController {
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> getQuizzesByCourse(
             @PathVariable UUID courseId,
-            @RequestParam(name = "nextCursor", required = false) String nextCursor) {
+            @RequestParam(name = "nextCursor", required = false) String nextCursor,
+            @RequestParam QuizStatus status
+    ) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
-        var pageResult = quizManagementService.getQuizzesByCourse(courseId, nextCursor, username, authorities);
+        var pageResult = quizManagementService.getQuizzesByCourse(courseId, status, nextCursor, username, authorities);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
 
@@ -125,11 +129,18 @@ public class QuizController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
-    @GetMapping("/pending")
+    @GetMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ApiResponse> getPendingQuizzes(
-            @RequestParam(name = "nextCursor", required = false) String nextCursor) {
-        var pageResult = quizManagementService.getPendingQuizzes(nextCursor);
+    public ResponseEntity<ApiResponse> getQuizzes(
+            @RequestParam(name = "nextCursor", required = false) String nextCursor,
+            @RequestParam QuizStatus status
+    ) {
+        if (status == QuizStatus.DRAFT) {
+            // TODO: add message here
+            throw new BadRequestException("");
+        }
+
+        var pageResult = quizManagementService.getQuizzes(status, nextCursor);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
 

@@ -1,6 +1,7 @@
 package com.pht.dev_edu.quiz.service;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
 import com.pht.dev_edu.quiz.dto.request.QuizRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizReviewRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizTypeConfigRequest;
@@ -29,7 +30,7 @@ public interface QuizManagementService {
 
     QuizDetailResponse getQuizDetail(UUID quizId, String username, Set<String> authorities);
 
-    CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, String nextCursor, String username, Set<String> authorities);
+    CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, QuizStatus status, String nextCursor, String username, Set<String> authorities);
 
-    CustomPaging<QuizResponse> getPendingQuizzes(String nextCursor);
+    CustomPaging<QuizResponse> getQuizzes(QuizStatus status, String nextCursor);
 }

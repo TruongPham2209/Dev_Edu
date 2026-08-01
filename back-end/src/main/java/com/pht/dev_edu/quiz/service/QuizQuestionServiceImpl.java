@@ -1,7 +1,9 @@
 package com.pht.dev_edu.quiz.service;
 
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
 import com.pht.dev_edu.quiz.dto.request.QuizQuestionOptionRequest;
@@ -12,10 +14,7 @@ import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionOptionEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
 import com.pht.dev_edu.quiz.mapper.QuizMapper;
-import com.pht.dev_edu.quiz.repo.QuizAssignmentRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionOptionRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionTypeConfigRepo;
+import com.pht.dev_edu.quiz.repo.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,6 +38,7 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
     QuizQuestionRepo questionRepo;
     QuizQuestionOptionRepo optionRepo;
     QuizAssignmentRepo assignmentRepo;
+    QuizRepo quizRepo;
 
     QuizMapper quizMapper;
     QuizService quizService;
@@ -50,7 +50,12 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
         checkCanEditQuizStructure(quiz);
 
         // Set status back to DRAFT
-        quiz.setStatus(QuizStatus.DRAFT);
+        if (quiz.getStatus() != QuizStatus.DRAFT) {
+            quiz.setStatus(QuizStatus.DRAFT);
+            quizRepo.save(quiz);
+
+            invalidateQuizCached(quizId);
+        }
 
         // Find config
         QuizQuestionTypeConfigEntity config = typeConfigRepo
@@ -94,6 +99,8 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
 
         QuizQuestionResponse response = quizMapper.toResponse(question);
         response.setOptions(quizMapper.toOptionResponseList(savedOptions));
+
+        invalidateQuizDetailCached(quizId);
         return response;
     }
 
@@ -104,7 +111,12 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
         QuizEntity quiz = quizService.getQuizEntityOrThrow(quizId);
         checkCanEditQuizStructure(quiz);
 
-        quiz.setStatus(QuizStatus.DRAFT);
+        if (quiz.getStatus() != QuizStatus.DRAFT) {
+            quiz.setStatus(QuizStatus.DRAFT);
+            quizRepo.save(quiz);
+
+            invalidateQuizCached(quizId);
+        }
 
         QuizQuestionEntity question = questionRepo.findByIdAndDeletedAtIsNull(questionId)
                 .orElseThrow(() -> new DataNotFoundException("Question not found with ID: " + questionId));
@@ -139,6 +151,8 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
 
         QuizQuestionResponse response = quizMapper.toResponse(question);
         response.setOptions(quizMapper.toOptionResponseList(savedOptions));
+
+        invalidateQuizDetailCached(quizId);
         return response;
     }
 
@@ -148,7 +162,12 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
         QuizEntity quiz = quizService.getQuizEntityOrThrow(quizId);
         checkCanEditQuizStructure(quiz);
 
-        quiz.setStatus(QuizStatus.DRAFT);
+        if (quiz.getStatus() != QuizStatus.DRAFT) {
+            quiz.setStatus(QuizStatus.DRAFT);
+            quizRepo.save(quiz);
+
+            invalidateQuizCached(quizId);
+        }
 
         QuizQuestionEntity question = questionRepo.findByIdAndDeletedAtIsNull(questionId)
                 .orElseThrow(() -> new DataNotFoundException("Question not found with ID: " + questionId));
@@ -160,6 +179,8 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
         question.setDeletedAt(LocalDateTime.now());
         question.setDeletedBy(username);
         questionRepo.save(question);
+
+        invalidateQuizDetailCached(quizId);
     }
 
     private void checkCanEditQuizStructure(QuizEntity quiz) {
@@ -202,5 +223,13 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
                         "MULTIPLE_CHOICE question must have AT LEAST 2 correct options. Found: " + correctCount);
             }
         }
+    }
+
+    private void invalidateQuizDetailCached(UUID quizId) {
+        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_DETAIL_PREFIX + quizId);
+    }
+
+    private void invalidateQuizCached(UUID quizId) {
+        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
     }
 }

@@ -1,6 +1,5 @@
 package com.pht.dev_edu.quiz.repo;
 
-import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,19 +15,20 @@ public interface QuizRepo extends JpaRepository<QuizEntity, UUID> {
             SELECT *
             FROM quizzes
             WHERE   course_id           = :courseId
-            AND     (created_at, id)    <= (:lastTimeStamp, :id)
+            AND     status              = :status
+            AND     (created_at, id)    <= (:lastTimestamp, :lastId)
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<QuizEntity> findByCourseIdAndDeletedAtIsNull(UUID courseId, UUID lastId, LocalDateTime lastTimestamp, int limit);
+    List<QuizEntity> findByCourseIdAndDeletedAtIsNull(UUID courseId, String status, UUID lastId, LocalDateTime lastTimestamp, int limit);
 
     @Query(value = """
             SELECT *
             FROM quizzes
             WHERE   status              = :status
-            AND     (created_at, id)    <= (:lastTimeStamp, :id)
+            AND     (created_at, id)    <= (:lastTimestamp, :lastId)
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<QuizEntity> findByStatusAndDeletedAtIsNull(QuizStatus status, UUID lastId, LocalDateTime lastTimestamp, int limit);
+    List<QuizEntity> findByStatusAndDeletedAtIsNull(String status, UUID lastId, LocalDateTime lastTimestamp, int limit);
 }

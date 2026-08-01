@@ -91,7 +91,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
         auditService.log("QUIZ", quiz.getId(), QuizAuditAction.EDIT_QUIZ, username, null, quiz,
                 "Updated quiz title/description");
-        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
+        invalidateQuizCached(quizId);
         return quizMapper.toResponse(quiz);
     }
 
@@ -132,6 +132,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
         config.setScoringMethod(request.getScoringMethod());
 
         typeConfigRepo.save(config);
+        invalidateQuizCached(quizId);
         return quizMapper.toResponse(config);
     }
 
@@ -150,7 +151,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
         QuizQuestionTypeConfigEntity typeConfigEntity = typeConfigRepo.findById(typeConfigId).orElseThrow(
                 () -> new BadRequestException("Type config not found"));
-        if (typeConfigEntity.getQuizId().equals(quizId)) {
+        if (!typeConfigEntity.getQuizId().equals(quizId)) {
             throw new BadRequestException("Type config not found for this quiz");
         }
 
@@ -160,7 +161,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
         }
 
         typeConfigRepo.delete(typeConfigEntity);
-        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
+        invalidateQuizCached(quizId);
     }
 
     @Override
@@ -196,7 +197,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
         auditService.log("QUIZ", quizId, QuizAuditAction.SUBMIT_FOR_APPROVAL, username, null, quiz,
                 "Submitted quiz for admin approval");
-        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
+        invalidateQuizCached(quizId);
         return quizMapper.toResponse(quiz);
     }
 
@@ -234,7 +235,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
         quiz.setReviewedAt(now);
         quizRepo.save(quiz);
 
-        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
+        invalidateQuizCached(quizId);
         return quizMapper.toResponse(quiz);
     }
 
@@ -245,12 +246,12 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, String nextCursor, String username,
-            Set<String> authorities) {
+    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, QuizStatus status, String nextCursor, String username,
+                                                         Set<String> authorities) {
         quizAccessService.validateAccessByCourse(username, authorities, courseId);
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, cursor.getId(), cursor.getTimeStamp(),
+        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, status.name(), cursor.getId(), cursor.getTimeStamp(),
                 QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
                 quizzes,
@@ -261,10 +262,10 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public CustomPaging<QuizResponse> getPendingQuizzes(String nextCursor) {
+    public CustomPaging<QuizResponse> getQuizzes(QuizStatus status, String nextCursor) {
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByStatusAndDeletedAtIsNull(QuizStatus.PENDING, cursor.getId(), cursor.getTimeStamp(),
+        var quizzes = quizRepo.findByStatusAndDeletedAtIsNull(status.name(), cursor.getId(), cursor.getTimeStamp(),
                 QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
                 quizzes,
@@ -293,5 +294,10 @@ public class QuizManagementServiceImpl implements QuizManagementService {
         return StringUtils.hasText(nextCursor)
                 ? PagingUtils.decodeTimeStampCursor(nextCursor)
                 : TimeStampCursor.getDefaultCursor(true);
+    }
+
+    private void invalidateQuizCached(UUID quizId) {
+        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
+        RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_DETAIL_PREFIX + quizId);
     }
 }
