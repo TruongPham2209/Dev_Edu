@@ -15,7 +15,7 @@ export function LecturerLayout({ children }: Readonly<LecturerLayoutProps>) {
       sx={{
         minHeight: "100vh",
         position: "relative",
-        overflow: "hidden",
+        overflow: "clip",
         background: theme.background,
         color: "text.primary",
       }}

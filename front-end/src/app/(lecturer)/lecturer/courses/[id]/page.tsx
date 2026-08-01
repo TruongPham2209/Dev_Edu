@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   BookOpen,
   FileText,
+  HelpCircle,
   LayoutDashboard,
   Users,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import { LecturerCourseDetailSkeleton } from "./course-detail-skeleton";
 import { CourseResponse } from "@/lib/type/courses";
 import { CourseHero } from "./course-hero";
 import { LecturesTab } from "./lectures-tab";
+import { LecturerCourseQuizzesTab } from "./quizzes-tab";
 import { StudentsTab } from "./students-tab";
 
 export default function LecturerCourseDetailPage() {
@@ -111,6 +113,11 @@ export default function LecturerCourseDetailPage() {
               label: "Students",
               icon: <Users size={18} />,
             },
+            {
+              value: "quizzes",
+              label: "Quizzes",
+              icon: <HelpCircle size={18} />,
+            },
           ]}
         />
       </Box>
@@ -165,6 +172,12 @@ export default function LecturerCourseDetailPage() {
         {visitedTabs.includes("students") && (
           <Box sx={{ display: tab === "students" ? "block" : "none" }}>
             <StudentsTab courseId={courseId} />
+          </Box>
+        )}
+
+        {visitedTabs.includes("quizzes") && (
+          <Box sx={{ display: tab === "quizzes" ? "block" : "none" }}>
+            <LecturerCourseQuizzesTab courseId={courseId} />
           </Box>
         )}
       </Box>

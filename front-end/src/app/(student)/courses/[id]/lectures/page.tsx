@@ -282,6 +282,7 @@ export default function StudentLecturePage() {
           >
             <SidebarContainer
               lectures={lectures}
+              courseId={courseId}
               activeLectureId={activeLecture.id}
               onSelectLecture={handleSelectLecture}
             />

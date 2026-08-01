@@ -16,9 +16,7 @@ interface CourseDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function CourseDetailPage({
-  params,
-}: CourseDetailPageProps) {
+export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { id: courseId } = use(params);
 
   if (!courseId) {
@@ -37,7 +35,14 @@ export default function CourseDetailPage({
 
   if (loadingCourse) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8, minHeight: "100vh" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          py: 8,
+          minHeight: "100vh",
+        }}
+      >
         <CircularProgress />
       </Box>
     );

@@ -7,6 +7,7 @@ import type {
   HeartbeatRequest,
   PendingGradingResponse,
   QuizAssignmentResponse,
+  QuizDetailResponse,
   QuizQuestionRequest,
   QuizQuestionResponse,
   QuizRequest,
@@ -51,8 +52,8 @@ export async function getQuizzesByCourse(
   );
 }
 
-export async function getQuizById(quizId: string): Promise<QuizResponse> {
-  return apiGet<QuizResponse>(`/api/v1/quizzes/${quizId}`);
+export async function getQuizById(quizId: string): Promise<QuizDetailResponse> {
+  return apiGet<QuizDetailResponse>(`/api/v1/quizzes/${quizId}`);
 }
 
 export async function createQuiz(data: QuizRequest): Promise<QuizResponse> {
@@ -185,6 +186,12 @@ export async function getAssignmentById(
   );
 }
 
+export async function deleteQuizAssignment(
+  assignmentId: string,
+): Promise<void> {
+  return apiDelete<void>(`/api/v1/quiz-assignments/${assignmentId}`);
+}
+
 // --- Student Attempt & Exam APIs ---
 
 export async function startAttempt(
@@ -313,7 +320,10 @@ export function useQuizzesByCourseQuery(
 
 export function useQuizByIdQuery(
   quizId: string,
-  options?: Omit<UseQueryOptions<QuizResponse, Error>, "queryKey" | "queryFn">,
+  options?: Omit<
+    UseQueryOptions<QuizDetailResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
 ) {
   return useQuery({
     queryKey: ["quizzes", "detail", quizId],
@@ -643,6 +653,20 @@ export function useAssignmentByIdQuery(
     queryFn: () => getAssignmentById(assignmentId),
     enabled: !!assignmentId,
     ...options,
+  });
+}
+
+export function useDeleteQuizAssignmentMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (assignmentId: string) => deleteQuizAssignment(assignmentId),
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["quiz-assignments"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }
 
