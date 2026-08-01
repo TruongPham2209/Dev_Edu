@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
+  ClipboardList,
   House,
   LayoutDashboard,
   MessagesSquare,
@@ -27,6 +28,7 @@ export const adminNavItems: NavItem[] = [
   { label: "Forum", href: "/admin/posts", icon: MessagesSquare },
   { label: "Categories", href: "/admin/categories", icon: Tags },
   { label: "Courses", href: "/admin/courses", icon: BookOpen },
+  { label: "Quizzes", href: "/admin/quizzes", icon: ClipboardList },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Discounts", href: "/admin/discounts", icon: Percent },
   { label: "Settings", href: "/admin/settings", icon: Settings },
