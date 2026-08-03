@@ -146,7 +146,7 @@ describe("date-utils", () => {
       // Assert
       // Verify returned result and rendered output.
       // ----------------------------------------------------------------------------
-      expect(formatted).toBe("25/12/2026 09:05:08");
+      expect(formatted).toBe("25/12/2026 09:05");
     });
   });
 

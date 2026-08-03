@@ -2,7 +2,10 @@
 
 import { InfoDialog } from "@/components/common/info-dialog";
 import { QuizStatusChip } from "@/components/dialog/quiz/quiz-status-chip";
-import { useStartAttemptMutation } from "@/lib/api/quizzes";
+import {
+  useStartAttemptMutation,
+  useStudentAttemptHistoryQuery,
+} from "@/lib/api/quizzes";
 import { useToast } from "@/lib/toast-context";
 import type { QuizAssignmentResponse } from "@/lib/type/quizzes";
 import { formatServerDate } from "@/lib/util/date-utils";
@@ -10,16 +13,18 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
   Grid,
   Paper,
   Skeleton,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
 import {
@@ -30,6 +35,7 @@ import {
   Eye,
   Hash,
   HelpCircle,
+  History,
   Play,
   RotateCcw,
   ShieldAlert,
@@ -108,6 +114,11 @@ export function QuizAssignmentDetailModal({
   const toast = useToast();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const { data: attemptHistory, isLoading: isLoadingHistory } =
+    useStudentAttemptHistoryQuery(assignment?.id || "", {
+      enabled: open && !!assignment?.id,
+    });
+
   const startMutation = useStartAttemptMutation({
     onSuccess: (data) => {
       toast.success("Exam attempt started successfully!");
@@ -132,12 +143,12 @@ export function QuizAssignmentDetailModal({
 
   if (!assignment && !loading) return null;
 
-  const attemptsCount = (assignment as any)?.attemptsCount || 0;
+  const submittedAttempts = attemptHistory || [];
+  const attemptsCount = submittedAttempts.length;
   const maxAttempts = assignment?.maxAttempts || 1;
-  const attemptsLeft = maxAttempts - attemptsCount;
+  const attemptsLeft = Math.max(0, maxAttempts - attemptsCount);
   const isActive = assignment?.status === "ACTIVE";
   const canAttempt = isActive && attemptsLeft > 0;
-  const attemptsList: any[] = (assignment as any)?.attempts || [];
 
   const handleConfirmStart = () => {
     if (!assignment) return;
@@ -177,7 +188,7 @@ export function QuizAssignmentDetailModal({
           <ModalSkeleton />
         ) : (
           <Stack spacing={3} sx={{ pt: 1 }}>
-            {/* Status & Key Stats (6 Metric Cards) */}
+            {/* Status & Key Stats */}
             <Grid container spacing={2}>
               {/* 1. Duration */}
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -206,7 +217,6 @@ export function QuizAssignmentDetailModal({
                   >
                     Duration
                   </Typography>
-
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                     {assignment.durationMinutes} Mins
                   </Typography>
@@ -234,7 +244,7 @@ export function QuizAssignmentDetailModal({
                     color="text.secondary"
                     sx={{ display: "block", fontWeight: 500 }}
                   >
-                    Attempts Limit
+                    Attempts Taken
                   </Typography>
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                     {attemptsCount} / {assignment.maxAttempts}
@@ -276,7 +286,7 @@ export function QuizAssignmentDetailModal({
                       color: attemptsLeft > 0 ? "success.main" : "error.main",
                     }}
                   >
-                    {Math.max(0, attemptsLeft)} Left
+                    {attemptsLeft} Left
                   </Typography>
                 </Paper>
               </Grid>
@@ -380,7 +390,7 @@ export function QuizAssignmentDetailModal({
                     color="text.secondary"
                     sx={{ display: "block", fontWeight: 500 }}
                   >
-                    Status
+                    Assignment Status
                   </Typography>
                   <Box sx={{ mt: 0.5 }}>
                     <QuizStatusChip status={assignment.status} />
@@ -408,68 +418,121 @@ export function QuizAssignmentDetailModal({
             </Paper>
 
             {/* Attempt History Section */}
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-                Previous Attempt History ({attemptsList.length})
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+            <Box sx={{ mt: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mb: 1.5,
+                }}
+              >
+                <History size={18} color="#2563eb" />
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  Submitted Attempt History ({submittedAttempts.length})
+                </Typography>
+              </Box>
 
-              {attemptsList.length === 0 ? (
+              {isLoadingHistory ? (
+                <Skeleton
+                  variant="rounded"
+                  height={100}
+                  sx={{ borderRadius: 2 }}
+                />
+              ) : submittedAttempts.length === 0 ? (
                 <Typography
                   variant="body2"
                   color="text.secondary"
                   sx={{ fontStyle: "italic", py: 1 }}
                 >
-                  No previous attempts recorded for this assignment.
+                  No previous submitted attempts found for this assignment.
                 </Typography>
               ) : (
-                <Stack spacing={1.5}>
-                  {attemptsList.map((att, idx) => (
-                    <Paper
-                      key={att.attemptId || att.id || idx}
-                      variant="outlined"
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Box>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{ fontWeight: 700 }}
-                        >
-                          Attempt #{att.attemptNumber || idx + 1}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Score: {att.totalScore ?? "N/A"} /{" "}
-                          {att.maxScore ?? 10} • Submitted:{" "}
-                          {formatServerDate(
-                            att.submittedAt || att.startedAt || new Date(),
-                            "datetime",
-                          )}{" "}
-                          • Status: {att.status}
-                        </Typography>
-                      </Box>
-
-                      <Link
-                        href={`/courses/${courseId}/quizzes/attempts/${att.attemptId || att.id}/result`}
-                        passHref
-                      >
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<Eye size={14} />}
-                          sx={{ borderRadius: 1.5 }}
-                        >
-                          View Result
-                        </Button>
-                      </Link>
-                    </Paper>
-                  ))}
-                </Stack>
+                <TableContainer
+                  component={Paper}
+                  variant="outlined"
+                  sx={{ borderRadius: 2 }}
+                >
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: "action.hover" }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 700 }}>Attempt</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>
+                          Submitted At
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }} align="center">
+                          Score
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 700 }} align="right">
+                          Action
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {submittedAttempts.map((attempt) => (
+                        <TableRow key={attempt.attemptId} hover>
+                          <TableCell sx={{ fontWeight: 600 }}>
+                            #{attempt.attemptNumber ?? "-"}
+                          </TableCell>
+                          <TableCell sx={{ fontSize: "0.825rem" }}>
+                            {attempt.submittedAt
+                              ? formatServerDate(
+                                  attempt.submittedAt,
+                                  "datetime",
+                                )
+                              : "Submitting..."}
+                          </TableCell>
+                          <TableCell>
+                            <QuizStatusChip status={attempt.status} />
+                          </TableCell>
+                          <TableCell align="center">
+                            {attempt.totalScore != null ? (
+                              <Chip
+                                label={`${attempt.totalScore} / ${attempt.maxScore}`}
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                                sx={{
+                                  fontWeight: 700,
+                                  height: 22,
+                                  fontSize: "0.75rem",
+                                }}
+                              />
+                            ) : (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                Pending Grading
+                              </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Link
+                              href={`/courses/${courseId}/quizzes/attempts/${attempt.attemptId}/result`}
+                              passHref
+                            >
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<Eye size={14} />}
+                                sx={{
+                                  borderRadius: 1.5,
+                                  textTransform: "none",
+                                  py: 0.25,
+                                  fontSize: "0.775rem",
+                                }}
+                              >
+                                View Result
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               )}
             </Box>
 
@@ -481,7 +544,7 @@ export function QuizAssignmentDetailModal({
               </Alert>
             )}
 
-            {/* Start Attempt Action Footer */}
+            {/* Action Footer */}
             <Box
               sx={{
                 display: "flex",
@@ -506,25 +569,26 @@ export function QuizAssignmentDetailModal({
                 onClick={() => setConfirmOpen(true)}
                 sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
               >
-                {attemptsCount > 0 ? "Retake / Resume Quiz" : "Start Attempt"}
+                {!canAttempt && attemptsCount >= maxAttempts
+                  ? "No Attempts Remaining"
+                  : attemptsCount > 0
+                    ? "Retake / Resume Quiz"
+                    : "Start Attempt"}
               </Button>
             </Box>
           </Stack>
         )}
       </InfoDialog>
 
-      {/* Confirmation Dialog with exact quiz/assignment title */}
-      <Dialog
+      {/* Confirmation Dialog */}
+      <InfoDialog
         open={confirmOpen}
         onClose={() => !startMutation.isPending && setConfirmOpen(false)}
+        title="Confirm Start Quiz"
+        headerIcon={<ShieldAlert size={22} color="#0284c7" />}
         maxWidth="xs"
-        fullWidth
-        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, textAlign: "center" }}>
-          Confirm Start Quiz
-        </DialogTitle>
-        <DialogContent sx={{ textAlign: "center" }}>
+        <Box sx={{ textAlign: "center", py: 1 }}>
           <Typography variant="body1" color="text.secondary">
             Are you sure you want to start the quiz{" "}
             <b>"{assignment?.assignmentName || "Quiz Assignment"}"</b>?
@@ -537,34 +601,41 @@ export function QuizAssignmentDetailModal({
             Timer ({assignment?.durationMinutes} mins) will begin immediately
             upon confirmation.
           </Alert>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", pb: 2.5 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setConfirmOpen(false)}
-            disabled={startMutation.isPending}
-            sx={{ borderRadius: 2 }}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 1.5,
+              mt: 3,
+            }}
           >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmStart}
-            disabled={startMutation.isPending}
-            startIcon={
-              startMutation.isPending ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : (
-                <Play size={16} />
-              )
-            }
-            sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
-          >
-            {startMutation.isPending ? "Starting Exam..." : "Yes, Start Quiz"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Button
+              variant="outlined"
+              onClick={() => setConfirmOpen(false)}
+              disabled={startMutation.isPending}
+              sx={{ borderRadius: 2 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmStart}
+              disabled={startMutation.isPending}
+              startIcon={
+                startMutation.isPending ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <Play size={16} />
+                )
+              }
+              sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
+            >
+              {startMutation.isPending ? "Starting Quiz..." : "Yes, Start Quiz"}
+            </Button>
+          </Box>
+        </Box>
+      </InfoDialog>
     </>
   );
 }

@@ -261,6 +261,15 @@ export async function getAttemptResult(
   );
 }
 
+export async function getStudentAttemptHistory(
+  assignmentId: string,
+): Promise<SubmitAttemptResponse[]> {
+  return apiGet<SubmitAttemptResponse[]>(
+    `/api/v1/quiz-assignments/${assignmentId}/my-attempts`,
+  );
+}
+
+
 // --- Essay Grading APIs ---
 
 export async function getPendingGradings(
@@ -855,3 +864,19 @@ export function useGradeEssayMutation(
 ) {
   return useGradeEssayQuestionMutation(options);
 }
+
+export function useStudentAttemptHistoryQuery(
+  assignmentId: string,
+  options?: Omit<
+    UseQueryOptions<SubmitAttemptResponse[], Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["quiz-assignments", "my-attempts", assignmentId],
+    queryFn: () => getStudentAttemptHistory(assignmentId),
+    enabled: !!assignmentId,
+    ...options,
+  });
+}
+

@@ -184,11 +184,15 @@ export interface HeartbeatRequest {
 
 export interface SubmitAttemptResponse {
   attemptId: string;
+  attemptNumber?: number;
   status: AttemptStatus;
-  submittedAt: string;
+  startedAt?: string;
+  submittedAt?: string;
+  gradedAt?: string | null;
   totalScore?: number | null;
   maxScore: number;
 }
+
 
 // --- Essay Grading Models ---
 
