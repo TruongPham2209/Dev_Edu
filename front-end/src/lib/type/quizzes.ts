@@ -99,6 +99,7 @@ export interface QuizReviewRequest {
 
 export interface CreateAssignmentRequest {
   quizId: string;
+  assignmentName: string;
   startTime: string;
   endTime?: string | null;
   durationMinutes: number;
@@ -110,6 +111,7 @@ export interface CreateAssignmentRequest {
 export interface QuizAssignmentResponse {
   id: string;
   quizId: string;
+  assignmentName: string;
   startTime: string;
   endTime?: string | null;
   durationMinutes: number;
@@ -234,3 +236,19 @@ export interface AttemptResultResponse {
   maxScore: number;
   answers: AttemptQuestionResultDto[];
 }
+
+export interface QuizAttemptReviewResponse {
+  attemptId: string;
+  assignmentId: string;
+  quizId: string;
+  studentUsername: string;
+  attemptNumber: number;
+  status: AttemptStatus;
+  startedAt: string;
+  submittedAt: string;
+  gradedAt?: string | null;
+  maxScore: number;
+  totalScore?: number | null;
+  answers: AttemptQuestionResultDto[];
+}
+

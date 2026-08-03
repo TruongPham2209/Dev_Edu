@@ -7,6 +7,7 @@ import type {
   HeartbeatRequest,
   PendingGradingResponse,
   QuizAssignmentResponse,
+  QuizAttemptReviewResponse,
   QuizDetailResponse,
   QuizQuestionRequest,
   QuizQuestionResponse,
@@ -235,6 +236,20 @@ export async function submitAttempt(
 ): Promise<SubmitAttemptResponse> {
   return apiPost<SubmitAttemptResponse>(
     `/api/v1/quiz-attempts/${attemptId}/submit`,
+  );
+}
+
+export async function getAttempt(
+  attemptId: string,
+): Promise<StartAttemptResponse> {
+  return apiGet<StartAttemptResponse>(`/api/v1/quiz-attempts/${attemptId}`);
+}
+
+export async function getAttemptReview(
+  attemptId: string,
+): Promise<QuizAttemptReviewResponse> {
+  return apiGet<QuizAttemptReviewResponse>(
+    `/api/v1/quiz-attempts/${attemptId}/review`,
   );
 }
 
@@ -723,6 +738,36 @@ export function useSubmitAttemptMutation(
       queryClient.invalidateQueries({ queryKey: ["quiz-attempts"] });
       options?.onSuccess?.(...args);
     },
+  });
+}
+
+export function useAttemptQuery(
+  attemptId: string,
+  options?: Omit<
+    UseQueryOptions<StartAttemptResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["quiz-attempts", "detail", attemptId],
+    queryFn: () => getAttempt(attemptId),
+    enabled: !!attemptId,
+    ...options,
+  });
+}
+
+export function useAttemptReviewQuery(
+  attemptId: string,
+  options?: Omit<
+    UseQueryOptions<QuizAttemptReviewResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["quiz-attempts", "review", attemptId],
+    queryFn: () => getAttemptReview(attemptId),
+    enabled: !!attemptId,
+    ...options,
   });
 }
 

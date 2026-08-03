@@ -1,6 +1,9 @@
 "use client";
 
-import { useAutosaveAttemptMutation, useHeartbeatAttemptMutation } from "@/lib/api/quizzes";
+import {
+  useAutosaveAttemptMutation,
+  useHeartbeatAttemptMutation,
+} from "@/lib/api/quizzes";
 import type { AutosaveRequest, StudentAnswerDto } from "@/lib/type/quizzes";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -60,7 +63,9 @@ export function useQuizExamSession({
     const storageKey = `quiz_session_token_${attemptId}`;
     let token = sessionStorage.getItem(storageKey);
     if (!token) {
-      token = crypto.randomUUID ? crypto.randomUUID() : `token_${Date.now()}_${Math.random()}`;
+      token = crypto.randomUUID
+        ? crypto.randomUUID()
+        : `token_${Date.now()}_${Math.random()}`;
       sessionStorage.setItem(storageKey, token);
     }
     setSessionToken(token);
@@ -107,20 +112,31 @@ export function useQuizExamSession({
     ) {
       setIsSessionLocked(true);
       setSessionLockMessage(
-        message || "Bạn đang làm bài ở thiết bị/tab khác. Phiên làm bài này đã bị vô hiệu hóa.",
+        message ||
+          "Bạn đang làm bài ở thiết bị/tab khác. Phiên làm bài này đã bị vô hiệu hóa.",
       );
     }
   }, []);
 
-  // Heartbeat 30s Loop
+  const heartbeatMutationRef = useRef(heartbeatMutation);
+  useEffect(() => {
+    heartbeatMutationRef.current = heartbeatMutation;
+  }, [heartbeatMutation]);
+
+  const handleSessionErrorRef = useRef(handleSessionError);
+  useEffect(() => {
+    handleSessionErrorRef.current = handleSessionError;
+  }, [handleSessionError]);
+
+  // Heartbeat 45s Loop (isolated from re-renders)
   useEffect(() => {
     if (!attemptId || !sessionToken || isSessionLocked || isExpired) return;
 
     const sendHeartbeat = () => {
-      heartbeatMutation.mutate(
+      heartbeatMutationRef.current.mutate(
         { attemptId, data: { sessionToken } },
         {
-          onError: (err) => handleSessionError(err),
+          onError: (err) => handleSessionErrorRef.current(err),
         },
       );
     };
@@ -128,9 +144,9 @@ export function useQuizExamSession({
     // Send initial heartbeat
     sendHeartbeat();
 
-    const interval = setInterval(sendHeartbeat, 30000);
+    const interval = setInterval(sendHeartbeat, 45000);
     return () => clearInterval(interval);
-  }, [attemptId, sessionToken, isSessionLocked, isExpired, heartbeatMutation, handleSessionError]);
+  }, [attemptId, sessionToken, isSessionLocked, isExpired]);
 
   // Trigger Autosave
   const sendAutosave = useCallback(
@@ -167,7 +183,14 @@ export function useQuizExamSession({
         },
       );
     },
-    [attemptId, sessionToken, isSessionLocked, isExpired, autosaveMutation, handleSessionError],
+    [
+      attemptId,
+      sessionToken,
+      isSessionLocked,
+      isExpired,
+      autosaveMutation,
+      handleSessionError,
+    ],
   );
 
   // Update Answer for a single option selection (Single Choice)
