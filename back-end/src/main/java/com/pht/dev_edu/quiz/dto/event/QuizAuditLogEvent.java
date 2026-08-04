@@ -1,5 +1,6 @@
 package com.pht.dev_edu.quiz.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,8 +18,10 @@ public class QuizAuditLogEvent {
     UUID entityId;
     QuizAuditAction action;
     String performedBy;
-    String oldValue;
-    String newValue;
+    Object oldValue;
+    Object newValue;
     String note;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime createdAt;
 }

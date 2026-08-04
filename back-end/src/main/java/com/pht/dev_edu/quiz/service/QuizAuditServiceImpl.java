@@ -1,6 +1,5 @@
 package com.pht.dev_edu.quiz.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.common.constant.KafkaTopicConstant;
 import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
 import com.pht.dev_edu.quiz.dto.event.QuizAuditLogEvent;
@@ -20,21 +19,17 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class QuizAuditServiceImpl implements QuizAuditService {
     KafkaTemplate<String, Object> kafkaTemplate;
-    ObjectMapper objectMapper;
 
     @Override
     public void log(String entityType, UUID entityId, QuizAuditAction action, String performedBy, Object oldValue, Object newValue, String note) {
         try {
-            String oldJson = oldValue != null ? objectMapper.writeValueAsString(oldValue) : null;
-            String newJson = newValue != null ? objectMapper.writeValueAsString(newValue) : null;
-
             QuizAuditLogEvent event = QuizAuditLogEvent.builder()
                     .entityType(entityType)
                     .entityId(entityId)
                     .action(action)
                     .performedBy(performedBy)
-                    .oldValue(oldJson)
-                    .newValue(newJson)
+                    .oldValue(oldValue)
+                    .newValue(newValue)
                     .note(note)
                     .createdAt(LocalDateTime.now())
                     .build();

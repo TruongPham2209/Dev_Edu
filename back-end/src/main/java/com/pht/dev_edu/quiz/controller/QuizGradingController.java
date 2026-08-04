@@ -23,17 +23,18 @@ import java.util.UUID;
 public class QuizGradingController {
     QuizGradingService gradingService;
 
-    // Get list pending essays to grading by quizId
-    @GetMapping("/{quizId}/pending")
+    // Get list of essay submissions for grading by quizId with nextCursor & status filter
+    @GetMapping(value = {"/{quizId}/essays", "/{quizId}/pending"})
     @PreAuthorize("hasAnyAuthority('ADMIN', 'LECTURER')")
-    public ResponseEntity<ApiResponse> getPendingEssayAttempts(
+    public ResponseEntity<ApiResponse> getEssaySubmissions(
             @PathVariable UUID quizId,
+            @RequestParam(name = "status", required = false, defaultValue = "ALL") String essayStatus,
             @RequestParam(name = "nextCursor", required = false) String nextCursor
     ) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
-        var pageResult = gradingService.getPendingEssayAttempts(quizId, nextCursor, username, authorities);
+        var pageResult = gradingService.getEssaySubmissions(quizId, essayStatus, nextCursor, username, authorities);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
 

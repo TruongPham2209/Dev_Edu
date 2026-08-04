@@ -136,8 +136,7 @@ public class QuizController {
             @RequestParam QuizStatus status
     ) {
         if (status == QuizStatus.DRAFT) {
-            // TODO: add message here
-            throw new BadRequestException("");
+            throw new BadRequestException("Invalid status.");
         }
 
         var pageResult = quizManagementService.getQuizzes(status, nextCursor);

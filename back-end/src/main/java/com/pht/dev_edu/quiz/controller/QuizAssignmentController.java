@@ -34,6 +34,16 @@ public class QuizAssignmentController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
+    public ResponseEntity<ApiResponse> deleteAssignment(@PathVariable UUID id) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        assignmentService.deleteAssignment(id, username, authorities);
+        return ApiUtils.buildSuccessResponse("Assignment has been deleted");
+    }
+
     // Get assignment by quiz
     @GetMapping("/quiz/{quizId}")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")

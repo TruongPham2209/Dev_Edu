@@ -5,6 +5,8 @@ import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,6 +41,7 @@ public class QuizAttemptAnswerEntity {
     @Column(name = "answer_text", columnDefinition = "TEXT")
     String answerText;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "selected_option_ids", columnDefinition = "jsonb")
     String selectedOptionIds;
 

@@ -5,6 +5,8 @@ import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -58,6 +60,7 @@ public class QuizAttemptEntity {
     @Column(name = "max_score", nullable = false, precision = 6, scale = 2)
     BigDecimal maxScore;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "question_order", nullable = false, columnDefinition = "jsonb")
     String questionOrder;
 

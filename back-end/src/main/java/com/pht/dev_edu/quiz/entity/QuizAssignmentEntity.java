@@ -23,6 +23,9 @@ public class QuizAssignmentEntity {
     @Column(nullable = false, updatable = false)
     UUID id;
 
+    @Column(name = "assignment_name", nullable = false)
+    String assignmentName;
+
     @Column(name = "quiz_id", nullable = false)
     UUID quizId;
 

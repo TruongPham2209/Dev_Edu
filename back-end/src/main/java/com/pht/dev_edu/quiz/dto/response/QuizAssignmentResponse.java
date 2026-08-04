@@ -15,6 +15,7 @@ import java.util.UUID;
 public class QuizAssignmentResponse {
     UUID id;
     UUID quizId;
+    String assignmentName;
     LocalDateTime startTime;
     LocalDateTime endTime;
     Integer durationMinutes;

@@ -16,7 +16,6 @@ public class CommonConfig {
     Executor taskExecutor() {
         return Executors.newThreadPerTaskExecutor(Thread.ofVirtual()
                 .name("virtual-thread-", 0) // prefix + auto increment
-                .factory()
-        );
+                .factory());
     }
 }

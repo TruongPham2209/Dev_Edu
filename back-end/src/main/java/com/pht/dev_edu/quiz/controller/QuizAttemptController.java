@@ -40,6 +40,16 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Get student attempt history for an assignment (submitted attempts only)
+    @GetMapping("/quiz-assignments/{assignmentId}/my-attempts")
+    @PreAuthorize("hasAuthority('STUDENT')")
+    public ResponseEntity<ApiResponse> getStudentAttemptHistory(@PathVariable UUID assignmentId) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        var result = attemptService.getStudentAttemptHistory(assignmentId, username);
+        return ApiUtils.buildSuccessResponse(result);
+    }
+
+
     // Autosave answer
     @PostMapping("/quiz-attempts/{attemptId}/autosave")
     @PreAuthorize("hasAuthority('STUDENT')")
@@ -71,6 +81,30 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse("Heartbeat acknowledged");
     }
 
+    // Get attempt detail / active state
+    @GetMapping("/quiz-attempts/{attemptId}")
+    @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
+    public ResponseEntity<ApiResponse> getAttemptById(@PathVariable UUID attemptId) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+        boolean isStaff = authorities.contains("LECTURER") || authorities.contains("ADMIN");
+
+        var result = attemptService.getAttemptById(attemptId, username, isStaff);
+        return ApiUtils.buildSuccessResponse(result);
+    }
+
+    // Get attempt review (student review submitted attempt)
+    @GetMapping("/quiz-attempts/{attemptId}/review")
+    @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
+    public ResponseEntity<ApiResponse> getAttemptReview(@PathVariable UUID attemptId) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+        boolean isStaff = authorities.contains("LECTURER") || authorities.contains("ADMIN");
+
+        var result = attemptService.getAttemptReview(attemptId, username, isStaff);
+        return ApiUtils.buildSuccessResponse(result);
+    }
+
     // Get attempt result
     @GetMapping("/quiz-attempts/{attemptId}/result")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'LECTURER', 'ADMIN')")
@@ -83,3 +117,4 @@ public class QuizAttemptController {
         return ApiUtils.buildSuccessResponse(result);
     }
 }
+

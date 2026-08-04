@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface QuizAssignmentService {
     QuizAssignmentResponse createAssignment(CreateAssignmentRequest request, String username, Set<String> authorities);
 
+    void deleteAssignment(UUID assignmentId, String username, Set<String> authorities);
+
     List<QuizAssignmentResponse> getAssignmentsByQuiz(UUID quizId, String username, Set<String> authorities);
 
     QuizAssignmentResponse getAssignmentById(UUID assignmentId, String username, Set<String> authorities);

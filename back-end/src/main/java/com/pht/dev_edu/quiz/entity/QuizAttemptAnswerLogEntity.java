@@ -4,6 +4,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,6 +33,7 @@ public class QuizAttemptAnswerLogEntity {
     @Column(name = "answer_text", columnDefinition = "TEXT")
     String answerText;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "selected_option_ids", columnDefinition = "jsonb")
     String selectedOptionIds;
 

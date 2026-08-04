@@ -37,24 +37,33 @@ public class QuizEventListener {
     QuizQuestionRepo questionRepo;
     ObjectMapper objectMapper;
 
-    @RetryableTopic(
-            attempts = "3",
-            backoff = @Backoff(delay = 5000, multiplier = 2),
-            dltTopicSuffix = "-dlq"
-    )
+    @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 5000, multiplier = 2), dltTopicSuffix = "-dlq")
     @KafkaListener(topics = KafkaTopicConstant.QUIZ_AUDIT_LOG_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
     @Transactional
     public void handleAuditLogEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         log.debug("Received quiz audit log event: {}", payload);
-        QuizAuditLogEvent event = objectMapper.readValue(payload, QuizAuditLogEvent.class);
+        String cleanPayload = unwrapJsonString(payload);
+        QuizAuditLogEvent event = objectMapper.readValue(cleanPayload, QuizAuditLogEvent.class);
+
+        String oldValueStr = null;
+        if (event.getOldValue() != null) {
+            oldValueStr = event.getOldValue() instanceof String ? (String) event.getOldValue()
+                    : objectMapper.writeValueAsString(event.getOldValue());
+        }
+
+        String newValueStr = null;
+        if (event.getNewValue() != null) {
+            newValueStr = event.getNewValue() instanceof String ? (String) event.getNewValue()
+                    : objectMapper.writeValueAsString(event.getNewValue());
+        }
 
         QuizAuditLogEntity auditLog = QuizAuditLogEntity.builder()
                 .entityType(event.getEntityType())
                 .entityId(event.getEntityId())
                 .action(event.getAction())
                 .performedBy(event.getPerformedBy())
-                .oldValue(event.getOldValue())
-                .newValue(event.getNewValue())
+                .oldValue(oldValueStr)
+                .newValue(newValueStr)
                 .note(event.getNote())
                 .createdAt(event.getCreatedAt())
                 .build();
@@ -63,16 +72,13 @@ public class QuizEventListener {
         ack.acknowledge();
     }
 
-    @RetryableTopic(
-            attempts = "3",
-            backoff = @Backoff(delay = 5000, multiplier = 2),
-            dltTopicSuffix = "-dlq"
-    )
+    @RetryableTopic(attempts = "3", backoff = @Backoff(delay = 5000, multiplier = 2), dltTopicSuffix = "-dlq")
     @KafkaListener(topics = KafkaTopicConstant.QUIZ_AUTOSAVE_LOG_TOPIC, groupId = KafkaTopicConstant.KAFKA_CONSUMER_GROUP)
     @Transactional
     public void handleAutosaveLogEvent(String payload, Acknowledgment ack) throws JsonProcessingException {
         log.debug("Received quiz autosave event: {}", payload);
-        QuizAutosaveLogEvent event = objectMapper.readValue(payload, QuizAutosaveLogEvent.class);
+        String cleanPayload = unwrapJsonString(payload);
+        QuizAutosaveLogEvent event = objectMapper.readValue(cleanPayload, QuizAutosaveLogEvent.class);
 
         String selectedOptionIdsJson = null;
         if (event.getSelectedOptionIds() != null) {
@@ -96,7 +102,8 @@ public class QuizEventListener {
         Optional<QuizQuestionEntity> questionOpt = questionRepo.findByIdAndDeletedAtIsNull(event.getQuestionId());
         if (questionOpt.isPresent()) {
             QuizQuestionEntity question = questionOpt.get();
-            Optional<QuizAttemptAnswerEntity> existingAnswerOpt = answerRepo.findByAttemptIdAndQuestionId(event.getAttemptId(), event.getQuestionId());
+            Optional<QuizAttemptAnswerEntity> existingAnswerOpt = answerRepo
+                    .findByAttemptIdAndQuestionId(event.getAttemptId(), event.getQuestionId());
 
             QuizAttemptAnswerEntity answer = existingAnswerOpt.orElseGet(() -> QuizAttemptAnswerEntity.builder()
                     .attemptId(event.getAttemptId())
@@ -116,5 +123,22 @@ public class QuizEventListener {
         }
 
         ack.acknowledge();
+    }
+
+    private String unwrapJsonString(String raw) {
+        if (raw == null)
+            return null;
+        String s = raw.trim();
+        while (s.startsWith("\"") && s.endsWith("\"") && s.length() > 2) {
+            try {
+                String unescaped = objectMapper.readValue(s, String.class);
+                if (unescaped == null || unescaped.equals(s))
+                    break;
+                s = unescaped.trim();
+            } catch (Exception e) {
+                break;
+            }
+        }
+        return s;
     }
 }

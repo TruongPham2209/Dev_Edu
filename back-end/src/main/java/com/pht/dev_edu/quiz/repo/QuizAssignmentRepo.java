@@ -4,6 +4,7 @@ import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
 import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
                 WHERE course_id = :courseId
             )
             AND deleted_at  IS NULL
-            AND start_time  >= :startTime
+            AND end_time    >= :startTime
             AND status      IN :statuses
             """, nativeQuery = true)
     List<QuizAssignmentEntity> findByCourseIdAndDeletedAtIsNullAndStartTimeAndStatuses(UUID courseId, LocalDateTime startTime, List<String> statuses);
@@ -36,4 +37,17 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
     List<QuizAssignmentEntity> findByStatusAndStartTimeLessThanEqualAndDeletedAtIsNull(AssignmentStatus status, LocalDateTime time);
 
     List<QuizAssignmentEntity> findByStatusAndEndTimeNotNullAndEndTimeLessThanEqualAndDeletedAtIsNull(AssignmentStatus status, LocalDateTime time);
+
+    @Query("""
+            SELECT  COUNT(a) > 0
+            FROM    QuizAssignmentEntity a
+            WHERE   a.quizId        = :quizId
+            AND     a.deletedAt     IS NULL
+            AND     (CAST(:endTime AS timestamp) IS NULL OR a.startTime < :endTime)
+            AND     (a.endTime IS NULL OR a.endTime > :startTime)
+            """)
+    boolean existsOverlappingAssignment(
+            @Param("quizId") UUID quizId,
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime);
 }

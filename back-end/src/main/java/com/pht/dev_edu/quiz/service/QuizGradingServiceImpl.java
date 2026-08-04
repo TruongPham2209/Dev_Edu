@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.pht.dev_edu.quiz.dto.projection.QuizEssaySubmissionProjection;
+import com.pht.dev_edu.quiz.dto.response.QuizEssaySubmissionResponse;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,22 +53,44 @@ public class QuizGradingServiceImpl implements QuizGradingService {
     private static final int DEFAULT_ESSAY_PAGE_SIZE = 10;
 
     @Override
-    public CustomPaging<SubmitAttemptResponse> getPendingEssayAttempts(UUID quizId, String nextCursor, String graderUsername, Set<String> authorities) {
+    public CustomPaging<QuizEssaySubmissionResponse> getEssaySubmissions(
+            UUID quizId, String essayStatus, String nextCursor, String graderUsername, Set<String> authorities) {
         quizAccessService.validateAccessByQuiz(graderUsername, authorities, quizId);
 
+        String normalizedStatus = StringUtils.hasText(essayStatus) ? essayStatus.toUpperCase().trim() : "ALL";
         TimeStampCursor cursor = resolveCursor(nextCursor);
-        var attempts = attemptRepo.findByQuizIdAndStatusAndCursor(quizId, AttemptStatus.GRADING.name(), cursor.getId(), cursor.getTimeStamp(), DEFAULT_ESSAY_PAGE_SIZE + 1);
+
+        List<QuizEssaySubmissionProjection> projections = answerRepo.findEssaySubmissionsByQuizIdAndStatusAndCursor(
+                quizId,
+                normalizedStatus,
+                cursor.getId(),
+                cursor.getTimeStamp(),
+                DEFAULT_ESSAY_PAGE_SIZE + 1
+        );
+
         return PagingUtils.getPagedWithCursor(
-                attempts,
-                a -> SubmitAttemptResponse.builder()
-                        .attemptId(a.getId())
-                        .status(a.getStatus())
-                        .submittedAt(a.getSubmittedAt())
-                        .totalScore(a.getTotalScore())
-                        .maxScore(a.getMaxScore())
+                projections,
+                p -> QuizEssaySubmissionResponse.builder()
+                        .attemptAnswerId(p.getAttemptAnswerId())
+                        .attemptId(p.getAttemptId())
+                        .questionId(p.getQuestionId())
+                        .assignmentId(p.getAssignmentId())
+                        .assignmentName(p.getAssignmentName())
+                        .studentUsername(p.getStudentUsername())
+                        .studentFullName(p.getStudentFullName())
+                        .submittedAt(p.getSubmittedAt())
+                        .lastSavedAt(p.getLastSavedAt())
+                        .questionContent(p.getQuestionContent())
+                        .maxPoints(p.getMaxPoints())
+                        .answerText(p.getAnswerText())
+                        .awardedPoints(p.getAwardedPoints())
+                        .feedback(p.getFeedback())
+                        .gradedBy(p.getGradedBy())
+                        .gradedAt(p.getGradedAt())
+                        .essayStatus(p.getEssayStatus())
                         .build(),
-                QuizAttemptEntity::getSubmittedAt,
-                QuizAttemptEntity::getId,
+                QuizEssaySubmissionProjection::getSubmittedAt,
+                QuizEssaySubmissionProjection::getAttemptAnswerId,
                 DEFAULT_ESSAY_PAGE_SIZE
         );
     }

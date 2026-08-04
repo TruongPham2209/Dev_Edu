@@ -5,6 +5,8 @@ import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,9 +38,11 @@ public class QuizAuditLogEntity {
     @Column(name = "performed_by", nullable = false)
     String performedBy;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "old_value", columnDefinition = "jsonb")
     String oldValue;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "new_value", columnDefinition = "jsonb")
     String newValue;
 
