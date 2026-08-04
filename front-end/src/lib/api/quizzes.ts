@@ -9,6 +9,7 @@ import type {
   QuizAssignmentResponse,
   QuizAttemptReviewResponse,
   QuizDetailResponse,
+  QuizEssaySubmissionResponse,
   QuizQuestionRequest,
   QuizQuestionResponse,
   QuizRequest,
@@ -269,8 +270,21 @@ export async function getStudentAttemptHistory(
   );
 }
 
-
 // --- Essay Grading APIs ---
+
+export async function getEssaySubmissions(
+  quizId: string,
+  status: string = "ALL",
+  nextCursor?: string,
+): Promise<CustomPaging<QuizEssaySubmissionResponse>> {
+  const params = new URLSearchParams();
+  params.append("status", status);
+  if (nextCursor) params.append("nextCursor", nextCursor);
+
+  return apiGet<CustomPaging<QuizEssaySubmissionResponse>>(
+    `/api/v1/quiz-gradings/${quizId}/essays?${params.toString()}`,
+  );
+}
 
 export async function getPendingGradings(
   quizId: string,
@@ -880,3 +894,30 @@ export function useStudentAttemptHistoryQuery(
   });
 }
 
+export function useEssaySubmissionsInfiniteQuery(
+  quizId?: string,
+  status: string = "ALL",
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<QuizEssaySubmissionResponse>,
+      Error,
+      InfiniteData<
+        CustomPaging<QuizEssaySubmissionResponse>,
+        string | undefined
+      >,
+      readonly unknown[],
+      string | undefined
+    >,
+    "queryKey" | "queryFn" | "getNextPageParam" | "initialPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: ["quiz-gradings", "essays-infinite", quizId, status],
+    queryFn: ({ pageParam }) =>
+      getEssaySubmissions(quizId!, status, pageParam as string | undefined),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: !!quizId,
+    ...options,
+  });
+}

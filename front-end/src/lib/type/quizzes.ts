@@ -196,6 +196,26 @@ export interface SubmitAttemptResponse {
 
 // --- Essay Grading Models ---
 
+export interface QuizEssaySubmissionResponse {
+  attemptAnswerId: string;
+  attemptId: string;
+  questionId: string;
+  assignmentId: string;
+  assignmentName: string;
+  studentUsername: string;
+  studentFullName: string;
+  submittedAt: string;
+  lastSavedAt: string;
+  questionContent: string;
+  maxPoints: number;
+  answerText: string;
+  awardedPoints?: number | null;
+  feedback?: string | null;
+  gradedBy?: string | null;
+  gradedAt?: string | null;
+  essayStatus: "PENDING" | "GRADED" | string;
+}
+
 export interface PendingGradingResponse {
   attemptId: string;
   quizTitle: string;
@@ -205,6 +225,7 @@ export interface PendingGradingResponse {
   questionsCount: number;
   pendingEssayCount: number;
 }
+
 
 export interface GradeEssayRequest {
   awardedPoints: number;

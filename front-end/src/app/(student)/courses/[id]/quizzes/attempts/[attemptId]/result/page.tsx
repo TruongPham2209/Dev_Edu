@@ -1,5 +1,6 @@
 "use client";
 
+import { QuestionResultCard } from "@/components/card/question-result-card";
 import { ErrorState } from "@/components/common/error-state";
 import { QuizStatusChip } from "@/components/dialog/quiz/quiz-status-chip";
 import { useAttemptResultQuery } from "@/lib/api/quizzes";
@@ -97,8 +98,8 @@ function QuizResultSkeleton() {
               <Divider />
               <Skeleton variant="text" width={120} height={20} />
               <Grid container spacing={1}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                  <Grid key={n} size={{ xs: 2.4 }}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                  <Grid key={n} size={{ xs: 4 }}>
                     <Skeleton
                       variant="rounded"
                       height={38}
@@ -228,311 +229,17 @@ export default function CourseStudentAttemptResultPage({
           <Grid container spacing={2.5}>
             {questionsList.map((q: any, idx: number) => {
               const qId = q.questionId || idx;
-              const isEssay = q.questionType === "ESSAY";
-              const isCorrect = q.isCorrect;
-              const questionContent = q.questionContent || q.content || "";
-              const points = q.questionPoints ?? q.points ?? 0;
-              const awarded = q.awardedPoints ?? 0;
-
-              let statusBorderColor = "divider";
-
-              if (!isEssay) {
-                if (isCorrect === true) {
-                  statusBorderColor = "success.main";
-                } else if (isCorrect === false) {
-                  statusBorderColor = "error.main";
-                }
-              } else if (awarded > 0) {
-                statusBorderColor = "success.main";
-              } else if (isGraded && awarded === 0) {
-                statusBorderColor = "error.main";
-              }
-
               return (
                 <Grid
                   key={qId}
                   id={`question-${qId}`}
                   size={{ xs: 12, sm: 6, md: 4 }}
                 >
-                  <Card
-                    variant="outlined"
-                    sx={{
-                      borderRadius: 1,
-                      border: 1,
-                      borderColor: statusBorderColor,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-                      transition: "all 0.2s ease-in-out",
-                      "&:hover": {
-                        boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    <CardContent
-                      sx={{
-                        p: 2.5,
-                        display: "flex",
-                        flexDirection: "column",
-                        flexGrow: 1,
-                      }}
-                    >
-                      {/* Card Header */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          mb: 1.5,
-                        }}
-                      >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <Chip
-                            label={`Q${idx + 1}`}
-                            color="primary"
-                            size="small"
-                            sx={{ fontWeight: 800, height: 22 }}
-                          />
-                          <Chip
-                            label={
-                              q.questionType === "SINGLE_CHOICE"
-                                ? "Single"
-                                : q.questionType === "MULTIPLE_CHOICE"
-                                  ? "Multiple"
-                                  : "Essay"
-                            }
-                            variant="outlined"
-                            size="small"
-                            sx={{ height: 22, fontSize: "0.7rem" }}
-                          />
-                        </Box>
-
-                        {/* Question Result Status Icon */}
-                        {!isEssay ? (
-                          isCorrect === true ? (
-                            <Chip
-                              icon={<Check size={14} color="#16a34a" />}
-                              label="Correct"
-                              color="success"
-                              size="small"
-                              variant="outlined"
-                              sx={{ fontWeight: 700, height: 22 }}
-                            />
-                          ) : (
-                            <Chip
-                              icon={<X size={14} color="#dc2626" />}
-                              label="Wrong"
-                              color="error"
-                              size="small"
-                              variant="outlined"
-                              sx={{ fontWeight: 700, height: 22 }}
-                            />
-                          )
-                        ) : awarded > 0 ? (
-                          <Chip
-                            icon={<Check size={14} color="#16a34a" />}
-                            label="Passed"
-                            color="success"
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontWeight: 700, height: 22 }}
-                          />
-                        ) : (
-                          <Chip
-                            icon={<Clock size={14} color="#d97706" />}
-                            label="Essay"
-                            color="warning"
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontWeight: 700, height: 22 }}
-                          />
-                        )}
-                      </Box>
-
-                      {/* Question Points */}
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontWeight: 700,
-                          color:
-                            awarded > 0 ? "success.main" : "text.secondary",
-                          mb: 1.5,
-                          display: "block",
-                        }}
-                      >
-                        Score: {awarded} / {points} pts
-                      </Typography>
-
-                      {/* Question Text */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          mb: 2,
-                          flexGrow: 1,
-                          lineHeight: 1.5,
-                        }}
-                        dangerouslySetInnerHTML={{ __html: questionContent }}
-                      />
-
-                      <Divider sx={{ my: 1.5 }} />
-
-                      {/* Options List for Single & Multiple Choice */}
-                      {!isEssay && q.options && (
-                        <Stack spacing={1}>
-                          {q.options.map((opt: any) => {
-                            const isUserSelected =
-                              q.selectedOptionIds?.includes(opt.id);
-                            const isCorrectOption =
-                              q.correctOptionIds?.includes(opt.id) ||
-                              opt.isCorrect;
-
-                            let optionBg = "background.paper";
-                            let optionBorder = "divider";
-                            let textColor = "text.primary";
-                            let statusIcon = null;
-
-                            if (isCorrectOption) {
-                              optionBg = "success.50";
-                              optionBorder = "success.main";
-                              textColor = "success.dark";
-                              statusIcon = (
-                                <Check
-                                  size={16}
-                                  color="#16a34a"
-                                  style={{ flexShrink: 0 }}
-                                />
-                              );
-                            } else if (isUserSelected && !isCorrectOption) {
-                              optionBg = "error.50";
-                              optionBorder = "error.main";
-                              textColor = "error.dark";
-                              statusIcon = (
-                                <X
-                                  size={16}
-                                  color="#dc2626"
-                                  style={{ flexShrink: 0 }}
-                                />
-                              );
-                            }
-
-                            return (
-                              <Paper
-                                key={opt.id}
-                                variant="outlined"
-                                sx={{
-                                  p: 1.25,
-                                  borderRadius: 0.5,
-                                  bgcolor: optionBg,
-                                  borderColor: optionBorder,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  gap: 1,
-                                }}
-                              >
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                    overflow: "hidden",
-                                  }}
-                                >
-                                  {statusIcon}
-                                  <Typography
-                                    variant="body2"
-                                    sx={{
-                                      fontWeight:
-                                        isCorrectOption || isUserSelected
-                                          ? 700
-                                          : 400,
-                                      color: textColor,
-                                      fontSize: "0.825rem",
-                                    }}
-                                  >
-                                    {opt.optionText}
-                                  </Typography>
-                                </Box>
-
-                                {isUserSelected && !isCorrectOption && (
-                                  <Chip
-                                    label="Your choice"
-                                    color="error"
-                                    size="small"
-                                    sx={{
-                                      height: 18,
-                                      fontSize: "0.65rem",
-                                      fontWeight: 700,
-                                    }}
-                                  />
-                                )}
-                              </Paper>
-                            );
-                          })}
-                        </Stack>
-                      )}
-
-                      {/* Essay Section */}
-                      {isEssay && (
-                        <Box sx={{ mt: 1 }}>
-                          <Box
-                            sx={{
-                              p: 1.5,
-                              bgcolor: "action.hover",
-                              borderRadius: 0.5,
-                              mb: 1.5,
-                            }}
-                          >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{
-                                fontWeight: 600,
-                                display: "block",
-                                mb: 0.5,
-                              }}
-                            >
-                              Your answer:
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                whiteSpace: "pre-wrap",
-                                fontSize: "0.825rem",
-                              }}
-                            >
-                              {q.answerText || "(No answer provided)"}
-                            </Typography>
-                          </Box>
-
-                          {q.feedback && (
-                            <Alert
-                              severity="info"
-                              icon={<MessageSquare size={16} />}
-                              sx={{ borderRadius: 2, py: 0.5, px: 1.5 }}
-                            >
-                              <Typography
-                                variant="caption"
-                                sx={{ fontWeight: 700, display: "block" }}
-                              >
-                                Instructor Feedback:
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                sx={{ fontSize: "0.825rem" }}
-                              >
-                                {q.feedback}
-                              </Typography>
-                            </Alert>
-                          )}
-                        </Box>
-                      )}
-                    </CardContent>
-                  </Card>
+                  <QuestionResultCard
+                    question={q}
+                    index={idx}
+                    isGraded={isGraded}
+                  />
                 </Grid>
               );
             })}
@@ -722,7 +429,7 @@ export default function CourseStudentAttemptResultPage({
 
                 <Divider sx={{ mb: 2.5 }} />
 
-                {/* Question Matrix Navigation */}
+                {/* Question Matrix Navigation - 3 Buttons per Row */}
                 <Typography
                   variant="subtitle2"
                   sx={{ fontWeight: 700, mb: 1.5 }}
@@ -758,7 +465,7 @@ export default function CourseStudentAttemptResultPage({
                     }
 
                     return (
-                      <Grid key={qId} size={{ xs: 2.4, sm: 2, md: 2.4 }}>
+                      <Grid key={qId} size={{ xs: 4 }}>
                         <Button
                           variant="contained"
                           size="small"
@@ -768,11 +475,11 @@ export default function CourseStudentAttemptResultPage({
                             width: "100%",
                             height: 38,
                             p: 0,
-                            borderRadius: 2,
+                            borderRadius: 1.5,
                             bgcolor: btnBg,
                             color: btnColor,
                             fontWeight: 700,
-                            fontSize: "0.8rem",
+                            fontSize: "0.85rem",
                             boxShadow: "none",
                             "&:hover": {
                               opacity: 0.9,
