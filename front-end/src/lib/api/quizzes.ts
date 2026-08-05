@@ -775,6 +775,8 @@ export function useAttemptQuery(
     queryKey: ["quiz-attempts", "detail", attemptId],
     queryFn: () => getAttempt(attemptId),
     enabled: !!attemptId,
+    staleTime: 0,
+    refetchOnMount: "always",
     ...options,
   });
 }
@@ -864,6 +866,7 @@ export function useGradeEssayQuestionMutation(
     ...options,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ["quiz-gradings"] });
+      queryClient.invalidateQueries({ queryKey: ["quiz-attempts"] });
       options?.onSuccess?.(...args);
     },
   });
@@ -890,6 +893,8 @@ export function useStudentAttemptHistoryQuery(
     queryKey: ["quiz-assignments", "my-attempts", assignmentId],
     queryFn: () => getStudentAttemptHistory(assignmentId),
     enabled: !!assignmentId,
+    staleTime: 0,
+    refetchOnMount: "always",
     ...options,
   });
 }
