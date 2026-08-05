@@ -1,160 +1,23 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# Quy tắc bắt buộc khi bắt đầu phiên làm việc mới
 
-# DevEdu AI Agent Rules
+Đây là project Next.js + MUI. Trước khi thực hiện **bất kỳ** yêu cầu nào của người dùng liên quan đến code, kiến trúc, API, hoặc convention của project, bắt buộc phải đọc các file tài liệu sau trong thư mục `docs` (nếu tồn tại):
 
-## Project Overview
+1. `docs/architecture.md` — cấu trúc thư mục, cách tổ chức code, routing, phân chia server/client component
+2. `docs/techstack.md` — tech stack, dependency, cách cấu hình/khởi tạo thư viện
+3. `docs/api-integration.md` — danh sách API frontend đang gọi, cách xác thực, cách xử lý request/response/error
+4. `docs/rule.md` — coding rule, convention, pattern chuẩn của project
 
-DevEdu is an online learning platform for developers.
+## Nguyên tắc bắt buộc tuân thủ
 
-Main features:
+- **Không suy đoán.** Mọi câu trả lời, đề xuất, hoặc đoạn code sinh ra phải dựa trên thông tin thực tế đọc được từ 4 file trên và từ codebase thực tế. Nếu thông tin không có trong tài liệu hoặc source code, phải nói rõ "không tìm thấy trong tài liệu/codebase" thay vì tự bịa ra cách làm.
+- **Ưu tiên đọc file trước khi trả lời.** Nếu 4 file trên chưa được đọc trong phiên hiện tại, phải đọc trước khi đưa ra bất kỳ quyết định kỹ thuật nào (đặt tên, cấu trúc thư mục, cách gọi API, cách dùng MUI, state management...).
+- **Tuân thủ convention đã ghi trong `docs/rule.md`.** Không tự ý áp dụng pattern, thư viện, hoặc cách tổ chức code khác với những gì đã được ghi nhận, trừ khi người dùng yêu cầu rõ ràng là muốn thay đổi convention.
+- **Khi tài liệu (`docs/*.md`) và codebase thực tế mâu thuẫn nhau**, ưu tiên đọc lại codebase thực tế làm chuẩn, đồng thời báo cho người dùng biết tài liệu có thể đã lỗi thời và nên cập nhật lại.
+- **Khi tạo tính năng mới**, phải đối chiếu với `docs/architecture.md` và `docs/rule.md` để đảm bảo đồng bộ về cấu trúc thư mục, cách đặt tên, cách gọi API, và cách quản lý state với phần còn lại của hệ thống.
+- **Nếu 4 file tài liệu chưa tồn tại** (project chưa được scan/tạo docs), phải thông báo cho người dùng và đề xuất chạy lại quy trình tạo tài liệu trước khi tiếp tục các yêu cầu phát triển tính năng phức tạp.
 
-- Course catalog and course detail pages
-- User authentication and profile management
-- Course enrollment and checkout flow
-- Payment integration
-- Learning dashboard
-- Forum and community discussions
-- Blog and content management
-- Admin management system
+## Khi nào cần đọc lại tài liệu trong cùng phiên
 
-## Tech Stack
-
-### Frontend
-
-- Next.js (latest version)
-- TypeScript
-- Material UI (MUI)
-- Lucide React icons
-- React Query
-- React Hook Form
-- Zod
-
-### Backend
-
-- Spring Boot
-- Spring Security
-- Spring Data JPA
-- PostgreSQL
-- JWT Authentication
-
-## Important Instructions
-
-### Before Writing Code
-
-This project uses a newer Next.js version.
-
-Do NOT assume APIs, routing conventions, server components, caching behavior, or file structure from previous Next.js versions.
-
-Always check:
-
-- node_modules/next/dist/docs/
-- Existing project patterns
-- Current package versions
-
-before generating code.
-
-### UI Guidelines
-
-Always use:
-
-- Material UI components
-- Lucide React icons
-
-Avoid:
-
-- Tailwind UI components
-- Chakra UI
-- Ant Design
-- Bootstrap
-
-unless explicitly requested.
-
-### Design Principles
-
-Build interfaces that are:
-
-- Clean and modern
-- Mobile responsive
-- Accessibility friendly
-- Production ready
-
-Reference products:
-
-- Udemy
-- Coursera
-- Khoa Phạm
-- Shopee checkout flow
-- Modern SaaS dashboards
-
-### Loading States
-
-Every async page or component must provide:
-
-- Loading skeleton
-- Error state
-- Empty state
-- Retry action when appropriate
-
-### Data Fetching
-
-Prefer:
-
-- React Query for client-side data fetching
-- Server Components when suitable
-- Proper cache invalidation
-
-Avoid:
-
-- Unnecessary duplicate API requests
-- Refetching data already available in memory
-
-### Form Handling
-
-Use:
-
-- React Hook Form
-- Zod validation
-
-Show:
-
-- Validation messages
-- Loading states
-- Success feedback
-
-### Code Quality
-
-Always:
-
-- Use TypeScript strict typing
-- Avoid `any`
-- Create reusable components
-- Extract constants
-- Extract hooks when logic becomes complex
-
-### Admin Module
-
-Admin pages should provide:
-
-- Data table
-- Filters
-- Search
-- Bulk actions
-- Pagination
-- Confirmation dialogs
-- Permission awareness
-
-### Commit Guidelines
-
-When generating commit messages use:
-
-feat:
-fix:
-refactor:
-perf:
-docs:
-test:
-chore:
-
-following Conventional Commits.
-
-<!-- END:nextjs-agent-rules -->
+- Ngay từ tin nhắn đầu tiên của phiên làm việc mới.
+- Sau khi người dùng thông báo có thay đổi lớn về cấu trúc project, dependency, hoặc API.
+- Trước khi trả lời bất kỳ câu hỏi nào về "project này đang làm theo cách nào", "có đang dùng thư viện X không", "API này gọi ra sao"...
