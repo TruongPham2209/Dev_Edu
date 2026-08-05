@@ -6,6 +6,7 @@ import { FormInput } from "@/components/common/form/form-input";
 import type { CreateAssignmentRequest, QuizResponse } from "@/lib/type/quizzes";
 import { Box, FormControlLabel, Stack, Switch } from "@mui/material";
 import { Clock } from "lucide-react";
+import { toLocalIsoString } from "@/lib/util/date-utils";
 import { useEffect, useMemo, useState } from "react";
 
 interface QuizAssignmentDialogProps {
@@ -139,8 +140,8 @@ export function QuizAssignmentDialog({
     const payload: CreateAssignmentRequest = {
       quizId,
       assignmentName: assignmentName.trim(),
-      startTime: new Date(startTime).toISOString(),
-      endTime: endTime ? new Date(endTime).toISOString() : null,
+      startTime: toLocalIsoString(startTime),
+      endTime: endTime ? toLocalIsoString(endTime) : null,
       durationMinutes,
       maxAttempts,
       shuffleQuestions,

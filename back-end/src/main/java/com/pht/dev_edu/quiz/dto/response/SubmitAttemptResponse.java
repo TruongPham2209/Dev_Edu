@@ -15,8 +15,11 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SubmitAttemptResponse {
     UUID attemptId;
+    Integer attemptNumber;
     AttemptStatus status;
+    LocalDateTime startedAt;
     LocalDateTime submittedAt;
+    LocalDateTime gradedAt;
     BigDecimal totalScore;
     BigDecimal maxScore;
 }

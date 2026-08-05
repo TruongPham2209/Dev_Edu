@@ -5,21 +5,31 @@ import {
   useHeartbeatAttemptMutation,
 } from "@/lib/api/quizzes";
 import type { AutosaveRequest, StudentAnswerDto } from "@/lib/type/quizzes";
+import { parseServerDate } from "@/lib/util/date-utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface UseQuizExamSessionProps {
   attemptId: string;
   expiresAt: string;
   initialAnswers?: StudentAnswerDto[];
+  activeSessionToken?: string;
   onSubmit: () => void;
 }
 
 export type AutosaveState = "SAVED" | "SAVING" | "ERROR";
 
+export function parseTargetExpiryTime(expiresAt: unknown): number {
+  if (!expiresAt) return 0;
+  const d = parseServerDate(expiresAt);
+  const t = d.getTime();
+  return isNaN(t) ? 0 : t;
+}
+
 export function useQuizExamSession({
   attemptId,
   expiresAt,
   initialAnswers = [],
+  activeSessionToken,
   onSubmit,
 }: UseQuizExamSessionProps) {
   // Session Token (UUID v4 stored per attempt in sessionStorage)
@@ -44,42 +54,87 @@ export function useQuizExamSession({
       { selectedOptionIds?: string[]; answerText?: string }
     > = {};
     initialAnswers.forEach((ans) => {
-      initial[ans.questionId] = {
-        selectedOptionIds: ans.selectedOptionIds,
-        answerText: ans.answerText || undefined,
-      };
+      if (ans && ans.questionId) {
+        initial[ans.questionId] = {
+          selectedOptionIds: ans.selectedOptionIds || [],
+          answerText: ans.answerText || undefined,
+        };
+      }
     });
     return initial;
   });
+
+  // Sync initialAnswers into answersMap when loaded asynchronously
+  useEffect(() => {
+    if (!initialAnswers || initialAnswers.length === 0) return;
+
+    setAnswersMap((prevMap) => {
+      const nextMap = { ...prevMap };
+      let hasChanges = false;
+
+      initialAnswers.forEach((ans) => {
+        if (!ans || !ans.questionId) return;
+        const current = nextMap[ans.questionId];
+
+        if (
+          !current ||
+          (!current.selectedOptionIds?.length && !current.answerText)
+        ) {
+          nextMap[ans.questionId] = {
+            selectedOptionIds: ans.selectedOptionIds || [],
+            answerText: ans.answerText || undefined,
+          };
+          hasChanges = true;
+        }
+      });
+
+      return hasChanges ? nextMap : prevMap;
+    });
+  }, [initialAnswers]);
 
   // Sequence counter for Autosave
   const clientSeqRef = useRef<number>(1);
   const [autosaveState, setAutosaveState] = useState<AutosaveState>("SAVED");
   const debouncedTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
-  // Initialize Session Token
+  // Initialize & Sync Session Token
   useEffect(() => {
     if (!attemptId) return;
+
     const storageKey = `quiz_session_token_${attemptId}`;
-    let token = sessionStorage.getItem(storageKey);
+
+    // 1. If backend returned an explicit activeSessionToken, use it as source of truth
+    if (activeSessionToken) {
+      localStorage.setItem(storageKey, activeSessionToken);
+      sessionStorage.setItem(storageKey, activeSessionToken);
+      setSessionToken(activeSessionToken);
+      return;
+    }
+
+    // 2. Fallback to localStorage / sessionStorage if available
+    let token =
+      localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
     if (!token) {
       token = crypto.randomUUID
         ? crypto.randomUUID()
         : `token_${Date.now()}_${Math.random()}`;
+      localStorage.setItem(storageKey, token);
       sessionStorage.setItem(storageKey, token);
     }
     setSessionToken(token);
-  }, [attemptId]);
+  }, [attemptId, activeSessionToken]);
 
   // Countdown Timer Effect
   useEffect(() => {
     if (!expiresAt) return;
 
-    const targetTime = new Date(expiresAt).getTime();
+    const targetTime = parseTargetExpiryTime(expiresAt);
+    if (targetTime <= 0) return;
 
     const updateTimer = () => {
       const now = Date.now();
-      const diff = Math.max(0, Math.floor((targetTime - now) / 1000));
+      const rawDiff = Math.floor((targetTime - now) / 1000);
+      const diff = isNaN(rawDiff) ? 0 : Math.max(0, rawDiff);
       setTimeRemaining(diff);
 
       if (diff <= 0) {
@@ -105,15 +160,15 @@ export function useQuizExamSession({
   const handleSessionError = useCallback((error: any) => {
     const message = error?.message || error?.toString() || "";
     if (
-      message.includes("thiết bị/tab khác") ||
+      message.includes("You are taking the test on another device/tab.") ||
+      message.includes("You are attempting this test in another session") ||
       message.includes("another session") ||
       error?.status === "FORBIDDEN" ||
       error?.statusCode === 403
     ) {
       setIsSessionLocked(true);
       setSessionLockMessage(
-        message ||
-          "Bạn đang làm bài ở thiết bị/tab khác. Phiên làm bài này đã bị vô hiệu hóa.",
+        message || "You are taking this test on another device/tab.",
       );
     }
   }, []);

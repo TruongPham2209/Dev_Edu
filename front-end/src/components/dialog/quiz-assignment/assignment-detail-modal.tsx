@@ -122,9 +122,27 @@ export function QuizAssignmentDetailModal({
   const startMutation = useStartAttemptMutation({
     onSuccess: (data) => {
       toast.success("Exam attempt started successfully!");
+      localStorage.setItem(
+        `quiz_session_token_${data.attemptId}`,
+        data.activeSessionToken,
+      );
       sessionStorage.setItem(
         `quiz_session_token_${data.attemptId}`,
         data.activeSessionToken,
+      );
+      if (assignment?.id) {
+        localStorage.setItem(
+          `quiz_session_token_assignment_${assignment.id}`,
+          data.activeSessionToken,
+        );
+        sessionStorage.setItem(
+          `quiz_session_token_assignment_${assignment.id}`,
+          data.activeSessionToken,
+        );
+      }
+      localStorage.setItem(
+        `quiz_start_data_${data.attemptId}`,
+        JSON.stringify(data),
       );
       sessionStorage.setItem(
         `quiz_start_data_${data.attemptId}`,
@@ -138,6 +156,14 @@ export function QuizAssignmentDetailModal({
     },
     onError: (err) => {
       toast.error(`Failed to start attempt: ${err.message}`);
+      if (assignment?.id) {
+        localStorage.removeItem(
+          `quiz_session_token_assignment_${assignment.id}`,
+        );
+        sessionStorage.removeItem(
+          `quiz_session_token_assignment_${assignment.id}`,
+        );
+      }
     },
   });
 
@@ -152,9 +178,16 @@ export function QuizAssignmentDetailModal({
 
   const handleConfirmStart = () => {
     if (!assignment) return;
-    const sessionToken = crypto.randomUUID
-      ? crypto.randomUUID()
-      : `token_${Date.now()}_${Math.random()}`;
+    const storageKey = `quiz_session_token_assignment_${assignment.id}`;
+    let sessionToken =
+      localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
+    if (!sessionToken) {
+      sessionToken = crypto.randomUUID
+        ? crypto.randomUUID()
+        : `token_${Date.now()}_${Math.random()}`;
+      localStorage.setItem(storageKey, sessionToken);
+      sessionStorage.setItem(storageKey, sessionToken);
+    }
     startMutation.mutate({ assignmentId: assignment.id, sessionToken });
   };
 

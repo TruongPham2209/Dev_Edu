@@ -12,8 +12,19 @@ import {
   Paper,
   Stack,
   Typography,
+  alpha,
+  useTheme,
 } from "@mui/material";
-import { Check, Clock, Eye, HelpCircle, MessageSquare, X } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Clock,
+  Eye,
+  HelpCircle,
+  MessageSquare,
+  X,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
 
 export interface QuestionResultCardProps {
@@ -27,6 +38,7 @@ export function QuestionResultCard({
   index: idx,
   isGraded = true,
 }: QuestionResultCardProps) {
+  const theme = useTheme();
   const [openDetail, setOpenDetail] = useState(false);
 
   const isEssay = q.questionType === "ESSAY";
@@ -194,26 +206,24 @@ export function QuestionResultCard({
                 let optionBg = "background.paper";
                 let optionBorder = "divider";
                 let textColor = "text.primary";
-                let statusIcon = null;
+                let borderStyle = "solid";
+                let borderWidth = 1;
 
-                if (isCorrectOption) {
-                  optionBg = "success.50";
+                if (isUserSelected && isCorrectOption) {
+                  optionBg = alpha(theme.palette.success.main, 0.12);
                   optionBorder = "success.main";
                   textColor = "success.dark";
-                  statusIcon = (
-                    <Check
-                      size={16}
-                      color="#16a34a"
-                      style={{ flexShrink: 0 }}
-                    />
-                  );
+                  borderWidth = 1.5;
                 } else if (isUserSelected && !isCorrectOption) {
-                  optionBg = "error.50";
+                  optionBg = alpha(theme.palette.error.main, 0.1);
                   optionBorder = "error.main";
                   textColor = "error.dark";
-                  statusIcon = (
-                    <X size={16} color="#dc2626" style={{ flexShrink: 0 }} />
-                  );
+                  borderWidth = 1.5;
+                } else if (!isUserSelected && isCorrectOption) {
+                  optionBg = alpha(theme.palette.success.main, 0.04);
+                  optionBorder = "success.main";
+                  textColor = "success.dark";
+                  borderStyle = "dashed";
                 }
 
                 return (
@@ -222,9 +232,11 @@ export function QuestionResultCard({
                     variant="outlined"
                     sx={{
                       p: 1.25,
-                      borderRadius: 0.5,
+                      borderRadius: 1,
                       bgcolor: optionBg,
                       borderColor: optionBorder,
+                      borderStyle: borderStyle,
+                      borderWidth: borderWidth,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -237,9 +249,42 @@ export function QuestionResultCard({
                         alignItems: "center",
                         gap: 1,
                         overflow: "hidden",
+                        flex: 1,
                       }}
                     >
-                      {statusIcon}
+                      {isUserSelected && isCorrectOption && (
+                        <CheckCircle2
+                          size={16}
+                          color="#16a34a"
+                          style={{ flexShrink: 0 }}
+                        />
+                      )}
+                      {isUserSelected && !isCorrectOption && (
+                        <XCircle
+                          size={16}
+                          color="#dc2626"
+                          style={{ flexShrink: 0 }}
+                        />
+                      )}
+                      {!isUserSelected && isCorrectOption && (
+                        <Check
+                          size={16}
+                          color="#16a34a"
+                          style={{ flexShrink: 0 }}
+                        />
+                      )}
+                      {!isUserSelected && !isCorrectOption && (
+                        <Box
+                          sx={{
+                            width: 16,
+                            height: 16,
+                            borderRadius: "50%",
+                            border: "1px solid",
+                            borderColor: "divider",
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
                       <Typography
                         variant="body2"
                         sx={{
@@ -256,19 +301,45 @@ export function QuestionResultCard({
                       </Typography>
                     </Box>
 
-                    {isUserSelected && !isCorrectOption && (
-                      <Chip
-                        label="Your choice"
-                        color="error"
-                        size="small"
-                        sx={{
-                          height: 18,
-                          fontSize: "0.65rem",
-                          fontWeight: 700,
-                          flexShrink: 0,
-                        }}
-                      />
-                    )}
+                    <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                      {isUserSelected && isCorrectOption && (
+                        <Chip
+                          label="Your Choice ✓"
+                          color="success"
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                          }}
+                        />
+                      )}
+                      {isUserSelected && !isCorrectOption && (
+                        <Chip
+                          label="Your Choice ✗"
+                          color="error"
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                          }}
+                        />
+                      )}
+                      {!isUserSelected && isCorrectOption && (
+                        <Chip
+                          label="Correct Answer"
+                          color="success"
+                          variant="outlined"
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                          }}
+                        />
+                      )}
+                    </Stack>
                   </Paper>
                 );
               })}
@@ -484,7 +555,7 @@ export function QuestionResultCard({
           {!isEssay && q.options && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
-                Options & Answers
+                Options & Answers breakdown
               </Typography>
               <Stack spacing={1.5}>
                 {q.options.map((opt: any) => {
@@ -496,26 +567,25 @@ export function QuestionResultCard({
                   let optionBg = "background.paper";
                   let optionBorder = "divider";
                   let textColor = "text.primary";
-                  let statusIcon = null;
+                  let borderStyle = "solid";
+                  let borderWidth = 1;
 
-                  if (isCorrectOption) {
-                    optionBg = "success.50";
+                  if (isUserSelected && isCorrectOption) {
+                    optionBg = alpha(theme.palette.success.main, 0.12);
                     optionBorder = "success.main";
                     textColor = "success.dark";
-                    statusIcon = (
-                      <Check
-                        size={18}
-                        color="#16a34a"
-                        style={{ flexShrink: 0 }}
-                      />
-                    );
+                    borderWidth = 2;
                   } else if (isUserSelected && !isCorrectOption) {
-                    optionBg = "error.50";
+                    optionBg = alpha(theme.palette.error.main, 0.1);
                     optionBorder = "error.main";
                     textColor = "error.dark";
-                    statusIcon = (
-                      <X size={18} color="#dc2626" style={{ flexShrink: 0 }} />
-                    );
+                    borderWidth = 2;
+                  } else if (!isUserSelected && isCorrectOption) {
+                    optionBg = alpha(theme.palette.success.main, 0.04);
+                    optionBorder = "success.main";
+                    textColor = "success.dark";
+                    borderStyle = "dashed";
+                    borderWidth = 1.5;
                   }
 
                   return (
@@ -527,6 +597,8 @@ export function QuestionResultCard({
                         borderRadius: 1.5,
                         bgcolor: optionBg,
                         borderColor: optionBorder,
+                        borderStyle: borderStyle,
+                        borderWidth: borderWidth,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -538,9 +610,42 @@ export function QuestionResultCard({
                           display: "flex",
                           alignItems: "center",
                           gap: 1.5,
+                          flex: 1,
                         }}
                       >
-                        {statusIcon}
+                        {isUserSelected && isCorrectOption && (
+                          <CheckCircle2
+                            size={20}
+                            color="#16a34a"
+                            style={{ flexShrink: 0 }}
+                          />
+                        )}
+                        {isUserSelected && !isCorrectOption && (
+                          <XCircle
+                            size={20}
+                            color="#dc2626"
+                            style={{ flexShrink: 0 }}
+                          />
+                        )}
+                        {!isUserSelected && isCorrectOption && (
+                          <Check
+                            size={20}
+                            color="#16a34a"
+                            style={{ flexShrink: 0 }}
+                          />
+                        )}
+                        {!isUserSelected && !isCorrectOption && (
+                          <Box
+                            sx={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: "50%",
+                              border: "1px solid",
+                              borderColor: "divider",
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
                         <Typography
                           variant="body1"
                           sx={{
@@ -553,23 +658,28 @@ export function QuestionResultCard({
                         </Typography>
                       </Box>
 
-                      <Stack direction="row" spacing={1}>
-                        {isCorrectOption && (
+                      <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                        {isUserSelected && isCorrectOption && (
                           <Chip
-                            label="Correct Answer"
+                            label="Your Choice ✓"
                             color="success"
                             size="small"
                             sx={{ fontWeight: 700 }}
                           />
                         )}
-                        {isUserSelected && (
+                        {isUserSelected && !isCorrectOption && (
                           <Chip
-                            label={
-                              isCorrectOption
-                                ? "Your Choice"
-                                : "Your Choice (Incorrect)"
-                            }
-                            color={isCorrectOption ? "primary" : "error"}
+                            label="Your Choice ✗"
+                            color="error"
+                            size="small"
+                            sx={{ fontWeight: 700 }}
+                          />
+                        )}
+                        {!isUserSelected && isCorrectOption && (
+                          <Chip
+                            label="Correct Answer"
+                            color="success"
+                            variant="outlined"
                             size="small"
                             sx={{ fontWeight: 700 }}
                           />

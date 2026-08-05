@@ -1,5 +1,7 @@
 package com.pht.dev_edu.quiz.scheduler;
 
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
@@ -15,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +38,8 @@ public class QuizScheduler {
     @Scheduled(cron = "0 * * * * *")
     public void autoSubmitExpiredAttempts() {
         LocalDateTime now = LocalDateTime.now();
-        List<QuizAttemptEntity> expiredAttempts = attemptRepo.findByStatusAndExpiresAtLessThanEqual(AttemptStatus.IN_PROGRESS, now);
+        List<QuizAttemptEntity> expiredAttempts = attemptRepo
+                .findByStatusAndExpiresAtLessThanEqual(AttemptStatus.IN_PROGRESS, now);
         if (expiredAttempts.isEmpty()) {
             return;
         }
@@ -54,24 +58,32 @@ public class QuizScheduler {
      * Update Assignment status: SCHEDULED -> ACTIVE -> CLOSED (runs every 1 minute)
      */
     @Scheduled(cron = "0 * * * * *")
+    @Transactional
     public void updateAssignmentStatuses() {
         LocalDateTime now = LocalDateTime.now();
 
-        // SCHEDULED -> ACTIVE
-        List<QuizAssignmentEntity> toActiveList = assignmentRepo.findByStatusAndStartTimeLessThanEqualAndDeletedAtIsNull(AssignmentStatus.SCHEDULED, now);
+        // SCHEDULED -> ACTIVE or CLOSED
+        List<QuizAssignmentEntity> toActiveList = assignmentRepo
+                .findByStatusAndStartTimeLessThanEqualAndDeletedAtIsNull(AssignmentStatus.SCHEDULED, now);
         for (QuizAssignmentEntity assignment : toActiveList) {
-            if (assignment.getEndTime() == null || now.isBefore(assignment.getEndTime())) {
+            if (assignment.getEndTime() == null || !now.isAfter(assignment.getEndTime())) {
                 assignment.setStatus(AssignmentStatus.ACTIVE);
-                assignmentRepo.save(assignment);
                 log.info("Transitioned assignment ID {} to ACTIVE", assignment.getId());
+            } else {
+                assignment.setStatus(AssignmentStatus.CLOSED);
+                log.info("Transitioned assignment ID {} to CLOSED", assignment.getId());
             }
+            assignmentRepo.save(assignment);
+            RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_ASSIGNMENT_PREFIX + assignment.getId());
         }
 
         // ACTIVE -> CLOSED
-        List<QuizAssignmentEntity> toClosedList = assignmentRepo.findByStatusAndEndTimeNotNullAndEndTimeLessThanEqualAndDeletedAtIsNull(AssignmentStatus.ACTIVE, now);
+        List<QuizAssignmentEntity> toClosedList = assignmentRepo
+                .findByStatusAndEndTimeNotNullAndEndTimeLessThanEqualAndDeletedAtIsNull(AssignmentStatus.ACTIVE, now);
         for (QuizAssignmentEntity assignment : toClosedList) {
             assignment.setStatus(AssignmentStatus.CLOSED);
             assignmentRepo.save(assignment);
+            RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_ASSIGNMENT_PREFIX + assignment.getId());
             log.info("Transitioned assignment ID {} to CLOSED", assignment.getId());
         }
     }

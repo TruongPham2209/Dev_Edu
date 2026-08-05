@@ -27,7 +27,7 @@ public interface QuizAssignmentRepo extends JpaRepository<QuizAssignmentEntity, 
                 WHERE course_id = :courseId
             )
             AND deleted_at  IS NULL
-            AND end_time    >= :startTime
+            AND (end_time IS NULL OR end_time >= :startTime)
             AND status      IN :statuses
             """, nativeQuery = true)
     List<QuizAssignmentEntity> findByCourseIdAndDeletedAtIsNullAndStartTimeAndStatuses(UUID courseId, LocalDateTime startTime, List<String> statuses);
