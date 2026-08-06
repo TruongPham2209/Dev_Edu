@@ -2,10 +2,9 @@
 
 import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { Box, Typography } from "@mui/material";
-import { BookOpen, PackageOpen, ShoppingCart } from "lucide-react";
+import { PackageOpen, ShoppingCart } from "lucide-react";
 import { Suspense, useState } from "react";
 import { CartTabContent } from "./cart-tab";
-import { EnrollmentTabContent } from "./enrollment-tab";
 import { PurchaseHistoryTabContent } from "./purchase-history-tab";
 
 function CartPageContent() {
@@ -18,7 +17,6 @@ function CartPageContent() {
   const CART_TABS = [
     { value: "cart", label: "Cart", icon: <ShoppingCart size={20} /> },
     { value: "order", label: "Order History", icon: <PackageOpen size={20} /> },
-    { value: "enrolled", label: "Enrolled", icon: <BookOpen size={20} /> },
   ];
 
   return (
@@ -38,7 +36,7 @@ function CartPageContent() {
           <ShoppingCart size={28} color="#0284c7" />
         </Box>
         <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a" }}>
-          Your learning space
+          Purchases & Cart
         </Typography>
       </Box>
 
@@ -67,9 +65,6 @@ function CartPageContent() {
       </Box>
       <Box sx={{ display: currentTab === "order" ? "block" : "none" }}>
         <PurchaseHistoryTabContent />
-      </Box>
-      <Box sx={{ display: currentTab === "enrolled" ? "block" : "none" }}>
-        <EnrollmentTabContent />
       </Box>
     </Box>
   );

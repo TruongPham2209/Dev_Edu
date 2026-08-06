@@ -89,17 +89,20 @@ describe("StudentHeader Component", () => {
 
     // ----------------------------------------------------------------------------
     // Assert
-    // Verify nav links and login/signup buttons render.
+    // Verify nav links and login/signup buttons render, and My Courses does not.
     // ----------------------------------------------------------------------------
     expect(screen.getByRole("link", { name: /Home/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Courses/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Explore/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Forum/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /My Courses/i })
+    ).not.toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Log in" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Sign up" })).toBeInTheDocument();
   });
 
-  it("shouldRenderCartButtonAndUserMenuWhenAuthenticatedAsStudent", () => {
+  it("shouldRenderCartButtonUserMenuAndMyCoursesWhenAuthenticatedAsStudent", () => {
     // ----------------------------------------------------------------------------
     // Arrange
     // Mock authenticated student.
@@ -124,11 +127,46 @@ describe("StudentHeader Component", () => {
 
     // ----------------------------------------------------------------------------
     // Assert
-    // Verify UserMenu and cart link exist, and Login/Signup do not.
+    // Verify UserMenu, My Courses, and cart link exist, and Login/Signup do not.
     // ----------------------------------------------------------------------------
     expect(screen.getByTestId("user-menu")).toBeInTheDocument();
     expect(
+      screen.getByRole("link", { name: /My Courses/i })
+    ).toBeInTheDocument();
+    expect(
       screen.queryByRole("link", { name: "Log in" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shouldNotRenderMyCoursesWhenAuthenticatedAsLecturerOnly", () => {
+    // ----------------------------------------------------------------------------
+    // Arrange
+    // Mock authenticated lecturer without STUDENT role.
+    // ----------------------------------------------------------------------------
+    vi.mocked(usePathname).mockReturnValue("/home");
+    vi.mocked(authHook.useAuth).mockReturnValue({
+      isAuthenticated: true,
+      user: {
+        id: "u-2",
+        username: "lecturer",
+        fullName: "Lecturer One",
+      } as any,
+      role: "LECTURER",
+      roles: ["LECTURER"],
+    });
+
+    // ----------------------------------------------------------------------------
+    // Act
+    // Render header.
+    // ----------------------------------------------------------------------------
+    render(<StudentHeader />);
+
+    // ----------------------------------------------------------------------------
+    // Assert
+    // Verify My Courses is not rendered.
+    // ----------------------------------------------------------------------------
+    expect(
+      screen.queryByRole("link", { name: /My Courses/i })
     ).not.toBeInTheDocument();
   });
 });

@@ -9,13 +9,13 @@
  *
  * Purpose
  * -------
- * Verify that CartPage renders header title ("Your learning space"), animated tabs
- * ("Cart", "Order History", "Enrolled"), and switches between tab contents.
+ * Verify that CartPage renders header title ("Purchases & Cart"), animated tabs
+ * ("Cart", "Order History"), and switches between tab contents.
  *
  * Tested Features
  * ---------------
- * ✓ Title rendering ("Your learning space")
- * ✓ Tab options rendering ("Cart", "Order History", "Enrolled")
+ * ✓ Title rendering ("Purchases & Cart")
+ * ✓ Tab options rendering ("Cart", "Order History")
  * ✓ Tab selection state switching
  *
  * Covered Scenarios
@@ -106,11 +106,10 @@ describe("CartPage", () => {
     // Verify title and tab options render.
     // ----------------------------------------------------------------------------
     expect(
-      screen.getByRole("heading", { name: "Your learning space" }),
+      screen.getByRole("heading", { name: "Purchases & Cart" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Cart")).toBeInTheDocument();
     expect(screen.getByText("Order History")).toBeInTheDocument();
-    expect(screen.getByText("Enrolled")).toBeInTheDocument();
 
     // ----------------------------------------------------------------------------
     // Act & Verify

@@ -98,10 +98,17 @@ export function StudentHeader() {
               justifyContent: "center",
             }}
           >
-            {studentNavItems.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
+            {studentNavItems
+              .filter((item) => {
+                if (item.href === "/my-courses") {
+                  return isAuthenticated && roles.includes("STUDENT");
+                }
+                return true;
+              })
+              .map((item) => {
+                const isActive =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const Icon = item.icon;
               return (
                 <Button
                   key={item.href}

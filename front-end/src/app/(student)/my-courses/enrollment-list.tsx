@@ -13,9 +13,9 @@ import {
 import { BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { CourseOrderItem } from "./course-order-item";
+import { CourseOrderItem } from "../cart/course-order-item";
 
-export function EnrollmentTabContent() {
+export function EnrollmentList() {
   const router = useRouter();
 
   const observerTarget = useRef(null);

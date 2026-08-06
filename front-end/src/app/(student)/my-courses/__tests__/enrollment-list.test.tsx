@@ -5,11 +5,11 @@
  *
  * File Under Test
  * ----------------
- * src/app/(student)/cart/enrollment-tab.tsx
+ * src/app/(student)/my-courses/enrollment-list.tsx
  *
  * Purpose
  * -------
- * Verify that EnrollmentTabContent component renders enrolled courses list, empty state
+ * Verify that EnrollmentList component renders enrolled courses list, empty state
  * when no courses are enrolled, skeleton loading placeholders, and navigates to /courses.
  *
  * Tested Features
@@ -36,14 +36,14 @@
  *
  * Notes
  * -----
- * Unit test for EnrollmentTabContent component.
+ * Unit test for EnrollmentList component.
  */
 
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EnrollmentTabContent } from "../enrollment-tab";
+import { EnrollmentList } from "../enrollment-list";
 
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
@@ -85,9 +85,9 @@ describe("EnrollmentTabContent", () => {
 
     // ----------------------------------------------------------------------------
     // Act
-    // Render EnrollmentTabContent.
+    // Render EnrollmentList.
     // ----------------------------------------------------------------------------
-    render(<EnrollmentTabContent />);
+    render(<EnrollmentList />);
 
     // ----------------------------------------------------------------------------
     // Assert
