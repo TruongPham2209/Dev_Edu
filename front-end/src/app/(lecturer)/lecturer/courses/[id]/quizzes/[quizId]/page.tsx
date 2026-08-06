@@ -3,8 +3,10 @@
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { ErrorState } from "@/components/common/error-state";
 import { QuestionFormDialog } from "@/components/dialog/quiz/question-form-dialog";
+import { QuestionImportDialog } from "@/components/dialog/quiz/question-import/page";
 import { TypeConfigDialog } from "@/components/dialog/quiz/type-config-dialog";
 import {
+  createQuizQuestion,
   useCreateQuizQuestionMutation,
   useCreateQuizTypeConfigMutation,
   useDeleteQuizQuestionMutation,
@@ -16,6 +18,7 @@ import {
   useUpdateQuizQuestionMutation,
 } from "@/lib/api/quizzes";
 import { useToast } from "@/lib/toast-context";
+import { useQueryClient } from "@tanstack/react-query";
 import type {
   QuestionType,
   QuizQuestionRequest,
@@ -45,6 +48,7 @@ export default function LecturerQuizConfigurePage({
   const { id: courseId, quizId } = use(params);
   const router = useRouter();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   // Local Form state
   const [overrideStatus, setOverrideStatus] = useState<QuizStatus | null>(null);
@@ -56,6 +60,7 @@ export default function LecturerQuizConfigurePage({
 
   // Question dialog state
   const [openQuestionModal, setOpenQuestionModal] = useState(false);
+  const [openImportModal, setOpenImportModal] = useState(false);
   const [editingQuestion, setEditingQuestion] =
     useState<QuizQuestionResponse | null>(null);
   const [defaultQuestionType, setDefaultQuestionType] =
@@ -346,6 +351,45 @@ export default function LecturerQuizConfigurePage({
     }
   };
 
+  const handleSaveImportedQuestions = async (
+    importedQuestions: QuizQuestionRequest[],
+  ) => {
+    if (isPendingStatus) {
+      toast.error(
+        "Questions cannot be modified when Quiz is pending approval.",
+      );
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      importedQuestions.map((q) => createQuizQuestion(quizId, q)),
+    );
+
+    const successCount = results.filter(
+      (res) => res.status === "fulfilled",
+    ).length;
+    const failCount = results.filter((res) => res.status === "rejected").length;
+
+    if (successCount === 0) {
+      toast.error("Failed to save imported questions.");
+      throw new Error("Failed to save questions");
+    }
+
+    // Invalidate React Query cache for this quiz detail and type configs
+    await queryClient.invalidateQueries({
+      queryKey: ["quizzes", "detail", quizId],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: ["quizzes", "type-configs", quizId],
+    });
+
+    handleContentModified(
+      failCount > 0
+        ? `Saved ${successCount} questions successfully, but ${failCount} questions failed to save.`
+        : `Successfully imported and saved all ${successCount} questions!`,
+    );
+  };
+
   const handleConfirmDeleteQuestion = async () => {
     if (!deletingQuestion) return;
     if (isPendingStatus) {
@@ -454,6 +498,7 @@ export default function LecturerQuizConfigurePage({
                   onEditQuestion={handleOpenEditQuestion}
                   onDuplicateQuestion={handleOpenDuplicateQuestion}
                   onDeleteQuestion={setDeletingQuestion}
+                  onImportQuestions={() => setOpenImportModal(true)}
                 />
               </Stack>
             </Grid>
@@ -502,6 +547,16 @@ export default function LecturerQuizConfigurePage({
         loading={
           createQuestionMutation.isPending || updateQuestionMutation.isPending
         }
+      />
+
+      {/* Import Questions Dialog */}
+      <QuestionImportDialog
+        open={openImportModal}
+        onClose={() => setOpenImportModal(false)}
+        onSave={handleSaveImportedQuestions}
+        typeConfigs={typeConfigs}
+        existingQuestions={questions}
+        isPendingStatus={isPendingStatus}
       />
 
       {/* Delete Type Config Confirm Dialog */}

@@ -1,5 +1,15 @@
 package com.pht.dev_edu.quiz.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
@@ -8,9 +18,10 @@ import com.pht.dev_edu.common.util.PagingUtils;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
+import com.pht.dev_edu.quiz.dto.projection.QuizEssaySubmissionProjection;
 import com.pht.dev_edu.quiz.dto.request.GradeEssayRequest;
 import com.pht.dev_edu.quiz.dto.response.AttemptResultResponse;
-import com.pht.dev_edu.quiz.dto.response.SubmitAttemptResponse;
+import com.pht.dev_edu.quiz.dto.response.QuizEssaySubmissionResponse;
 import com.pht.dev_edu.quiz.entity.QuizAttemptAnswerEntity;
 import com.pht.dev_edu.quiz.entity.QuizAttemptEntity;
 import com.pht.dev_edu.quiz.entity.QuizEssayGradingEntity;
@@ -19,22 +30,11 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptAnswerRepo;
 import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizEssayGradingRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import com.pht.dev_edu.quiz.dto.projection.QuizEssaySubmissionProjection;
-import com.pht.dev_edu.quiz.dto.response.QuizEssaySubmissionResponse;
 
 @Slf4j
 @Service
@@ -54,19 +54,20 @@ public class QuizGradingServiceImpl implements QuizGradingService {
 
     @Override
     public CustomPaging<QuizEssaySubmissionResponse> getEssaySubmissions(
-            UUID quizId, String essayStatus, String nextCursor, String graderUsername, Set<String> authorities) {
+            UUID quizId, String essayStatus, String nextCursor, String graderUsername,
+            Set<String> authorities) {
         quizAccessService.validateAccessByQuiz(graderUsername, authorities, quizId);
 
         String normalizedStatus = StringUtils.hasText(essayStatus) ? essayStatus.toUpperCase().trim() : "ALL";
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        List<QuizEssaySubmissionProjection> projections = answerRepo.findEssaySubmissionsByQuizIdAndStatusAndCursor(
-                quizId,
-                normalizedStatus,
-                cursor.getId(),
-                cursor.getTimeStamp(),
-                DEFAULT_ESSAY_PAGE_SIZE + 1
-        );
+        List<QuizEssaySubmissionProjection> projections = answerRepo
+                .findEssaySubmissionsByQuizIdAndStatusAndCursor(
+                        quizId,
+                        normalizedStatus,
+                        cursor.getId(),
+                        cursor.getTimeStamp(),
+                        DEFAULT_ESSAY_PAGE_SIZE + 1);
 
         return PagingUtils.getPagedWithCursor(
                 projections,
@@ -91,15 +92,16 @@ public class QuizGradingServiceImpl implements QuizGradingService {
                         .build(),
                 QuizEssaySubmissionProjection::getSubmittedAt,
                 QuizEssaySubmissionProjection::getAttemptAnswerId,
-                DEFAULT_ESSAY_PAGE_SIZE
-        );
+                DEFAULT_ESSAY_PAGE_SIZE);
     }
 
     @Override
     @Transactional
-    public AttemptResultResponse gradeEssayAnswer(UUID attemptId, UUID questionId, GradeEssayRequest request, String graderUsername, Set<String> authorities) {
+    public AttemptResultResponse gradeEssayAnswer(UUID attemptId, UUID questionId, GradeEssayRequest request,
+            String graderUsername, Set<String> authorities) {
         QuizAttemptEntity attempt = attemptRepo.findById(attemptId)
-                .orElseThrow(() -> new DataNotFoundException("Attempt not found with ID: " + attemptId));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Attempt not found with ID: " + attemptId));
         quizAccessService.validateAccessByQuiz(graderUsername, authorities, attempt.getQuizId());
 
         if (attempt.getStatus() != AttemptStatus.GRADING) {
@@ -107,14 +109,16 @@ public class QuizGradingServiceImpl implements QuizGradingService {
         }
 
         QuizQuestionEntity question = questionRepo.findByIdAndDeletedAtIsNull(questionId)
-                .orElseThrow(() -> new DataNotFoundException("Question not found with ID: " + questionId));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Question not found with ID: " + questionId));
 
         if (question.getQuestionType() != QuestionType.ESSAY) {
             throw new BadRequestException("Only ESSAY questions can be manually graded.");
         }
 
         if (request.getAwardedPoints().compareTo(question.getPoints()) > 0) {
-            throw new BadRequestException("Awarded points (" + request.getAwardedPoints() + ") cannot exceed maximum question points (" + question.getPoints() + ").");
+            throw new BadRequestException("Awarded points (" + request.getAwardedPoints()
+                    + ") cannot exceed maximum question points (" + question.getPoints() + ").");
         }
 
         QuizAttemptAnswerEntity answer = answerRepo.findByAttemptIdAndQuestionId(attemptId, questionId)
@@ -144,7 +148,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
         essayGradingRepo.save(essayGrading);
 
         // Check if any ungaded essay question remains for this attempt
-        int ungadedCount = answerRepo.countByAttemptIdAndQuestionTypeAndAwardedPointsIsNull(attemptId, QuestionType.ESSAY);
+        int ungadedCount = answerRepo.countByAttemptIdAndQuestionTypeAndAwardedPointsIsNull(attemptId,
+                QuestionType.ESSAY);
         if (ungadedCount == 0) {
             // All essay questions graded -> Recalculate total score
             List<QuizAttemptAnswerEntity> allAnswers = answerRepo.findByAttemptId(attemptId);
@@ -159,7 +164,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
             attemptRepo.save(attempt);
         }
 
-        auditService.log("ATTEMPT_ANSWER", answer.getId(), QuizAuditAction.GRADE, graderUsername, null, answer, request.getFeedback());
+        auditService.log("ATTEMPT_ANSWER", answer.getId(), QuizAuditAction.GRADE, graderUsername, null, answer,
+                request.getFeedback());
 
         return attemptService.getAttemptResult(attemptId, graderUsername, true);
     }

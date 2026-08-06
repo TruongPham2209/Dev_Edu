@@ -69,6 +69,10 @@ export async function updateQuiz(
   return apiPut<QuizResponse>(`/api/v1/quizzes/${quizId}`, data);
 }
 
+export async function duplicateQuiz(quizId: string): Promise<QuizResponse> {
+  return apiPost<QuizResponse>(`/api/v1/quizzes/${quizId}/duplicate`);
+}
+
 // --- Quiz Approval APIs ---
 
 export async function submitQuizForApproval(
@@ -395,6 +399,20 @@ export function useUpdateQuizMutation(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ quizId, data }) => updateQuiz(quizId, data),
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useDuplicateQuizMutation(
+  options?: UseMutationOptions<QuizResponse, Error, string>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (quizId: string) => duplicateQuiz(quizId),
     ...options,
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: ["quizzes"] });
