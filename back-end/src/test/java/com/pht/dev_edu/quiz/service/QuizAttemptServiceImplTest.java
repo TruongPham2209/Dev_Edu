@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,6 +43,72 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionOptionRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
 
+/*
+ * <analysis>
+ * QuizAttemptServiceImpl
+ * - submitAttempt(UUID attemptId, String username)
+ *   - branches:
+ *       attempt already submitted/graded -> returns existing status without re-saving
+ *       attempt auto-graded only (no essays) -> status = GRADED, clears activeSessionToken
+ *       attempt contains essay questions -> status = GRADING
+ *   - paths:
+ *       [P1: auto-graded only attempt submission]
+ *       [P2: attempt with essay questions submission]
+ *       [P3: already submitted attempt idempotent submission]
+ *   - planned tests:
+ *       [submitAttempt_AutoGradedOnly_TransitionsToGraded -> P1]
+ *       [submitAttempt_WithEssayQuestion_TransitionsToGrading -> P2]
+ *       [submitAttempt_AlreadySubmitted_ReturnsExistingStatus -> P3]
+ *
+ * - getAttemptReview(UUID attemptId, String username, boolean isLecturer)
+ *   - branches:
+ *       attempt status == IN_PROGRESS -> BadRequestException
+ *       attempt status submitted/graded -> returns review data
+ *   - paths:
+ *       [P1: attempt in progress review request]
+ *       [P2: attempt submitted review request]
+ *   - planned tests:
+ *       [getAttemptReview_WhenInProgress_ThrowsBadRequest -> P1]
+ *       [getAttemptReview_WhenSubmitted_ReturnsReviewData -> P2]
+ * </analysis>
+ */
+
+/**
+ * ============================================================================
+ * Unit Test for QuizAttemptServiceImpl
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify quiz attempt submission, auto vs manual grading status transitions, and attempt review lookup rules.
+ *
+ * Test Scope
+ * ----------
+ * - submitAttempt(UUID, String)
+ * - getAttemptReview(UUID, String, boolean)
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Auto-grading attempt submission (transitions to GRADED and revokes active session token)
+ * ✓ Essay question attempt submission (transitions to GRADING for manual teacher evaluation)
+ * ✓ Idempotent submission for already submitted/graded attempts
+ * ✓ Review access restriction when attempt is still IN_PROGRESS
+ * ✓ Review data retrieval for submitted/graded attempts
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - QuizAttemptRepo
+ * - QuizAssignmentRepo
+ * - QuizQuestionRepo
+ * - QuizQuestionOptionRepo
+ * - QuizAttemptAnswerRepo
+ * - QuizAttemptAnswerLogRepo
+ * - QuizAccessService
+ * - QuizAuditService
+ * - KafkaTemplate
+ * - QuizMapper
+ * - ObjectMapper (Spy)
+ */
 @ExtendWith(MockitoExtension.class)
 class QuizAttemptServiceImplTest {
 
@@ -90,6 +157,7 @@ class QuizAttemptServiceImplTest {
     }
 
     @Test
+    @DisplayName("submitAttempt - when auto-graded only questions, should transition attempt to GRADED")
     void submitAttempt_AutoGradedOnly_TransitionsToGraded() throws Exception {
         QuizAttemptEntity attempt = QuizAttemptEntity.builder()
                 .id(attemptId)
@@ -124,11 +192,12 @@ class QuizAttemptServiceImplTest {
 
         assertNotNull(response);
         assertEquals(AttemptStatus.GRADED, response.getStatus());
-        verify(attemptRepo).save(attempt);
+        verify(attemptRepo).saveAndFlush(attempt);
         assertNull(attempt.getActiveSessionToken());
     }
 
     @Test
+    @DisplayName("submitAttempt - when attempt contains essay questions, should transition attempt to GRADING")
     void submitAttempt_WithEssayQuestion_TransitionsToGrading() throws Exception {
         QuizAttemptEntity attempt = QuizAttemptEntity.builder()
                 .id(attemptId)
@@ -161,6 +230,7 @@ class QuizAttemptServiceImplTest {
     }
 
     @Test
+    @DisplayName("submitAttempt - when attempt is already submitted, should return existing status without re-saving")
     void submitAttempt_AlreadySubmitted_ReturnsExistingStatus() {
         QuizAttemptEntity attempt = QuizAttemptEntity.builder()
                 .id(attemptId)
@@ -179,6 +249,7 @@ class QuizAttemptServiceImplTest {
     }
 
     @Test
+    @DisplayName("getAttemptReview - when attempt is IN_PROGRESS, should throw BadRequestException")
     void getAttemptReview_WhenInProgress_ThrowsBadRequest() {
         QuizAttemptEntity attempt = QuizAttemptEntity.builder()
                 .id(attemptId)
@@ -193,6 +264,7 @@ class QuizAttemptServiceImplTest {
     }
 
     @Test
+    @DisplayName("getAttemptReview - when attempt is submitted, should return review data")
     void getAttemptReview_WhenSubmitted_ReturnsReviewData() {
         QuizAttemptEntity attempt = QuizAttemptEntity.builder()
                 .id(attemptId)
