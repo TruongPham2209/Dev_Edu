@@ -91,7 +91,7 @@ export function FilterSelect({
         onChange={(e) => onChange(e.target.value)}
         displayEmpty
         renderValue={(selected) => {
-          if (selected === defaultValue) {
+          if (defaultLabel && selected === defaultValue) {
             return (
               <Box
                 component="span"
@@ -105,7 +105,24 @@ export function FilterSelect({
             );
           }
 
-          return items.find((item) => item.id === selected)?.title || "";
+          const selectedItem = items.find((item) => item.id === selected);
+          if (selectedItem) {
+            return selectedItem.title;
+          }
+
+          return defaultLabel ? (
+            <Box
+              component="span"
+              sx={{
+                color: "#94a3b8",
+                fontWeight: 500,
+              }}
+            >
+              {defaultLabel}
+            </Box>
+          ) : (
+            selected || ""
+          );
         }}
         IconComponent={(props) => (
           <Box

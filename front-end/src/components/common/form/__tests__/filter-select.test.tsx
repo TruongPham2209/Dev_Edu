@@ -127,4 +127,22 @@ describe("FilterSelect", () => {
     // ----------------------------------------------------------------------------
     expect(handleChange).toHaveBeenCalledWith("cat-1");
   });
+
+  it("shouldRenderMatchingItemTitleWhenValueIsALLWithoutDefaultLabel", () => {
+    const itemsWithAll: FilterItem[] = [
+      { id: "ALL", title: "All Submissions" },
+      { id: "PENDING", title: "Needs Grading" },
+    ];
+
+    render(
+      <FilterSelect
+        label="Status"
+        value="ALL"
+        items={itemsWithAll}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("All Submissions")).toBeInTheDocument();
+  });
 });

@@ -2,6 +2,7 @@
 
 import {
   Box,
+  Button,
   Divider,
   List,
   ListItemButton,
@@ -14,10 +15,12 @@ import {
 import {
   CheckCircle2,
   FileText,
+  HelpCircle,
   ListIcon,
   Lock,
   PlayCircle,
 } from "lucide-react";
+import NextLink from "next/link";
 import { LectureResponse } from "@/lib/type/lectures";
 
 interface LectureItemProps {
@@ -168,12 +171,14 @@ function LectureItem({
 
 interface SidebarContainerProps {
   lectures: LectureResponse[];
+  courseId?: string;
   activeLectureId?: string;
   onSelectLecture: (id: string) => void;
 }
 
 export function SidebarContainer({
   lectures,
+  courseId,
   activeLectureId,
   onSelectLecture,
 }: SidebarContainerProps) {
@@ -187,13 +192,27 @@ export function SidebarContainer({
         overflow: "hidden",
       }}
     >
-      <Box sx={{ p: 1.5, bgcolor: "background.default" }}>
+      <Box sx={{ p: 1.5, bgcolor: "background.default", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <ListIcon size={18} />
           <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
             Course Content
           </Typography>
         </Stack>
+
+        {courseId && (
+          <Button
+            component={NextLink}
+            href={`/courses/${courseId}/quizzes`}
+            size="small"
+            variant="outlined"
+            color="primary"
+            startIcon={<HelpCircle size={14} />}
+            sx={{ borderRadius: 1.5, fontSize: "0.75rem", fontWeight: 700, py: 0.25, px: 1 }}
+          >
+            Quizzes
+          </Button>
+        )}
       </Box>
       <Divider />
       <Box sx={{ p: 1 }}>
