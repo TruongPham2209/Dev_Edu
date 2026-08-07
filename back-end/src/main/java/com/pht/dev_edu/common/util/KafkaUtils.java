@@ -6,6 +6,7 @@ import com.pht.dev_edu.forum.document.PostDocument;
 import com.pht.dev_edu.forum.dto.PostInteractiveData;
 import com.pht.dev_edu.forum.entity.PostVersionEntity;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -35,6 +36,15 @@ public class KafkaUtils {
         if (event != null) {
             kafkaTemplate.send(
                     KafkaTopicConstant.TRACKING_EVENT_TOPIC,
+                    event
+            );
+        }
+    }
+
+    public static void sendPersonalNotificationEvent(PersonalNotificationEvent event) {
+        if (event != null && StringUtils.hasText(event.getUsername())) {
+            kafkaTemplate.send(
+                    KafkaTopicConstant.PERSONAL_NOTIFICATION_TOPIC,
                     event
             );
         }

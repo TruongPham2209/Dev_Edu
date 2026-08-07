@@ -24,4 +24,7 @@ public class KafkaTopicConstant {
     // Quiz Logging Topics
     public static final String QUIZ_AUDIT_LOG_TOPIC = "quiz-audit-log-topic";
     public static final String QUIZ_AUTOSAVE_LOG_TOPIC = "quiz-autosave-log-topic";
+
+    // Notification Topics
+    public static final String PERSONAL_NOTIFICATION_TOPIC = "personal-notification-topic";
 }
