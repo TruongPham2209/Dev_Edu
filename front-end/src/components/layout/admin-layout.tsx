@@ -20,7 +20,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { ManageHeader } from "../manage-header";
+import { ManageHeader } from "./components/manage-header";
 type AdminLayoutProps = {
   children: ReactNode;
 };

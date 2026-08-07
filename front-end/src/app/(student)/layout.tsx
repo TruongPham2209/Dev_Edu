@@ -1,4 +1,4 @@
-import { StudentLayout } from "@/components/layout/web/page";
+import { StudentLayout } from "@/components/layout/web-layout";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

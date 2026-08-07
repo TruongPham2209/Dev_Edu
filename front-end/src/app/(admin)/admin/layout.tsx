@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminLayout } from "@/components/layout/admin/page";
+import { AdminLayout } from "@/components/layout/admin-layout";
 
 export const metadata: Metadata = {
   title: "Admin Console",

@@ -17,7 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { AuthLayout } from "@/components/layout/auth/auth-layout";
+import { AuthLayout } from "@/components/layout/auth-layout";
 import { FormInput } from "@/components/common/form/form-input";
 import { setAuthSession } from "@/lib/auth-storage";
 import { getPrimaryRole, getRedirectPathForRoles } from "@/lib/auth/constants";

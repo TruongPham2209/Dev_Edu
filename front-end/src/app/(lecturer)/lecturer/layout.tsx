@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LecturerLayout } from "@/components/layout/lecturer/page";
+import { LecturerLayout } from "@/components/layout/lecturer-layout";
 
 export const metadata: Metadata = {
   title: "Lecturer Studio",

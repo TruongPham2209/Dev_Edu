@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/admin/page.tsx
+ * src/components/layout/admin-layout.tsx
  *
  * Purpose
  * -------
@@ -41,7 +41,7 @@ import * as authHook from "@/lib/use-auth";
 import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AdminLayout } from "../page";
+import { AdminLayout } from "../admin-layout";
 
 vi.mock("next/navigation", () => ({
   usePathname: vi.fn(),

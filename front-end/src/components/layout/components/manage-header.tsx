@@ -11,7 +11,16 @@ import {
   Typography,
   useScrollTrigger,
 } from "@mui/material";
-import { Bell, Code2, Home, Menu, Moon, X, UserCheck, Shield } from "lucide-react";
+import {
+  Bell,
+  Code2,
+  Home,
+  Menu,
+  Moon,
+  X,
+  UserCheck,
+  Shield,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";

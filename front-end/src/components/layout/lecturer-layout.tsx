@@ -1,7 +1,7 @@
 import { Box, Container } from "@mui/material";
 import type { ReactNode } from "react";
 import { roleThemes } from "@/lib/role-theme";
-import { ManageHeader } from "@/components/layout/manage-header";
+import { ManageHeader } from "@/components/layout/components/manage-header";
 
 type LecturerLayoutProps = {
   children: ReactNode;

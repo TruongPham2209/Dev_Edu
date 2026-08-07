@@ -16,7 +16,7 @@ import { Code2, ShoppingCart, UserCheck, Shield } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { UserMenu } from "../user-menu";
+import { UserMenu } from "./user-menu";
 
 export function StudentHeader() {
   const pathname = usePathname();
@@ -107,42 +107,43 @@ export function StudentHeader() {
               })
               .map((item) => {
                 const isActive =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
                 const Icon = item.icon;
-              return (
-                <Button
-                  key={item.href}
-                  component={Link}
-                  href={item.href}
-                  disableElevation
-                  startIcon={
-                    <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                  }
-                  sx={{
-                    borderRadius: 999,
-                    fontWeight: isActive ? 700 : 600,
-                    textTransform: "none",
-                    fontSize: "0.95rem",
-                    px: 2.5,
-                    py: 1,
-                    color: isActive ? "#16a34a" : "#64748b",
-                    bgcolor: isActive ? "#f0fdf4" : "transparent",
-                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                      bgcolor: isActive ? "#dcfce7" : "#f1f5f9",
-                      color: isActive ? "#15803d" : "#0f172a",
-                      transform: "translateY(-1px)",
-                    },
-                    "& .MuiButton-startIcon": {
-                      marginRight: 0.75,
-                      transition: "color 0.2s ease",
-                    },
-                  }}
-                >
-                  {item.label}
-                </Button>
-              );
-            })}
+                return (
+                  <Button
+                    key={item.href}
+                    component={Link}
+                    href={item.href}
+                    disableElevation
+                    startIcon={
+                      <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                    }
+                    sx={{
+                      borderRadius: 999,
+                      fontWeight: isActive ? 700 : 600,
+                      textTransform: "none",
+                      fontSize: "0.95rem",
+                      px: 2.5,
+                      py: 1,
+                      color: isActive ? "#16a34a" : "#64748b",
+                      bgcolor: isActive ? "#f0fdf4" : "transparent",
+                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                      "&:hover": {
+                        bgcolor: isActive ? "#dcfce7" : "#f1f5f9",
+                        color: isActive ? "#15803d" : "#0f172a",
+                        transform: "translateY(-1px)",
+                      },
+                      "& .MuiButton-startIcon": {
+                        marginRight: 0.75,
+                        transition: "color 0.2s ease",
+                      },
+                    }}
+                  >
+                    {item.label}
+                  </Button>
+                );
+              })}
           </Box>
 
           {/* Right Section: Actions & Auth */}

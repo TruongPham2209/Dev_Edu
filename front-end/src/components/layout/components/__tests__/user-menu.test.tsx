@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/user-menu.tsx
+ * src/components/layout/components/user-menu.tsx
  *
  * Purpose
  * -------

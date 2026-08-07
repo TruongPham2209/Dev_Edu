@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/auth/auth-layout.tsx
+ * src/components/layout/auth-layout.tsx
  *
  * Purpose
  * -------

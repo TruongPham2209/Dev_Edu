@@ -1,7 +1,7 @@
 "use client";
 
 import { FormInput } from "@/components/common/form/form-input";
-import { AuthLayout } from "@/components/layout/auth/auth-layout";
+import { AuthLayout } from "@/components/layout/auth-layout";
 import { useRegisterMutation } from "@/lib/api/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";

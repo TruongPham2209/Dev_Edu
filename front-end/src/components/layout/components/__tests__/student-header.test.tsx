@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/web/student-header.tsx
+ * src/components/layout/components/student-header.tsx
  *
  * Purpose
  * -------
@@ -44,7 +44,7 @@ import * as authHook from "@/lib/use-auth";
 import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { StudentHeader } from "../student-header";
+import { StudentHeader } from "../../components/student-header";
 
 vi.mock("next/navigation", () => ({
   usePathname: vi.fn(),
@@ -95,7 +95,7 @@ describe("StudentHeader Component", () => {
     expect(screen.getByRole("link", { name: /Explore/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Forum/i })).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /My Courses/i })
+      screen.queryByRole("link", { name: /My Courses/i }),
     ).not.toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: "Log in" })).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("StudentHeader Component", () => {
     // ----------------------------------------------------------------------------
     expect(screen.getByTestId("user-menu")).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /My Courses/i })
+      screen.getByRole("link", { name: /My Courses/i }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Log in" }),
@@ -166,7 +166,7 @@ describe("StudentHeader Component", () => {
     // Verify My Courses is not rendered.
     // ----------------------------------------------------------------------------
     expect(
-      screen.queryByRole("link", { name: /My Courses/i })
+      screen.queryByRole("link", { name: /My Courses/i }),
     ).not.toBeInTheDocument();
   });
 });

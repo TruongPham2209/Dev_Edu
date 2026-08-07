@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/web/page.tsx
+ * src/components/layout/web-layout.tsx
  *
  * Purpose
  * -------
@@ -22,7 +22,7 @@
  *
  * Mocked Dependencies
  * -------------------
- * - "@/components/layout/web/student-header" (mocked StudentHeader)
+ * - "@/components/layout/components/student-header" (mocked StudentHeader)
  *
  * Not Covered
  * -----------
@@ -35,9 +35,9 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { StudentLayout } from "../page";
+import { StudentLayout } from "../web-layout";
 
-vi.mock("@/components/layout/web/student-header", () => ({
+vi.mock("@/components/components/student-header", () => ({
   StudentHeader: () => (
     <header data-testid="student-header">Student Navigation Header</header>
   ),

@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/manage-header.tsx
+ * src/components/layout/components/manage-header.tsx
  *
  * Purpose
  * -------
@@ -31,7 +31,7 @@
  * -------------------
  * - "next/navigation" (usePathname)
  * - "@/lib/use-auth" (useAuth)
- * - "./user-menu" (mocked UserMenu component)
+ * - "../user-menu" (mocked UserMenu component)
  *
  * Not Covered
  * -----------

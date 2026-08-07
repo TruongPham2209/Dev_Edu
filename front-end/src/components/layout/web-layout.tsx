@@ -1,6 +1,6 @@
 import { Box, Container } from "@mui/material";
 import type { ReactNode } from "react";
-import { StudentHeader } from "@/components/layout/web/student-header";
+import { StudentHeader } from "@/components/layout/components/student-header";
 
 type StudentLayoutProps = {
   children: ReactNode;

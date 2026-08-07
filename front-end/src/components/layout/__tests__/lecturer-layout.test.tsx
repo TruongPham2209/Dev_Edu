@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/components/layout/lecturer/page.tsx
+ * src/components/layout/lecturer-layout.tsx
  *
  * Purpose
  * -------
@@ -23,7 +23,7 @@
  *
  * Mocked Dependencies
  * -------------------
- * - "@/components/layout/manage-header" (mocked ManageHeader)
+ * - "@/components/layout/components/manage-header" (mocked ManageHeader)
  *
  * Not Covered
  * -----------
@@ -36,9 +36,9 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { LecturerLayout } from "../page";
+import { LecturerLayout } from "../lecturer-layout";
 
-vi.mock("@/components/layout/manage-header", () => ({
+vi.mock("@/components/layout/components/manage-header", () => ({
   ManageHeader: ({ title }: any) => (
     <header data-testid="manage-header">{title}</header>
   ),
