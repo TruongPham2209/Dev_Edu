@@ -19,4 +19,6 @@ public class RedisDurationConstant {
     public static final Duration POST_DATA_DURATION = Duration.ofHours(1);
 
     public static final Duration QUIZ_DATA_DURATION = Duration.ofHours(3);
+
+    public static final Duration NOTIFICATION_DATA_DURATION = Duration.ofHours(12);
 }

@@ -20,10 +20,10 @@ public class NotificationController {
 
     NotificationService notificationService;
 
+    // Get notification by cursor
     @GetMapping
     public ResponseEntity<?> getNotifications(
-            @RequestParam(required = false) String cursor
-    ) {
+            @RequestParam(required = false) String cursor) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
         var userRoles = SecurityContextUtils.getCurrentUserAuthorities();
 
@@ -31,6 +31,7 @@ public class NotificationController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Get unread count
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadCount() {
         var username = SecurityContextUtils.getCurrentUsernameForController();
@@ -40,11 +41,11 @@ public class NotificationController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Mark as read by ID or mark all as read
     @PutMapping("/read")
     public ResponseEntity<?> markAsRead(
             @RequestParam(required = false) UUID id,
-            @RequestParam(required = false, defaultValue = "PERSONAL") NotificationCategory category
-    ) {
+            @RequestParam(required = false, defaultValue = "PERSONAL") NotificationCategory category) {
         var username = SecurityContextUtils.getCurrentUsernameForController();
         if (id != null) {
             notificationService.markNotificationAsRead(id, category, username);

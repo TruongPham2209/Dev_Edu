@@ -21,30 +21,30 @@ import java.util.UUID;
 public class NotificationGroupController {
     NotificationGroupService notificationGroupService;
 
+    // Create group notification
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createGroupNotification(
-            @RequestBody @Valid CreateGroupNotificationRequest request
-    ) {
+            @RequestBody @Valid CreateGroupNotificationRequest request) {
         var createdBy = SecurityContextUtils.getCurrentUsernameForController();
         var result = notificationGroupService.createGroupNotification(request, createdBy);
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    // Delete group notification
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteGroupNotification(
-            @PathVariable UUID id
-    ) {
+            @PathVariable UUID id) {
         notificationGroupService.softDeleteGroupNotification(id);
         return ApiUtils.buildSuccessResponse("Group notification deleted successfully");
     }
 
+    // Get all group notifications
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<?> getAllGroupNotifications(
-            @RequestParam(required = false) String cursor
-    ) {
+            @RequestParam(required = false) String cursor) {
         var result = notificationGroupService.getAllGroupNotifications(cursor);
         return ApiUtils.buildSuccessResponse(result);
     }

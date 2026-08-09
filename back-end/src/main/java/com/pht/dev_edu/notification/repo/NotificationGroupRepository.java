@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,28 +16,15 @@ import java.util.UUID;
 public interface NotificationGroupRepository extends JpaRepository<NotificationGroupEntity, UUID> {
     Optional<NotificationGroupEntity> findByIdAndDeletedAtIsNull(UUID id);
 
-    @Query("SELECT g FROM NotificationGroupEntity g WHERE g.deletedAt IS NULL " +
-            "AND (g.createdAt < :createdAt OR (g.createdAt = :createdAt AND g.id < :id)) " +
-            "ORDER BY g.createdAt DESC, g.id DESC LIMIT :limit")
+    @Query(value = """
+            SELECT *
+            FROM notification_group
+            WHERE deleted_at IS NULL
+            AND (created_at, id) <= (:createdAt, :id)
+            ORDER BY created_at DESC, id DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<NotificationGroupEntity> findActiveWithCursor(
-            @Param("createdAt") LocalDateTime createdAt,
-            @Param("id") UUID id,
-            @Param("limit") int limit);
-
-    @Query("SELECT DISTINCT g FROM NotificationGroupEntity g " +
-            "JOIN NotificationGroupTargetEntity t ON g.id = t.notificationGroupId " +
-            "WHERE g.deletedAt IS NULL AND t.role IN :roles " +
-            "ORDER BY g.createdAt DESC, g.id DESC LIMIT :limit")
-    List<NotificationGroupEntity> findActiveByRoles(@Param("roles") Collection<String> roles,
-            @Param("limit") int limit);
-
-    @Query("SELECT DISTINCT g FROM NotificationGroupEntity g " +
-            "JOIN NotificationGroupTargetEntity t ON g.id = t.notificationGroupId " +
-            "WHERE g.deletedAt IS NULL AND t.role IN :roles " +
-            "AND (g.createdAt < :createdAt OR (g.createdAt = :createdAt AND g.id < :id)) " +
-            "ORDER BY g.createdAt DESC, g.id DESC LIMIT :limit")
-    List<NotificationGroupEntity> findActiveByRolesWithCursor(
-            @Param("roles") Collection<String> roles,
             @Param("createdAt") LocalDateTime createdAt,
             @Param("id") UUID id,
             @Param("limit") int limit);

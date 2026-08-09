@@ -1,17 +1,18 @@
 package com.pht.dev_edu.notification.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.notification.dto.CreateGroupNotificationRequest;
 import com.pht.dev_edu.notification.dto.NotificationCategory;
 import com.pht.dev_edu.notification.dto.NotificationResponse;
 import com.pht.dev_edu.notification.entity.NotificationGroupEntity;
-import com.pht.dev_edu.notification.entity.NotificationGroupReadStatusEntity;
 import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
 import com.pht.dev_edu.notification.repo.NotificationGroupReadStatusRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupRepository;
@@ -82,71 +83,6 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public CustomPaging<NotificationResponse> getGroupNotificationsForUser(
-            String username,
-            Collection<String> userRoles,
-            String cursor) {
-        if (CollectionUtils.isEmpty(userRoles)) {
-            return new CustomPaging<>();
-        }
-
-        var decodedCursor = resolveCursor(cursor);
-        List<NotificationGroupEntity> groupList = notificationGroupRepository.findActiveByRolesWithCursor(
-                userRoles,
-                decodedCursor.getTimeStamp(),
-                decodedCursor.getId(),
-                NOTIFICATION_PAGE_SIZE + 1);
-
-        if (groupList.isEmpty()) {
-            return new CustomPaging<>();
-        }
-
-        List<UUID> groupIds = groupList.stream().map(NotificationGroupEntity::getId).toList();
-
-        Map<UUID, List<RoleEnum>> rolesMap = notificationGroupTargetRepository
-                .findByNotificationGroupIdIn(groupIds).stream()
-                .collect(Collectors.groupingBy(
-                        NotificationGroupTargetEntity::getNotificationGroupId,
-                        Collectors.mapping(NotificationGroupTargetEntity::getRole,
-                                Collectors.toList())));
-
-        Map<UUID, NotificationGroupReadStatusEntity> readStatusMap = notificationGroupReadStatusRepository
-                .findByUsernameAndNotificationGroupIdIn(username, groupIds).stream()
-                .collect(Collectors.toMap(
-                        NotificationGroupReadStatusEntity::getNotificationGroupId,
-                        status -> status));
-
-        return PagingUtils.getPagedWithCursor(
-                groupList,
-                group -> {
-                    var status = readStatusMap.get(group.getId());
-                    boolean isRead = status != null && Boolean.TRUE.equals(status.getIsRead());
-                    LocalDateTime readAt = status != null ? status.getReadAt() : null;
-                    List<RoleEnum> roles = rolesMap.getOrDefault(group.getId(),
-                            Collections.emptyList());
-
-                    return NotificationResponse.builder()
-                            .id(group.getId())
-                            .title(group.getTitle())
-                            .content(group.getContent())
-                            .type(group.getType())
-                            .targetData(group.getTargetData())
-                            .createdBy(group.getCreatedBy())
-                            .createdAt(group.getCreatedAt())
-                            .category(NotificationCategory.GROUP)
-                            .isRead(isRead)
-                            .readAt(readAt)
-                            .targetRoles(roles)
-                            .build();
-                },
-                NotificationGroupEntity::getCreatedAt,
-                NotificationGroupEntity::getId,
-                NOTIFICATION_PAGE_SIZE);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public CustomPaging<NotificationResponse> getAllGroupNotifications(String cursor) {
 
         var decodedCursor = resolveCursor(cursor);
@@ -213,12 +149,37 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
 
     @Override
     @Transactional
+    public void markAllAsReadBefore(String username, Collection<String> userRoles, LocalDateTime timestamp) {
+        if (CollectionUtils.isEmpty(userRoles)) {
+            return;
+        }
+
+        List<UUID> unreadGroupIds = notificationGroupReadStatusRepository
+                .findUnreadGroupIdsByRolesAndTimestamp(userRoles, username, timestamp);
+
+        if (unreadGroupIds.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        List<UUID> ids = unreadGroupIds.stream()
+                .map(g -> UuidCreator.getTimeOrderedEpoch())
+                .toList();
+
+        notificationGroupReadStatusRepository.batchUpsertReadStatus(ids, unreadGroupIds, username, now);
+    }
+
+    @Override
+    @Transactional
     public void softDeleteGroupNotification(UUID groupId) {
         int updated = notificationGroupRepository.softDeleteById(groupId, LocalDateTime.now());
         if (updated == 0) {
             throw new DataNotFoundException(
                     "Group notification not found or already deleted with id: " + groupId);
         }
+
+        String cachedKey = RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.GROUP + ":" + groupId;
+        RedisUtils.invalidateCache(cachedKey);
     }
 
     private TimeStampCursor resolveCursor(String nextCursor) {

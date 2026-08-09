@@ -1,12 +1,15 @@
 package com.pht.dev_edu.notification.service;
 
+import com.pht.dev_edu.common.constant.RedisDurationConstant;
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
+import com.pht.dev_edu.common.dto.TimeStampCursor;
+import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.PagingUtils;
-import com.pht.dev_edu.notification.dto.NotificationCategory;
-import com.pht.dev_edu.notification.dto.NotificationResponse;
-import com.pht.dev_edu.notification.dto.UnreadCountResponse;
-import com.pht.dev_edu.notification.dto.UnifiedNotificationProjection;
+import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.notification.dto.*;
 import com.pht.dev_edu.notification.repo.NotificationRepository;
+import com.pht.dev_edu.user.service.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,41 +28,28 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationServiceImpl implements NotificationService {
-
     NotificationRepository notificationRepository;
+
+    UserService userService;
     NotificationPersonalService notificationPersonalService;
     NotificationGroupService notificationGroupService;
 
     private static final int NOTIFICATION_PAGE_SIZE = 15;
 
     @Override
-    @Transactional(readOnly = true)
     public CustomPaging<NotificationResponse> getUnifiedNotifications(
             String username,
             Collection<String> userRoles,
-            String cursor) {
+            String nextCursor) {
         int limit = NOTIFICATION_PAGE_SIZE + 1;
 
-        boolean hasRoles = !CollectionUtils.isEmpty(userRoles);
-        Collection<String> safeRoles = hasRoles ? userRoles : Collections.singletonList("");
-
-        boolean hasCursor = StringUtils.hasText(cursor);
-        LocalDateTime cursorCreatedAt = null;
-        UUID cursorId = null;
-
-        if (hasCursor) {
-            var decodedCursor = PagingUtils.decodeTimeStampCursor(cursor);
-            cursorCreatedAt = decodedCursor.getTimeStamp();
-            cursorId = decodedCursor.getId();
-        }
+        TimeStampCursor cursor = resolveCursor(nextCursor);
 
         List<UnifiedNotificationProjection> projections = notificationRepository.findUnifiedNotificationsWithCursor(
                 username,
-                safeRoles,
-                hasRoles,
-                hasCursor,
-                cursorCreatedAt,
-                cursorId,
+                userRoles,
+                cursor.getTimeStamp(),
+                cursor.getId(),
                 limit);
 
         return PagingUtils.getPagedWithCursor(
@@ -73,7 +61,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UnreadCountResponse getUnreadNotificationCounts(String username, Collection<String> userRoles) {
         long personalUnread = notificationPersonalService.getUnreadCount(username);
         long groupUnread = notificationGroupService.getUnreadGroupCountForUser(username, userRoles);
@@ -101,8 +88,33 @@ public class NotificationServiceImpl implements NotificationService {
         notificationPersonalService.markAllAsRead(username);
 
         if (!CollectionUtils.isEmpty(userRoles)) {
-            // TODO: implement notification group mark all as read
+            var user = userService.findByUsername(username);
+            var userCreatedAt = user.getCreatedAt();
+
+            notificationGroupService.markAllAsReadBefore(username, userRoles, userCreatedAt);
         }
+    }
+
+    @Override
+    public CachedNotification getCachedNotification(UUID id, NotificationCategory category) {
+        String cachedKey = RedisPrefixConstant.NOTIFICATION_PREFIX + category + ":" + id;
+        return RedisUtils.getDataFromCacheOrDb(
+                cachedKey,
+                CachedNotification.class,
+                () -> getNotificationFromDb(id, category),
+                RedisDurationConstant.NOTIFICATION_DATA_DURATION);
+    }
+
+    private CachedNotification getNotificationFromDb(UUID id, NotificationCategory category) {
+        if (category == null) {
+            throw new BadRequestException("Category is null");
+        }
+
+        if (category == NotificationCategory.GROUP) {
+
+        }
+
+        return null;
     }
 
     private NotificationResponse toNotificationResponse(UnifiedNotificationProjection proj) {
@@ -119,5 +131,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .category(NotificationCategory.valueOf(proj.getCategory()))
                 .createdBy(proj.getCreatedBy())
                 .build();
+    }
+
+    private TimeStampCursor resolveCursor(String nextCursor) {
+        return StringUtils.hasText(nextCursor)
+                ? PagingUtils.decodeTimeStampCursor(nextCursor)
+                : TimeStampCursor.getDefaultCursor(true);
     }
 }
