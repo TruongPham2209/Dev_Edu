@@ -24,6 +24,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { NotificationCenter } from "./notification-center";
 import { UserMenu } from "./user-menu";
 import { useAuth } from "@/lib/use-auth";
 
@@ -215,11 +216,7 @@ export function ManageHeader({
                 Switch to Admin Portal
               </Button>
             )}
-            <Tooltip title="Notifications" arrow>
-              <IconButton sx={{ color: "#475569" }}>
-                <Bell size={18} />
-              </IconButton>
-            </Tooltip>
+            <NotificationCenter />
             <Tooltip title="Theme" arrow>
               <IconButton sx={{ color: "#475569" }}>
                 <Moon size={18} />

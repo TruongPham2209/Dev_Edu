@@ -17,6 +17,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { UserMenu } from "./user-menu";
+import { NotificationCenter } from "./notification-center";
 
 export function StudentHeader() {
   const pathname = usePathname();
@@ -220,6 +221,7 @@ export function StudentHeader() {
                     <ShoppingCart size={20} />
                   </IconButton>
                 )}
+                <NotificationCenter />
                 <UserMenu />
               </>
             ) : (
