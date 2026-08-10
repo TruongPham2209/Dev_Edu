@@ -1,6 +1,8 @@
 package com.pht.dev_edu.notification.entity;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,6 +10,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -28,8 +31,9 @@ public class NotificationPersonalEntity {
     @Column(name = "username", nullable = false)
     String username;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 100)
-    String type;
+    NotificationEvent type;
 
     @Column(name = "title", nullable = false, length = 500)
     String title;
@@ -39,7 +43,7 @@ public class NotificationPersonalEntity {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "target_data", columnDefinition = "jsonb")
-    String targetData;
+    Map<NotificationTargetType, String> targetData;
 
     @Column(name = "is_read", nullable = false)
     Boolean isRead;

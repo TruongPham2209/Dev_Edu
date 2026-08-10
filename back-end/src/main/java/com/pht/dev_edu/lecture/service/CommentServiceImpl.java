@@ -18,6 +18,10 @@ import com.pht.dev_edu.lecture.dto.CommentResponse;
 import com.pht.dev_edu.lecture.entity.LectureCommentEntity;
 import com.pht.dev_edu.lecture.mapper.LectureCommentMapper;
 import com.pht.dev_edu.lecture.repo.LectureCommentRepository;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -38,6 +44,7 @@ import java.util.concurrent.Executor;
 public class CommentServiceImpl implements CommentService {
     LectureCommentRepository lectureCommentRepository;
     LectureCommentMapper commentMapper;
+    NotificationPersonalService notificationPersonalService;
     LecturePermissionService lecturePermissionService;
     Executor executor;
 
@@ -111,8 +118,10 @@ public class CommentServiceImpl implements CommentService {
         commentEntity.setUsername(author);
         commentEntity.setDepth(0);
 
+        LectureCommentEntity parentComment;
+
         if (req.getParentCommentId() != null) {
-            var parentComment = findCommentById(req.getParentCommentId());
+            parentComment = findCommentById(req.getParentCommentId());
             if (parentComment == null) {
                 log.error("Parent comment with id {} not found", req.getParentCommentId());
                 throw new DataNotFoundException("Parent comment not found");
@@ -123,7 +132,7 @@ public class CommentServiceImpl implements CommentService {
                 throw new BadRequestException("Cannot add reply to a deleted comment that has reached max depth");
             }
 
-            if (parentComment.getDeletedAt() != null && !lectureCommentRepository.hasNonDeletedReplies(parentComment.getId()) ) {
+            if (parentComment.getDeletedAt() != null && !lectureCommentRepository.hasNonDeletedReplies(parentComment.getId())) {
                 log.error("Parent comment with id {} is deleted and has no non-deleted replies, cannot add reply", req.getParentCommentId());
                 throw new BadRequestException("Cannot add reply to a deleted comment that has no non-deleted replies");
             }
@@ -135,8 +144,24 @@ public class CommentServiceImpl implements CommentService {
             commentEntity.setDepth(newCommentDepth);
             commentEntity.setRootCommentId(rootCommentId);
             commentEntity.setParentCommentId(parentCommentId);
+        } else {
+            parentComment = null;
         }
         lectureCommentRepository.save(commentEntity);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            if (parentComment != null) {
+                Map<NotificationTargetType, String> targetData = new HashMap<>();
+                targetData.put(NotificationTargetType.LECTURE, commentEntity.getLectureId().toString());
+                PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                        .event(NotificationEvent.LECTURE_COMMENT_RESPONSE)
+                        .targetData(targetData)
+                        .username(parentComment.getUsername())
+                        .content(commentEntity.getContent())
+                        .build();
+                notificationPersonalService.publishNotification(event);
+            }
+        }, executor);
         return commentMapper.entityToRes(commentEntity);
     }
 

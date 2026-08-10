@@ -11,6 +11,10 @@ import com.pht.dev_edu.lecture.dto.MaterialRequest;
 import com.pht.dev_edu.lecture.dto.MaterialResponse;
 import com.pht.dev_edu.lecture.mapper.MaterialMapper;
 import com.pht.dev_edu.lecture.repo.LectureMaterialRepository;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -31,6 +33,7 @@ import java.util.concurrent.Executor;
 public class MaterialServiceImpl implements MaterialService {
     LectureMaterialRepository lectureMaterialRepository;
 
+    NotificationPersonalService notificationPersonalService;
     LecturePermissionService lecturePermissionService;
     FileService fileService;
 
@@ -54,6 +57,17 @@ public class MaterialServiceImpl implements MaterialService {
         material.setFileType(fileInfo.getContentType());
         material.setFileOriginalName(fileInfo.getOriginalFileName());
         lectureMaterialRepository.save(material);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            Map<NotificationTargetType, String> targetData = new HashMap<>();
+            targetData.put(NotificationTargetType.LECTURE, material.getLectureId().toString());
+            PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                    .event(NotificationEvent.COURSE_NEW_MATERIAL)
+                    .targetData(targetData)
+                    .content(material.getTitle())
+                    .build();
+            notificationPersonalService.publishNotification(event);
+        }, executor);
 
         return materialMapper.entityToRes(material);
     }

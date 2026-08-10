@@ -1,0 +1,17 @@
+package com.pht.dev_edu.notification.dto;
+
+public enum NotificationEvent {
+    COURSE_NEW_LECTURE,
+    COURSE_NEW_ASSIGNMENT,
+    COURSE_NEW_MATERIAL,
+
+    SUBMISSION_FEEDBACK,
+
+    LECTURE_COMMENT_RESPONSE,
+
+    QUIZ_ACTIVE,
+    QUIZ_ASSIGNMENT_GRADED,
+
+    POST_COMMENT,
+    POST_RESPONSE
+}

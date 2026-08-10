@@ -38,5 +38,5 @@ public interface NotificationGroupService {
     /**
      * Soft deletes a group notification (Admin action).
      */
-    void softDeleteGroupNotification(UUID groupId);
+    void softDeleteGroupNotification(UUID groupId, String username);
 }

@@ -8,6 +8,10 @@ import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import com.pht.dev_edu.user.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -29,6 +31,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     FeedbackRepository feedbackRepository;
     UserRepository userRepository;
 
+    NotificationPersonalService notificationPersonalService;
     AssignmentPermissionService assignmentPermissionService;
     FeedbackMapper feedbackMapper;
     Executor executor;
@@ -51,6 +54,18 @@ public class FeedbackServiceImpl implements FeedbackService {
         var feedbackEntity = feedbackMapper.reqToEntity(req);
         feedbackEntity.setLecturer(author);
         feedbackRepository.save(feedbackEntity);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            Map<NotificationTargetType, String> targetData = new HashMap<>();
+            targetData.put(NotificationTargetType.LECTURE, feedbackEntity.getAssignmentId().toString());
+            PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                    .event(NotificationEvent.SUBMISSION_FEEDBACK)
+                    .targetData(targetData)
+                    .username(req.getStudentUsername())
+                    .content(feedbackEntity.getFeedback())
+                    .build();
+            notificationPersonalService.publishNotification(event);
+        }, executor);
 
         return feedbackMapper.entityToRes(feedbackEntity);
     }

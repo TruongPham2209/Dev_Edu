@@ -2,6 +2,7 @@ package com.pht.dev_edu.notification.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.pht.dev_edu.common.dto.RoleEnum;
@@ -23,7 +24,7 @@ public class CachedNotification {
     String title;
     String content;
     NotificationCategory category;
-    String targetData;
+    Map<NotificationTargetType, String> targetData;
     LocalDateTime createdAt;
     LocalDateTime deleteAt;
     String createdBy;

@@ -17,7 +17,5 @@ import java.util.Set;
 public class CreateGroupNotificationRequest {
     String title;
     String content;
-    String type;
-    String targetData;
     Set<RoleEnum> targetRoles;
 }

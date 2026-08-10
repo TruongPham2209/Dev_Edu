@@ -42,7 +42,7 @@ public class KafkaUtils {
     }
 
     public static void sendPersonalNotificationEvent(PersonalNotificationEvent event) {
-        if (event != null && StringUtils.hasText(event.getUsername())) {
+        if (event != null) {
             kafkaTemplate.send(
                     KafkaTopicConstant.PERSONAL_NOTIFICATION_TOPIC,
                     event

@@ -2,6 +2,11 @@ package com.pht.dev_edu.quiz.scheduler;
 
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.quiz.dto.enums.AssignmentStatus;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
@@ -20,7 +25,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Component
@@ -30,6 +38,9 @@ public class QuizScheduler {
     QuizAttemptRepo attemptRepo;
     QuizAssignmentRepo assignmentRepo;
     UserQuizSessionRepo sessionRepo;
+
+    Executor executor;
+    NotificationPersonalService notificationPersonalService;
     QuizAttemptService attemptService;
 
     /**
@@ -69,6 +80,17 @@ public class QuizScheduler {
             if (assignment.getEndTime() == null || !now.isAfter(assignment.getEndTime())) {
                 assignment.setStatus(AssignmentStatus.ACTIVE);
                 log.info("Transitioned assignment ID {} to ACTIVE", assignment.getId());
+
+                TransactionUtils.runAfterCommitAsync(() -> {
+                    Map<NotificationTargetType, String> targetData = new HashMap<>();
+                    targetData.put(NotificationTargetType.COURSE, assignment.getQuizId().toString());
+                    PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                            .event(NotificationEvent.QUIZ_ACTIVE)
+                            .targetData(targetData)
+                            .content(assignment.getAssignmentName())
+                            .build();
+                    notificationPersonalService.publishNotification(event);
+                }, executor);
             } else {
                 assignment.setStatus(AssignmentStatus.CLOSED);
                 log.info("Transitioned assignment ID {} to CLOSED", assignment.getId());

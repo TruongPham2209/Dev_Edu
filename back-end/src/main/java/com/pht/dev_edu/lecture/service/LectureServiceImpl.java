@@ -23,6 +23,10 @@ import com.pht.dev_edu.lecture.repo.LectureCommentRepository;
 import com.pht.dev_edu.lecture.repo.LectureMaterialRepository;
 import com.pht.dev_edu.lecture.repo.LectureProgressRepository;
 import com.pht.dev_edu.lecture.repo.LectureRepository;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.tracking.dto.GetVideoDurationEvent;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -52,6 +53,7 @@ public class LectureServiceImpl implements LectureService {
     AssignmentRepository assignmentRepository;
 
     Executor executor;
+    NotificationPersonalService notificationPersonalService;
     LecturePermissionService lecturePermissionService;
     AssignmentService assignmentService;
     FileService fileService;
@@ -121,6 +123,19 @@ public class LectureServiceImpl implements LectureService {
 
         lectureRepository.save(newLecture);
         sendGetDurationEvent(req.getVideoObjectKey(), newLecture.getId());
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            Map<NotificationTargetType, String> targetData = new HashMap<>();
+            targetData.put(NotificationTargetType.COURSE, newLecture.getCourseId().toString());
+            targetData.put(NotificationTargetType.LECTURE, newLecture.getId().toString());
+            PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                    .event(NotificationEvent.COURSE_NEW_LECTURE)
+                    .targetData(targetData)
+                    .content(newLecture.getTitle())
+                    .build();
+            notificationPersonalService.publishNotification(event);
+        }, executor);
+
         return lectureMapper.entityToResponse(newLecture);
     }
 

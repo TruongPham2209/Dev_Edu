@@ -1,14 +1,14 @@
 package com.pht.dev_edu.notification.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.pht.dev_edu.common.constant.EventTrackingConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.PagingUtils;
-import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.*;
 import com.pht.dev_edu.notification.dto.CreateGroupNotificationRequest;
 import com.pht.dev_edu.notification.dto.NotificationCategory;
 import com.pht.dev_edu.notification.dto.NotificationResponse;
@@ -17,6 +17,7 @@ import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
 import com.pht.dev_edu.notification.repo.NotificationGroupReadStatusRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupTargetRepository;
+import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +29,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,6 +41,8 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
     NotificationGroupRepository notificationGroupRepository;
     NotificationGroupTargetRepository notificationGroupTargetRepository;
     NotificationGroupReadStatusRepository notificationGroupReadStatusRepository;
+
+    Executor executor;
 
     private static final int NOTIFICATION_PAGE_SIZE = 10;
 
@@ -52,8 +56,6 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
         var groupEntity = NotificationGroupEntity.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
-                .type(request.getType())
-                .targetData(request.getTargetData())
                 .createdBy(createdBy)
                 .build();
 
@@ -126,10 +128,11 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
     @Override
     @Transactional(readOnly = true)
     public long getUnreadGroupCountForUser(String username, Collection<String> userRoles) {
-        if (CollectionUtils.isEmpty(userRoles)) {
+        Set<RoleEnum> roles = SecurityContextUtils.extractRoleEnums(userRoles);
+        if (CollectionUtils.isEmpty(roles)) {
             return 0;
         }
-        return notificationGroupReadStatusRepository.countUnreadGroupNotificationsByRolesAndUsername(userRoles,
+        return notificationGroupReadStatusRepository.countUnreadGroupNotificationsByRolesAndUsername(roles,
                 username);
     }
 
@@ -150,12 +153,13 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
     @Override
     @Transactional
     public void markAllAsReadBefore(String username, Collection<String> userRoles, LocalDateTime timestamp) {
-        if (CollectionUtils.isEmpty(userRoles)) {
+        Set<RoleEnum> roles = SecurityContextUtils.extractRoleEnums(userRoles);
+        if (CollectionUtils.isEmpty(roles)) {
             return;
         }
 
         List<UUID> unreadGroupIds = notificationGroupReadStatusRepository
-                .findUnreadGroupIdsByRolesAndTimestamp(userRoles, username, timestamp);
+                .findUnreadGroupIdsByRolesAndTimestamp(roles, username, timestamp);
 
         if (unreadGroupIds.isEmpty()) {
             return;
@@ -166,20 +170,34 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
                 .map(g -> UuidCreator.getTimeOrderedEpoch())
                 .toList();
 
-        notificationGroupReadStatusRepository.batchUpsertReadStatus(ids, unreadGroupIds, username, now);
+        String idsStr = ids.stream().map(UUID::toString).collect(Collectors.joining(","));
+        String groupIdsStr = unreadGroupIds.stream().map(UUID::toString).collect(Collectors.joining(","));
+
+        notificationGroupReadStatusRepository.batchUpsertReadStatus(idsStr, groupIdsStr, username, now);
     }
 
     @Override
     @Transactional
-    public void softDeleteGroupNotification(UUID groupId) {
+    public void softDeleteGroupNotification(UUID groupId, String username) {
         int updated = notificationGroupRepository.softDeleteById(groupId, LocalDateTime.now());
         if (updated == 0) {
             throw new DataNotFoundException(
                     "Group notification not found or already deleted with id: " + groupId);
         }
 
-        String cachedKey = RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.GROUP + ":" + groupId;
-        RedisUtils.invalidateCache(cachedKey);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            String cachedKey = RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.GROUP + ":"
+                    + groupId;
+            RedisUtils.invalidateCache(cachedKey);
+
+            var trackingEvent = TrackingEvent.builder()
+                    .aggregateId(groupId)
+                    .action(EventTrackingConstant.NOTIFICATION_DELETED)
+                    .username(username)
+                    .details(String.format("Deleted group notification with ID %s", groupId))
+                    .build();
+            KafkaUtils.sendTrackingEvent(trackingEvent);
+        }, executor);
     }
 
     private TimeStampCursor resolveCursor(String nextCursor) {

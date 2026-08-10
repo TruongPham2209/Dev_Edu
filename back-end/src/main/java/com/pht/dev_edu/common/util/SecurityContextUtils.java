@@ -1,12 +1,16 @@
 package com.pht.dev_edu.common.util;
 
+import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.security.UnauthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 public class SecurityContextUtils {
@@ -56,4 +60,26 @@ public class SecurityContextUtils {
                 .map(GrantedAuthority::getAuthority)
                 .collect(java.util.stream.Collectors.toSet());
     }
+
+    public static Set<RoleEnum> extractRoleEnums(Collection<String> authorities) {
+        if (CollectionUtils.isEmpty(authorities)) {
+            return Set.of();
+        }
+        Set<RoleEnum> roles = new HashSet<>();
+        for (String auth : authorities) {
+            if (auth == null) continue;
+            String clean = auth.startsWith("ROLE_") ? auth.substring(5) : auth;
+            try {
+                roles.add(RoleEnum.valueOf(clean));
+            } catch (IllegalArgumentException ignored) {
+                // Ignore non-RoleEnum values like SCOPE_openid, SCOPE_profile
+            }
+        }
+        return roles;
+    }
+
+    public static Set<RoleEnum> getCurrentUserRoleEnums() {
+        return extractRoleEnums(getCurrentUserAuthorities());
+    }
 }
+

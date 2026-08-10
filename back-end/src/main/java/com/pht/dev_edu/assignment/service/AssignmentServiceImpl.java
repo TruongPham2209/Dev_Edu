@@ -11,6 +11,10 @@ import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.KafkaUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 @Slf4j
@@ -34,6 +36,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     FeedbackRepository feedbackRepository;
 
     Executor executor;
+    NotificationPersonalService notificationPersonalService;
     AssignmentPermissionService assignmentPermissionService;
     AssignmentMapper assignmentMapper;
 
@@ -68,6 +71,17 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentPermissionService.checkModifyAssignmentPermissionByLecture(authorities, author, req.getLectureId());
         var assignment = assignmentMapper.reqToEntity(req);
         assignmentRepository.save(assignment);
+
+        TransactionUtils.runAfterCommitAsync(() -> {
+            Map<NotificationTargetType, String> targetData = new HashMap<>();
+            targetData.put(NotificationTargetType.LECTURE, assignment.getLectureId().toString());
+            PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                    .event(NotificationEvent.COURSE_NEW_ASSIGNMENT)
+                    .targetData(targetData)
+                    .content(assignment.getTitle())
+                    .build();
+            notificationPersonalService.publishNotification(event);
+        }, executor);
 
         return assignmentMapper.entityToRes(assignment);
     }

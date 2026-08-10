@@ -37,4 +37,9 @@ public interface NotificationService {
      * Get cached notification (for push notification)
      */
     CachedNotification getCachedNotification(UUID id, NotificationCategory category);
+
+    /**
+     * Delete personal notification by ID
+     */
+    void deleteNotification(UUID id, String username);
 }

@@ -1,7 +1,6 @@
 package com.pht.dev_edu.notification.service;
 
 import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
-import com.pht.dev_edu.notification.entity.NotificationPersonalEntity;
 
 import java.util.UUID;
 
@@ -15,7 +14,7 @@ public interface NotificationPersonalService {
     /**
      * Saves a personal notification received from Kafka listener into database.
      */
-    NotificationPersonalEntity saveFromEvent(PersonalNotificationEvent event);
+    void saveFromEvent(PersonalNotificationEvent event);
 
     /**
      * Gets count of unread personal notifications for a user.

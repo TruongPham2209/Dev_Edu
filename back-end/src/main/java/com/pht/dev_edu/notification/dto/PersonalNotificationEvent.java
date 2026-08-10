@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,8 +15,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class PersonalNotificationEvent {
     String username;
-    String type;
+    NotificationEvent event;
     String title;
     String content;
-    String targetData;
+    Map<NotificationTargetType, String> targetData;
 }

@@ -56,4 +56,14 @@ public class NotificationController {
 
         return ApiUtils.buildSuccessResponse("Notification marked as read successfully");
     }
+
+    // Delete personal notification by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteNotification(
+            @PathVariable UUID id) {
+        var username = SecurityContextUtils.getCurrentUsernameForController();
+        notificationService.deleteNotification(id, username);
+
+        return ApiUtils.buildSuccessResponse("Notification deleted successfully");
+    }
 }

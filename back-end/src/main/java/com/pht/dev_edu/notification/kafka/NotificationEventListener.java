@@ -38,8 +38,8 @@ public class NotificationEventListener {
         var event = objectMapper.readValue(payload, PersonalNotificationEvent.class);
 
         // Save personal notification into DB
-        var savedEntity = notificationPersonalService.saveFromEvent(event);
-        log.info("Saved personal notification with ID: {} for user: {}", savedEntity.getId(), event.getUsername());
+        notificationPersonalService.saveFromEvent(event);
+        log.info("Saved personal notification for user: {}", event.getUsername());
 
         ack.acknowledge();
     }

@@ -25,4 +25,6 @@ public class EventTrackingConstant {
     public static final String POST_STATUS_UPDATED = "post_status.updated";
 
     public static final String FORUM_COMMENT_DELETED = "forum_comment.deleted";
+
+    public static final String NOTIFICATION_DELETED = "notification.deleted";
 }

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UUID> {
@@ -118,6 +119,14 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
             """,
             nativeQuery = true)
     Page<EnrollmentUserProjection> findEnrolledUsersByCourseIdAndCursor(UUID courseId, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
+
+    @Query(value = """
+                        SELECT student_username
+                        FROM enrollment
+                        WHERE course_id = :courseId
+            """,
+            nativeQuery = true)
+    List<String> findAllEnrolledUsersByCourseId(UUID courseId);
 
     boolean existsByCourseId(UUID courseId);
 

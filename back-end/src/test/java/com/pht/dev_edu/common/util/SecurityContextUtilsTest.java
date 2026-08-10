@@ -1,5 +1,7 @@
 package com.pht.dev_edu.common.util;
 
+import com.pht.dev_edu.common.dto.RoleEnum;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
@@ -287,4 +289,27 @@ class SecurityContextUtilsTest {
         // Assert
         assertThat(result).containsExactlyInAnyOrder("ROLE_ADMIN", "ROLE_LECTURER");
     }
+
+    // ==================== extractRoleEnums ====================
+
+    @Test
+    @DisplayName("extractRoleEnums - should return empty set for null or empty authorities")
+    void shouldReturnEmptySetForNullOrEmptyAuthorities() {
+        assertThat(SecurityContextUtils.extractRoleEnums(null)).isEmpty();
+        assertThat(SecurityContextUtils.extractRoleEnums(List.of())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("extractRoleEnums - should extract valid RoleEnums and ignore non-role authorities like SCOPE_openid")
+    void shouldExtractValidRoleEnumsAndIgnoreScopes() {
+        // Arrange
+        List<String> authorities = List.of("SCOPE_openid", "SCOPE_profile", "ROLE_STUDENT", "ADMIN", "INVALID_ROLE");
+
+        // Act
+        Set<RoleEnum> result = SecurityContextUtils.extractRoleEnums(authorities);
+
+        // Assert
+        assertThat(result).containsExactlyInAnyOrder(RoleEnum.STUDENT, RoleEnum.ADMIN);
+    }
 }
+

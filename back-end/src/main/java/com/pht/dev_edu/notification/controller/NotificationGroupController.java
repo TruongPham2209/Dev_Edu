@@ -36,7 +36,9 @@ public class NotificationGroupController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteGroupNotification(
             @PathVariable UUID id) {
-        notificationGroupService.softDeleteGroupNotification(id);
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+
+        notificationGroupService.softDeleteGroupNotification(id, username);
         return ApiUtils.buildSuccessResponse("Group notification deleted successfully");
     }
 

@@ -1,20 +1,15 @@
 package com.pht.dev_edu.quiz.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
@@ -30,11 +25,18 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptAnswerRepo;
 import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizEssayGradingRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -46,6 +48,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
     QuizAttemptAnswerRepo answerRepo;
     QuizEssayGradingRepo essayGradingRepo;
 
+    Executor executor;
+    NotificationPersonalService notificationPersonalService;
     QuizAccessService quizAccessService;
     QuizAttemptService attemptService;
     QuizAuditService auditService;
@@ -144,9 +148,9 @@ public class QuizGradingServiceImpl implements QuizGradingService {
         essayGradingRepo.save(essayGrading);
 
         // Check if any ungaded essay question remains for this attempt
-        int ungadedCount = answerRepo.countByAttemptIdAndQuestionTypeAndAwardedPointsIsNull(attemptId,
+        int ungradedCount = answerRepo.countByAttemptIdAndQuestionTypeAndAwardedPointsIsNull(attemptId,
                 QuestionType.ESSAY);
-        if (ungadedCount == 0) {
+        if (ungradedCount == 0) {
             // All essay questions graded -> Recalculate total score
             List<QuizAttemptAnswerEntity> allAnswers = answerRepo.findByAttemptId(attemptId);
             BigDecimal totalScore = allAnswers.stream()
@@ -158,6 +162,19 @@ public class QuizGradingServiceImpl implements QuizGradingService {
             attempt.setGradedAt(now);
             attempt.setTotalScore(totalScore);
             attemptRepo.save(attempt);
+
+            TransactionUtils.runAfterCommitAsync(() -> {
+                Map<NotificationTargetType, String> targetData = new HashMap<>();
+                targetData.put(NotificationTargetType.COURSE, attempt.getQuizId().toString());
+                targetData.put(NotificationTargetType.QUIZ_ATTEMPT, attempt.getId().toString());
+                PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                        .event(NotificationEvent.QUIZ_ASSIGNMENT_GRADED)
+                        .targetData(targetData)
+                        .content(question.getContent())
+                        .username(attempt.getStudentUsername())
+                        .build();
+                notificationPersonalService.publishNotification(event);
+            }, executor);
         }
 
         auditService.log("ATTEMPT_ANSWER", answer.getId(), QuizAuditAction.GRADE, graderUsername, null, answer,

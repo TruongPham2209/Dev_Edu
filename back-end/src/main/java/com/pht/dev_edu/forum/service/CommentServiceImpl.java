@@ -11,9 +11,15 @@ import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.forum.dto.CommentProjection;
 import com.pht.dev_edu.forum.dto.CommentRequest;
 import com.pht.dev_edu.forum.dto.CommentResponse;
+import com.pht.dev_edu.forum.entity.CommentEntity;
 import com.pht.dev_edu.forum.mapper.ForumCommentMapper;
 import com.pht.dev_edu.forum.repo.CommentRepository;
+import com.pht.dev_edu.notification.dto.NotificationEvent;
+import com.pht.dev_edu.notification.dto.NotificationTargetType;
+import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.tracking.dto.TrackingEvent;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -30,10 +38,11 @@ import java.util.concurrent.Executor;
 @Slf4j
 @Service("forumCommentService")
 @RequiredArgsConstructor
-@FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommentServiceImpl implements CommentService {
     CommentRepository commentRepository;
 
+    NotificationPersonalService notificationPersonalService;
     ForumCommentMapper forumCommentMapper;
     Executor executor;
 
@@ -45,8 +54,10 @@ public class CommentServiceImpl implements CommentService {
         var commentEntity = forumCommentMapper.reqToEntity(request);
         commentEntity.setAuthor(username);
 
+        CommentEntity parentComment;
+
         if (request.getRepliedToCommentId() != null) {
-            var parentComment = commentRepository.findById(request.getRepliedToCommentId())
+            parentComment = commentRepository.findById(request.getRepliedToCommentId())
                     .orElseThrow(() -> {
                         log.error("Parent comment not found with ID {}", request.getRepliedToCommentId());
                         return new BadRequestException("Parent comment not found.");
@@ -67,9 +78,31 @@ public class CommentServiceImpl implements CommentService {
 
             int depth = Math.min(parentComment.getDepth() + 1, MAX_COMMENT_DEPTH);
             commentEntity.setDepth(depth);
+        } else {
+            parentComment = null;
         }
 
         commentRepository.save(commentEntity);
+        TransactionUtils.runAfterCommitAsync(() -> {
+            Map<NotificationTargetType, String> targetData = new HashMap<>();
+            targetData.put(NotificationTargetType.POST, commentEntity.getPostId().toString());
+            PersonalNotificationEvent event = PersonalNotificationEvent.builder()
+                    .event(NotificationEvent.POST_COMMENT)
+                    .targetData(targetData)
+                    .content(commentEntity.getContent())
+                    .build();
+            notificationPersonalService.publishNotification(event);
+
+            if (parentComment != null) {
+                PersonalNotificationEvent responseEvent = PersonalNotificationEvent.builder()
+                        .event(NotificationEvent.POST_RESPONSE)
+                        .targetData(targetData)
+                        .username(parentComment.getAuthor())
+                        .content(commentEntity.getContent())
+                        .build();
+                notificationPersonalService.publishNotification(responseEvent);
+            }
+        }, executor);
         return forumCommentMapper.entityToRes(commentEntity);
     }
 
@@ -108,7 +141,7 @@ public class CommentServiceImpl implements CommentService {
 
         return PagingUtils.getPagedWithCursor(
                 commentPage,
-                c ->  convertProjectionToRes(c, username),
+                c -> convertProjectionToRes(c, username),
                 CommentProjection::getCreatedAt,
                 CommentProjection::getId,
                 pageable.getPageSize() - 1
