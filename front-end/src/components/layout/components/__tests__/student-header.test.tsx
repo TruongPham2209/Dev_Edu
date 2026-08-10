@@ -59,8 +59,14 @@ vi.mock("@/lib/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock("../../user-menu", () => ({
+vi.mock("../user-menu", () => ({
   UserMenu: () => <div data-testid="user-menu">UserMenu</div>,
+}));
+
+vi.mock("../notification-center", () => ({
+  NotificationCenter: () => (
+    <div data-testid="notification-center">NotificationCenter</div>
+  ),
 }));
 
 describe("StudentHeader Component", () => {

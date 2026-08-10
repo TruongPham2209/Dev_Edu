@@ -60,6 +60,12 @@ vi.mock("../user-menu", () => ({
   UserMenu: () => <div data-testid="user-menu">UserMenu</div>,
 }));
 
+vi.mock("../notification-center", () => ({
+  NotificationCenter: () => (
+    <div data-testid="notification-center">NotificationCenter</div>
+  ),
+}));
+
 describe("ManageHeader", () => {
   beforeEach(() => {
     vi.clearAllMocks();

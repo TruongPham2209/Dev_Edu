@@ -44,6 +44,9 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizEssayGradingRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
 
+import java.util.concurrent.Executor;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
+
 /*
  * <analysis>
  * QuizGradingServiceImpl
@@ -114,6 +117,8 @@ import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
  * - QuizAccessService
  * - QuizAttemptService
  * - QuizAuditService
+ * - Executor
+ * - NotificationPersonalService
  */
 @ExtendWith(MockitoExtension.class)
 class QuizGradingServiceImplTest {
@@ -126,6 +131,10 @@ class QuizGradingServiceImplTest {
     QuizAttemptAnswerRepo answerRepo;
     @Mock
     QuizEssayGradingRepo essayGradingRepo;
+    @Mock
+    Executor executor;
+    @Mock
+    NotificationPersonalService notificationPersonalService;
     @Mock
     QuizAccessService quizAccessService;
     @Mock

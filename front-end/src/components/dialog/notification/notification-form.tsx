@@ -217,6 +217,7 @@ export function CreateGroupNotificationDialog({
                     }}
                   >
                     <FormControlLabel
+                      onClick={(e) => e.stopPropagation()}
                       control={
                         <Checkbox
                           checked={checked}
