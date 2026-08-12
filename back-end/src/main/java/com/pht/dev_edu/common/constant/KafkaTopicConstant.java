@@ -27,4 +27,5 @@ public class KafkaTopicConstant {
 
     // Notification Topics
     public static final String PERSONAL_NOTIFICATION_TOPIC = "personal-notification-topic";
+    public static final String PUSH_NOTIFICATION_TOPIC = "push-notification-topic";
 }

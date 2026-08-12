@@ -36,8 +36,16 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <elastic.version>8.14.1</elastic.version>
+        <firebase-admin.version>9.3.0</firebase-admin.version>
     </properties>
     <dependencies>
+        <!-- Firebase Admin SDK -->
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>${firebase-admin.version}</version>
+        </dependency>
+
         <!-- Mail SDK -->
         <dependency>
             <groupId>com.brevo</groupId>

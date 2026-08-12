@@ -107,7 +107,10 @@ export async function apiPut<T>(endpoint: string, body: unknown): Promise<T> {
   return response.data;
 }
 
-export async function apiDelete<T>(endpoint: string): Promise<T> {
-  const response = await apiCall<T>(endpoint, { method: "DELETE" });
+export async function apiDelete<T>(endpoint: string, body?: unknown): Promise<T> {
+  const response = await apiCall<T>(endpoint, {
+    method: "DELETE",
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
   return response.data;
 }

@@ -59,7 +59,30 @@ public class NotificationPersonalServiceImpl implements NotificationPersonalServ
         }
         notificationPersonalRepository.saveAll(notifications);
 
-        // TODO: push notification
+        // Publish push notification event for each created notification into Kafka
+        for (var notification : notifications) {
+            try {
+                java.util.Map<String, String> dataMap = new java.util.HashMap<>();
+                if (notification.getTargetData() != null) {
+                    notification.getTargetData().forEach((k, v) -> {
+                        if (k != null && v != null) {
+                            dataMap.put(k.name(), v);
+                        }
+                    });
+                }
+                var pushEvent = com.pht.dev_edu.notification.dto.PushNotificationEvent.builder()
+                        .username(notification.getUsername())
+                        .title(notification.getTitle())
+                        .body(notification.getContent())
+                        .data(dataMap)
+                        .build();
+
+                KafkaUtils.sendPushNotificationEvent(pushEvent);
+                log.info("Published PushNotificationEvent to Kafka for username={}", notification.getUsername());
+            } catch (Exception e) {
+                log.warn("Failed to publish PushNotificationEvent to Kafka for user {}: {}", notification.getUsername(), e.getMessage());
+            }
+        }
     }
 
     @Override

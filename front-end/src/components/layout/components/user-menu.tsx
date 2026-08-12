@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/use-auth";
 import { clearAuthSession } from "@/lib/auth-storage";
 import { useRouter } from "next/navigation";
 import { logoutAction } from "@/app/logout/actions";
+import { unregisterPushNotificationOnLogout } from "@/lib/push-notification";
 
 export function UserMenu() {
   const router = useRouter();
@@ -25,6 +26,11 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     setAnchorEl(null);
+    try {
+      await unregisterPushNotificationOnLogout();
+    } catch (err) {
+      console.error("Failed to unregister push notification:", err);
+    }
     clearAuthSession();
     try {
       await logoutAction();

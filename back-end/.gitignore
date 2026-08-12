@@ -40,3 +40,8 @@ build/
 # agents skills
 /.agents
 /features
+
+# Keys and secrets
+src/main/resources/keys/*
+!src/main/resources/keys/.gitkeep
+
