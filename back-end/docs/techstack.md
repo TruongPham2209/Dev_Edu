@@ -22,6 +22,7 @@
 - [14. Development & Build Tools](#14-development--build-tools)
 - [15. Monitoring & Observability](#15-monitoring--observability)
 - [16. Containerization](#16-containerization)
+- [17. AI & Vector Database Integration](#17-ai--vector-database-integration)
 
 ---
 
@@ -125,10 +126,15 @@
 
 ## 4. Database & ORM
 
-### PostgreSQL (`postgresql` driver)
+### PostgreSQL (`postgresql` driver & pgvector extension)
 
-- **Mục đích**: Database chính
+- **Mục đích**: Database chính & lưu trữ vector embeddings cho AI Chatbot
+- **Image**: `pgvector/pgvector:pg16` (thay cho `postgres:16-alpine` tiêu chuẩn)
 - **Cấu hình**: env variables `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- **Vector Search Engine**: Extension `vector`
+  - Kiểu dữ liệu: `vector(1536)` cho embedding 1536 chiều từ OpenAI
+  - Indexing: HNSW index với `vector_cosine_ops` cho phép tìm kiếm cosine similarity siêu tốc (`<=>`)
+  - Native Query Casting: `CAST(:embedding AS vector)` trong câu lệnh native `@Modifying` upsert
 - **Connection Pool**: HikariCP
   - Max pool size: 20
   - Min idle: 10
@@ -364,13 +370,33 @@
 | Service | Image | Port |
 |---|---|---|
 | `app` | Build từ Dockerfile.dev | 9000 |
-| `postgres` | `postgres:16-alpine` | 5433→5432 |
+| `postgres` | `pgvector/pgvector:pg16` | 5433→5432 |
 | `redis` | `redis:7-alpine` | 6380→6379 |
 | `elasticsearch` | `elasticsearch:8.14.1` | 9200 |
 | `kafka` | `apache/kafka:3.7.1` | 9092, 29092 |
 
 - **Volumes**: `m2-cache`, `postgres-data`, `redis-data`, `kafka-data`
 - **Health check**: PostgreSQL có healthcheck, app depends_on postgres healthy
+
+---
+
+## 17. AI & Vector Database Integration
+
+### OpenAI REST API Integration
+
+- **Model Embedding**: `text-embedding-3-small` (1536 chiều)
+- **Model Chat Completions**: `gpt-4o-mini` (hoặc `gpt-4o`)
+- **HTTP Client**: Spring 6 / Spring Boot 3 `RestClient` (Base URL: `https://api.openai.com`)
+- **Header**: `Authorization: Bearer ${OPENAI_API_KEY}`
+- **OpenAI Function Calling (Tools)**:
+  - `search_courses_semantic(query)`: Tìm kiếm khoá học bằng ngữ nghĩa tự nhiên qua vector cosine similarity.
+  - `search_courses_filtered(category, level, priceMin, priceMax)`: Lọc khoá học chính xác theo tiêu chí.
+
+### Automated Vector Synchronization
+
+- **CommandLineRunner Initializer**: Cấu hình `@Order(4)` trong `InitDataConfig.java` tự động rà soát và tạo embedding cho các khoá học chưa có data hoặc bị thay đổi nội dung khi ứng dụng khởi chạy.
+- **HTML Stripping & Sanitization**: Bóc tách toàn bộ thẻ HTML trong mô tả khoá học (`stripHtmlTags`) và xoá bỏ prompt instruction nghi ngờ (`sanitizeText`) trước khi sinh vector.
+
 
 ---
 

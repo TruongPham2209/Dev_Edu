@@ -17,7 +17,7 @@
 
 ## 1. Tổng quan kiến trúc
 
-Dev-Edu Backend là một ứng dụng **Spring Boot 3.5** sử dụng **Java 21**, được tổ chức theo kiến trúc **Layered Architecture kết hợp Module-based Package Organization**. Mỗi module nghiệp vụ (user, course, enrollment, assignment, lecture, file, forum, livestream, metric, tracking) được tổ chức thành một package riêng biệt, bên trong mỗi module lại tuân thủ kiến trúc phân tầng: `controller → service → repository → entity`.
+Dev-Edu Backend là một ứng dụng **Spring Boot 3.5** sử dụng **Java 21**, được tổ chức theo kiến trúc **Layered Architecture kết hợp Module-based Package Organization**. Mỗi module nghiệp vụ (user, course, enrollment, assignment, lecture, file, forum, livestream, quiz, notification, metric, tracking, chat) được tổ chức thành một package riêng biệt, bên trong mỗi module lại tuân thủ kiến trúc phân tầng: `controller → service → repository → entity`.
 
 Các thành phần dùng chung (cross-cutting concerns) được đặt trong package `common`.
 
@@ -116,14 +116,40 @@ com.pht.dev_edu/
 │   ├── repo/
 │   └── service/
 │
-└── tracking/                        # Module tracking & logging
-    ├── controller/
-    ├── dto/
-    ├── entity/
-    ├── kafka/
-    ├── mapper/
-    ├── repo/
-    └── service/
+├── quiz/                            # Module trắc nghiệm & đề thi
+│   ├── controller/                  # QuizController, QuizQuestionController, QuizAttemptController, QuizAssignmentController, QuizGradingController
+│   ├── dto/
+│   ├── entity/                      # QuizEntity, QuizQuestionEntity, QuizAttemptEntity...
+│   ├── kafka/                       # Kafka producer/consumer cho quiz events
+│   ├── mapper/
+│   ├── repo/
+│   ├── scheduler/
+│   └── service/
+│
+├── notification/                    # Module thông báo & FCM Device Token
+│   ├── controller/                  # NotificationController, NotificationGroupController, DeviceTokenController
+│   ├── dto/
+│   ├── entity/                      # NotificationPersonalEntity, NotificationGroupEntity, DeviceTokenEntity...
+│   ├── mapper/
+│   ├── repo/
+│   └── service/
+│
+├── tracking/                        # Module tracking & logging
+│   ├── controller/
+│   ├── dto/
+│   ├── entity/
+│   ├── kafka/
+│   ├── mapper/
+│   ├── repo/
+│   └── service/
+│
+└── chat/                            # Module tư vấn khoá học AI Chatbot
+    ├── controller/                  # ChatController
+    ├── dto/                         # Request, Response, CourseCard DTOs
+    │   └── openai/                  # OpenAI REST API DTOs (Tools, Messages, Request/Response)
+    ├── entity/                      # CourseEmbeddingEntity, ChatConversationEntity, ChatMessageEntity
+    ├── repository/                  # CourseEmbeddingRepository (pgvector HNSW), ChatConversationRepository, ChatMessageRepository
+    └── service/                     # ChatService/Impl, CourseEmbeddingService/Impl, OpenAiService/Impl
 ```
 
 ---
@@ -218,6 +244,34 @@ Ghi log request, tracking sự kiện, theo dõi nộp bài (submission tracking
 - **Controller**: `SubmissionTrackingController`
 - **Entity**: `LogRequestEntity`, `LogTrackingEntity`, `LogCronJobEntity`, `MailTrackingEntity`, `SubmissionTrackingEntity`
 - **Kafka**: Consumer xử lý sự kiện tracking
+
+### 3.12. `chat` — Module tư vấn khoá học AI Chatbot
+
+Tư vấn khoá học thông minh sử dụng OpenAI Chat Completions (Function Calling) và truy vấn Vector Similarity (pgvector).
+
+- **Controller**: `ChatController`
+- **Entity**: `CourseEmbeddingEntity` (lưu vector 1536 chiều), `ChatConversationEntity`, `ChatMessageEntity` (lưu JSONB `referenced_course_ids`)
+- **Repository**: `CourseEmbeddingRepository` (sử dụng PostgreSQL HNSW vector index `<=>` cosine distance & native upsert), `ChatConversationRepository`, `ChatMessageRepository`
+- **Service**: Tuân thủ chuẩn Interface / ServiceImpl:
+  - `ChatService` / `ChatServiceImpl`: Xử lý hội thoại, validate input <= 500 chars, phân biệt auth/anonymous, kiểm tra sở hữu conversation, tự động loại trừ khoá học học viên đã đăng ký, sinh course cards response, kiểm tra rò rỉ system prompt.
+  - `CourseEmbeddingService` / `CourseEmbeddingServiceImpl`: Xử lý bóc tách thẻ HTML (`stripHtmlTags`), tạo `source_text`, tính SHA-256 hash, sinh vector embedding qua OpenAI API, đồng bộ tự động khi khởi chạy app (`CommandLineRunner`).
+  - `OpenAiService` / `OpenAiServiceImpl`: REST Client gọi OpenAI Embedding & Chat Completions API với Tool Definitions (`search_courses_semantic`, `search_courses_filtered`).
+
+### 3.13. `quiz` — Module trắc nghiệm & đề thi
+
+Quản lý ngân hàng câu hỏi, tạo đề thi (quiz), làm bài (attempt), tính điểm tự động, chấm bài tự luận, và phân công bài quiz (assignment).
+
+- **Controller**: `QuizController`, `QuizQuestionController`, `QuizAttemptController`, `QuizAssignmentController`, `QuizGradingController`
+- **Entity**: `QuizEntity`, `QuizQuestionEntity`, `QuizQuestionOptionEntity`, `QuizAssignmentEntity`, `QuizAttemptEntity`, `QuizAttemptAnswerEntity`, `QuizAttemptAnswerLogEntity`, `QuizEssayGradingEntity`, `QuizAuditLogEntity`, `UserQuizSessionEntity`
+- **Kafka**: Producer/Consumer xử lý sự kiện nộp bài, chấm điểm và thông báo kết quả quiz
+
+### 3.14. `notification` — Module thông báo & FCM Device Token
+
+Quản lý thông báo cá nhân (personal), thông báo nhóm theo role (group), theo dõi trạng thái đã đọc, và đăng ký Firebase Cloud Messaging (FCM) device tokens.
+
+- **Controller**: `NotificationController`, `NotificationGroupController`, `DeviceTokenController`
+- **Entity**: `NotificationPersonalEntity`, `NotificationGroupEntity`, `NotificationGroupTargetEntity`, `NotificationGroupReadStatusEntity`, `DeviceTokenEntity`
+- **Push Notification**: Tích hợp Firebase Admin SDK đẩy push notification trực tiếp tới thiết bị học viên/giảng viên
 
 ---
 

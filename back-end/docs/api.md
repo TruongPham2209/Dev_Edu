@@ -52,7 +52,20 @@
 - [6. File Module](#6-file-module)
 - [7. Forum Module](#7-forum-module)
 - [8. Metric Module](#8-metric-module)
-- [9. Tracking Module](#9-tracking-module)
+- [10. Chat Module](#10-chat-module)
+  - [10.1 Gửi tin nhắn tư vấn khoá học](#101-gửi-tin-nhắn-tư-vấn-khoá-học)
+  - [10.2 Lấy danh sách hội thoại cũ](#102-lấy-danh-sách-hội-thoại-cũ)
+  - [10.3 Lấy chi tiết tin nhắn trong hội thoại](#103-lấy-chi-tiết-tin-nhắn-trong-hội-thoại)
+- [11. Quiz Module](#11-quiz-module)
+  - [11.1 Quản lý bài kiểm tra trắc nghiệm](#111-quản-lý-bài-kiểm-tra-trắc-nghiệm)
+  - [11.2 Quản lý câu hỏi & phương án](#112-quản-lý-câu-hỏi--phương-án)
+  - [11.3 Giao bài tập Quiz](#113-giao-bài-tập-quiz)
+  - [11.4 Thực hiện làm bài Quiz](#114-thực-hiện-làm-bài-quiz)
+  - [11.5 Chấm điểm tự luận Quiz](#115-chấm-điểm-tự-luận-quiz)
+- [12. Notification Module](#12-notification-module)
+  - [12.1 Quản lý thông báo cá nhân](#121-quản-lý-thông-báo-cá-nhân)
+  - [12.2 Quản lý thông báo nhóm](#122-quản-lý-thông-báo-nhóm)
+  - [12.3 Đăng ký FCM Device Token](#123-đăng-ký-fcm-device-token)
 
 ---
 
@@ -1359,3 +1372,205 @@ Mọi API đều trả về cùng format `ApiResponse`:
 | `assignmentId` | `UUID` | ✅ | |
 | `studentUsername` | `String` | ❌ | STUDENT: tự override; Non-student: bắt buộc |
 | `page` | `int` | ❌ | Default 0 |
+
+---
+
+## 10. Chat Module
+
+Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI Function Calling + PostgreSQL pgvector semantic search).
+
+### 10.1 Gửi tin nhắn tư vấn khoá học
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoint** | `POST /api/chat/messages` |
+| **Permission** | Public (Optional Auth: Có JWT sẽ cá nhân hoá & lưu lịch sử; không JWT xử lý như anonymous) |
+
+**Request Body:**
+
+```json
+{
+  "conversationId": "uuid | null",
+  "message": "Cho mình hỏi khoá học backend phù hợp cho người mới bắt đầu",
+  "history": [
+    { "role": "user", "content": "Chào chatbot" },
+    { "role": "assistant", "content": "Chào bạn! Mình có thể giúp gì cho bạn?" }
+  ]
+}
+```
+
+| Field | Type | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `conversationId` | `UUID` | ❌ | Null nếu tạo hội thoại mới. Đăng nhập: BE validate conversationId thuộc sở hữu user. |
+| `message` | `String` | ✅ | Nội dung tin nhắn (tối đa 500 ký tự). |
+| `history` | `Array` | ❌ | Bắt buộc khi dùng anonymous (FE tự quản lý lịch sử). Bị bỏ qua khi đã đăng nhập (BE tự load từ DB). |
+
+**Response Data (`ChatMessageResponse`):**
+
+```json
+{
+  "conversationId": "019ebac1-40fb-7a3f-a81e-5bb1533573d3",
+  "reply": {
+    "role": "assistant",
+    "content": "Dưới đây là một số khoá học lập trình backend dành cho người mới bắt đầu..."
+  },
+  "courses": [
+    {
+      "courseId": "019ebac1-40fb-7a3f-a81e-5bb1533573d4",
+      "title": "Lập trình Java Spring Boot Căn Bản",
+      "shortDescription": "Khóa học nhập môn Spring Boot từ zero đến hero",
+      "price": 499000.00,
+      "thumbnailUrl": "https://pub-r2.dev/thumbnail.jpg",
+      "matchReason": "Phù hợp với nhu cầu học Java của bạn"
+    }
+  ]
+}
+```
+
+---
+
+### 10.2 Lấy danh sách hội thoại cũ
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoint** | `GET /api/chat/conversations` |
+| **Permission** | Authenticated (`STUDENT` / `LECTURER` / `ADMIN`) |
+
+**Response Data (`List<ChatConversationSummaryResponse>`):**
+
+```json
+[
+  {
+    "id": "019ebac1-40fb-7a3f-a81e-5bb1533573d3",
+    "lastMessagePreview": "Dưới đây là một số khoá học lập trình backend dành cho người mới bắt đầu...",
+    "updatedAt": "2026-08-12T16:50:00"
+  }
+]
+```
+
+---
+
+### 10.3 Lấy chi tiết tin nhắn trong hội thoại
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoint** | `GET /api/chat/conversations/{id}/messages` |
+| **Permission** | Authenticated (User sở hữu hội thoại) |
+
+**Path Variable:** `id` — `UUID` (ID hội thoại)
+
+**Response Data (`List<ChatMessageDetailResponse>`):**
+
+```json
+[
+  {
+    "id": "019ebac1-40fb-7a3f-a81e-5bb1533573e1",
+    "role": "user",
+    "content": "Cho mình hỏi khoá học backend phù hợp cho người mới bắt đầu",
+    "referencedCourseIds": null,
+    "courses": [],
+    "createdAt": "2026-08-12T16:49:50"
+  },
+  {
+    "id": "019ebac1-40fb-7a3f-a81e-5bb1533573e2",
+    "role": "assistant",
+    "content": "Dưới đây là một số khoá học lập trình backend dành cho người mới bắt đầu...",
+    "referencedCourseIds": [
+      "019ebac1-40fb-7a3f-a81e-5bb1533573d4"
+    ],
+    "courses": [
+      {
+        "courseId": "019ebac1-40fb-7a3f-a81e-5bb1533573d4",
+        "title": "Lập trình Java Spring Boot Căn Bản",
+        "shortDescription": "Khóa học nhập môn Spring Boot từ zero đến hero",
+        "price": 499000.00,
+        "thumbnailUrl": "https://pub-r2.dev/thumbnail.jpg",
+        "matchReason": "Khoá học được gợi ý trong hội thoại"
+      }
+    ],
+    "createdAt": "2026-08-12T16:50:00"
+  }
+]
+```
+
+---
+
+## 11. Quiz Module
+
+Module tạo đề thi trắc nghiệm/tự luận, làm bài, chấm điểm tự động & giao bài tập quiz.
+
+### 11.1 Quản lý bài kiểm tra trắc nghiệm
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `GET /api/v1/quizzes`<br>`POST /api/v1/quizzes`<br>`GET /api/v1/quizzes/{id}`<br>`PUT /api/v1/quizzes/{id}`<br>`DELETE /api/v1/quizzes/{id}` |
+| **Permission** | `LECTURER`, `ADMIN` (Tạo, Sửa, Xoá); `STUDENT` (Xem danh sách/chi tiết) |
+
+---
+
+### 11.2 Quản lý câu hỏi & phương án
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `GET /api/v1/quizzes/{quizId}/questions`<br>`POST /api/v1/quizzes/{quizId}/questions`<br>`PUT /api/v1/quizzes/{quizId}/questions/{questionId}`<br>`DELETE /api/v1/quizzes/{quizId}/questions/{questionId}` |
+| **Permission** | `LECTURER`, `ADMIN` |
+
+---
+
+### 11.3 Giao bài tập Quiz
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `POST /api/v1/quizzes/{quizId}/assignments`<br>`GET /api/v1/quizzes/assignments`<br>`DELETE /api/v1/quizzes/assignments/{id}` |
+| **Permission** | `LECTURER`, `ADMIN` |
+
+---
+
+### 11.4 Thực hiện làm bài Quiz
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `POST /api/v1/quizzes/attempts/start`<br>`POST /api/v1/quizzes/attempts/{attemptId}/save`<br>`POST /api/v1/quizzes/attempts/{attemptId}/submit`<br>`GET /api/v1/quizzes/attempts/{attemptId}/result` |
+| **Permission** | Authenticated (`STUDENT`) |
+
+---
+
+### 11.5 Chấm điểm tự luận Quiz
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `GET /api/v1/quizzes/grading/pending`<br>`POST /api/v1/quizzes/grading/grade` |
+| **Permission** | `LECTURER`, `ADMIN` |
+
+---
+
+## 12. Notification Module
+
+Module quản lý thông báo cá nhân, thông báo nhóm và đăng ký thiết bị push notification (FCM).
+
+### 12.1 Quản lý thông báo cá nhân
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `GET /api/v1/notifications`<br>`PATCH /api/v1/notifications/{id}/read`<br>`PATCH /api/v1/notifications/read-all` |
+| **Permission** | Authenticated (`STUDENT`, `LECTURER`, `ADMIN`) |
+
+---
+
+### 12.2 Quản lý thông báo nhóm
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `GET /api/v1/notifications/groups`<br>`POST /api/v1/notifications/groups`<br>`PATCH /api/v1/notifications/groups/{id}/read` |
+| **Permission** | `ADMIN` (Tạo); Authenticated (Xem & đánh dấu đã đọc theo Role target) |
+
+---
+
+### 12.3 Đăng ký FCM Device Token
+
+| Thuộc tính | Giá trị |
+|---|---|
+| **Endpoints** | `POST /api/v1/device-tokens`<br>`DELETE /api/v1/device-tokens` |
+| **Permission** | Authenticated (`STUDENT`, `LECTURER`, `ADMIN`) |
+
+
