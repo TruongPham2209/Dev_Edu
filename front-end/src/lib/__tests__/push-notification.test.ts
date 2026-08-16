@@ -23,6 +23,9 @@ describe("push-notification helper service", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
 
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY = "valid-api-key";
+    process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY = "valid-vapid-key";
+
     global.Notification = {
       requestPermission: vi.fn(),
     } as unknown as typeof Notification;
@@ -49,6 +52,11 @@ describe("push-notification helper service", () => {
       writable: true,
       configurable: true,
     });
+  });
+
+  it("shouldConstructServiceWorkerUrlWithQueryParams", () => {
+    const swUrl = pushNotification.getServiceWorkerUrl();
+    expect(swUrl).toContain("/firebase-messaging-sw.js");
   });
 
   it("shouldReturnNullIfBrowserDoesNotSupportServiceWorkerOrNotification", async () => {
@@ -91,6 +99,23 @@ describe("push-notification helper service", () => {
     });
   });
 
+  it("shouldListenForegroundNotifications", async () => {
+    const { getFirebaseMessaging } = await import("../firebase");
+    const { onMessage } = await import("firebase/messaging");
+
+    const mockMessaging = {} as any;
+    vi.mocked(getFirebaseMessaging).mockResolvedValue(mockMessaging);
+
+    const mockUnsub = vi.fn();
+    vi.mocked(onMessage).mockReturnValue(mockUnsub);
+
+    const callback = vi.fn();
+    const unsub = await pushNotification.listenForegroundNotifications(callback);
+
+    expect(onMessage).toHaveBeenCalledWith(mockMessaging, expect.any(Function));
+    expect(unsub).toBe(mockUnsub);
+  });
+
   it("shouldUnregisterTokenOnLogout", async () => {
     const mockRegistration = {} as ServiceWorkerRegistration;
     vi.spyOn(navigator.serviceWorker, "getRegistration").mockResolvedValue(
@@ -112,3 +137,4 @@ describe("push-notification helper service", () => {
     });
   });
 });
+

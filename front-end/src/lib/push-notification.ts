@@ -1,13 +1,49 @@
 import { getToken, onMessage, MessagePayload } from "firebase/messaging";
 import { getFirebaseMessaging } from "./firebase";
-import { registerDeviceTokenApi, unregisterDeviceTokenApi } from "./api/notifications";
+import {
+  registerDeviceTokenApi,
+  unregisterDeviceTokenApi,
+} from "./api/notifications";
 
-export async function requestAndRegisterPushNotification(): Promise<string | null> {
+export function getServiceWorkerUrl(): string {
+  return "/firebase-messaging-sw.js";
+}
+
+function isConfiguredValue(val?: string): boolean {
+  if (!val) return false;
+  if (val.startsWith("your_") || val.includes("xxxx")) return false;
+  return true;
+}
+
+export async function requestAndRegisterPushNotification(): Promise<
+  string | null
+> {
   try {
     if (typeof window === "undefined") return null;
 
     if (!("serviceWorker" in navigator) || !("Notification" in window)) {
       console.warn("Browser does not support push notifications.");
+      return null;
+    }
+
+    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
+    console.log("[FCM Config Debug]", {
+      apiKey: apiKey || "(not set)",
+      authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "(not set)",
+      projectId: projectId || "(not set)",
+      messagingSenderId:
+        process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "(not set)",
+      appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "(not set)",
+      vapidKey: vapidKey || "(not set)",
+    });
+
+    if (!isConfiguredValue(vapidKey) || !isConfiguredValue(apiKey)) {
+      console.warn(
+        "Push notifications skipped: Firebase credentials in .env are placeholder values.",
+      );
       return null;
     }
 
@@ -17,18 +53,33 @@ export async function requestAndRegisterPushNotification(): Promise<string | nul
       return null;
     }
 
-    const registration = await navigator.serviceWorker.register(
-      "/firebase-messaging-sw.js",
-    );
+    const swUrl = getServiceWorkerUrl();
+    const registration = await navigator.serviceWorker.register(swUrl);
+    await navigator.serviceWorker.ready;
 
     const messaging = await getFirebaseMessaging();
     if (!messaging) return null;
 
-    const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
-    const currentToken = await getToken(messaging, {
-      vapidKey: vapidKey || undefined,
-      serviceWorkerRegistration: registration,
-    });
+    let currentToken: string | null = null;
+    try {
+      currentToken = await getToken(messaging, {
+        vapidKey: vapidKey || undefined,
+        serviceWorkerRegistration: registration,
+      });
+    } catch (tokenErr) {
+      console.warn(
+        "getToken with explicit registration failed, trying fallback:",
+        tokenErr,
+      );
+      try {
+        currentToken = await getToken(messaging, {
+          vapidKey: vapidKey || undefined,
+        });
+      } catch (tokenErr2) {
+        console.warn("getToken fallback failed:", tokenErr2);
+        return null;
+      }
+    }
 
     if (currentToken) {
       await registerDeviceTokenApi({
@@ -39,7 +90,10 @@ export async function requestAndRegisterPushNotification(): Promise<string | nul
       return currentToken;
     }
   } catch (error) {
-    console.error("Error setting up push notifications:", error);
+    console.warn(
+      "Push notification setup warning (FCM Push Service error or unconfigured):",
+      error,
+    );
   }
   return null;
 }
@@ -65,9 +119,17 @@ export async function unregisterPushNotificationOnLogout(): Promise<void> {
     const messaging = await getFirebaseMessaging();
     if (!messaging) return;
 
-    const registration = await navigator.serviceWorker.getRegistration(
-      "/firebase-messaging-sw.js",
-    );
+    const swUrl = getServiceWorkerUrl();
+    let registration = await navigator.serviceWorker
+      .getRegistration(swUrl)
+      .catch(() => undefined);
+
+    if (!registration) {
+      registration = await navigator.serviceWorker
+        .getRegistration("/firebase-messaging-sw.js")
+        .catch(() => undefined);
+    }
+
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
 
     const token = await getToken(messaging, {

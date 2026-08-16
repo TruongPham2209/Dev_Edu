@@ -77,8 +77,8 @@ export function AuthSync({ serverToken }: AuthSyncProps) {
 
     let unsubscribe: (() => void) | undefined;
     listenForegroundNotifications((payload) => {
-      const title = payload.notification?.title;
-      const body = payload.notification?.body;
+      const title = payload.notification?.title || payload.data?.title;
+      const body = payload.notification?.body || payload.data?.body;
       const message = title
         ? `${title}${body ? `: ${body}` : ""}`
         : body || "New notification received";
