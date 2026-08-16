@@ -37,6 +37,8 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import com.pht.dev_edu.chat.service.CourseEmbeddingService;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -56,6 +58,7 @@ public class CourseServiceImpl implements CourseService {
 
     FileService fileService;
     CategoryService categoryService;
+    CourseEmbeddingService courseEmbeddingService;
 
     RedisTemplate<String, Object> redisTemplate;
     ObjectMapper objectMapper;
@@ -105,8 +108,7 @@ public class CourseServiceImpl implements CourseService {
             return objectMapper.convertValue(
                     cachedData,
                     new TypeReference<List<CourseResponse>>() {
-                    }
-            );
+                    });
         }
 
         var highlightedCourses = courseRepository.findHighlightedCourses(10);
@@ -132,38 +134,40 @@ public class CourseServiceImpl implements CourseService {
         if (categoryId != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.findActiveCoursesByCategoryIdAndCursor(categoryId, cursor.getId(),
+                            cursor.getTimeStamp(), limit);
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.findDeletedCoursesByCategoryIdAndCursor(categoryId, cursor.getId(),
+                            cursor.getTimeStamp(), limit);
                 case ALL ->
-                        courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.findByCategoryIdAndCursor(categoryId, cursor.getId(), cursor.getTimeStamp(),
+                            limit);
             };
         } else if (keyword != null) {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE ->
-                        courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.searchActiveCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
                 case DELETED ->
-                        courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.searchDeletedCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(),
+                            limit);
                 case ALL ->
-                        courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.searchCoursesByCursor(keyword, cursor.getId(), cursor.getTimeStamp(), limit);
             };
         } else {
             queryFn = cursor -> switch (req.getStatus()) {
                 case ACTIVE -> courseRepository.findActiveCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
                 case DELETED ->
-                        courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
+                    courseRepository.findDeletedCoursesByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
                 case ALL -> courseRepository.findByCursor(cursor.getId(), cursor.getTimeStamp(), limit);
             };
         }
-
 
         return executeCoursePaging(req, queryFn);
     }
 
     private CustomPaging<CourseResponse> executeCoursePaging(
             CourseCursorRequest pageRequest,
-            Function<TimeStampCursor, List<CourseDetailProjection>> queryFn
-    ) {
+            Function<TimeStampCursor, List<CourseDetailProjection>> queryFn) {
         var cursor = resolveCursor(pageRequest.getNextCursor());
         var coursePage = queryFn.apply(cursor);
 
@@ -174,8 +178,7 @@ public class CourseServiceImpl implements CourseService {
                 c -> convertProjectionToRes(c, globalDiscount),
                 CourseDetailProjection::getCreatedAt,
                 CourseDetailProjection::getId,
-                pageRequest.getSize()
-        );
+                pageRequest.getSize());
     }
 
     private TimeStampCursor resolveCursor(String nextCursor) {
@@ -200,6 +203,7 @@ public class CourseServiceImpl implements CourseService {
         courseEntity.setThumbnailUrl(thumbnailUrl);
         courseEntity.setCreatedBy(author);
         courseRepository.save(courseEntity);
+        courseEmbeddingService.syncEmbedding(courseEntity);
 
         // Convert here and save here
         var courseLecturers = course.getLecturerUsernames().stream()
@@ -208,10 +212,8 @@ public class CourseServiceImpl implements CourseService {
                                 CourseLecturerId.builder()
                                         .courseId(courseEntity.getId())
                                         .lecturerUsername(lecturerUsername)
-                                        .build()
-                        )
-                        .build()
-                )
+                                        .build())
+                        .build())
                 .toList();
         courseLecturerRepository.saveAll(courseLecturers);
 
@@ -244,6 +246,7 @@ public class CourseServiceImpl implements CourseService {
         updatedCourse.setCreatedBy(existingCourse.getCreatedBy());
         updatedCourse.setCreatedAt(existingCourse.getCreatedAt());
         courseRepository.save(updatedCourse);
+        courseEmbeddingService.syncEmbedding(updatedCourse);
 
         courseLecturerRepository.deleteByIdCourseId(course.getId());
 
@@ -253,10 +256,8 @@ public class CourseServiceImpl implements CourseService {
                                 CourseLecturerId.builder()
                                         .courseId(updatedCourse.getId())
                                         .lecturerUsername(lecturerUsername)
-                                        .build()
-                        )
-                        .build()
-                )
+                                        .build())
+                        .build())
                 .toList();
         courseLecturerRepository.saveAll(courseLecturers);
 
@@ -314,6 +315,7 @@ public class CourseServiceImpl implements CourseService {
 
         existingCourse.setDeletedAt(LocalDateTime.now());
         courseRepository.save(existingCourse);
+        courseEmbeddingService.syncEmbedding(existingCourse);
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_PREFIX + courseId);
         RedisUtils.invalidateCache(RedisPrefixConstant.COURSE_HIGHLIGHTED);
     }
@@ -324,13 +326,13 @@ public class CourseServiceImpl implements CourseService {
                 cachedKey,
                 CourseEntity.class,
                 () -> courseRepository.findById(courseId),
-                RedisDurationConstant.COURSE_DATA_DURATION
-        );
+                RedisDurationConstant.COURSE_DATA_DURATION);
     }
 
     private String getThumbnailUrl(String author, String thumbnailObjectKey) {
         var thumbnailInfo = fileService.getFileInfo(author, thumbnailObjectKey);
-        boolean isImage = FileContentTypeUtils.isValidContentType(thumbnailInfo.getContentType(), FileContentTypeUtils.FileType.IMAGE);
+        boolean isImage = FileContentTypeUtils.isValidContentType(thumbnailInfo.getContentType(),
+                FileContentTypeUtils.FileType.IMAGE);
         if (!StringUtils.hasText(thumbnailInfo.getPublicUrl()) || !isImage) {
             KafkaUtils.sendDeleteFileEvent(thumbnailObjectKey);
             log.error("Thumbnail with object key {} does not have a public URL", thumbnailObjectKey);

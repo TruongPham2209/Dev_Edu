@@ -2,6 +2,7 @@ package com.pht.dev_edu.common.util;
 
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.security.UnauthorizedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,20 +28,22 @@ public class SecurityContextUtils {
         return getCurrentUsername(authentication);
     }
 
-
     public static String getCurrentUsername(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
             return null; // hoặc throw exception tuỳ nhu cầu
         }
 
         Object principal = authentication.getPrincipal();
+        if (principal == null || "anonymousUser".equalsIgnoreCase(String.valueOf(principal))) {
+            return null;
+        }
 
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        } else if (principal instanceof String) {
-            return (String) principal;
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails.getUsername();
         } else if (principal instanceof Jwt jwt) {
             return jwt.getClaimAsString("sub");
+        } else if (principal instanceof String username) {
+            return username;
         }
 
         return null;
@@ -52,7 +55,7 @@ public class SecurityContextUtils {
     }
 
     public static Set<String> getCurrentUserAuthorities(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
             return Set.of(); // hoặc throw exception tuỳ nhu cầu
         }
 

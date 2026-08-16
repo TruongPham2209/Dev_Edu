@@ -1,5 +1,6 @@
 package com.pht.dev_edu.common.config;
 
+import com.pht.dev_edu.chat.service.CourseEmbeddingService;
 import com.github.f4b6a3.uuid.UuidCreator;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.security.OAuth2PasswordGrantAuthenticationConverter;
@@ -155,6 +156,16 @@ public class InitDataConfig {
     CommandLineRunner syncPostToElastic(PostElasticsearchRepository postElasticsearchRepository) {
         return args -> {
             postElasticsearchRepository.syncAllToElasticsearch();
+        };
+    }
+
+    @Bean
+    @Transactional
+    @Order(4)
+    CommandLineRunner syncCourseEmbeddings(CourseEmbeddingService courseEmbeddingService) {
+        return args -> {
+            log.info("Checking and syncing missing course embeddings to pgvector...");
+            courseEmbeddingService.syncAllCourseEmbeddings();
         };
     }
 }

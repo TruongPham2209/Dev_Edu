@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,9 +39,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         SELECT COUNT(e.course_id)
                         FROM enrollment e
                         WHERE   e.student_username  = :studentUsername
-            """,
-            nativeQuery = true)
-    Page<EnrolledCourseProjection> findEnrolledCoursesByStudentUsernameAndCursor(String studentUsername, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
+            """, nativeQuery = true)
+    Page<EnrolledCourseProjection> findEnrolledCoursesByStudentUsernameAndCursor(String studentUsername, UUID lastId,
+            LocalDateTime lastUpdatedAt, Pageable pageable);
 
     @Query(value = """
                         SELECT  c.id                    AS id,
@@ -64,9 +65,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         LEFT JOIN course c
                             ON cl.course_id = c.id
                         WHERE   cl.lecturer_username  = :lecturerUsername
-            """,
-            nativeQuery = true)
-    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, String keyword, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
+            """, nativeQuery = true)
+    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, String keyword,
+            UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
                         WITH filteredCourses AS (
@@ -95,10 +96,9 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         LEFT JOIN course c
                             ON cl.course_id = c.id
                         WHERE   cl.lecturer_username  = :lecturerUsername
-            """,
-            nativeQuery = true)
-    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, String keyword, UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
-
+            """, nativeQuery = true)
+    Page<EnrolledCourseProjection> findCoursesAssignedToLecturerByCursor(String lecturerUsername, String keyword,
+            UUID categoryId, UUID lastId, LocalDateTime lastCreatedAt, Pageable pageable);
 
     @Query(value = """
                         SELECT  e.id                    AS id,
@@ -116,17 +116,19 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
                         SELECT COUNT(e.student_username)
                         FROM enrollment e
                         WHERE e.course_id = :courseId
-            """,
-            nativeQuery = true)
-    Page<EnrollmentUserProjection> findEnrolledUsersByCourseIdAndCursor(UUID courseId, UUID lastId, LocalDateTime lastUpdatedAt, Pageable pageable);
+            """, nativeQuery = true)
+    Page<EnrollmentUserProjection> findEnrolledUsersByCourseIdAndCursor(UUID courseId, UUID lastId,
+            LocalDateTime lastUpdatedAt, Pageable pageable);
 
     @Query(value = """
                         SELECT student_username
                         FROM enrollment
                         WHERE course_id = :courseId
-            """,
-            nativeQuery = true)
+            """, nativeQuery = true)
     List<String> findAllEnrolledUsersByCourseId(UUID courseId);
+
+    @Query(value = "SELECT e.course_id FROM enrollment e WHERE e.student_username = :studentUsername", nativeQuery = true)
+    List<UUID> findEnrolledCourseIdsByStudentUsername(@Param("studentUsername") String studentUsername);
 
     boolean existsByCourseId(UUID courseId);
 
