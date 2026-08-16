@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import { AppProviders } from "@/components/providers/app-providers";
 import { AuthSync } from "@/components/auth/auth-sync";
+import { ChatWidget } from "@/components/chat/chat-widget";
 import { cookies } from "next/headers";
 import "./globals.css";
 
@@ -66,6 +67,7 @@ export default async function RootLayout({
           <AppProviders>
             {children}
             <AuthSync serverToken={token} />
+            <ChatWidget />
           </AppProviders>
         </AppRouterCacheProvider>
       </body>
