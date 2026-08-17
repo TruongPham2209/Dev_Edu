@@ -49,7 +49,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: { xs: "100dvh", lg: "100vh" },
         display: "grid",
         gridTemplateColumns: { xs: "1fr", lg: "1.15fr 0.85fr" },
         bgcolor: "#f8fafc",
@@ -380,17 +380,69 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           px: { xs: 2, sm: 4, md: 6 },
-          py: 8,
+          py: { xs: 3, sm: 5, lg: 8 },
         }}
       >
+        {/* Mobile Header Logo (visible only on small screens < lg) */}
+        <Box
+          sx={{
+            display: { xs: "flex", lg: "none" },
+            alignItems: "center",
+            justifyContent: "center",
+            mb: { xs: 3, sm: 4 },
+            width: "100%",
+            maxWidth: 480,
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={1.5}
+            component={Link}
+            href="/home"
+            sx={{
+              textDecoration: "none",
+              alignItems: "center",
+              transition: "transform 0.2s ease",
+              "&:hover": { transform: "translateY(-1px)" },
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "#16a34a",
+                color: "#ffffff",
+                width: 36,
+                height: 36,
+                borderRadius: "10px",
+                boxShadow: "0 4px 12px rgba(22, 163, 74, 0.25)",
+              }}
+            >
+              <Code2 size={20} />
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              DevEdu
+            </Typography>
+          </Stack>
+        </Box>
+
         <Card
           sx={{
             maxWidth: 480,
             width: "100%",
-            borderRadius: "24px",
+            borderRadius: { xs: "18px", sm: "24px" },
             border: "1px solid rgba(15, 23, 42, 0.08)",
             boxShadow: `
               0 24px 64px rgba(15, 23, 42, 0.06),
@@ -409,9 +461,9 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
             }}
           />
 
-          <CardContent sx={{ p: { xs: 3, sm: 4.5 } }}>
+          <CardContent sx={{ p: { xs: 2.5, sm: 4, md: 4.5 } }}>
             {/* Header info */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: { xs: 3, sm: 4 } }}>
               <Typography
                 variant="h4"
                 sx={{
@@ -419,6 +471,8 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                   mb: 1.2,
                   letterSpacing: "-0.03em",
                   color: "#0f172a",
+                  fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.125rem" },
+                  lineHeight: 1.2,
                 }}
               >
                 {title}
@@ -428,6 +482,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                 sx={{
                   color: "text.secondary",
                   lineHeight: 1.5,
+                  fontSize: { xs: "0.875rem", sm: "0.9375rem" },
                 }}
               >
                 {subtitle}

@@ -122,7 +122,7 @@ export default function RegisterPage() {
       title="Create account"
       subtitle="Start your learning journey and build your career with DevEdu."
     >
-      <Stack spacing={3.5} component="form" onSubmit={handleSubmit} noValidate>
+      <Stack spacing={{ xs: 2.5, sm: 3.5 }} component="form" onSubmit={handleSubmit} noValidate>
         {errorMsg && (
           <Alert
             severity="error"
@@ -232,8 +232,8 @@ export default function RegisterPage() {
           size="large"
           disabled={registerMutation.isPending}
           sx={{
-            py: 1.5,
-            fontSize: "1rem",
+            py: { xs: 1.25, sm: 1.5 },
+            fontSize: { xs: "0.9375rem", sm: "1rem" },
             fontWeight: 700,
             borderRadius: "14px",
             bgcolor: "#16a34a",
@@ -252,7 +252,7 @@ export default function RegisterPage() {
               bgcolor: alpha("#16a34a", 0.4),
               color: alpha("#ffffff", 0.8),
             },
-            mt: 2,
+            mt: { xs: 1, sm: 2 },
           }}
         >
           {registerMutation.isPending ? (
@@ -270,7 +270,8 @@ export default function RegisterPage() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            mt: 1,
+            textAlign: "center",
+            mt: 0.5,
           }}
         >
           <Typography

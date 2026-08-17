@@ -132,7 +132,7 @@ export default function LoginForm() {
       title="Sign in"
       subtitle="Sign in to continue your learning journey with DevEdu."
     >
-      <Stack spacing={3.5} component="form" onSubmit={handleSubmit} noValidate>
+      <Stack spacing={{ xs: 2.5, sm: 3.5 }} component="form" onSubmit={handleSubmit} noValidate>
         {errorMsg && (
           <Alert
             severity="error"
@@ -192,8 +192,8 @@ export default function LoginForm() {
           size="large"
           disabled={loginMutation.isPending}
           sx={{
-            py: 1.5,
-            fontSize: "1rem",
+            py: { xs: 1.25, sm: 1.5 },
+            fontSize: { xs: "0.9375rem", sm: "1rem" },
             fontWeight: 700,
             borderRadius: "14px",
             bgcolor: "#16a34a",
@@ -244,7 +244,7 @@ export default function LoginForm() {
           onClick={handleGoogleLogin}
           disabled={loginMutation.isPending}
           sx={{
-            py: 1.3,
+            py: { xs: 1.1, sm: 1.3 },
             borderRadius: "14px",
             borderColor: "rgba(15, 23, 42, 0.08)",
             color: "#475569",
@@ -265,7 +265,9 @@ export default function LoginForm() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mt: 1,
+            flexWrap: "wrap",
+            gap: 1.5,
+            mt: 0.5,
           }}
         >
           <Typography
