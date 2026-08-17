@@ -52,7 +52,7 @@ export default function AdminCourseDetailPage() {
   }
 
   return (
-    <Stack spacing={4} sx={{ width: "100%" }}>
+    <Stack spacing={{ xs: 2.5, sm: 4 }} sx={{ width: "100%", pb: { xs: 3, sm: 5 } }}>
       {/* Hero Section containing breadcrumbs, course info & metric counters */}
       <CourseHero
         course={course}
@@ -63,7 +63,7 @@ export default function AdminCourseDetailPage() {
       />
 
       {/* Data Row: Lectures list and Discount campaign list */}
-      <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ alignItems: "stretch" }}>
         <Grid
           size={{ xs: 12, md: 6 }}
           sx={{ display: "flex", flexDirection: "column" }}
@@ -85,7 +85,7 @@ export default function AdminCourseDetailPage() {
       </Grid>
 
       {/* User Row: Lecturers list and Enrolled Students list */}
-      <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ alignItems: "stretch" }}>
         <Grid
           size={{ xs: 12, md: 6 }}
           sx={{ display: "flex", flexDirection: "column" }}
@@ -104,7 +104,7 @@ export default function AdminCourseDetailPage() {
       </Grid>
 
       {/* Review Row: Review list */}
-      <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ alignItems: "stretch" }}>
         <Grid
           size={{ xs: 12, md: 6 }}
           sx={{ display: "flex", flexDirection: "column" }}

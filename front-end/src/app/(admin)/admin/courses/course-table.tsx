@@ -79,6 +79,7 @@ export function CourseTable({
               color: "text.primary",
               fontSize: "0.925rem",
               mb: 0.5,
+              wordBreak: "break-word",
             }}
           >
             {course.title}
@@ -92,6 +93,7 @@ export function CourseTable({
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               lineHeight: 1.4,
+              wordBreak: "break-word",
             }}
           >
             {stripHtml(course.description)}

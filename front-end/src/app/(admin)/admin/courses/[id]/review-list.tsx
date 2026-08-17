@@ -99,19 +99,19 @@ export function ReviewList({ courseId }: ReviewListProps) {
         boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
-        height: 520, // Consistent height for the Data Row
+        height: { xs: 450, sm: 520 }, // Consistent height for the Data Row
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
           borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: 2,
+          gap: 1.5,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -129,7 +129,12 @@ export function ReviewList({ courseId }: ReviewListProps) {
           <Box>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.2 }}
+              sx={{
+                fontWeight: 800,
+                color: "text.primary",
+                lineHeight: 1.2,
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+              }}
             >
               Reviews
             </Typography>
@@ -184,8 +189,8 @@ export function ReviewList({ courseId }: ReviewListProps) {
                     display: "flex",
                     alignItems: "flex-start",
                     justifyContent: "space-between",
-                    px: 3,
-                    py: 2,
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 1.5, sm: 2 },
                     transition: "background-color 0.15s ease",
                     "&:hover": {
                       bgcolor: "rgba(15, 23, 42, 0.02)",
@@ -194,15 +199,16 @@ export function ReviewList({ courseId }: ReviewListProps) {
                 >
                   <Stack
                     direction="row"
-                    spacing={2}
-                    sx={{ overflow: "hidden", mr: 2, flexGrow: 1 }}
+                    spacing={{ xs: 1.5, sm: 2 }}
+                    sx={{ overflow: "hidden", mr: 1.5, flexGrow: 1 }}
                   >
                     <Avatar
                       src={review.avatarUrl || undefined}
                       alt={review.username}
                       sx={{
-                        width: 44,
-                        height: 44,
+                        width: { xs: 36, sm: 44 },
+                        height: { xs: 36, sm: 44 },
+                        flexShrink: 0,
                         border: "1px solid rgba(15, 23, 42, 0.08)",
                       }}
                     >
@@ -226,7 +232,8 @@ export function ReviewList({ courseId }: ReviewListProps) {
                           sx={{
                             fontWeight: 700,
                             color: "text.primary",
-                            fontSize: "0.95rem",
+                            fontSize: { xs: "0.875rem", sm: "0.95rem" },
+                            wordBreak: "break-word",
                           }}
                         >
                           {review.fullName || review.username}

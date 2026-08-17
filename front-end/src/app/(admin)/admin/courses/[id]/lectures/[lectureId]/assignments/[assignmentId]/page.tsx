@@ -205,8 +205,8 @@ export default function AdminAssignmentDetailPage() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack component="div" spacing={4}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+      <Stack component="div" spacing={{ xs: 2.5, sm: 4 }}>
         {/* HERO SECTION COMPONENT */}
         <AssignmentHeroSection
           assignment={assignment}

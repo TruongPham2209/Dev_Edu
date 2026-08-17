@@ -4,7 +4,7 @@ import { Skeleton, Stack } from "@mui/material";
 
 export function LectureDetailSkeleton() {
   return (
-    <Stack spacing={4} sx={{ pb: 6 }}>
+    <Stack spacing={{ xs: 2.5, sm: 4 }} sx={{ pb: { xs: 3, sm: 6 } }}>
       {/* Hero Section Skeleton */}
       <Stack spacing={3} sx={{ width: "100%" }}>
         {/* Breadcrumb */}
@@ -17,7 +17,7 @@ export function LectureDetailSkeleton() {
         {/* Main Card */}
         <Skeleton variant="rounded" height={320} sx={{ borderRadius: 4 }} />
         {/* Metric Items Grid (3 items) */}
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={3}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={{ xs: 2, sm: 3 }}>
           <Skeleton
             variant="rounded"
             height={90}
@@ -37,7 +37,7 @@ export function LectureDetailSkeleton() {
       </Stack>
 
       {/* Lists Section Skeleton (Materials & Assignments) */}
-      <Stack direction="column" spacing={4}>
+      <Stack direction="column" spacing={{ xs: 2.5, sm: 4 }}>
         <Skeleton variant="rounded" height={200} sx={{ borderRadius: 4 }} />
         <Skeleton variant="rounded" height={200} sx={{ borderRadius: 4 }} />
       </Stack>

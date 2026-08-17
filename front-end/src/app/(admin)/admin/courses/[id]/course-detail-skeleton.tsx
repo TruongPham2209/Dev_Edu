@@ -55,7 +55,7 @@ export function AdminCourseDetailSkeleton() {
       </Card>
 
       {/* Metrics Grid Skeletons */}
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {Array.from({ length: 4 }).map((_, index) => (
           <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
             <Card
@@ -88,7 +88,7 @@ export function AdminCourseDetailSkeleton() {
       </Grid>
 
       {/* List Rows Skeletons */}
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Skeleton variant="rounded" height={520} sx={{ borderRadius: 1 }} />
         </Grid>
@@ -96,7 +96,7 @@ export function AdminCourseDetailSkeleton() {
           <Skeleton variant="rounded" height={520} sx={{ borderRadius: 1 }} />
         </Grid>
       </Grid>
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Skeleton variant="rounded" height={520} sx={{ borderRadius: 1 }} />
         </Grid>

@@ -122,26 +122,40 @@ export function TopCoursesList() {
         backdropFilter: "blur(8px)",
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
           <BookOpen size={20} className="text-blue-500" />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
+          >
             Top Courses
           </Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 3, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+        >
           Based on number of enrolled students
         </Typography>
 
         {courses.length === 0 ? (
           <Box sx={{ py: 6, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               No course data
             </Typography>
           </Box>
         ) : (
-          <TableContainer sx={{ overflowX: "auto" }}>
-            <Table sx={{ minWidth: 600 }}>
+          <TableContainer sx={{ overflowX: "auto !important" }}>
+            <Table sx={{ minWidth: 580 }}>
               <TableHead>
                 <TableRow
                   sx={{
@@ -340,15 +354,25 @@ export function TopUsersList() {
       }}
     >
       <CardContent
-        sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%" }}
+        sx={{ p: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column", height: "100%" }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
           <Users size={20} className="text-purple-500" />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
+          >
             Top Users
           </Typography>
         </Box>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 2, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+        >
           Top students & top contributors
         </Typography>
 
@@ -358,11 +382,13 @@ export function TopUsersList() {
           sx={{
             borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
             mb: 2.5,
+            minHeight: 38,
             "& .MuiTab-root": {
               textTransform: "none",
               fontWeight: 700,
-              fontSize: "0.85rem",
+              fontSize: { xs: "0.8rem", sm: "0.85rem" },
               minWidth: "auto",
+              py: 1,
               flex: 1,
             },
           }}
@@ -375,7 +401,11 @@ export function TopUsersList() {
           /* STUDENTS LIST */
           topStudents.length === 0 ? (
             <Box sx={{ py: 4, textAlign: "center" }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+              >
                 No student data
               </Typography>
             </Box>
@@ -386,12 +416,14 @@ export function TopUsersList() {
                   key={student.username}
                   sx={{
                     display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
                     justifyContent: "space-between",
-                    alignItems: "center",
-                    p: 1.5,
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    p: { xs: 1.25, sm: 1.5 },
                     borderRadius: 2,
                     border: "1px solid rgba(15, 23, 42, 0.04)",
                     bgcolor: "rgba(255, 255, 255, 0.5)",
+                    gap: 1,
                     transition: "all 0.2s",
                     "&:hover": {
                       transform: "translateX(4px)",
@@ -402,7 +434,7 @@ export function TopUsersList() {
                   <Stack
                     direction="row"
                     spacing={1.5}
-                    sx={{ alignItems: "center" }}
+                    sx={{ alignItems: "center", width: "100%" }}
                   >
                     <Box sx={{ position: "relative" }}>
                       <Avatar
@@ -439,16 +471,46 @@ export function TopUsersList() {
                         </Box>
                       )}
                     </Box>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
                         {student.fullName || `@${student.username}`}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: "block",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
                         {student.email}
                       </Typography>
                     </Box>
                   </Stack>
-                  <Box sx={{ textAlign: "right" }}>
+                  <Box
+                    sx={{
+                      width: { xs: "100%", sm: "auto" },
+                      display: "flex",
+                      flexDirection: { xs: "row", sm: "column" },
+                      justifyContent: { xs: "space-between", sm: "flex-end" },
+                      alignItems: { xs: "center", sm: "flex-end" },
+                      pt: { xs: 0.75, sm: 0 },
+                      borderTop: {
+                        xs: "1px dashed rgba(15, 23, 42, 0.08)",
+                        sm: "none",
+                      },
+                    }}
+                  >
                     <Typography
                       variant="body2"
                       sx={{ fontWeight: 800, color: "text.primary" }}
@@ -466,7 +528,11 @@ export function TopUsersList() {
         ) : /* CONTRIBUTORS LIST */
         topContributors.length === 0 ? (
           <Box sx={{ py: 4, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               No contributor data
             </Typography>
           </Box>
@@ -477,12 +543,14 @@ export function TopUsersList() {
                 key={contributor.username}
                 sx={{
                   display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  p: 1.5,
+                  alignItems: { xs: "flex-start", sm: "center" },
+                  p: { xs: 1.25, sm: 1.5 },
                   borderRadius: 2,
                   border: "1px solid rgba(15, 23, 42, 0.04)",
                   bgcolor: "rgba(255, 255, 255, 0.5)",
+                  gap: 1,
                   transition: "all 0.2s",
                   "&:hover": {
                     transform: "translateX(4px)",
@@ -493,7 +561,7 @@ export function TopUsersList() {
                 <Stack
                   direction="row"
                   spacing={1.5}
-                  sx={{ alignItems: "center" }}
+                  sx={{ alignItems: "center", width: "100%" }}
                 >
                   <Box sx={{ position: "relative" }}>
                     <Avatar
@@ -532,21 +600,51 @@ export function TopUsersList() {
                       </Box>
                     )}
                   </Box>
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 700,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
                       {contributor.fullName || `@${contributor.username}`}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        display: "block",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
                       @{contributor.username}
                     </Typography>
                   </Box>
                 </Stack>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <Box sx={{ textAlign: "right" }}>
+                <Box
+                  sx={{
+                    width: { xs: "100%", sm: "auto" },
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: { xs: "space-between", sm: "flex-end" },
+                    gap: 2,
+                    pt: { xs: 0.75, sm: 0 },
+                    borderTop: {
+                      xs: "1px dashed rgba(15, 23, 42, 0.08)",
+                      sm: "none",
+                    },
+                  }}
+                >
+                  <Box sx={{ textAlign: { xs: "left", sm: "right" } }}>
                     <Stack
                       direction="row"
                       spacing={0.5}
-                      sx={{ alignItems: "center", justifyContent: "flex-end" }}
+                      sx={{ alignItems: "center" }}
                     >
                       <MessageSquare size={13} color="text.secondary" />
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -557,19 +655,11 @@ export function TopUsersList() {
                       Comments
                     </Typography>
                   </Box>
-                  <Box sx={{ textAlign: "right" }}>
-                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                      {contributor.postCount}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Posts
-                    </Typography>
                   </Box>
                 </Box>
-              </Box>
-            ))}
-          </Stack>
-        )}
+              ))}
+            </Stack>
+          )}
       </CardContent>
     </Card>
   );

@@ -100,19 +100,19 @@ export const LecturesList = ({
         boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
-        height: 520, // Consistent height for the Data Row
+        height: { xs: 450, sm: 520 }, // Consistent height for the Data Row
       }}
     >
       {/* Header */}
       <Box
         sx={{
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
           borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           flexWrap: "wrap",
-          gap: 2,
+          gap: 1.5,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -130,12 +130,17 @@ export const LecturesList = ({
           <Box>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.2 }}
+              sx={{
+                fontWeight: 800,
+                color: "text.primary",
+                lineHeight: 1.2,
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+              }}
             >
               Lectures List
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Manage lectures for this course
+              Manage lectures
             </Typography>
           </Box>
         </Box>
@@ -179,8 +184,8 @@ export const LecturesList = ({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    px: 3,
-                    py: 2,
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 1.5, sm: 2 },
                     transition: "background-color 0.15s ease",
                     "&:hover": {
                       bgcolor: "rgba(15, 23, 42, 0.02)",
@@ -190,20 +195,26 @@ export const LecturesList = ({
                   <Stack
                     component="div"
                     direction="row"
-                    spacing={2.5}
-                    sx={{ alignItems: "center", overflow: "hidden", mr: 2 }}
+                    spacing={{ xs: 1.5, sm: 2.5 }}
+                    sx={{ alignItems: "center", overflow: "hidden", mr: 1.5 }}
                   >
                     <Avatar
                       variant="rounded"
                       sx={{
                         bgcolor: "rgba(37, 99, 235, 0.05)",
                         color: "primary.main",
-                        width: 40,
-                        height: 40,
+                        width: { xs: 36, sm: 40 },
+                        height: { xs: 36, sm: 40 },
+                        flexShrink: 0,
                         border: "1px solid rgba(37, 99, 235, 0.12)",
                       }}
                     >
-                      <Typography sx={{ fontWeight: 800, fontSize: "0.95rem" }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                        }}
+                      >
                         {index + 1}
                       </Typography>
                     </Avatar>
@@ -212,10 +223,11 @@ export const LecturesList = ({
                         sx={{
                           fontWeight: 700,
                           color: "text.primary",
-                          fontSize: "0.95rem",
+                          fontSize: { xs: "0.875rem", sm: "0.95rem" },
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          wordBreak: "break-word",
                         }}
                       >
                         {lecture.title}
@@ -229,6 +241,7 @@ export const LecturesList = ({
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          wordBreak: "break-word",
                         }}
                       >
                         {lecture.summary || "Không có tóm tắt"}

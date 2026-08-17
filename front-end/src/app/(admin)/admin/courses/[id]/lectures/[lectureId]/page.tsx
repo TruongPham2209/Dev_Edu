@@ -79,7 +79,7 @@ export default function AdminLectureDetailPage() {
   }
 
   return (
-    <Stack spacing={4} sx={{ pb: 6 }}>
+    <Stack spacing={{ xs: 2.5, sm: 4 }} sx={{ pb: { xs: 3, sm: 6 } }}>
       {/* Hero Section */}
       <LectureHeroSection
         lecture={lecture}
@@ -90,7 +90,7 @@ export default function AdminLectureDetailPage() {
       />
 
       {/* Main grids for Materials & Assignments */}
-      <Stack direction="column" spacing={4}>
+      <Stack direction="column" spacing={{ xs: 2.5, sm: 4 }}>
         {/* Secondary Data Loading Placeholder */}
         {loadingSecondary && (
           <Skeleton variant="rounded" height={140} sx={{ borderRadius: 4 }} />

@@ -50,8 +50,24 @@ export const CourseHero = ({
       {/* Modern Compact Breadcrumbs */}
       <Box sx={{ py: 0.5 }}>
         <Breadcrumbs
-          separator={<ChevronRight size={14} className="text-slate-400" />}
+          separator={<ChevronRight size={14} className="text-slate-400 shrink-0" />}
           aria-label="breadcrumb"
+          sx={{
+            "& .MuiBreadcrumbs-ol": {
+              alignItems: "center",
+              flexWrap: "nowrap",
+              overflow: "hidden",
+            },
+            "& .MuiBreadcrumbs-li": {
+              display: "inline-flex",
+              alignItems: "center",
+              minWidth: 0,
+            },
+            "& .MuiBreadcrumbs-separator": {
+              mx: { xs: 0.5, sm: 1 },
+              flexShrink: 0,
+            },
+          }}
         >
           <Link
             href="/admin/courses"
@@ -64,17 +80,18 @@ export const CourseHero = ({
           >
             <span
               style={{ cursor: "pointer" }}
-              className="hover:text-blue-600 transition-colors"
+              className="hover:text-blue-600 transition-colors shrink-0"
             >
               Manage Course
             </span>
           </Link>
           <Typography
             color="text.primary"
+            title={course.title}
             sx={{
               fontSize: "0.875rem",
               fontWeight: 600,
-              maxWidth: 250,
+              maxWidth: { xs: 180, sm: 280, md: 450 },
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -109,8 +126,8 @@ export const CourseHero = ({
             position: "absolute",
             top: -120,
             right: -120,
-            width: 260,
-            height: 260,
+            width: { xs: 160, sm: 260 },
+            height: { xs: 160, sm: 260 },
             borderRadius: "50%",
             background:
               "radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%)",
@@ -133,14 +150,14 @@ export const CourseHero = ({
       >
         <CardContent
           sx={{
-            p: { xs: 2.5, md: 3 },
-            "&:last-child": { pb: { xs: 2.5, md: 3 } },
+            p: { xs: 2, sm: 2.5, md: 3 },
+            "&:last-child": { pb: { xs: 2, sm: 2.5, md: 3 } },
           }}
         >
           <Box
             sx={{
               display: "flex",
-              mb: 3,
+              mb: { xs: 2, sm: 3 },
               borderBottom: "1px solid",
               borderColor: "rgba(15,23,42,0.06)",
             }}
@@ -183,6 +200,7 @@ export const CourseHero = ({
                 sx={{
                   fontWeight: 800,
                   color: "text.primary",
+                  fontSize: { xs: "1rem", sm: "1.25rem" },
                 }}
               >
                 Course Details
@@ -191,20 +209,22 @@ export const CourseHero = ({
           </Box>
           <Box
             sx={{
+              overflowX: "auto",
+              wordBreak: "break-word",
               "& img": { maxWidth: "100%", height: "auto", borderRadius: 1 },
               "& p": {
                 mt: 0,
                 mb: 1.5,
                 lineHeight: 1.6,
                 color: "text.secondary",
-                fontSize: "0.95rem",
+                fontSize: { xs: "0.875rem", sm: "0.95rem" },
               },
               "& ul, & ol": {
                 mt: 0,
                 mb: 1.5,
                 pl: 3,
                 color: "text.secondary",
-                fontSize: "0.95rem",
+                fontSize: { xs: "0.875rem", sm: "0.95rem" },
               },
               "& h1, & h2, & h3, & h4, & h5, & h6": {
                 color: "text.primary",
@@ -221,7 +241,7 @@ export const CourseHero = ({
       </Card>
 
       {/* Metrics Row */}
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricItem
             title="Total Lectures"

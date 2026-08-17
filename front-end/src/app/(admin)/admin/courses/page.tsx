@@ -254,7 +254,7 @@ export default function AdminCoursesPage() {
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 2,
-            mb: 3,
+            mb: { xs: 2, sm: 3 },
           }}
         >
           {/* Left Side: Search & Filter */}
@@ -265,14 +265,15 @@ export default function AdminCoursesPage() {
               flexWrap: "wrap",
               gap: 2,
               flex: 1,
+              width: { xs: "100%", md: "auto" },
             }}
           >
             {/* Search Input Container */}
             <Box
               sx={{
                 flex: 1,
-                minWidth: { xs: "100%", md: 320 },
-                maxWidth: 500,
+                minWidth: { xs: "100%", sm: 260, md: 320 },
+                maxWidth: { xs: "100%", md: 500 },
               }}
             >
               <SearchInput
@@ -285,17 +286,19 @@ export default function AdminCoursesPage() {
             </Box>
 
             {/* Category Filter Select */}
-            <FilterSelect
-              label="Filter by Category"
-              value={categoryFilter}
-              onChange={handleCategorySelect}
-              items={categories.map((cat) => ({
-                id: cat.id,
-                title: cat.name,
-              }))}
-              defaultLabel="All Categories"
-              defaultValue="ALL"
-            />
+            <Box sx={{ width: { xs: "100%", sm: "auto" } }}>
+              <FilterSelect
+                label="Filter by Category"
+                value={categoryFilter}
+                onChange={handleCategorySelect}
+                items={categories.map((cat) => ({
+                  id: cat.id,
+                  title: cat.name,
+                }))}
+                defaultLabel="All Categories"
+                defaultValue="ALL"
+              />
+            </Box>
           </Box>
 
           {/* Right Side: Create Button */}
@@ -303,9 +306,10 @@ export default function AdminCoursesPage() {
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
+              justifyContent: { xs: "flex-end", sm: "center" },
               height: 56, // Matches SearchInput minHeight
               gap: 1,
+              width: { xs: "100%", sm: "auto" },
             }}
           >
             <ButtonAction

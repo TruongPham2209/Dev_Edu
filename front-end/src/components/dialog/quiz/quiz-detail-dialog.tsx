@@ -269,7 +269,7 @@ export function QuizDetailDialog({
             <Paper
               variant="outlined"
               sx={{
-                p: 2,
+                p: { xs: 1.5, sm: 2 },
                 borderRadius: 2.5,
                 background:
                   "linear-gradient(135deg, rgba(241,245,249,0.8) 0%, rgba(248,250,252,0.95) 100%)",
@@ -279,12 +279,12 @@ export function QuizDetailDialog({
                 justifyContent: "space-between",
                 alignItems: "center",
                 flexWrap: "wrap",
-                gap: 2,
+                gap: 1.5,
               }}
             >
               <Stack
                 direction="row"
-                spacing={1.5}
+                spacing={1}
                 useFlexGap
                 sx={{ flexWrap: "wrap", alignItems: "center" }}
               >
@@ -298,7 +298,7 @@ export function QuizDetailDialog({
                     sx={{
                       fontWeight: 700,
                       borderRadius: 2,
-                      fontSize: "0.78rem",
+                      fontSize: "0.75rem",
                       py: 0.5,
                       px: 0.5,
                     }}
@@ -345,7 +345,7 @@ export function QuizDetailDialog({
                   position: "sticky",
                   top: 0,
                   zIndex: 10,
-                  p: 2,
+                  p: { xs: 1.5, sm: 2 },
                   borderRadius: 2.5,
                   bgcolor: "background.paper",
                   borderColor: "rgba(0,0,0,0.12)",
@@ -354,11 +354,11 @@ export function QuizDetailDialog({
               >
                 <Stack
                   direction="row"
-                  spacing={1.5}
+                  spacing={1}
                   useFlexGap
                   sx={{
                     flexWrap: "wrap",
-                    justifyContent: "flex-end",
+                    justify: "flex-end",
                     alignItems: "center",
                   }}
                 >
@@ -372,7 +372,13 @@ export function QuizDetailDialog({
                         `/lecturer/courses/${quizDetail.courseId}/quizzes/${quizDetail.id}`,
                       );
                     }}
-                    sx={{ borderRadius: 2, fontWeight: 600 }}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      flex: { xs: 1, sm: "none" },
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     Edit
                   </Button>
@@ -389,7 +395,13 @@ export function QuizDetailDialog({
                             `/lecturer/courses/${quizDetail.courseId}/quizzes/${quizDetail.id}/assignments`,
                           );
                         }}
-                        sx={{ borderRadius: 2, fontWeight: 600 }}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          flex: { xs: 1, sm: "none" },
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         Manage Assignments
                       </Button>
@@ -404,7 +416,13 @@ export function QuizDetailDialog({
                             `/lecturer/courses/${quizDetail.courseId}/quizzes/${quizDetail.id}/grading`,
                           );
                         }}
-                        sx={{ borderRadius: 2, fontWeight: 600 }}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 600,
+                          flex: { xs: 1, sm: "none" },
+                          fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         Manage Grading
                       </Button>
@@ -418,7 +436,13 @@ export function QuizDetailDialog({
                       startIcon={<Send size={16} />}
                       disabled={isPendingAction}
                       onClick={handleSubmitClick}
-                      sx={{ borderRadius: 2, fontWeight: 700 }}
+                      sx={{
+                        borderRadius: 2,
+                        fontWeight: 700,
+                        flex: { xs: 1, sm: "none" },
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                        whiteSpace: "nowrap",
+                      }}
                     >
                       Submit
                     </Button>
@@ -432,7 +456,11 @@ export function QuizDetailDialog({
               <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
                 Description
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ wordBreak: "break-word" }}
+              >
                 {quizDetail.description || "No description."}
               </Typography>
             </Box>
@@ -453,14 +481,19 @@ export function QuizDetailDialog({
                       key={cfg.id}
                       variant="outlined"
                       sx={{
-                        p: 1.5,
+                        p: { xs: 1.25, sm: 1.5 },
                         borderRadius: 2,
                         display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
                         justifyContent: "space-between",
-                        alignItems: "center",
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        gap: 1,
                       }}
                     >
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 600, wordBreak: "break-word" }}
+                      >
                         {cfg.questionType}: {cfg.requiredCount} questions (
                         {cfg.pointsPerQuestion} pts/question)
                       </Typography>
@@ -516,7 +549,7 @@ export function QuizDetailDialog({
                       key={q.id}
                       variant="outlined"
                       sx={{
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                         borderRadius: 2,
                         bgcolor: "background.paper",
                       }}
@@ -531,7 +564,11 @@ export function QuizDetailDialog({
                       >
                         <Typography
                           variant="subtitle2"
-                          sx={{ fontWeight: 700, color: "primary.main" }}
+                          sx={{
+                            fontWeight: 700,
+                            color: "primary.main",
+                            wordBreak: "break-word",
+                          }}
                         >
                           Question {i + 1} ({q.questionType})
                         </Typography>
@@ -551,7 +588,11 @@ export function QuizDetailDialog({
                       <Typography
                         variant="body2"
                         dangerouslySetInnerHTML={{ __html: q.content }}
-                        sx={{ mb: 1.5 }}
+                        sx={{
+                          mb: 1.5,
+                          overflowX: "auto",
+                          wordBreak: "break-word",
+                        }}
                       />
 
                       {q.options && q.options.length > 0 && (
@@ -564,6 +605,7 @@ export function QuizDetailDialog({
                                 py: 1,
                                 borderRadius: 1.5,
                                 fontSize: "0.85rem",
+                                wordBreak: "break-word",
                                 bgcolor: opt.isCorrect
                                   ? "rgba(34, 197, 94, 0.1)"
                                   : "action.hover",
@@ -595,7 +637,7 @@ export function QuizDetailDialog({
                   position: "sticky",
                   bottom: 0,
                   zIndex: 10,
-                  p: 2,
+                  p: { xs: 1.5, sm: 2 },
                   borderRadius: 2.5,
                   bgcolor: "background.paper",
                   borderColor: "rgba(0,0,0,0.12)",
@@ -604,7 +646,7 @@ export function QuizDetailDialog({
               >
                 <Stack
                   direction="row"
-                  spacing={1.5}
+                  spacing={1}
                   useFlexGap
                   sx={{
                     flexWrap: "wrap",
@@ -618,7 +660,13 @@ export function QuizDetailDialog({
                     startIcon={<CheckCircle2 size={16} />}
                     disabled={isPendingAction}
                     onClick={handleOpenApprove}
-                    sx={{ borderRadius: 2, fontWeight: 700 }}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      flex: { xs: 1, sm: "none" },
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     Approve
                   </Button>
@@ -628,7 +676,13 @@ export function QuizDetailDialog({
                     startIcon={<XCircle size={16} />}
                     disabled={isPendingAction}
                     onClick={handleOpenReject}
-                    sx={{ borderRadius: 2, fontWeight: 700 }}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      flex: { xs: 1, sm: "none" },
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      whiteSpace: "nowrap",
+                    }}
                   >
                     Reject
                   </Button>

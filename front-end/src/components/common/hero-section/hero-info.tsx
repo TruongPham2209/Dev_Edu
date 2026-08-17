@@ -15,10 +15,10 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
         position: "relative",
         overflow: "hidden",
 
-        borderRadius: "32px",
+        borderRadius: { xs: "20px", sm: "24px", md: "32px" },
 
-        px: { xs: 3, md: 4 },
-        py: { xs: 3, md: 3.5 },
+        px: { xs: 2.5, sm: 3, md: 4 },
+        py: { xs: 2.5, sm: 3, md: 3.5 },
 
         background: `
           linear-gradient(
@@ -45,8 +45,8 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
           top: -80,
           right: -80,
 
-          width: 240,
-          height: 240,
+          width: { xs: 160, sm: 240 },
+          height: { xs: 160, sm: 240 },
 
           borderRadius: "50%",
 
@@ -62,7 +62,7 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
 
       <Stack
         direction={{ xs: "column", lg: "row" }}
-        spacing={{ xs: 2.5, lg: 3 }}
+        spacing={{ xs: 2, lg: 3 }}
         sx={{
           justifyContent: "space-between",
           alignItems: {
@@ -74,11 +74,12 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
         }}
       >
         {/* LEFT */}
-        <Box sx={{ flex: 7 }}>
+        <Box sx={{ flex: { xs: "1", lg: "7" }, width: "100%" }}>
           {/* Badge */}
           <Chip
             icon={<Sparkles size={14} />}
             label="Management Panel"
+            size="small"
             sx={{
               mb: 1.5,
 
@@ -89,6 +90,7 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
               fontWeight: 700,
 
               borderRadius: "999px",
+              fontSize: { xs: "0.75rem", sm: "0.8125rem" },
 
               border: "1px solid",
               borderColor: alpha("#16a34a", 0.12),
@@ -103,22 +105,23 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
           <Box
             sx={{
               display: "flex",
-              alignItems: "center",
-              gap: 1.5,
+              alignItems: { xs: "flex-start", sm: "center" },
+              gap: { xs: 1.25, sm: 1.5 },
               mb: 1.2,
             }}
           >
             {/* Icon */}
             <Box
               sx={{
-                width: 52,
-                height: 52,
+                width: { xs: 42, sm: 48, md: 52 },
+                height: { xs: 42, sm: 48, md: 52 },
 
-                borderRadius: "16px",
+                borderRadius: { xs: "12px", sm: "16px" },
 
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                flexShrink: 0,
 
                 background: `
                   linear-gradient(
@@ -139,8 +142,8 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
                 `,
 
                 "& svg": {
-                  width: 26,
-                  height: 26,
+                  width: { xs: 22, sm: 24, md: 26 },
+                  height: { xs: 22, sm: 24, md: 26 },
                 },
               }}
             >
@@ -151,17 +154,21 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
             <Typography
               sx={{
                 fontSize: {
-                  xs: "1.75rem",
-                  md: "2.5rem",
+                  xs: "1.35rem",
+                  sm: "1.75rem",
+                  md: "2.25rem",
+                  lg: "2.5rem",
                 },
 
                 fontWeight: 900,
 
-                lineHeight: 1,
+                lineHeight: 1.15,
 
-                letterSpacing: "-0.06em",
+                letterSpacing: "-0.03em",
 
                 color: "#14532d",
+
+                wordBreak: "break-word",
               }}
             >
               {title}
@@ -174,13 +181,16 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
               maxWidth: 760,
 
               fontSize: {
-                xs: "0.95rem",
+                xs: "0.85rem",
+                sm: "0.95rem",
                 md: "1.05rem",
               },
 
               lineHeight: 1.6,
 
               color: alpha("#14532d", 0.82),
+
+              wordBreak: "break-word",
 
               mb: 0,
             }}
@@ -190,40 +200,45 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
         </Box>
 
         {/* RIGHT */}
-        <Box
-          sx={{
-            flex: 3,
-            display: "flex",
-            alignItems: { xs: "flex-start", lg: "flex-end" },
-          }}
-        >
-          {/* Tags */}
-          <Stack
-            direction="row"
-            spacing={1.2}
-            useFlexGap
+        {tags && tags.length > 0 && (
+          <Box
             sx={{
-              flexWrap: "wrap",
-              justifyContent: { xs: "flex-start", lg: "flex-end" },
+              flex: { xs: "1", lg: "3" },
+              width: "100%",
+              display: "flex",
+              alignItems: { xs: "flex-start", lg: "flex-end" },
             }}
           >
-            {tags?.map((item) => (
-              <Chip
-                key={item}
-                label={item}
-                sx={{
-                  bgcolor: "rgba(255,255,255,.65)",
-                  color: "#166534",
-                  fontWeight: 600,
-                  borderRadius: "12px",
-                  border: "1px solid",
-                  borderColor: alpha("#16a34a", 0.1),
-                  backdropFilter: "blur(10px)",
-                }}
-              />
-            ))}
-          </Stack>
-        </Box>
+            {/* Tags */}
+            <Stack
+              direction="row"
+              spacing={1}
+              useFlexGap
+              sx={{
+                flexWrap: "wrap",
+                justifyContent: { xs: "flex-start", lg: "flex-end" },
+              }}
+            >
+              {tags.map((item) => (
+                <Chip
+                  key={item}
+                  label={item}
+                  size="small"
+                  sx={{
+                    bgcolor: "rgba(255,255,255,.65)",
+                    color: "#166534",
+                    fontWeight: 600,
+                    fontSize: { xs: "0.725rem", sm: "0.8125rem" },
+                    borderRadius: "10px",
+                    border: "1px solid",
+                    borderColor: alpha("#16a34a", 0.1),
+                    backdropFilter: "blur(10px)",
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )}
       </Stack>
     </Box>
   );

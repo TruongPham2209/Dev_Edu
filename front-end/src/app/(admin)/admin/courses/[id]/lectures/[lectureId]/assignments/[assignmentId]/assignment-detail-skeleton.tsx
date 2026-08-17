@@ -4,8 +4,8 @@ import { Box, Container, Skeleton, Stack } from "@mui/material";
 
 export function AssignmentDetailSkeleton() {
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack component="div" spacing={4}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+      <Stack component="div" spacing={{ xs: 2.5, sm: 4 }}>
         {/* Assignment Hero Section Skeleton */}
         <Stack spacing={3}>
           {/* Breadcrumbs */}

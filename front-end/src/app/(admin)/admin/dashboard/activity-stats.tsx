@@ -201,19 +201,26 @@ export function ActivityStats() {
             backdropFilter: "blur(8px)",
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, mb: 0.5, fontSize: { xs: "1rem", sm: "1.25rem" } }}
+            >
               System Activity Overview
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 3, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Analyze traffic and user behavior in the last 30 days
             </Typography>
 
-            <Grid container spacing={2} sx={{ mb: 4 }}>
-              <Grid size={{ xs: 6 }}>
+            <Grid container spacing={{ xs: 1.5, sm: 2 }} sx={{ mb: 4 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Box
                   sx={{
-                    p: 2,
+                    p: { xs: 1.75, sm: 2 },
                     borderRadius: 2.5,
                     bgcolor: alpha("#10b981", 0.08),
                     border: "1px solid rgba(16, 185, 129, 0.15)",
@@ -231,23 +238,31 @@ export function ActivityStats() {
                     <Zap size={16} />
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 700, textTransform: "uppercase" }}
+                      sx={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        fontSize: { xs: "0.675rem", sm: "0.75rem" },
+                      }}
                     >
                       Active Users (24h)
                     </Typography>
                   </Box>
                   <Typography
                     variant="h4"
-                    sx={{ fontWeight: 800, color: "#10b981" }}
+                    sx={{
+                      fontWeight: 800,
+                      color: "#10b981",
+                      fontSize: { xs: "1.5rem", sm: "1.85rem", md: "2rem" },
+                    }}
                   >
                     {dailyActiveUsers.toLocaleString()}
                   </Typography>
                 </Box>
               </Grid>
-              <Grid size={{ xs: 6 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Box
                   sx={{
-                    p: 2,
+                    p: { xs: 1.75, sm: 2 },
                     borderRadius: 2.5,
                     bgcolor: alpha("#3b82f6", 0.08),
                     border: "1px solid rgba(59, 130, 246, 0.15)",
@@ -265,14 +280,22 @@ export function ActivityStats() {
                     <Shield size={16} />
                     <Typography
                       variant="caption"
-                      sx={{ fontWeight: 700, textTransform: "uppercase" }}
+                      sx={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        fontSize: { xs: "0.675rem", sm: "0.75rem" },
+                      }}
                     >
                       Total Request Logs
                     </Typography>
                   </Box>
                   <Typography
                     variant="h4"
-                    sx={{ fontWeight: 800, color: "#3b82f6" }}
+                    sx={{
+                      fontWeight: 800,
+                      color: "#3b82f6",
+                      fontSize: { xs: "1.5rem", sm: "1.85rem", md: "2rem" },
+                    }}
                   >
                     {totalRequestLogs.toLocaleString()}
                   </Typography>
@@ -373,16 +396,23 @@ export function ActivityStats() {
         >
           <CardContent
             sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               display: "flex",
               flexDirection: "column",
               height: "100%",
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, mb: 0.5, fontSize: { xs: "1rem", sm: "1.25rem" } }}
+            >
               Recent Activity Log
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Latest events and actions on the system
             </Typography>
 

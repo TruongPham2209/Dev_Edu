@@ -148,7 +148,7 @@ export function KpiCards() {
                 },
               }}
             >
-              <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 }, "&:last-child": { pb: { xs: 2, sm: 2.5 } } }}>
                 <Stack spacing={1.5}>
                   <Box
                     sx={{
@@ -160,14 +160,15 @@ export function KpiCards() {
                   >
                     <Box
                       sx={{
-                        width: 38,
-                        height: 38,
+                        width: { xs: 34, sm: 38 },
+                        height: { xs: 34, sm: 38 },
                         borderRadius: 2.5,
                         bgcolor: alpha(kpi.color, 0.12),
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         color: kpi.color,
+                        flexShrink: 0,
                       }}
                     >
                       <Icon size={18} strokeWidth={2.2} />
@@ -184,6 +185,7 @@ export function KpiCards() {
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          fontSize: { xs: "0.675rem", sm: "0.75rem" },
                         }}
                       >
                         {kpi.title}
@@ -191,7 +193,7 @@ export function KpiCards() {
                       <Typography
                         variant="caption"
                         color="text.secondary"
-                        sx={{ fontSize: "0.75rem" }}
+                        sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" } }}
                       >
                         {kpi.subtitle}
                       </Typography>
@@ -202,7 +204,7 @@ export function KpiCards() {
                     sx={{
                       fontWeight: 800,
                       color: "text.primary",
-                      fontSize: { xs: "1.5rem", md: "1.75rem" },
+                      fontSize: { xs: "1.35rem", sm: "1.5rem", md: "1.75rem" },
                       mt: 0.5,
                     }}
                   >

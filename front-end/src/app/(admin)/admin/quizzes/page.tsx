@@ -120,7 +120,7 @@ export default function AdminQuizManagementPage() {
   };
 
   return (
-    <Stack spacing={3} sx={{ width: "100%", overflowX: "hidden" }}>
+    <Stack spacing={{ xs: 2.5, sm: 3 }} sx={{ width: "100%", overflowX: "hidden", pb: { xs: 3, sm: 5 } }}>
       {/* 1. Hero Section */}
       <HeroInfo
         title="Quizzes Management"
@@ -130,7 +130,7 @@ export default function AdminQuizManagementPage() {
       />
 
       {/* 2. Quiz Status Tabs (excluding DRAFT) */}
-      <Box sx={{ mb: 4, borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={{ mb: { xs: 2.5, sm: 4 }, borderBottom: 1, borderColor: "divider" }}>
         <AnimatedTabs
           tabs={STATUS_TABS}
           value={activeTab}
@@ -140,7 +140,7 @@ export default function AdminQuizManagementPage() {
 
       {/* 3. Quiz List & States */}
       {isLoading ? (
-        <Grid container spacing={3}>
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Grid key={i} size={{ xs: 12, md: 6, lg: 4 }}>
               <Skeleton
@@ -165,7 +165,7 @@ export default function AdminQuizManagementPage() {
         />
       ) : (
         <Box>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {quizzes.map((quiz) => (
               <Grid key={quiz.id} size={{ xs: 12, md: 6, lg: 4 }}>
                 <QuizCard
@@ -185,7 +185,7 @@ export default function AdminQuizManagementPage() {
               sx={{
                 display: "flex",
                 justifyContent: "center",
-                mt: 5,
+                mt: { xs: 3, sm: 5 },
                 mb: 2,
               }}
             >
@@ -200,7 +200,14 @@ export default function AdminQuizManagementPage() {
                     <RefreshCw size={16} />
                   )
                 }
-                sx={{ borderRadius: 3, px: 4, py: 1.2, fontWeight: 700 }}
+                sx={{
+                  borderRadius: 3,
+                  px: 4,
+                  py: 1.2,
+                  fontWeight: 700,
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
                 {isFetchingNextPage ? "Loading..." : "Load more quizzes"}
               </Button>

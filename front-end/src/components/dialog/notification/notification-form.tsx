@@ -157,7 +157,7 @@ export function CreateGroupNotificationDialog({
           error={touched.targetRoles && errors.targetRoles}
           variant="standard"
           sx={{
-            p: 2.5,
+            p: { xs: 1.75, sm: 2.5 },
             borderRadius: 2.5,
             bgcolor: "#f8fafc",
             border: "1px solid rgba(15, 23, 42, 0.08)",

@@ -45,12 +45,12 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
         boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
-        height: 480, // Consistent height for the User Row
+        height: { xs: 420, sm: 480 }, // Consistent height for the User Row
       }}
     >
       <Box
         sx={{
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
           borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
           display: "flex",
           alignItems: "center",
@@ -71,7 +71,12 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
         <Box>
           <Typography
             variant="h6"
-            sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.2 }}
+            sx={{
+              fontWeight: 800,
+              color: "text.primary",
+              lineHeight: 1.2,
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
           >
             Assigned Lecturers
           </Typography>
@@ -111,8 +116,8 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      px: 3,
-                      py: 2,
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 1.5, sm: 2 },
                       transition: "background-color 0.15s ease",
                       "&:hover": {
                         bgcolor: "rgba(15, 23, 42, 0.02)",
@@ -130,8 +135,9 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
                           color: "white",
                           fontWeight: 700,
                           fontSize: "0.95rem",
-                          width: 40,
-                          height: 40,
+                          width: { xs: 36, sm: 40 },
+                          height: { xs: 36, sm: 40 },
+                          flexShrink: 0,
                           boxShadow: "0 2px 8px -2px rgba(0,0,0,0.15)",
                         }}
                       >
@@ -139,7 +145,12 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
                       </Avatar>
                       <Box>
                         <Typography
-                          sx={{ fontWeight: 700, color: "text.primary" }}
+                          sx={{
+                            fontWeight: 700,
+                            color: "text.primary",
+                            fontSize: { xs: "0.875rem", sm: "0.95rem" },
+                            wordBreak: "break-word",
+                          }}
                         >
                           @{username}
                         </Typography>

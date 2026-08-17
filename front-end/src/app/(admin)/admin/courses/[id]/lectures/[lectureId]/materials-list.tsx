@@ -97,18 +97,25 @@ export function MaterialsList({
         boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         {/* Header */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 3,
+            mb: { xs: 2, sm: 3 },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                fontSize: { xs: "1.05rem", sm: "1.25rem" },
+              }}
+            >
               Materials
             </Typography>
           </Box>
@@ -156,24 +163,24 @@ export function MaterialsList({
                       },
                     }}
                   >
-                    <CardContent sx={{ p: "16px !important" }}>
+                    <CardContent sx={{ p: { xs: "12px !important", sm: "16px !important" } }}>
                       <Stack
-                        direction="row"
-                        spacing={2}
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={{ xs: 1.5, sm: 2 }}
                         sx={{
-                          alignItems: "center",
+                          alignItems: { xs: "flex-start", sm: "center" },
                           justifyContent: "space-between",
                         }}
                       >
                         <Stack
                           direction="row"
                           spacing={2}
-                          sx={{ alignItems: "center", minWidth: 0 }}
+                          sx={{ alignItems: "center", minWidth: 0, width: "100%" }}
                         >
                           <Box
                             sx={{
-                              width: 48,
-                              height: 48,
+                              width: { xs: 40, sm: 48 },
+                              height: { xs: 40, sm: 48 },
                               borderRadius: 2.5,
                               bgcolor: "grey.50",
                               border: "1px solid",
@@ -192,9 +199,11 @@ export function MaterialsList({
                               sx={{
                                 fontWeight: 750,
                                 color: "#1e293b",
+                                fontSize: { xs: "0.875rem", sm: "1rem" },
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
+                                wordBreak: "break-word",
                               }}
                             >
                               {material.title}
@@ -242,7 +251,7 @@ export function MaterialsList({
                         <Stack
                           direction="row"
                           spacing={1}
-                          sx={{ flexShrink: 0 }}
+                          sx={{ flexShrink: 0, alignSelf: { xs: "flex-end", sm: "center" } }}
                         >
                           <ButtonAction
                             tooltip="Download"

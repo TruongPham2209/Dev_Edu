@@ -64,18 +64,25 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
         boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         {/* Header */}
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 3,
+            mb: { xs: 2, sm: 3 },
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                fontSize: { xs: "1.05rem", sm: "1.25rem" },
+              }}
+            >
               Assignments
             </Typography>
           </Box>
@@ -113,16 +120,17 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                     },
                   }}
                 >
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                     <Box
                       sx={{
                         display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
                         justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        gap: 3,
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        gap: { xs: 1.5, sm: 3 },
                       }}
                     >
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
                         <Stack
                           direction="row"
                           spacing={1}
@@ -150,9 +158,11 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                             sx={{
                               fontWeight: 750,
                               color: "#1e293b",
+                              fontSize: { xs: "0.875rem", sm: "1rem" },
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
+                              wordBreak: "break-word",
                             }}
                           >
                             {assignment.title}
@@ -174,7 +184,7 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                             <Calendar size={13} className="text-slate-400" />
                             <Typography
                               variant="caption"
-                              sx={{ fontWeight: 550 }}
+                              sx={{ fontWeight: 550, fontSize: { xs: "0.75rem", sm: "0.8rem" } }}
                             >
                               Created at:{" "}
                               {formatServerDate(
@@ -189,12 +199,13 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                         <Box
                           sx={{
                             color: "text.secondary",
-                            fontSize: "0.875rem",
+                            fontSize: { xs: "0.825rem", sm: "0.875rem" },
                             lineHeight: 1.6,
                             overflow: "hidden",
                             display: "-webkit-box",
                             WebkitBoxOrient: "vertical",
                             WebkitLineClamp: 2,
+                            wordBreak: "break-word",
                             "& p": { m: 0 },
                           }}
                           dangerouslySetInnerHTML={{
@@ -206,7 +217,7 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                       <Stack
                         direction="row"
                         spacing={1}
-                        sx={{ flexShrink: 0, alignItems: "center" }}
+                        sx={{ flexShrink: 0, alignItems: "center", alignSelf: { xs: "flex-end", sm: "center" } }}
                       >
                         <ButtonAction
                           onClick={() =>

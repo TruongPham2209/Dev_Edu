@@ -13,16 +13,19 @@ export const CourseHero = ({ course }: { course: CourseResponse }) => {
         sx={{
           "& .MuiBreadcrumbs-ol": {
             alignItems: "flex-start",
-            flexWrap: "wrap",
+            flexWrap: "nowrap",
+            overflow: "hidden",
           },
           "& .MuiBreadcrumbs-li": {
             display: "inline-flex",
             alignItems: "flex-start",
+            minWidth: 0,
           },
           "& .MuiBreadcrumbs-separator": {
-            mx: { xs: 0.75, sm: 1 },
+            mx: { xs: 0.5, sm: 1 },
             mt: "3px",
             color: "text.disabled",
+            flexShrink: 0,
           },
         }}
       >

@@ -81,6 +81,8 @@ const ExpandableContent = ({ content }: { content: string }) => {
           sx={{
             typography: "body1",
             color: "text.primary",
+            overflowX: "auto",
+            wordBreak: "break-word",
             "& img": {
               maxWidth: "100%",
               height: "auto",
@@ -190,50 +192,54 @@ function ModerationCard({
             },
           }}
         >
-          <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
-            {/* Author & Status Row */}
+          <Box sx={{ p: { xs: 2, sm: 3 } }}>
+            {/* Author & Status Header */}
             <Stack
               direction="row"
-              spacing={2}
+              spacing={{ xs: 1.5, sm: 2 }}
               sx={{
-                mb: 3,
+                mb: { xs: 2, sm: 3 },
                 display: "flex",
-                alignItems: "center",
+                alignItems: "flex-start",
               }}
             >
               <Avatar
                 src={post.authorAvatarUrl || undefined}
                 alt={post.authorFullName}
                 sx={{
-                  width: 48,
-                  height: 48,
+                  width: { xs: 40, sm: 48 },
+                  height: { xs: 40, sm: 48 },
                   border: "1px solid",
                   borderColor: "divider",
+                  flexShrink: 0,
                 }}
               />
-              <Box sx={{ flexGrow: 1 }}>
-                <Stack
-                  direction="row"
-                  spacing={1}
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <Typography
+                  variant="subtitle1"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                    wordBreak: "break-word",
                   }}
                 >
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: 600, lineHeight: 1.2 }}
-                  >
-                    {post.authorFullName}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ display: { xs: "none", sm: "block" } }}
-                  >
-                    @{post.authorUsername}
-                  </Typography>
-                </Stack>
+                  {post.authorFullName}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{
+                    display: "block",
+                    fontWeight: 500,
+                    mt: 0.25,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  @{post.authorUsername}
+                </Typography>
                 <Stack
                   direction="row"
                   spacing={0.5}
@@ -244,30 +250,34 @@ function ModerationCard({
                     alignItems: "center",
                   }}
                 >
-                  <Clock size={14} />
-                  <Typography variant="body2">
+                  <Clock size={13} />
+                  <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
                     {formatServerDate(post.createdAt, "datetime")}
                   </Typography>
                 </Stack>
               </Box>
               <Chip
-                icon={<ShieldAlert size={14} />}
+                icon={<ShieldAlert size={13} />}
                 label="Pending Review"
                 size="small"
                 sx={{
                   fontWeight: 600,
+                  fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                  height: 26,
                   bgcolor: (theme) =>
                     theme.palette.mode === "dark"
                       ? "rgba(255, 152, 0, 0.16)"
                       : "#fff4e5",
                   color: (theme) =>
                     theme.palette.mode === "dark" ? "#ffb74d" : "#ed6c02",
-                  px: 1,
+                  px: 0.5,
                   border: "1px solid",
                   borderColor: (theme) =>
                     theme.palette.mode === "dark"
                       ? "rgba(255, 152, 0, 0.3)"
                       : "#ffe0b2",
+                  flexShrink: 0,
+                  alignSelf: "flex-start",
                   "& .MuiChip-icon": {
                     color: "inherit",
                   },
@@ -279,7 +289,13 @@ function ModerationCard({
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontWeight: 700, mb: 1, lineHeight: 1.3 }}
+                sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  lineHeight: 1.3,
+                  fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                  wordBreak: "break-word",
+                }}
               >
                 {post.title}
               </Typography>
@@ -287,7 +303,11 @@ function ModerationCard({
                 <Typography
                   variant="body1"
                   color="text.secondary"
-                  sx={{ mb: 2 }}
+                  sx={{
+                    mb: 2,
+                    fontSize: { xs: "0.875rem", sm: "1rem" },
+                    wordBreak: "break-word",
+                  }}
                 >
                   {post.shortDescription}
                 </Typography>
@@ -300,7 +320,7 @@ function ModerationCard({
           <Divider />
           <Box
             sx={{
-              p: { xs: 2, sm: 2.5 },
+              p: { xs: 1.5, sm: 2.5 },
               bgcolor: (theme) =>
                 theme.palette.mode === "dark" ? "rgba(0,0,0,0.2)" : "#fcfcfc",
               borderBottomLeftRadius: 12,
@@ -308,8 +328,8 @@ function ModerationCard({
             }}
           >
             <Stack
-              direction="row"
-              spacing={2}
+              direction={{ xs: "row", sm: "row" }}
+              spacing={{ xs: 1, sm: 2 }}
               sx={{ justifyContent: "flex-end", alignItems: "center" }}
             >
               <Button
@@ -319,10 +339,14 @@ function ModerationCard({
                 onClick={() => handleAction("REJECTED")}
                 disabled={isPending || isRemoving}
                 sx={{
+                  flex: { xs: 1, sm: "none" },
                   borderRadius: 2,
                   textTransform: "none",
                   fontWeight: 600,
-                  px: { xs: 2, sm: 3 },
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                  px: { xs: 1.5, sm: 3 },
+                  py: { xs: 0.75, sm: 1 },
+                  whiteSpace: "nowrap",
                   "&:hover": {
                     bgcolor: "error.50",
                   },
@@ -337,10 +361,14 @@ function ModerationCard({
                 onClick={() => handleAction("APPROVED")}
                 disabled={isPending || isRemoving}
                 sx={{
+                  flex: { xs: 1, sm: "none" },
                   borderRadius: 2,
                   textTransform: "none",
                   fontWeight: 600,
-                  px: { xs: 3, sm: 4 },
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 0.75, sm: 1 },
+                  whiteSpace: "nowrap",
                   boxShadow: "none",
                   "&:hover": { boxShadow: "none" },
                 }}
@@ -367,24 +395,28 @@ const PostSkeleton = () => (
       bgcolor: "background.paper",
     }}
   >
-    <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 3, alignItems: "center" }}>
-        <Skeleton variant="circular" width={48} height={48} />
+    <Box sx={{ p: { xs: 2, sm: 3 } }}>
+      <Stack
+        direction="row"
+        spacing={{ xs: 1.5, sm: 2 }}
+        sx={{ mb: 3, alignItems: "center" }}
+      >
+        <Skeleton variant="circular" width={40} height={40} />
         <Box sx={{ flexGrow: 1 }}>
-          <Skeleton width="30%" height={24} sx={{ mb: 0.5 }} />
-          <Skeleton width="20%" height={16} />
+          <Skeleton width="40%" height={22} sx={{ mb: 0.5 }} />
+          <Skeleton width="25%" height={14} />
         </Box>
         <Skeleton
           variant="rounded"
-          width={130}
-          height={28}
+          width={110}
+          height={26}
           sx={{ borderRadius: 1 }}
         />
       </Stack>
 
-      <Skeleton width="60%" height={32} sx={{ mb: 1.5 }} />
-      <Skeleton width="80%" height={20} sx={{ mb: 0.5 }} />
-      <Skeleton width="40%" height={20} sx={{ mb: 3 }} />
+      <Skeleton width="70%" height={28} sx={{ mb: 1.5 }} />
+      <Skeleton width="85%" height={18} sx={{ mb: 0.5 }} />
+      <Skeleton width="45%" height={18} sx={{ mb: 3 }} />
 
       <Skeleton
         variant="rounded"
@@ -396,27 +428,25 @@ const PostSkeleton = () => (
     <Divider />
     <Box
       sx={{
-        p: { xs: 2, sm: 2.5 },
+        p: { xs: 1.5, sm: 2.5 },
         bgcolor: (theme) =>
           theme.palette.mode === "dark" ? "rgba(0,0,0,0.2)" : "#fcfcfc",
       }}
     >
       <Stack
         direction="row"
-        spacing={2}
+        spacing={1.5}
         sx={{ justifyContent: "flex-end", alignItems: "center" }}
       >
         <Skeleton
           variant="rounded"
-          width={120}
-          height={40}
-          sx={{ borderRadius: 2 }}
+          height={38}
+          sx={{ borderRadius: 2, flex: { xs: 1, sm: "none" }, width: { sm: 120 } }}
         />
         <Skeleton
           variant="rounded"
-          width={130}
-          height={40}
-          sx={{ borderRadius: 2 }}
+          height={38}
+          sx={{ borderRadius: 2, flex: { xs: 1, sm: "none" }, width: { sm: 130 } }}
         />
       </Stack>
     </Box>
@@ -492,7 +522,7 @@ export default function AdminPostsPage() {
 
   if (isError) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
+      <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 3 } }}>
         <ErrorState
           title="Failed to load pending posts"
           subtitle="There was an error connecting to the server."
@@ -503,16 +533,24 @@ export default function AdminPostsPage() {
   }
 
   return (
-    <Box sx={{ pb: 8, pt: { xs: 2, sm: 4 }, minHeight: "100vh" }}>
-      <Container maxWidth="md">
-        <Box sx={{ mb: 4, display: "flex", flexDirection: "column", gap: 1 }}>
+    <Box sx={{ pb: { xs: 4, sm: 8 }, pt: { xs: 2, sm: 4 }, minHeight: "100vh" }}>
+      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ mb: { xs: 2.5, sm: 4 }, display: "flex", flexDirection: "column", gap: 0.5 }}>
           <Typography
             variant="h4"
-            sx={{ fontWeight: 800, letterSpacing: "-0.02em" }}
+            sx={{
+              fontWeight: 800,
+              letterSpacing: "-0.02em",
+              fontSize: { xs: "1.5rem", sm: "1.85rem", md: "2.125rem" },
+            }}
           >
             Post Moderation
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}
+          >
             Review and approve or reject forum posts awaiting publication.
           </Typography>
         </Box>
@@ -527,7 +565,7 @@ export default function AdminPostsPage() {
           <Paper
             elevation={0}
             sx={{
-              p: 6,
+              p: { xs: 3, sm: 6 },
               textAlign: "center",
               borderRadius: 3,
               border: "1px dashed",

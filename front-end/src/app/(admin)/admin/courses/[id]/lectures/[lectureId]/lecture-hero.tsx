@@ -48,8 +48,24 @@ export function LectureHeroSection({
       {/* 1. Elegant Compact Breadcrumbs */}
       <Box sx={{ py: 0.5 }}>
         <Breadcrumbs
-          separator={<ChevronRight size={14} className="text-slate-400" />}
+          separator={<ChevronRight size={14} className="text-slate-400 shrink-0" />}
           aria-label="breadcrumb"
+          sx={{
+            "& .MuiBreadcrumbs-ol": {
+              alignItems: "center",
+              flexWrap: "nowrap",
+              overflow: "hidden",
+            },
+            "& .MuiBreadcrumbs-li": {
+              display: "inline-flex",
+              alignItems: "center",
+              minWidth: 0,
+            },
+            "& .MuiBreadcrumbs-separator": {
+              mx: { xs: 0.5, sm: 1 },
+              flexShrink: 0,
+            },
+          }}
         >
           <Link
             href="/admin/courses"
@@ -62,7 +78,7 @@ export function LectureHeroSection({
           >
             <span
               style={{ cursor: "pointer" }}
-              className="hover:text-blue-600 transition-colors"
+              className="hover:text-blue-600 transition-colors shrink-0"
             >
               Course Management
             </span>
@@ -76,27 +92,33 @@ export function LectureHeroSection({
               fontWeight: 500,
             }}
           >
-            <span
-              style={{
+            <Typography
+              component="span"
+              title={courseTitle}
+              sx={{
                 cursor: "pointer",
-                maxWidth: 200,
+                maxWidth: { xs: 100, sm: 180, md: 250 },
                 display: "inline-block",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 verticalAlign: "middle",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "inherit",
+                "&:hover": { color: "primary.main" },
               }}
-              className="hover:text-blue-600 transition-colors"
             >
               {courseTitle}
-            </span>
+            </Typography>
           </Link>
           <Typography
             color="text.primary"
+            title={lecture.title}
             sx={{
               fontSize: "0.875rem",
               fontWeight: 600,
-              maxWidth: 220,
+              maxWidth: { xs: 120, sm: 220, md: 380 },
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -111,7 +133,7 @@ export function LectureHeroSection({
       <LectureHeroInfo lecture={lecture} />
 
       {/* 3. Metrics Row */}
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         <Grid size={{ xs: 12, sm: 4 }}>
           <MetricItem
             title="Estimated duration"

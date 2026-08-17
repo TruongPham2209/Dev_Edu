@@ -53,7 +53,7 @@ export function QuizCard({
     >
       <CardContent
         sx={{
-          p: 3,
+          p: { xs: 2, sm: 3 },
           flex: 1,
           display: "flex",
           flexDirection: "column",
@@ -69,15 +69,16 @@ export function QuizCard({
             mb: 1.5,
           }}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               variant="h6"
               sx={{
                 fontWeight: 700,
-                fontSize: "1.05rem",
+                fontSize: { xs: "0.95rem", sm: "1.05rem" },
                 color: "text.primary",
                 lineHeight: 1.3,
                 mb: 0.5,
+                wordBreak: "break-word",
               }}
             >
               {quiz.title}
@@ -92,9 +93,10 @@ export function QuizCard({
                   gap: 0.5,
                   color: "text.secondary",
                   fontWeight: 500,
+                  wordBreak: "break-word",
                 }}
               >
-                <BookOpen size={13} />
+                <BookOpen size={13} className="shrink-0" />
                 {quiz.courseTitle}
               </Typography>
             )}
@@ -114,7 +116,8 @@ export function QuizCard({
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
             minHeight: 40,
-            fontSize: "0.85rem",
+            fontSize: { xs: "0.825rem", sm: "0.85rem" },
+            wordBreak: "break-word",
           }}
         >
           {quiz.description || "This quiz doesn't have a description."}
@@ -146,7 +149,9 @@ export function QuizCard({
             justifyContent: "space-between",
             alignItems: "center",
             color: "text.secondary",
-            mb: 2.5,
+            mb: 2,
+            flexWrap: "wrap",
+            gap: 1,
           }}
         >
           <Typography
@@ -176,7 +181,16 @@ export function QuizCard({
         </Stack>
 
         {/* Actions Row */}
-        <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{
+            justifyContent: "flex-end",
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <Button
             size="small"
             variant="outlined"
@@ -186,7 +200,9 @@ export function QuizCard({
               borderRadius: 2,
               textTransform: "none",
               fontWeight: 600,
-              flex: isPending ? "initial" : 1,
+              flex: isPending ? { xs: 1, sm: "initial" } : 1,
+              whiteSpace: "nowrap",
+              fontSize: { xs: "0.8rem", sm: "0.875rem" },
             }}
           >
             View detail
@@ -202,7 +218,14 @@ export function QuizCard({
                 startIcon={<X size={15} />}
                 onClick={() => onReject?.(quiz)}
                 disabled={isActionPending}
-                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 600 }}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  flex: { xs: 1, sm: "none" },
+                  whiteSpace: "nowrap",
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                }}
               >
                 Reject
               </Button>
@@ -214,7 +237,14 @@ export function QuizCard({
                 startIcon={<Check size={15} />}
                 onClick={() => onApprove?.(quiz)}
                 disabled={isActionPending}
-                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  flex: { xs: 1, sm: "none" },
+                  whiteSpace: "nowrap",
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                }}
               >
                 Approve
               </Button>

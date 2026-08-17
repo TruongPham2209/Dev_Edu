@@ -164,25 +164,35 @@ export function UserGrowthChart() {
         backdropFilter: "blur(8px)",
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
+            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
             gap: 2,
-            mb: 4,
+            mb: { xs: 2.5, sm: 4 },
           }}
         >
-          <Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <TrendingUp size={18} className="text-blue-500" />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "1rem", sm: "1.25rem" },
+                }}
+              >
                 User growth
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Statistics on the number of newly registered users
             </Typography>
           </Box>
@@ -192,12 +202,14 @@ export function UserGrowthChart() {
             value={period}
             onChange={(_, val) => val && setPeriod(val)}
             sx={{
+              width: { xs: "100%", sm: "auto" },
               "& .MuiToggleButton-root": {
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.75rem",
-                px: 1.5,
+                fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                px: { xs: 1, sm: 1.5 },
                 py: 0.5,
+                flex: { xs: 1, sm: "none" },
               },
             }}
           >
@@ -353,25 +365,35 @@ export function CourseGrowthChart() {
         backdropFilter: "blur(8px)",
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
+            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
             gap: 2,
-            mb: 4,
+            mb: { xs: 2.5, sm: 4 },
           }}
         >
-          <Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <BarChart3 size={18} className="text-emerald-500" />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "1rem", sm: "1.25rem" },
+                }}
+              >
                 Course growth
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Statistics on the number of newly published courses
             </Typography>
           </Box>
@@ -381,12 +403,14 @@ export function CourseGrowthChart() {
             value={period}
             onChange={(_, val) => val && setPeriod(val)}
             sx={{
+              width: { xs: "100%", sm: "auto" },
               "& .MuiToggleButton-root": {
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.75rem",
-                px: 1.5,
+                fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                px: { xs: 1, sm: 1.5 },
                 py: 0.5,
+                flex: { xs: 1, sm: "none" },
               },
             }}
           >
@@ -542,25 +566,35 @@ export function RevenueGrowthChart() {
         backdropFilter: "blur(8px)",
       }}
     >
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
+            alignItems: { xs: "flex-start", sm: "center" },
+            flexDirection: { xs: "column", sm: "row" },
             gap: 2,
-            mb: 4,
+            mb: { xs: 2.5, sm: 4 },
           }}
         >
-          <Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <LineChart size={18} className="text-cyan-500" />
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "1rem", sm: "1.25rem" },
+                }}
+              >
                 Revenue growth
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Revenue growth from completed transactions
             </Typography>
           </Box>
@@ -570,12 +604,14 @@ export function RevenueGrowthChart() {
             value={period}
             onChange={(_, val) => val && setPeriod(val)}
             sx={{
+              width: { xs: "100%", sm: "auto" },
               "& .MuiToggleButton-root": {
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.75rem",
-                px: 1.5,
+                fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                px: { xs: 1, sm: 1.5 },
                 py: 0.5,
+                flex: { xs: 1, sm: "none" },
               },
             }}
           >

@@ -121,9 +121,9 @@ export default function AdminNotificationsPage() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: 4,
+        gap: { xs: 3, sm: 4 },
         width: "100%",
-        pb: 5,
+        pb: { xs: 3, sm: 5 },
       }}
     >
       {/* Hero Section */}
@@ -138,7 +138,7 @@ export default function AdminNotificationsPage() {
       <Paper
         variant="outlined"
         sx={{
-          borderRadius: 1,
+          borderRadius: 2,
           borderColor: "rgba(15, 23, 42, 0.08)",
           boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.03)",
           overflow: "hidden",
@@ -147,7 +147,7 @@ export default function AdminNotificationsPage() {
         {/* Header Toolbar */}
         <Box
           sx={{
-            p: 2.5,
+            p: { xs: 2, sm: 2.5 },
             borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
             bgcolor: "#ffffff",
             display: "flex",
@@ -159,44 +159,51 @@ export default function AdminNotificationsPage() {
         >
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 800, color: "#0f172a" }}
+            sx={{
+              fontWeight: 800,
+              color: "#0f172a",
+              fontSize: { xs: "0.95rem", sm: "1rem" },
+            }}
           >
             Dispatched Announcements
           </Typography>
 
-          <Box
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<BellPlus size={18} />}
+            onClick={() => setCreateDialogOpen(true)}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              flexWrap: "wrap",
+              borderRadius: 2.5,
+              px: 2.5,
+              py: 1,
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: { xs: "0.8rem", sm: "0.875rem" },
               width: { xs: "100%", sm: "auto" },
+              whiteSpace: "nowrap",
+              boxShadow: "0px 4px 12px rgba(37, 99, 235, 0.25)",
             }}
           >
-            <ButtonAction
-              tooltip="Create Announcement"
-              icon={<BellPlus size={20} />}
-              onClick={() => setCreateDialogOpen(true)}
-              variant="contained"
-              color="primary"
-            />
-          </Box>
+            Create Announcement
+          </Button>
         </Box>
 
         {/* Content Body */}
         <Box>
           {isGroupLoading ? (
             <Box
-              sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}
+              sx={{ p: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column", gap: 2 }}
             >
               {[1, 2, 3, 4, 5].map((key) => (
                 <Box
                   key={key}
                   sx={{
                     display: "flex",
-                    alignItems: "flex-start",
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
                     gap: 2,
-                    p: 2.5,
+                    p: { xs: 2, sm: 2.5 },
                     borderRadius: 2,
                     border: "1px solid rgba(15, 23, 42, 0.06)",
                     bgcolor: "#ffffff",
@@ -204,11 +211,11 @@ export default function AdminNotificationsPage() {
                 >
                   <Skeleton
                     variant="rounded"
-                    width={44}
-                    height={44}
+                    width={40}
+                    height={40}
                     sx={{ borderRadius: 2.5, flexShrink: 0 }}
                   />
-                  <Box sx={{ flex: 1 }}>
+                  <Box sx={{ flex: 1, width: "100%" }}>
                     <Box
                       sx={{
                         display: "flex",
@@ -217,7 +224,7 @@ export default function AdminNotificationsPage() {
                         mb: 1,
                       }}
                     >
-                      <Skeleton variant="text" width="35%" height={24} />
+                      <Skeleton variant="text" width="45%" height={24} />
                       <Skeleton
                         variant="rounded"
                         width={80}
@@ -238,11 +245,11 @@ export default function AdminNotificationsPage() {
                       sx={{ mb: 1.5 }}
                     />
                     <Box sx={{ display: "flex", gap: 2 }}>
+                      <Skeleton variant="text" width={100} height={16} />
                       <Skeleton variant="text" width={120} height={16} />
-                      <Skeleton variant="text" width={140} height={16} />
                     </Box>
                   </Box>
-                  <Box sx={{ display: "flex", gap: 1 }}>
+                  <Box sx={{ display: "flex", gap: 1, alignSelf: { xs: "flex-end", sm: "center" } }}>
                     <Skeleton variant="circular" width={34} height={34} />
                     <Skeleton variant="circular" width={34} height={34} />
                   </Box>
@@ -250,7 +257,7 @@ export default function AdminNotificationsPage() {
               ))}
             </Box>
           ) : isGroupError ? (
-            <Box sx={{ p: 4 }}>
+            <Box sx={{ p: { xs: 2.5, sm: 4 } }}>
               <ErrorState
                 title="Failed to load group announcements"
                 onRetry={() => {
@@ -259,7 +266,7 @@ export default function AdminNotificationsPage() {
               />
             </Box>
           ) : groupNotificationsList.length === 0 ? (
-            <Box sx={{ p: 4 }}>
+            <Box sx={{ p: { xs: 2.5, sm: 4 } }}>
               <EmptyState
                 title="No Group Announcements Found"
                 subtitle="There are no system or group notifications dispatched yet. Click 'Create Announcement' above to dispatch a new notification."
@@ -272,8 +279,8 @@ export default function AdminNotificationsPage() {
                   <ListItemButton
                     onClick={() => handleOpenDetail(announcement)}
                     sx={{
-                      py: 2.5,
-                      px: 3,
+                      py: { xs: 2, sm: 2.5 },
+                      px: { xs: 2, sm: 3 },
                       transition: "bgcolor 0.15s ease",
                       "&:hover": { bgcolor: "rgba(15, 23, 42, 0.02)" },
                     }}
@@ -281,9 +288,9 @@ export default function AdminNotificationsPage() {
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: { xs: "column", md: "row" },
+                        flexDirection: { xs: "column", sm: "row" },
                         justifyContent: "space-between",
-                        alignItems: { xs: "flex-start", md: "center" },
+                        alignItems: { xs: "flex-start", sm: "center" },
                         gap: 2,
                         width: "100%",
                       }}
@@ -292,14 +299,15 @@ export default function AdminNotificationsPage() {
                         sx={{
                           display: "flex",
                           alignItems: "flex-start",
-                          gap: 2,
+                          gap: { xs: 1.5, sm: 2 },
                           flex: 1,
+                          width: "100%",
                         }}
                       >
                         <Box
                           sx={{
-                            width: 44,
-                            height: 44,
+                            width: { xs: 38, sm: 44 },
+                            height: { xs: 38, sm: 44 },
                             borderRadius: 2.5,
                             bgcolor: "rgba(245, 158, 11, 0.12)",
                             color: "#d97706",
@@ -309,10 +317,10 @@ export default function AdminNotificationsPage() {
                             flexShrink: 0,
                           }}
                         >
-                          <Users size={22} />
+                          <Users size={20} />
                         </Box>
 
-                        <Box sx={{ flex: 1 }}>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Box
                             sx={{
                               display: "flex",
@@ -323,7 +331,12 @@ export default function AdminNotificationsPage() {
                           >
                             <Typography
                               variant="subtitle1"
-                              sx={{ fontWeight: 700, color: "#0f172a" }}
+                              sx={{
+                                fontWeight: 700,
+                                color: "#0f172a",
+                                fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                                wordBreak: "break-word",
+                              }}
                             >
                               {announcement.title}
                             </Typography>
@@ -346,10 +359,12 @@ export default function AdminNotificationsPage() {
                               sx={{
                                 color: "text.secondary",
                                 mt: 0.5,
+                                fontSize: { xs: "0.825rem", sm: "0.875rem" },
                                 display: "-webkit-box",
                                 WebkitLineClamp: 2,
                                 WebkitBoxOrient: "vertical",
                                 overflow: "hidden",
+                                wordBreak: "break-word",
                               }}
                             >
                               {stripHtmlTags(announcement.content)}
@@ -360,7 +375,7 @@ export default function AdminNotificationsPage() {
                             sx={{
                               display: "flex",
                               alignItems: "center",
-                              gap: 2,
+                              gap: { xs: 1, sm: 2 },
                               mt: 1.5,
                               flexWrap: "wrap",
                             }}
@@ -372,12 +387,13 @@ export default function AdminNotificationsPage() {
                                 gap: 0.5,
                               }}
                             >
-                              <Clock size={14} className="text-slate-400" />
+                              <Clock size={13} className="text-slate-400" />
                               <Typography
                                 variant="caption"
                                 sx={{
                                   color: "text.secondary",
                                   fontWeight: 500,
+                                  fontSize: { xs: "0.725rem", sm: "0.75rem" },
                                 }}
                               >
                                 {formatServerDate(
@@ -397,7 +413,7 @@ export default function AdminNotificationsPage() {
                                   }}
                                 >
                                   <Shield
-                                    size={14}
+                                    size={13}
                                     className="text-slate-400"
                                   />
                                   <Typography
@@ -405,6 +421,7 @@ export default function AdminNotificationsPage() {
                                     sx={{
                                       color: "text.secondary",
                                       fontWeight: 600,
+                                      fontSize: { xs: "0.725rem", sm: "0.75rem" },
                                     }}
                                   >
                                     Roles: {announcement.targetRoles.join(", ")}
@@ -418,6 +435,7 @@ export default function AdminNotificationsPage() {
                                 sx={{
                                   color: "text.secondary",
                                   fontWeight: 500,
+                                  fontSize: { xs: "0.725rem", sm: "0.75rem" },
                                 }}
                               >
                                 By: {announcement.createdBy}
@@ -428,7 +446,18 @@ export default function AdminNotificationsPage() {
                       </Box>
 
                       <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          width: { xs: "100%", sm: "auto" },
+                          justifyContent: { xs: "flex-end", sm: "flex-end" },
+                          pt: { xs: 1, sm: 0 },
+                          borderTop: {
+                            xs: "1px dashed rgba(15, 23, 42, 0.08)",
+                            sm: "none",
+                          },
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <ButtonAction
@@ -462,6 +491,8 @@ export default function AdminNotificationsPage() {
                       borderRadius: 2.5,
                       fontWeight: 700,
                       textTransform: "none",
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      width: { xs: "100%", sm: "auto" },
                     }}
                   >
                     {isFetchingNextGroupPage ? (

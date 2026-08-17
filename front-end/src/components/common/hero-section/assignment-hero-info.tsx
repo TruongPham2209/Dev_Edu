@@ -34,8 +34,8 @@ export function AssignmentHeroInfo({
       <Box
         sx={{
           position: "relative",
-          px: { xs: 3, md: 4 },
-          py: { xs: 3.5, md: 4 },
+          px: { xs: 2.5, sm: 3, md: 4 },
+          py: { xs: 2.5, sm: 3.5, md: 4 },
           background: `
             linear-gradient(
               135deg,
@@ -54,8 +54,8 @@ export function AssignmentHeroInfo({
             position: "absolute",
             top: -80,
             right: -60,
-            width: 250,
-            height: 250,
+            width: { xs: 160, sm: 250 },
+            height: { xs: 160, sm: 250 },
             borderRadius: "50%",
             background: "rgba(34, 197, 94, 0.06)",
             filter: "blur(70px)",
@@ -67,8 +67,8 @@ export function AssignmentHeroInfo({
             position: "absolute",
             bottom: -90,
             left: -70,
-            width: 220,
-            height: 220,
+            width: { xs: 140, sm: 220 },
+            height: { xs: 140, sm: 220 },
             borderRadius: "50%",
             background: "rgba(59, 130, 246, 0.04)",
             filter: "blur(60px)",
@@ -79,7 +79,7 @@ export function AssignmentHeroInfo({
         <Stack
           component="div"
           direction={{ xs: "column", md: "row" }}
-          spacing={4}
+          spacing={{ xs: 2.5, md: 4 }}
           sx={{
             position: "relative",
             zIndex: 1,
@@ -88,12 +88,12 @@ export function AssignmentHeroInfo({
           }}
         >
           {/* Left Content */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
             <Stack
               component="div"
               direction="row"
               spacing={1}
-              sx={{ alignItems: "center", mb: 2 }}
+              sx={{ alignItems: "center", mb: 1.5, flexWrap: "wrap" }}
             >
               <Box
                 sx={{
@@ -117,7 +117,7 @@ export function AssignmentHeroInfo({
               </Box>
               <Typography
                 variant="body2"
-                sx={{ color: "text.secondary", fontWeight: 600 }}
+                sx={{ color: "text.secondary", fontWeight: 600, wordBreak: "break-word" }}
               >
                 {lectureTitle}
               </Typography>
@@ -127,9 +127,10 @@ export function AssignmentHeroInfo({
               variant="h4"
               sx={{
                 fontWeight: 900,
-                fontSize: { xs: "1.8rem", md: "2.4rem" },
+                fontSize: { xs: "1.35rem", sm: "1.8rem", md: "2.4rem" },
                 letterSpacing: "-0.04em",
                 color: "grey.900",
+                wordBreak: "break-word",
               }}
             >
               {assignment.title}
@@ -140,7 +141,8 @@ export function AssignmentHeroInfo({
           <Box
             sx={{
               minWidth: { xs: "100%", md: 250 },
-              p: 2.5,
+              width: { xs: "100%", md: "auto" },
+              p: { xs: 2, sm: 2.5 },
               borderRadius: 2.5,
               bgcolor: "rgba(255, 255, 255, 0.85)",
               backdropFilter: "blur(12px)",

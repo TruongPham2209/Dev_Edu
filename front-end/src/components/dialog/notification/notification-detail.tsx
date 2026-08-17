@@ -94,9 +94,11 @@ export function NotificationDetailDialog({
               color: "#334155",
               lineHeight: 1.6,
               bgcolor: "#f8fafc",
-              p: 2.5,
+              p: { xs: 1.75, sm: 2.5 },
               borderRadius: 1,
               border: "1px solid rgba(15, 23, 42, 0.06)",
+              wordBreak: "break-word",
+              overflowX: "auto",
               "& p": { margin: "0 0 0.5em 0" },
               "& ul, & ol": { pl: 2.5, my: 0.5 },
               "& h1, & h2, & h3": {
@@ -119,8 +121,9 @@ export function NotificationDetailDialog({
               color: "#334155",
               lineHeight: 1.6,
               whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
               bgcolor: "#f8fafc",
-              p: 2.5,
+              p: { xs: 1.75, sm: 2.5 },
               borderRadius: 1,
               border: "1px solid rgba(15, 23, 42, 0.06)",
             }}

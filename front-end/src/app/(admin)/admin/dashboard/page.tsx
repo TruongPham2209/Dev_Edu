@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <Stack spacing={4} sx={{ width: "100%", pb: 6 }}>
+    <Stack spacing={{ xs: 3, sm: 4 }} sx={{ width: "100%", pb: { xs: 3, sm: 6 } }}>
       {/* HEADER WITH TITLE AND REFRESH ACTION */}
       <Box
         sx={{
@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
           gap: 2,
         }}
       >
-        <Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack
             direction="row"
             spacing={1.5}
@@ -47,8 +47,8 @@ export default function AdminDashboardPage() {
           >
             <Box
               sx={{
-                width: 38,
-                height: 38,
+                width: { xs: 34, sm: 38 },
+                height: { xs: 34, sm: 38 },
                 borderRadius: 2.5,
                 bgcolor: "primary.main",
                 color: "primary.contrastText",
@@ -56,15 +56,27 @@ export default function AdminDashboardPage() {
                 alignItems: "center",
                 justifyContent: "center",
                 boxShadow: "0px 4px 12px rgba(37, 99, 235, 0.2)",
+                flexShrink: 0,
               }}
             >
               <LayoutDashboard size={20} strokeWidth={2.2} />
             </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                fontSize: { xs: "1.25rem", sm: "1.65rem", md: "2rem" },
+                wordBreak: "break-word",
+              }}
+            >
               System Reporting & Indicators
             </Typography>
           </Stack>
-          <Typography variant="body1" color="text.secondary">
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ fontSize: { xs: "0.85rem", sm: "1rem" } }}
+          >
             Real-time monitoring of system health, revenue growth and
             operational activities.
           </Typography>
@@ -86,10 +98,14 @@ export default function AdminDashboardPage() {
             py: 1,
             textTransform: "none",
             fontWeight: 700,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
             borderColor: "rgba(15, 23, 42, 0.12)",
             color: "text.primary",
             bgcolor: "background.paper",
             boxShadow: "0px 2px 8px rgba(0,0,0,0.02)",
+            width: { xs: "100%", sm: "auto" },
+            whiteSpace: "nowrap",
+            flexShrink: 0,
             "&:hover": {
               borderColor: "rgba(15, 23, 42, 0.2)",
               bgcolor: "rgba(15, 23, 42, 0.02)",

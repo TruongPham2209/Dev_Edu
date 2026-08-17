@@ -56,8 +56,8 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
         overflow: "hidden",
       }}
     >
-      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-        <Grid container spacing={4} sx={{ alignItems: "center" }}>
+      <CardContent sx={{ p: { xs: 2.5, sm: 3, md: 4 } }}>
+        <Grid container spacing={{ xs: 2.5, md: 4 }} sx={{ alignItems: "center" }}>
           {/* Video Preview / Thumbnail Area */}
           <Grid size={{ xs: 12, md: 5, lg: 4.5 }}>
             <Box
@@ -239,6 +239,8 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
                   color: "text.primary",
                   letterSpacing: "-0.5px",
                   lineHeight: 1.2,
+                  fontSize: { xs: "1.35rem", sm: "1.75rem", md: "2.1rem" },
+                  wordBreak: "break-word",
                 }}
               >
                 {lecture.title}
@@ -254,6 +256,8 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
+                  fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                  wordBreak: "break-word",
                 }}
               >
                 {lecture.summary || "No summary for this lecture."}

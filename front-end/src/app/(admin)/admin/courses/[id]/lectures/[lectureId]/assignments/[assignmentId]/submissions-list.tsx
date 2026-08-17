@@ -93,17 +93,23 @@ export function SubmissionsList({
       <Box
         sx={{
           borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
-          px: 3,
-          py: 2.5,
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2.5 },
           bgcolor: "grey.50",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 800, color: "grey.900", fontSize: "1.05rem" }}
+          sx={{
+            fontWeight: 800,
+            color: "grey.900",
+            fontSize: { xs: "0.95rem", sm: "1.05rem" },
+          }}
         >
           Submissions list
         </Typography>
@@ -118,7 +124,7 @@ export function SubmissionsList({
 
       <CardContent sx={{ p: 0 }}>
         {submissionsLoading && submissions.length === 0 ? (
-          <Box sx={{ p: 4 }}>
+          <Box sx={{ p: { xs: 2, sm: 4 } }}>
             <Stack component="div" spacing={2}>
               <Skeleton
                 variant="rectangular"
@@ -138,7 +144,7 @@ export function SubmissionsList({
             </Stack>
           </Box>
         ) : submissions.length === 0 ? (
-          <Box sx={{ p: 4 }}>
+          <Box sx={{ p: { xs: 2, sm: 4 } }}>
             <EmptyState
               title="No submissions yet"
               subtitle="No submissions for this assignment yet."
@@ -146,8 +152,8 @@ export function SubmissionsList({
             />
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: "auto" }}>
+            <Table sx={{ minWidth: 600 }}>
               <TableHead sx={{ bgcolor: "grey.50" }}>
                 <TableRow>
                   <TableCell
