@@ -90,7 +90,7 @@ export function SearchInput({
       ref={containerRef}
       sx={{
         width: "100%",
-        maxWidth,
+        maxWidth: typeof maxWidth === "number" ? { xs: "100%", sm: maxWidth } : maxWidth,
         mx: "auto",
         position: "relative",
       }}

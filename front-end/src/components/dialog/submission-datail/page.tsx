@@ -102,7 +102,9 @@ export function SubmissionDetailsDialog({
         slotProps={{
           paper: {
             sx: {
-              borderRadius: 2,
+              borderRadius: { xs: 2, sm: 3 },
+              m: { xs: 1.5, sm: 2, md: 3 },
+              width: { xs: "calc(100% - 24px)", sm: "auto" },
               boxShadow: "0 20px 60px rgba(15, 23, 42, 0.15)",
             },
           },
@@ -111,7 +113,7 @@ export function SubmissionDetailsDialog({
         <DialogTitle
           sx={{
             m: 0,
-            p: 2.5,
+            p: { xs: 1.75, sm: 2.5 },
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -120,22 +122,31 @@ export function SubmissionDetailsDialog({
             bgcolor: "grey.50",
           }}
         >
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, color: "text.primary" }}
+              sx={{
+                fontWeight: 800,
+                color: "text.primary",
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+              }}
             >
               Student Assignment Details
             </Typography>
           </Box>
-          <IconButton onClick={onClose} sx={{ color: "text.secondary" }}>
+          <IconButton
+            onClick={onClose}
+            sx={{ color: "text.secondary", p: { xs: 0.5, sm: 1 } }}
+          >
             <X size={20} />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent sx={{ p: 3, overflowX: "hidden" }}>
+        <DialogContent
+          sx={{ p: { xs: 2, sm: 2.5, md: 3 }, overflowX: "hidden" }}
+        >
           {selectedSubmission && (
-            <Stack component="div" spacing={3}>
+            <Stack component="div" spacing={{ xs: 2, sm: 3 }}>
               {/* Tabs within Modal */}
               <Tabs
                 value={modalActiveTab}
@@ -144,6 +155,7 @@ export function SubmissionDetailsDialog({
                   borderBottom: 1,
                   borderColor: "divider",
                   minHeight: 40,
+                  overflowX: "auto",
                   "& .MuiTabs-indicator": {
                     height: 3,
                     borderRadius: "3px 3px 0 0",
@@ -159,8 +171,9 @@ export function SubmissionDetailsDialog({
                   sx={{
                     textTransform: "none",
                     fontWeight: 700,
-                    fontSize: "0.9rem",
+                    fontSize: { xs: "0.8rem", sm: "0.9rem" },
                     minHeight: 40,
+                    px: { xs: 1.5, sm: 2 },
                     color: "text.secondary",
                     "&.Mui-selected": { color: "success.main" },
                   }}
@@ -173,8 +186,9 @@ export function SubmissionDetailsDialog({
                   sx={{
                     textTransform: "none",
                     fontWeight: 700,
-                    fontSize: "0.9rem",
+                    fontSize: { xs: "0.8rem", sm: "0.9rem" },
                     minHeight: 40,
+                    px: { xs: 1.5, sm: 2 },
                     color: "text.secondary",
                     "&.Mui-selected": { color: "success.main" },
                   }}
@@ -210,8 +224,8 @@ export function SubmissionDetailsDialog({
         {modalActiveTab === "info" && selectedSubmission && (
           <Box
             sx={{
-              p: 3,
-              pt: 2,
+              p: { xs: 2, sm: 3 },
+              pt: { xs: 1.5, sm: 2 },
               bgcolor: "background.paper",
               borderTop: "1px solid",
               borderColor: "divider",

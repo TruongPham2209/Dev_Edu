@@ -136,20 +136,20 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
         boxShadow: "0 4px 24px rgba(0,0,0,0.02)",
       }}
     >
-      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 4,
+            mb: { xs: 2.5, sm: 4 },
             flexWrap: "wrap",
             gap: 2,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <HelpCircle className="text-blue-500" size={24} />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}>
               Quizzes
             </Typography>
           </Box>
@@ -214,20 +214,21 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
         ) : (
           <DataTable
             data={filteredQuizzes}
-            minWidth={750}
+            minWidth={560}
             keyExtractor={(quiz: QuizResponse) => quiz.id}
             columns={[
               {
                 header: "Quiz",
+                width: "55%",
                 render: (row: QuizResponse) => (
                   <Box sx={{ py: 0.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: { xs: "0.875rem", sm: "0.925rem" } }}>
                       {row.title}
                     </Typography>
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ display: "block" }}
+                      sx={{ display: "block", fontSize: { xs: "0.75rem", sm: "0.8rem" } }}
                     >
                       {row.description || "No Description"}
                       {row.createdAt && ` • ${formatServerDate(row.createdAt)}`}
@@ -252,7 +253,7 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
               },
               {
                 header: "Status",
-                width: 140,
+                width: 120,
                 align: "center",
                 render: (row: QuizResponse) => (
                   <QuizStatusChip status={row.status} />
@@ -260,7 +261,7 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
               },
               {
                 header: "Actions",
-                width: 200,
+                width: 160,
                 align: "center",
                 render: (row: QuizResponse) => (
                   <Stack

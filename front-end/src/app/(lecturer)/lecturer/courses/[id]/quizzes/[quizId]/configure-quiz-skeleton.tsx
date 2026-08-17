@@ -19,7 +19,7 @@ export function ConfigureQuizSkeleton() {
         <Stack spacing={3}>
           {/* 1. Quiz Info Skeleton Card */}
           <Card variant="outlined" sx={{ borderRadius: 1 }}>
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Box
                 sx={{
                   display: "flex",
@@ -80,7 +80,7 @@ export function ConfigureQuizSkeleton() {
 
           {/* 2. Type Configs Skeleton Card */}
           <Card variant="outlined" sx={{ borderRadius: 1 }}>
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Box
                 sx={{
                   display: "flex",
@@ -165,7 +165,7 @@ export function ConfigureQuizSkeleton() {
 
           {/* 3. Questions Section Skeleton Card */}
           <Card variant="outlined" sx={{ borderRadius: 1 }}>
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Skeleton
                 variant="text"
                 width={240}
@@ -300,7 +300,7 @@ export function ConfigureQuizSkeleton() {
             bgcolor: "background.paper",
           }}
         >
-          <CardContent sx={{ p: 2.5 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
             <Skeleton variant="text" width={160} height={26} sx={{ mb: 0.5 }} />
             <Skeleton variant="text" width={220} height={16} sx={{ mb: 2 }} />
 

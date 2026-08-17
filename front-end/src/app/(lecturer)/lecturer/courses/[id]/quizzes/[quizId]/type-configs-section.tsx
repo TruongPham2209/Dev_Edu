@@ -33,22 +33,29 @@ export function TypeConfigsSection({
 }: TypeConfigsSectionProps) {
   return (
     <Card variant="outlined" sx={{ borderRadius: 1 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: { xs: "flex-start", sm: "center" },
             mb: 2.5,
-            flexWrap: "wrap",
+            flexDirection: { xs: "column", sm: "row" },
             gap: 1.5,
           }}
         >
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, fontSize: { xs: "0.95rem", sm: "1.25rem" } }}
+            >
               Matrix Type Configurations ({typeConfigs.length})
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Matrix requirements for questions in this quiz.
             </Typography>
           </Box>
@@ -62,18 +69,30 @@ export function TypeConfigsSection({
                   : ""
             }
           >
-            <span>
+            <Box
+              component="span"
+              sx={{ width: { xs: "100%", sm: "auto" }, display: "inline-block" }}
+            >
               <Button
                 variant="contained"
                 color="primary"
                 startIcon={<Plus size={16} />}
                 onClick={onAddConfig}
                 disabled={typeConfigs.length >= 3 || isPendingStatus}
-                sx={{ borderRadius: 2, fontWeight: 700 }}
+                sx={{
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                  width: "100%",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                  px: { xs: 2, sm: 2.5 },
+                  py: 1,
+                }}
               >
                 Add Type Config
               </Button>
-            </span>
+            </Box>
           </Tooltip>
         </Box>
 
@@ -81,14 +100,18 @@ export function TypeConfigsSection({
           <Paper
             variant="outlined"
             sx={{
-              p: 3,
+              p: { xs: 2.5, sm: 3 },
               textAlign: "center",
               borderRadius: 2.5,
               bgcolor: "action.hover",
               borderColor: "dashed",
             }}
           >
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               No matrix configuration added. Add at least 1 type config to manage questions.
             </Typography>
           </Paper>
@@ -107,66 +130,104 @@ export function TypeConfigsSection({
                   <Paper
                     variant="outlined"
                     sx={{
-                      p: 2,
-                      borderRadius: 1,
+                      p: { xs: 2, sm: 2.5 },
+                      borderRadius: 2,
                       display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
+                      flexDirection: "column",
+                      gap: 1.5,
                       borderColor: cfg.isComplete
                         ? "rgba(34, 197, 94, 0.4)"
-                        : "rgba(0,0,0,0.12)",
+                        : "rgba(148, 163, 184, 0.16)",
+                      bgcolor: "white",
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        borderColor: cfg.isComplete ? "success.main" : "primary.light",
+                        boxShadow: "0 4px 12px rgba(15, 23, 42, 0.04)",
+                      },
                     }}
                   >
-                    <Box>
+                    {/* Header: Title on left, Delete on right */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
                       <Typography
-                        variant="subtitle2"
+                        variant="subtitle1"
                         sx={{
-                          fontWeight: 700,
+                          fontWeight: 800,
                           color: "primary.main",
+                          fontSize: { xs: "0.95rem", sm: "1.05rem" },
                         }}
                       >
                         {typeLabel}
                       </Typography>
+
+                      <Tooltip
+                        title={
+                          isPendingStatus
+                            ? "Type Configs cannot be deleted when Quiz is pending approval."
+                            : ""
+                        }
+                      >
+                        <span>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<Trash2 size={13} />}
+                            disabled={isPendingStatus}
+                            onClick={() => onDeleteConfig(cfg)}
+                            sx={{
+                              borderRadius: 2,
+                              fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                              px: 1.2,
+                              py: 0.4,
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                              flexShrink: 0,
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </span>
+                      </Tooltip>
+                    </Box>
+
+                    {/* Footer Stats & Chip */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
+                        alignItems: { xs: "flex-start", sm: "center" },
+                        justifyContent: "space-between",
+                        gap: 1,
+                      }}
+                    >
                       <Typography
-                        variant="caption"
+                        variant="body2"
                         color="text.secondary"
-                        sx={{ display: "block" }}
+                        sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
                       >
                         Progress: <strong>{cfg.actualCount}</strong> / {cfg.requiredCount} Qs
                       </Typography>
+
                       <Chip
                         label={`${cfg.pointsPerQuestion} pts/each`}
                         size="small"
                         variant="outlined"
                         sx={{
-                          mt: 0.5,
-                          fontSize: "0.7rem",
-                          height: 20,
+                          fontSize: "0.725rem",
+                          fontWeight: 700,
+                          height: 22,
+                          bgcolor: "grey.50",
+                          borderColor: "rgba(148, 163, 184, 0.2)",
                         }}
                       />
                     </Box>
-
-                    <Tooltip
-                      title={
-                        isPendingStatus
-                          ? "Type Configs cannot be deleted when Quiz is pending approval."
-                          : ""
-                      }
-                    >
-                      <span>
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          startIcon={<Trash2 size={14} />}
-                          disabled={isPendingStatus}
-                          onClick={() => onDeleteConfig(cfg)}
-                          sx={{ borderRadius: 2 }}
-                        >
-                          Delete
-                        </Button>
-                      </span>
-                    </Tooltip>
                   </Paper>
                 </Grid>
               );

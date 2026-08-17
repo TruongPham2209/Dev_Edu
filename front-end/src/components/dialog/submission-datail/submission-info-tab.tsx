@@ -52,19 +52,19 @@ export function SubmissionInfoTab({
       <Card
         variant="outlined"
         sx={{
-          p: 2,
+          p: { xs: 1.5, sm: 2 },
           borderRadius: 1,
           bgcolor: "grey.50",
           border: "1px solid rgba(148, 163, 184, 0.12)",
-          mb: 4,
+          mb: { xs: 2.5, sm: 4 },
         }}
       >
         <Stack
           component="div"
           direction={{ xs: "column", sm: "row" }}
-          spacing={2}
+          spacing={{ xs: 1.5, sm: 2 }}
           sx={{
-            alignItems: { xs: "flex-start", sm: "center" },
+            alignItems: { xs: "stretch", sm: "center" },
             justifyContent: "space-between",
           }}
         >
@@ -72,15 +72,15 @@ export function SubmissionInfoTab({
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
+              gap: { xs: 1.25, sm: 2 },
               minWidth: 0,
               flex: 1,
             }}
           >
             <Box
               sx={{
-                width: 44,
-                height: 44,
+                width: { xs: 38, sm: 44 },
+                height: { xs: 38, sm: 44 },
                 borderRadius: 1,
                 bgcolor: "white",
                 border: "1px solid rgba(148,163,184,0.12)",
@@ -98,6 +98,7 @@ export function SubmissionInfoTab({
                 sx={{
                   fontWeight: 700,
                   color: "text.primary",
+                  fontSize: { xs: "0.825rem", sm: "0.875rem" },
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
@@ -106,20 +107,28 @@ export function SubmissionInfoTab({
                 {selectedSubmission.fileName ||
                   getFileNameFromKey(selectedSubmission.fileObjectKey)}
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                Size: {formatBytes(selectedSubmission.fileSize)} &bull; Type:
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "0.725rem", sm: "0.775rem" },
+                }}
+              >
+                Size: {formatBytes(selectedSubmission.fileSize)} &bull; Type:{" "}
                 {selectedSubmission.contentType || "Unknown"}
               </Typography>
             </Box>
           </Box>
 
-          <ButtonAction
-            tooltip="Download"
-            icon={<Download size={22} />}
-            variant="soft-dark"
-            color="primary"
-            onClick={() => triggerDownload(selectedSubmission.fileObjectKey)}
-          />
+          <Box sx={{ alignSelf: { xs: "flex-end", sm: "center" } }}>
+            <ButtonAction
+              tooltip="Download"
+              icon={<Download size={20} />}
+              variant="soft-dark"
+              color="primary"
+              onClick={() => triggerDownload(selectedSubmission.fileObjectKey)}
+            />
+          </Box>
         </Stack>
       </Card>
 
@@ -133,6 +142,7 @@ export function SubmissionInfoTab({
           alignItems: "center",
           gap: 1,
           color: "text.primary",
+          fontSize: { xs: "0.85rem", sm: "0.875rem" },
         }}
       >
         <MessageSquare size={16} />
@@ -145,7 +155,7 @@ export function SubmissionInfoTab({
           <Card
             variant="outlined"
             sx={{
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               borderRadius: 1,
               borderColor: "rgba(148, 163, 184, 0.1)",
             }}
@@ -175,7 +185,7 @@ export function SubmissionInfoTab({
           <Card
             variant="outlined"
             sx={{
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               borderRadius: 1,
               borderColor: "rgba(148, 163, 184, 0.1)",
             }}
@@ -199,7 +209,7 @@ export function SubmissionInfoTab({
       ) : feedbacks.length === 0 ? (
         <Box
           sx={{
-            p: 3,
+            p: { xs: 2, sm: 3 },
             textAlign: "center",
             bgcolor: "grey.25",
             borderRadius: 1,
@@ -208,16 +218,26 @@ export function SubmissionInfoTab({
           }}
         >
           <MessageSquare
-            size={28}
+            size={26}
             style={{ color: "#cbd5e1", marginBottom: 8 }}
           />
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary", fontWeight: 600 }}
+            sx={{
+              color: "text.secondary",
+              fontWeight: 600,
+              fontSize: { xs: "0.825rem", sm: "0.875rem" },
+            }}
           >
             No feedback has been submitted yet
           </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontSize: { xs: "0.725rem", sm: "0.775rem" },
+            }}
+          >
             Enter instructions or modifications for students in the form below.
           </Typography>
         </Box>
@@ -227,7 +247,7 @@ export function SubmissionInfoTab({
           spacing={1.5}
           sx={{
             mb: 3,
-            maxH: 260,
+            maxH: { xs: 220, sm: 260 },
             overflowY: "auto",
             overflowX: "hidden",
             pr: 0.5,
@@ -237,12 +257,12 @@ export function SubmissionInfoTab({
             <Box
               key={fb.id}
               sx={{
-                p: 2,
+                p: { xs: 1.5, sm: 2 },
                 borderRadius: 1,
                 bgcolor: "white",
                 border: "1px solid rgba(148, 163, 184, 0.12)",
                 display: "flex",
-                gap: 2,
+                gap: { xs: 1.25, sm: 2 },
                 position: "relative",
                 transition: "all 0.2s",
                 "&:hover": {
@@ -256,8 +276,8 @@ export function SubmissionInfoTab({
               <Avatar
                 src={fb.lecturerAvatar}
                 sx={{
-                  width: 32,
-                  height: 32,
+                  width: { xs: 28, sm: 32 },
+                  height: { xs: 28, sm: 32 },
                   bgcolor: "success.50",
                   color: "success.main",
                   fontWeight: 800,
@@ -272,17 +292,25 @@ export function SubmissionInfoTab({
                     display: "flex",
                     justifyContent: "space-between",
                     mb: 0.5,
+                    gap: 1,
                   }}
                 >
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 700, color: "text.primary" }}
+                    sx={{
+                      fontWeight: 700,
+                      color: "text.primary",
+                      fontSize: { xs: "0.825rem", sm: "0.875rem" },
+                    }}
                   >
                     {fb.lecturerFullName}
                   </Typography>
                   <Typography
                     variant="caption"
-                    sx={{ color: "text.secondary" }}
+                    sx={{
+                      color: "text.secondary",
+                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
+                    }}
                   >
                     {formatServerDate(fb.createdAt, "datetime")}
                   </Typography>
@@ -293,13 +321,14 @@ export function SubmissionInfoTab({
                     color: "text.primary",
                     whiteSpace: "pre-wrap",
                     lineHeight: 1.5,
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
                   }}
                 >
                   {fb.feedback}
                 </Typography>
               </Box>
 
-              {/* Delete Feedback Button (Reveals on hover, if isMine is true OR user is ADMIN) */}
+              {/* Delete Feedback Button (Visible on mobile touch devices, reveals on hover for desktop) */}
               {(fb.isMine || isAdmin) && (
                 <IconButton
                   className="delete-fb-action"
@@ -310,10 +339,11 @@ export function SubmissionInfoTab({
                     position: "absolute",
                     right: 6,
                     bottom: 6,
-                    opacity: 0,
+                    opacity: { xs: 0.85, sm: 0 },
                     transition: "opacity 0.2s",
                     bgcolor: "error.50",
-                    "&:hover": { bgcolor: "error.100" },
+                    p: 0.5,
+                    "&:hover": { bgcolor: "error.100", opacity: 1 },
                   }}
                 >
                   <Trash2 size={13} />

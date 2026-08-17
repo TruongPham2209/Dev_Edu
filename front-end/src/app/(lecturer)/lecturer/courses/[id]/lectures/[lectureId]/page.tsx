@@ -85,34 +85,72 @@ export default function LecturerLectureDetailPage() {
   const courseTitle = course?.title || "Course";
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container
+      maxWidth="xl"
+      sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3, md: 4 } }}
+    >
       {/* 1. Elegant Breadcrumbs */}
       <Breadcrumbs
-        separator={<ChevronRight size={14} className="text-slate-400" />}
+        separator={<ChevronRight size={14} style={{ flexShrink: 0 }} />}
         sx={{
-          mb: 3,
+          mb: { xs: 2, sm: 3 },
+          "& .MuiBreadcrumbs-ol": {
+            alignItems: "center",
+            flexWrap: "nowrap",
+            overflow: "hidden",
+          },
           "& .MuiBreadcrumbs-li": {
-            fontSize: "0.875rem",
+            display: "inline-flex",
+            alignItems: "center",
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
             fontWeight: 500,
+            minWidth: 0,
+          },
+          "& .MuiBreadcrumbs-separator": {
+            mx: { xs: 0.5, sm: 1 },
+            color: "text.disabled",
+            display: "inline-flex",
+            alignItems: "center",
+            flexShrink: 0,
           },
         }}
       >
         <Link
           href="/lecturer"
-          className="flex items-center text-slate-500 hover:text-slate-900 transition-colors gap-1.5"
-          style={{ textDecoration: "none" }}
+          className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors gap-1 shrink-0"
+          style={{ textDecoration: "none", lineHeight: 1.4 }}
         >
-          <Home size={15} />
-          Dashboard
+          <Home size={14} style={{ flexShrink: 0 }} />
+          <span className="hidden sm:inline">Dashboard</span>
         </Link>
         <Link
           href={`/lecturer/courses/${courseId}`}
-          className="text-slate-500 hover:text-slate-900 transition-colors"
-          style={{ textDecoration: "none" }}
+          className="text-slate-500 hover:text-slate-900 transition-colors truncate"
+          style={{
+            textDecoration: "none",
+            lineHeight: 1.4,
+            maxWidth: 130,
+            display: "inline-block",
+          }}
+          title={courseTitle}
         >
           {courseTitle}
         </Link>
-        <Typography sx={{ color: "text.primary", fontWeight: 700 }}>
+        <Typography
+          component="span"
+          sx={{
+            color: "text.primary",
+            fontWeight: 700,
+            lineHeight: 1.4,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: { xs: 150, sm: 300, md: "none" },
+            display: "inline-block",
+          }}
+          title={lecture.title}
+        >
           {lecture.title}
         </Typography>
       </Breadcrumbs>
@@ -125,7 +163,7 @@ export default function LecturerLectureDetailPage() {
         sx={{
           borderBottom: 1,
           borderColor: "divider",
-          mb: 4,
+          mb: { xs: 2.5, sm: 4 },
           position: "sticky",
           top: 0,
           bgcolor: "background.default",
@@ -183,8 +221,8 @@ export default function LecturerLectureDetailPage() {
               sx={{
                 borderBottom: 1,
                 borderColor: "divider",
-                px: 3,
-                py: 2,
+                px: { xs: 2, sm: 3 },
+                py: { xs: 1.5, sm: 2 },
                 bgcolor: "grey.50",
                 display: "flex",
                 alignItems: "center",
@@ -201,24 +239,29 @@ export default function LecturerLectureDetailPage() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "primary.main",
+                  flexShrink: 0,
                 }}
               >
                 <BookOpen size={18} />
               </Box>
               <Typography
                 variant="subtitle1"
-                sx={{ fontWeight: 800, color: "#1e293b" }}
+                sx={{
+                  fontWeight: 800,
+                  color: "#1e293b",
+                  fontSize: { xs: "0.95rem", sm: "1rem" },
+                }}
               >
                 Detailed content
               </Typography>
             </Box>
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Box
                 dangerouslySetInnerHTML={{ __html: lecture.content || "" }}
                 sx={{
                   color: "text.primary",
                   lineHeight: 1.8,
-                  fontSize: "0.975rem",
+                  fontSize: { xs: "0.875rem", sm: "0.975rem" },
                   "& p": {
                     mt: 0,
                     mb: 2,

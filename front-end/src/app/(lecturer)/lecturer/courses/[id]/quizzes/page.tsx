@@ -185,23 +185,34 @@ export default function LecturerCreateQuizPage({
     createQuizMutation.isPending || updateQuizMutation.isPending;
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack spacing={4}>
+    <Container
+      maxWidth="xl"
+      sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3, md: 4 } }}
+    >
+      <Stack spacing={{ xs: 2.5, sm: 4 }}>
         {/* 1. Hero Section */}
         <QuizHero courseId={courseId} />
 
         {/* 2. Quiz Info Section */}
         <Card variant="outlined" sx={{ borderRadius: 1 }}>
-          <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 mb: 2.5,
+                flexWrap: "wrap",
+                gap: 1,
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "1rem", sm: "1.25rem" },
+                }}
+              >
                 1. General Quiz Information
               </Typography>
               {createdQuizId && (
@@ -247,7 +258,12 @@ export default function LecturerCreateQuizPage({
                     startIcon={
                       createdQuizId ? <Save size={16} /> : <Plus size={16} />
                     }
-                    sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
+                    sx={{
+                      borderRadius: 2,
+                      px: 3,
+                      fontWeight: 700,
+                      width: { xs: "100%", sm: "auto" },
+                    }}
                   >
                     {isInfoSaving
                       ? "Saving..."
@@ -264,22 +280,32 @@ export default function LecturerCreateQuizPage({
         {/* 3. Type Configs Section (Locked until Quiz is created) */}
         {createdQuizId ? (
           <Card variant="outlined" sx={{ borderRadius: 1 }}>
-            <CardContent sx={{ p: 3 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: { xs: "flex-start", sm: "center" },
                   mb: 2.5,
-                  flexWrap: "wrap",
+                  flexDirection: { xs: "column", sm: "row" },
                   gap: 1.5,
                 }}
               >
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "0.95rem", sm: "1.25rem" },
+                    }}
+                  >
                     2. Question Matrix Configurations
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+                  >
                     Define question types, required counts, and points per
                     question.
                   </Typography>
@@ -294,7 +320,16 @@ export default function LecturerCreateQuizPage({
                     setOpenTypeConfigModal(true);
                   }}
                   disabled={existingTypes.length >= 3}
-                  sx={{ borderRadius: 2, fontWeight: 700 }}
+                  sx={{
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    width: { xs: "100%", sm: "auto" },
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                    px: { xs: 2, sm: 2.5 },
+                    py: 1,
+                  }}
                 >
                   Add Type Config
                 </Button>
@@ -317,24 +352,41 @@ export default function LecturerCreateQuizPage({
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 4,
+                    p: { xs: 2.5, sm: 4 },
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
                     textAlign: "center",
                     borderRadius: 2.5,
                     bgcolor: "action.hover",
                     borderColor: "dashed",
                   }}
                 >
-                  <Layers
-                    size={36}
-                    style={{ color: "#94a3b8", marginBottom: 8 }}
-                  />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  <Box
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mb: 1.5,
+                      color: "#94a3b8",
+                    }}
+                  >
+                    <Layers size={36} />
+                  </Box>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "0.95rem", sm: "1rem" },
+                    }}
+                  >
                     No Matrix Type Configs Added Yet
                   </Typography>
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 2 }}
+                    sx={{ mb: 2, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
                   >
                     Add at least 1 question type config (Single Choice, Multiple
                     Choice, or Essay) to proceed to question creation.
@@ -346,7 +398,12 @@ export default function LecturerCreateQuizPage({
                       setEditingTypeConfig(null);
                       setOpenTypeConfigModal(true);
                     }}
-                    sx={{ borderRadius: 2, fontWeight: 700 }}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      width: { xs: "100%", sm: "auto" },
+                    }}
                   >
                     Add First Type Config
                   </Button>
@@ -367,51 +424,96 @@ export default function LecturerCreateQuizPage({
                           <Paper
                             variant="outlined"
                             sx={{
-                              p: 2,
-                              borderRadius: 1,
+                              p: { xs: 2, sm: 2.5 },
+                              borderRadius: 2,
                               display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
+                              flexDirection: "column",
+                              gap: 1.5,
+                              bgcolor: "white",
+                              borderColor: "rgba(148, 163, 184, 0.16)",
+                              transition: "all 0.2s",
+                              "&:hover": {
+                                borderColor: "primary.light",
+                                boxShadow: "0 4px 12px rgba(15, 23, 42, 0.04)",
+                              },
                             }}
                           >
-                            <Box>
+                            {/* Card Top Header: Type Label + Delete Action */}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
                               <Typography
                                 variant="subtitle1"
-                                sx={{ fontWeight: 700, color: "primary.main" }}
+                                sx={{
+                                  fontWeight: 800,
+                                  color: "primary.main",
+                                  fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                                }}
                               >
                                 {typeLabel}
                               </Typography>
+
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                startIcon={<Trash2 size={13} />}
+                                onClick={() => setDeletingTypeConfig(cfg)}
+                                sx={{
+                                  borderRadius: 2,
+                                  fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                                  px: 1.2,
+                                  py: 0.4,
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </Box>
+
+                            {/* Card Bottom Body: Question Count & Points + Grading Chip */}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexDirection: { xs: "column", sm: "row" },
+                                alignItems: { xs: "flex-start", sm: "center" },
+                                justifyContent: "space-between",
+                                gap: 1,
+                              }}
+                            >
                               <Typography
                                 variant="body2"
                                 color="text.secondary"
+                                sx={{
+                                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                                }}
                               >
                                 Required: <strong>{cfg.requiredCount}</strong>{" "}
-                                questions •{" "}
+                                questions &bull;{" "}
                                 <strong>{cfg.pointsPerQuestion}</strong>{" "}
                                 pts/each
                               </Typography>
+
                               <Chip
                                 label={`Grading: ${cfg.scoringMethod}`}
                                 size="small"
                                 variant="outlined"
                                 sx={{
-                                  mt: 1,
-                                  fontSize: "0.75rem",
-                                  fontWeight: 600,
+                                  fontSize: "0.725rem",
+                                  fontWeight: 700,
+                                  height: 22,
+                                  bgcolor: "grey.50",
+                                  borderColor: "rgba(148, 163, 184, 0.2)",
                                 }}
                               />
                             </Box>
-
-                            <Button
-                              variant="outlined"
-                              color="error"
-                              size="small"
-                              startIcon={<Trash2 size={14} />}
-                              onClick={() => setDeletingTypeConfig(cfg)}
-                              sx={{ borderRadius: 2 }}
-                            >
-                              Delete
-                            </Button>
                           </Paper>
                         </Grid>
                       );
@@ -420,19 +522,26 @@ export default function LecturerCreateQuizPage({
                 </Stack>
               )}
 
-              <Divider sx={{ my: 3 }} />
+              <Divider sx={{ my: { xs: 2, sm: 3 } }} />
 
               {/* Proceed to Questions Action Bar */}
               <Box
                 sx={{
                   display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  flexWrap: "wrap",
+                  alignItems: { xs: "stretch", sm: "center" },
                   gap: 2,
                 }}
               >
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    textAlign: { xs: "center", sm: "left" },
+                  }}
+                >
                   {typeConfigs.length > 0
                     ? `Ready! You have configured ${typeConfigs.length} matrix type(s). Proceed to create detailed questions.`
                     : "Add at least 1 type config to enable question creation."}
@@ -444,7 +553,16 @@ export default function LecturerCreateQuizPage({
                   disabled={typeConfigs.length === 0}
                   endIcon={<ArrowRight size={18} />}
                   onClick={() => setShowProceedConfirm(true)}
-                  sx={{ borderRadius: 2.5, px: 3.5, py: 1.2, fontWeight: 800 }}
+                  sx={{
+                    borderRadius: 2.5,
+                    px: { xs: 2.5, sm: 3.5 },
+                    py: { xs: 1.2, sm: 1.4 },
+                    fontWeight: 800,
+                    fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                    width: { xs: "100%", sm: "auto" },
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
                 >
                   Create Questions
                 </Button>
@@ -456,20 +574,28 @@ export default function LecturerCreateQuizPage({
           <Paper
             variant="outlined"
             sx={{
-              p: 4,
+              p: { xs: 2.5, sm: 4 },
               textAlign: "center",
-              borderRadius: 3,
+              borderRadius: 1,
               bgcolor: "action.hover",
               borderColor: "dashed",
             }}
           >
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 700, color: "text.secondary" }}
+              sx={{
+                fontWeight: 700,
+                color: "text.secondary",
+                fontSize: { xs: "0.95rem", sm: "1.1rem" },
+              }}
             >
               🔒 Step 2 & 3 Locked
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+            >
               Please enter Quiz Information above and click &quot;Create Quiz &
               Continue&quot; first.
             </Typography>

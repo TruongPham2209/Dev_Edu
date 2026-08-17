@@ -225,45 +225,85 @@ export default function LecturerAssignmentDetailPage() {
   const lectureTitle = lecture?.title || "Bài giảng";
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container
+      maxWidth="xl"
+      sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3, md: 4 } }}
+    >
       {/* 1. Elegant Breadcrumbs Navigation */}
       <Breadcrumbs
-        separator={<ChevronRight size={14} style={{ color: "#94a3b8" }} />}
+        separator={<ChevronRight size={14} style={{ flexShrink: 0 }} />}
         sx={{
-          mb: 3,
+          mb: { xs: 2, sm: 3 },
+          "& .MuiBreadcrumbs-ol": {
+            alignItems: "center",
+            flexWrap: "nowrap",
+            overflow: "hidden",
+          },
           "& .MuiBreadcrumbs-li": {
-            fontSize: "0.875rem",
+            display: "inline-flex",
+            alignItems: "center",
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
             fontWeight: 500,
+            minWidth: 0,
+          },
+          "& .MuiBreadcrumbs-separator": {
+            mx: { xs: 0.5, sm: 1 },
+            color: "text.disabled",
+            display: "inline-flex",
+            alignItems: "center",
+            flexShrink: 0,
           },
         }}
       >
         <Link
           href="/lecturer"
-          className="flex items-center text-slate-500 hover:text-slate-900 transition-colors gap-1.5"
-          style={{
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-          }}
+          className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors gap-1 shrink-0"
+          style={{ textDecoration: "none", lineHeight: 1.4 }}
         >
-          <Home size={14} />
-          <span>Dashboard</span>
+          <Home size={14} style={{ flexShrink: 0 }} />
+          <span className="hidden sm:inline">Dashboard</span>
         </Link>
         <Link
           href={`/lecturer/courses/${courseId}`}
-          className="text-slate-500 hover:text-slate-900 transition-colors"
-          style={{ textDecoration: "none" }}
+          className="text-slate-500 hover:text-slate-900 transition-colors truncate"
+          style={{
+            textDecoration: "none",
+            lineHeight: 1.4,
+            maxWidth: 100,
+            display: "inline-block",
+          }}
+          title={courseTitle}
         >
           {courseTitle}
         </Link>
         <Link
           href={`/lecturer/courses/${courseId}/lectures/${lectureId}`}
-          className="text-slate-500 hover:text-slate-900 transition-colors"
-          style={{ textDecoration: "none" }}
+          className="text-slate-500 hover:text-slate-900 transition-colors truncate"
+          style={{
+            textDecoration: "none",
+            lineHeight: 1.4,
+            maxWidth: 110,
+            display: "inline-block",
+          }}
+          title={lectureTitle}
         >
           {lectureTitle}
         </Link>
-        <Typography sx={{ color: "text.primary", fontWeight: 700 }}>
+        <Typography
+          component="span"
+          sx={{
+            color: "text.primary",
+            fontWeight: 700,
+            lineHeight: 1.4,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: { xs: 120, sm: 250, md: "none" },
+            display: "inline-block",
+          }}
+          title={assignment.title}
+        >
           {assignment.title}
         </Typography>
       </Breadcrumbs>
@@ -280,12 +320,13 @@ export default function LecturerAssignmentDetailPage() {
         sx={{
           borderBottom: 1,
           borderColor: "divider",
-          mb: 4,
+          mb: { xs: 2.5, sm: 4 },
           position: "sticky",
           top: 0,
           bgcolor: "background.default",
           zIndex: 10,
           pt: 1,
+          overflowX: "auto",
         }}
       >
         <AnimatedTabs

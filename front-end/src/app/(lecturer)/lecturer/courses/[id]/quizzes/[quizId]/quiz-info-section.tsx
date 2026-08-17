@@ -50,16 +50,21 @@ export function QuizInfoSection({
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 1 }}>
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             mb: 2,
+            flexWrap: "wrap",
+            gap: 1,
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.25rem" } }}
+          >
             Quiz Information
           </Typography>
           {status && <QuizStatusChip status={status} />}
@@ -99,17 +104,27 @@ export function QuizInfoSection({
                     : ""
                 }
               >
-                <span>
+                <Box
+                  component="span"
+                  sx={{ width: { xs: "100%", sm: "auto" }, display: "inline-block" }}
+                >
                   <Button
                     type="submit"
                     variant="contained"
                     disabled={isSaving || isPendingStatus}
                     startIcon={<Save size={16} />}
-                    sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
+                    sx={{
+                      borderRadius: 2,
+                      px: 3,
+                      fontWeight: 700,
+                      width: "100%",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
                   >
                     {isSaving ? "Saving..." : "Save Quiz Details"}
                   </Button>
-                </span>
+                </Box>
               </Tooltip>
             </Box>
           </Stack>

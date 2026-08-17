@@ -64,10 +64,20 @@ export const StudentsTab = ({ courseId }: { courseId: string }) => {
         boxShadow: "0 4px 24px rgba(0,0,0,0.02)",
       }}
     >
-      <CardContent sx={{ p: 4 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            mb: { xs: 2, sm: 3 },
+          }}
+        >
           <Users className="text-blue-500" size={24} />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
+          >
             Enrolled Students
           </Typography>
         </Box>
@@ -83,7 +93,7 @@ export const StudentsTab = ({ courseId }: { courseId: string }) => {
               sx={{
                 display: "grid",
                 gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-                gap: 2,
+                gap: { xs: 1.5, sm: 2 },
               }}
             >
               {students.map((student) => (
@@ -91,41 +101,84 @@ export const StudentsTab = ({ courseId }: { courseId: string }) => {
                   key={student.id}
                   sx={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                    p: 1,
-                    borderRadius: 1,
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    justifyContent: "space-between",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: { xs: 1.5, sm: 2 },
+                    p: { xs: 1.5, sm: 2 },
+                    borderRadius: 1.5,
                     border: "1px solid",
                     borderColor: "divider",
-                    "&:hover": { bgcolor: "grey.50" },
-                    transition: "background-color 0.2s",
+                    bgcolor: "background.paper",
+                    "&:hover": {
+                      bgcolor: "grey.50",
+                      borderColor: "primary.main",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.04)",
+                    },
+                    transition: "all 0.2s ease-in-out",
                   }}
                 >
-                  <Avatar
-                    src={student.avatarUrl || undefined}
-                    sx={{ width: 48, height: 48, bgcolor: "primary.main" }}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      minWidth: 0,
+                      flex: 1,
+                    }}
                   >
-                    {student.fullName
-                      ? student.fullName.charAt(0).toUpperCase()
-                      : student.username.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      {student.fullName || student.username}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "text.secondary" }}
+                    <Avatar
+                      src={student.avatarUrl || undefined}
+                      sx={{
+                        width: { xs: 40, sm: 48 },
+                        height: { xs: 40, sm: 48 },
+                        bgcolor: "primary.main",
+                        fontWeight: 700,
+                        fontSize: { xs: "1rem", sm: "1.1rem" },
+                      }}
                     >
-                      @{student.username}
-                    </Typography>
+                      {student.fullName
+                        ? student.fullName.charAt(0).toUpperCase()
+                        : student.username.charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: "0.9rem", sm: "1rem" },
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {student.fullName || student.username}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: { xs: "0.775rem", sm: "0.85rem" },
+                        }}
+                      >
+                        @{student.username}
+                      </Typography>
+                    </Box>
                   </Box>
                   {student.enrolledAt && (
                     <Typography
-                      variant="body2"
-                      sx={{ color: "text.secondary" }}
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontSize: { xs: "0.75rem", sm: "0.825rem" },
+                        bgcolor: "grey.100",
+                        px: 1.25,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontWeight: 500,
+                        alignSelf: { xs: "flex-end", sm: "center" },
+                      }}
                     >
-                      Enrolled on {formatServerDate(student.enrolledAt)}
+                      Enrolled: {formatServerDate(student.enrolledAt)}
                     </Typography>
                   )}
                 </Box>

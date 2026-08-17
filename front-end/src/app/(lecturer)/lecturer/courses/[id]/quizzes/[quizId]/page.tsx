@@ -394,8 +394,8 @@ export default function LecturerQuizConfigurePage({
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack spacing={4}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3, md: 4 } }}>
+      <Stack spacing={{ xs: 2.5, sm: 4 }}>
         {/* 1. Hero Section */}
         <QuizHero
           courseId={courseId}

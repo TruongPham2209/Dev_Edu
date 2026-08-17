@@ -47,21 +47,27 @@ export const QuizHero = ({
   return (
     <Stack spacing={2} sx={{ width: "100%" }}>
       <Breadcrumbs
-        separator={<ChevronRight size={14} style={{ flexShrink: 0, marginTop: 3 }} />}
+        separator={<ChevronRight size={14} style={{ flexShrink: 0 }} />}
         aria-label="breadcrumb"
         sx={{
           "& .MuiBreadcrumbs-ol": {
-            alignItems: "flex-start",
-            flexWrap: "wrap",
+            alignItems: "center",
+            flexWrap: "nowrap",
+            overflow: "hidden",
           },
           "& .MuiBreadcrumbs-li": {
             display: "inline-flex",
-            alignItems: "flex-start",
+            alignItems: "center",
+            fontSize: { xs: "0.8rem", sm: "0.85rem" },
+            fontWeight: 500,
+            minWidth: 0,
           },
           "& .MuiBreadcrumbs-separator": {
-            mx: { xs: 0.75, sm: 1 },
-            mt: "3px",
+            mx: { xs: 0.5, sm: 1 },
             color: "text.disabled",
+            display: "inline-flex",
+            alignItems: "center",
+            flexShrink: 0,
           },
         }}
       >
@@ -73,15 +79,18 @@ export const QuizHero = ({
             display: "inline-flex",
             alignItems: "center",
             gap: 0.5,
-            fontSize: "0.85rem",
+            fontSize: { xs: "0.8rem", sm: "0.85rem" },
             fontWeight: 500,
             color: "text.secondary",
             lineHeight: 1.4,
+            flexShrink: 0,
             "&:hover": { color: "primary.main" },
           }}
         >
           <Home size={14} style={{ flexShrink: 0 }} />
-          {roleAccess === "STUDENT" ? "Home" : "Dashboard"}
+          <span className="hidden sm:inline">
+            {roleAccess === "STUDENT" ? "Home" : "Dashboard"}
+          </span>
         </MuiLink>
 
         <MuiLink
@@ -90,32 +99,32 @@ export const QuizHero = ({
           href={courseDetailPath}
           sx={{
             display: "inline-flex",
-            alignItems: "flex-start",
+            alignItems: "center",
             gap: 0.75,
-            fontSize: "0.85rem",
+            fontSize: { xs: "0.8rem", sm: "0.85rem" },
             fontWeight: 500,
             color: "text.secondary",
             lineHeight: 1.4,
+            minWidth: 0,
             "&:hover": { color: "primary.main" },
           }}
         >
-          <BookOpen size={14} style={{ flexShrink: 0, marginTop: 3 }} />
+          <BookOpen size={14} style={{ flexShrink: 0 }} />
           {isLoading ? (
-            <Skeleton width={100} height={20} />
+            <Skeleton width={80} height={20} />
           ) : (
             <Typography
               component="span"
               sx={{
-                fontSize: "0.85rem",
+                fontSize: { xs: "0.8rem", sm: "0.85rem" },
                 fontWeight: 500,
                 lineHeight: 1.4,
                 color: "inherit",
-                display: "-webkit-box",
-                WebkitLineClamp: { xs: 2, sm: 1 },
-                WebkitBoxOrient: "vertical",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                wordBreak: "break-word",
+                whiteSpace: "nowrap",
+                maxWidth: { xs: 130, sm: 260 },
+                display: "inline-block",
               }}
               title={courseTitle || "Course Detail"}
             >
@@ -128,25 +137,25 @@ export const QuizHero = ({
           <Box
             sx={{
               display: "inline-flex",
-              alignItems: "flex-start",
+              alignItems: "center",
               gap: 0.75,
               color: "text.primary",
+              minWidth: 0,
             }}
           >
-            <ClipboardList size={14} style={{ flexShrink: 0, marginTop: 3 }} />
+            <ClipboardList size={14} style={{ flexShrink: 0 }} />
             <Typography
               component="span"
               sx={{
-                fontSize: "0.85rem",
+                fontSize: { xs: "0.8rem", sm: "0.85rem" },
                 fontWeight: 600,
                 lineHeight: 1.4,
                 color: "text.primary",
-                display: "-webkit-box",
-                WebkitLineClamp: { xs: 2, sm: 1 },
-                WebkitBoxOrient: "vertical",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                wordBreak: "break-word",
+                whiteSpace: "nowrap",
+                maxWidth: { xs: 140, sm: 280, md: "none" },
+                display: "inline-block",
               }}
               title={quizTitle}
             >

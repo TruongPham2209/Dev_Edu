@@ -2,7 +2,7 @@ import { Box, Card, Container, Skeleton, Stack } from "@mui/material";
 
 export function AssignmentDetailSkeleton() {
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3, md: 4 } }}>
       {/* Breadcrumbs Skeleton */}
       <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 3 }}>
         <Skeleton variant="circular" width={16} height={16} />
@@ -15,19 +15,19 @@ export function AssignmentDetailSkeleton() {
       <Box
         sx={{
           borderRadius: 2,
-          mb: 4,
+          mb: { xs: 2.5, sm: 4 },
           border: "1px solid rgba(148, 163, 184, 0.14)",
           bgcolor: "white",
         }}
       >
         <Box
           sx={{
-            p: { xs: 3.5, md: 4 },
+            p: { xs: 2.5, sm: 3.5, md: 4 },
           }}
         >
           <Stack
             direction={{ xs: "column", md: "row" }}
-            spacing={4}
+            spacing={{ xs: 2.5, md: 4 }}
             sx={{ justifyContent: "space-between" }}
           >
             <Box sx={{ flex: 1 }}>
@@ -47,14 +47,14 @@ export function AssignmentDetailSkeleton() {
               <Skeleton
                 variant="text"
                 width="50%"
-                height={48}
+                height={40}
                 sx={{ mb: 1.5 }}
               />
             </Box>
             <Box
               sx={{
                 minWidth: { xs: "100%", md: 250 },
-                p: 2.5,
+                p: { xs: 2, sm: 2.5 },
                 borderRadius: 2.5,
                 bgcolor: "grey.50",
               }}
@@ -91,27 +91,29 @@ export function AssignmentDetailSkeleton() {
       </Box>
 
       {/* Tabs Skeleton */}
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{ mb: 4, borderBottom: 1, borderColor: "divider", pb: 1 }}
-      >
-        <Skeleton
-          variant="rectangular"
-          width={120}
-          height={36}
-          sx={{ borderRadius: 1 }}
-        />
-        <Skeleton
-          variant="rectangular"
-          width={120}
-          height={36}
-          sx={{ borderRadius: 1 }}
-        />
-      </Stack>
+      <Box sx={{ mb: { xs: 2.5, sm: 4 }, borderBottom: 1, borderColor: "divider", pb: 1, overflowX: "auto" }}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ minWidth: "max-content" }}
+        >
+          <Skeleton
+            variant="rectangular"
+            width={120}
+            height={36}
+            sx={{ borderRadius: 1 }}
+          />
+          <Skeleton
+            variant="rectangular"
+            width={120}
+            height={36}
+            sx={{ borderRadius: 1 }}
+          />
+        </Stack>
+      </Box>
 
       {/* Main Content Skeleton */}
-      <Card variant="outlined" sx={{ borderRadius: 2, p: 3 }}>
+      <Card variant="outlined" sx={{ borderRadius: 2, p: { xs: 2, sm: 3, md: 4 } }}>
         <Skeleton variant="text" width="40%" height={32} sx={{ mb: 3 }} />
         <Skeleton variant="text" width="100%" height={20} sx={{ mb: 1 }} />
         <Skeleton variant="text" width="95%" height={20} sx={{ mb: 1 }} />

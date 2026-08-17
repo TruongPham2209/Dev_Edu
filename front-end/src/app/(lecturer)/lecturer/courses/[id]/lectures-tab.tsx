@@ -85,20 +85,20 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
         boxShadow: "0 4px 24px rgba(0,0,0,0.02)",
       }}
     >
-      <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 4,
+            mb: { xs: 2.5, sm: 4 },
             flexWrap: "wrap",
             gap: 2,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <LayoutList className="text-blue-500" size={24} />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}>
               Course Curriculum
             </Typography>
           </Box>
@@ -126,9 +126,9 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
                   display: "flex",
                   alignItems: { xs: "flex-start", sm: "center" },
                   flexDirection: { xs: "column", sm: "row" },
-                  gap: 2,
-                  p: 1,
-                  borderRadius: 1,
+                  gap: { xs: 1.5, sm: 2 },
+                  p: { xs: 1.5, sm: 2 },
+                  borderRadius: 1.5,
                   border: "1px solid",
                   borderColor: "divider",
                   bgcolor: "background.paper",
@@ -143,14 +143,14 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 2,
+                    gap: 1.5,
                     flex: 1,
                   }}
                 >
                   <Box
                     sx={{
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       borderRadius: "50%",
                       bgcolor: "grey.50",
                       display: "flex",
@@ -158,22 +158,23 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
                       justifyContent: "center",
                       color: "text.secondary",
                       fontWeight: 700,
-                      fontSize: "0.875rem",
+                      fontSize: "0.825rem",
                       flexShrink: 0,
                     }}
                   >
                     {index + 1}
                   </Box>
-                  <Box>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Box
                       sx={{
                         display: "flex",
                         alignItems: "center",
                         gap: 1,
                         mb: 0.5,
+                        flexWrap: "wrap",
                       }}
                     >
-                      <Typography sx={{ fontWeight: 600, fontSize: "1.05rem" }}>
+                      <Typography sx={{ fontWeight: 600, fontSize: { xs: "0.95rem", sm: "1.05rem" } }}>
                         {lecture.title}
                       </Typography>
                       {lecture.videoObjectKey && (
@@ -195,6 +196,7 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
                         WebkitLineClamp: 1,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
                       }}
                     >
                       {lecture.summary || "No summary provided"}

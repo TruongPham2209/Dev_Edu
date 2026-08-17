@@ -72,7 +72,7 @@ const CourseManageCardBase = ({
         <Box
           sx={{
             position: "relative",
-            height: 150,
+            height: { xs: 160, sm: 150 },
             overflow: "hidden",
             bgcolor: "rgba(15, 23, 42, 0.02)",
           }}
@@ -137,12 +137,17 @@ const CourseManageCardBase = ({
         </Box>
 
         <CardContent
-          sx={{ p: 2, flexGrow: 1, display: "flex", flexDirection: "column" }}
+          sx={{
+            p: { xs: 1.75, sm: 2 },
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
           <Typography
             variant="h6"
             sx={{
-              fontSize: "1rem",
+              fontSize: { xs: "0.95rem", sm: "1rem" },
               fontWeight: 700,
               lineHeight: 1.4,
               color: "#0f172a",
@@ -166,7 +171,7 @@ const CourseManageCardBase = ({
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
-              fontSize: "0.85rem",
+              fontSize: { xs: "0.8rem", sm: "0.85rem" },
               lineHeight: 1.5,
               minHeight: "2.55rem",
             }}
@@ -211,8 +216,13 @@ const CourseCardSkeleton = () => (
       overflow: "hidden",
     }}
   >
-    <Skeleton variant="rectangular" height={150} animation="wave" />
-    <CardContent sx={{ p: 2 }}>
+    <Skeleton
+      variant="rectangular"
+      height={150}
+      animation="wave"
+      sx={{ height: { xs: 160, sm: 150 } }}
+    />
+    <CardContent sx={{ p: { xs: 1.75, sm: 2 } }}>
       <Skeleton width="90%" height={24} sx={{ mb: 1 }} animation="wave" />
       <Skeleton width="100%" height={16} animation="wave" />
       <Skeleton width="70%" height={16} sx={{ mb: 2 }} animation="wave" />
@@ -225,11 +235,7 @@ const CourseCardSkeleton = () => (
           justifyContent: "space-between",
         }}
       >
-        <Stack direction="row" spacing={2}>
-          <Skeleton width={30} height={16} animation="wave" />
-          <Skeleton width={30} height={16} animation="wave" />
-        </Stack>
-        <Skeleton width={60} height={16} animation="wave" />
+        <Skeleton width={80} height={16} animation="wave" />
       </Stack>
     </CardContent>
   </Card>

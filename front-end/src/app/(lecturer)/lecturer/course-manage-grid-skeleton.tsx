@@ -6,18 +6,20 @@ interface CourseManageGridSkeletonProps {
 }
 
 export function CourseManageGridSkeleton({
-  count = 5,
+  count = 6,
 }: CourseManageGridSkeletonProps) {
   return (
     <Box
       sx={{
         display: "grid",
         gridTemplateColumns: {
-          xs: "repeat(2, 1fr)",
+          xs: "1fr",
+          sm: "repeat(2, 1fr)",
           md: "repeat(3, 1fr)",
-          lg: "repeat(5, 1fr)",
+          lg: "repeat(4, 1fr)",
+          xl: "repeat(5, 1fr)",
         },
-        gap: 2.5,
+        gap: { xs: 2, sm: 2.5 },
       }}
     >
       {Array.from({ length: count }).map((_, index) => (

@@ -58,10 +58,14 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
           },
         }}
       >
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Grid container spacing={4} sx={{ alignItems: "center" }}>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3.5, md: 4 } }}>
+          <Grid
+            container
+            spacing={{ xs: 2.5, md: 4 }}
+            sx={{ alignItems: "center" }}
+          >
             {/* Thumbnail */}
-            <Grid size={{ xs: 12, md: 3, lg: 2.5 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 3, lg: 2.5 }}>
               <Box
                 sx={{
                   position: "relative",
@@ -92,7 +96,7 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
             </Grid>
 
             {/* Course Title and Info */}
-            <Grid size={{ xs: 12, md: 9, lg: 9.5 }}>
+            <Grid size={{ xs: 12, sm: 8, md: 9, lg: 9.5 }}>
               <Stack spacing={2}>
                 <Box
                   sx={{
@@ -106,7 +110,7 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
                     label="Course"
                     size="small"
                     sx={{
-                      height: 34,
+                      height: 32,
                       px: 1,
                       borderRadius: "999px",
                       bgcolor: "rgba(37,99,235,0.1)",
@@ -122,7 +126,7 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
                       alignItems: "center",
                       gap: 1,
                       px: 1.75,
-                      py: 0.8,
+                      py: 0.6,
                       borderRadius: "999px",
                       bgcolor: "rgba(16,185,129,0.1)",
                       border: "1px solid rgba(16,185,129,0.15)",
@@ -154,13 +158,14 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
                   variant="h3"
                   sx={{
                     fontWeight: 900,
-                    letterSpacing: "-1.2px",
-                    lineHeight: 1.05,
+                    letterSpacing: "-0.8px",
+                    lineHeight: 1.15,
                     color: "#0f172a",
-                    maxWidth: "90%",
+                    maxWidth: "100%",
                     fontSize: {
-                      xs: "2rem",
-                      md: "2.6rem",
+                      xs: "1.35rem",
+                      sm: "1.85rem",
+                      md: "2.4rem",
                     },
                   }}
                 >
@@ -169,7 +174,7 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
 
                 <Stack
                   direction={{ xs: "column", sm: "row" }}
-                  spacing={{ xs: 2, sm: 4 }}
+                  spacing={{ xs: 1.5, sm: 4 }}
                   divider={
                     <Box
                       sx={{
@@ -207,7 +212,7 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
                             sx={{
                               fontWeight: 900,
                               color: "#ef4444",
-                              fontSize: "1.4rem",
+                              fontSize: { xs: "1.15rem", sm: "1.4rem" },
                               letterSpacing: "-0.5px",
                             }}
                           >
@@ -218,6 +223,7 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
                               textDecoration: "line-through",
                               color: "text.secondary",
                               fontWeight: 600,
+                              fontSize: { xs: "0.85rem", sm: "1rem" },
                             }}
                           >
                             {course.originalPrice?.toLocaleString()} VND
@@ -245,7 +251,11 @@ export const CourseHeroInfo = ({ course }: CourseHeroProps) => {
                     <Calendar size={16} className="text-slate-500" />
                     <Typography
                       variant="body2"
-                      sx={{ color: "text.secondary", fontWeight: 550 }}
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 550,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      }}
                     >
                       Created at: {formatServerDate(course.createdAt)}
                     </Typography>

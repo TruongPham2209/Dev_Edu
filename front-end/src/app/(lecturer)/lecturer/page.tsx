@@ -3,36 +3,29 @@
 import { CourseManageCard } from "@/components/card/course-manage-card";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
-import { SearchInput } from "@/components/common/form/search-input";
 import {
   FilterItem,
   FilterSelect,
 } from "@/components/common/form/filter-select";
+import { SearchInput } from "@/components/common/form/search-input";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
   useAssignedCoursesInfiniteQuery,
   useCategoriesQuery,
 } from "@/lib/api/courses";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Container, Stack, Typography } from "@mui/material";
 import { LayoutGrid, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CourseManageGridSkeleton } from "./course-manage-grid-skeleton";
 
 export default function LecturerDashboardPage() {
-  const { handleError } = useApiWithToast();
-
   const [keyword, setKeyword] = useState("");
   const [categoryId, setCategoryId] = useState("ALL");
 
   const debouncedKeyword = useDebounce(keyword, 500);
   const debouncedCategoryId = useDebounce(categoryId, 500);
 
-  const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-  } = useCategoriesQuery();
+  const { data: categoriesData } = useCategoriesQuery();
 
   const {
     data: coursesData,
@@ -86,8 +79,11 @@ export default function LecturerDashboardPage() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Stack spacing={2}>
+    <Container
+      maxWidth="xl"
+      sx={{ py: { xs: 2.5, sm: 4 }, px: { xs: 2, sm: 3, md: 4 } }}
+    >
+      <Stack spacing={3}>
         {/* Management Header Section */}
         <Box
           sx={{
@@ -126,7 +122,7 @@ export default function LecturerDashboardPage() {
               flexDirection: { xs: "column", md: "row" },
               alignItems: { xs: "flex-start", md: "center" },
               justifyContent: "space-between",
-              gap: 3,
+              gap: { xs: 2, md: 3 },
             }}
           >
             <Box>
@@ -152,7 +148,7 @@ export default function LecturerDashboardPage() {
                     fontWeight: 800,
                     letterSpacing: "-0.02em",
                     color: "#0f172a",
-                    fontSize: { xs: "1.5rem", md: "1.875rem" },
+                    fontSize: { xs: "1.35rem", sm: "1.65rem", md: "1.875rem" },
                   }}
                 >
                   Assigned Courses
@@ -163,7 +159,8 @@ export default function LecturerDashboardPage() {
                 sx={{
                   color: "#64748b",
                   lineHeight: 1.6,
-                  maxWidth: 600,
+                  maxWidth: { xs: "100%", md: 600 },
+                  fontSize: { xs: "0.825rem", sm: "0.875rem" },
                 }}
               >
                 The teaching content coordination and management system. Here
@@ -175,7 +172,7 @@ export default function LecturerDashboardPage() {
             {/* Search bar */}
             <Stack
               direction={{ xs: "column", sm: "row" }}
-              spacing={2}
+              spacing={1.5}
               sx={{ width: { xs: "100%", md: "auto" } }}
             >
               <SearchInput
@@ -219,11 +216,13 @@ export default function LecturerDashboardPage() {
               sx={{
                 display: "grid",
                 gridTemplateColumns: {
-                  xs: "repeat(2, 1fr)",
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
                   md: "repeat(3, 1fr)",
-                  lg: "repeat(5, 1fr)",
+                  lg: "repeat(4, 1fr)",
+                  xl: "repeat(5, 1fr)",
                 },
-                gap: 2.5,
+                gap: { xs: 2, sm: 2.5 },
               }}
             >
               {courses.map((course) => {

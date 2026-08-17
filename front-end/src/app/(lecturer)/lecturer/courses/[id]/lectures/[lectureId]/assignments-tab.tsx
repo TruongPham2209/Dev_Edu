@@ -144,32 +144,45 @@ export function AssignmentsTab({
           alignItems: "center",
           borderBottom: 1,
           borderColor: "divider",
-          px: 3,
-          py: 2,
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
           bgcolor: "grey.50",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               borderRadius: 2,
               bgcolor: "primary.50",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "primary.main",
-              mt: 0.5,
+              flexShrink: 0,
             }}
           >
             <ClipboardList size={20} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                fontSize: { xs: "1.1rem", sm: "1.25rem" },
+              }}
+            >
               Assignments
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+              }}
+            >
               Manage practical assignments and essay questions to evaluate
               student competence.
             </Typography>
@@ -179,13 +192,14 @@ export function AssignmentsTab({
           <IconButton
             onClick={handleOpenDialog}
             sx={{
-              width: 42,
-              height: 42,
-              borderRadius: 3,
+              width: 40,
+              height: 40,
+              borderRadius: 2.5,
               bgcolor: "primary.main",
               color: "white",
               boxShadow: "0 4px 12px rgba(25, 118, 210, 0.18)",
               transition: "all 0.2s ease",
+              flexShrink: 0,
 
               "&:hover": {
                 bgcolor: "primary.dark",
@@ -194,12 +208,12 @@ export function AssignmentsTab({
               },
             }}
           >
-            <ClipboardPen size={20} strokeWidth={2.2} />
+            <ClipboardPen size={18} strokeWidth={2.2} />
           </IconButton>
         </Tooltip>
       </Box>
 
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         {assignments.length === 0 ? (
           <EmptyState
             title="No assignments yet"
@@ -224,45 +238,60 @@ export function AssignmentsTab({
                     },
                   }}
                 >
-                  <CardContent sx={{ p: 2 }}>
+                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
                     <Box
                       sx={{
                         display: "flex",
+                        flexDirection: { xs: "column", sm: "row" },
                         justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        gap: 3,
+                        alignItems: { xs: "stretch", sm: "flex-start" },
+                        gap: { xs: 1.5, sm: 2 },
                       }}
                     >
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          sx={{ alignItems: "center", mb: 1 }}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: { xs: "column", sm: "row" },
+                            alignItems: { xs: "flex-start", sm: "center" },
+                            justifyContent: "space-between",
+                            gap: { xs: 0.75, sm: 1.5 },
+                            mb: assignment.description ? 1 : 0,
+                          }}
                         >
                           <Box
                             sx={{
-                              p: 0.75,
-                              borderRadius: 1,
-                              bgcolor: "rgba(37, 99, 235, 0.06)",
-                              color: "primary.main",
                               display: "flex",
-                              flexShrink: 0,
+                              alignItems: "center",
+                              gap: 1,
+                              minWidth: 0,
                             }}
                           >
-                            <FileText size={18} />
+                            <Box
+                              sx={{
+                                p: 0.75,
+                                borderRadius: 1.5,
+                                bgcolor: "rgba(37, 99, 235, 0.08)",
+                                color: "primary.main",
+                                display: "flex",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <FileText size={18} />
+                            </Box>
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: 750,
+                                color: "#1e293b",
+                                fontSize: { xs: "0.9rem", sm: "1.025rem" },
+                                lineHeight: 1.35,
+                                wordBreak: "break-word",
+                              }}
+                            >
+                              {assignment.title}
+                            </Typography>
                           </Box>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              fontWeight: 750,
-                              color: "#1e293b",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {assignment.title}
-                          </Typography>
 
                           <Stack
                             direction="row"
@@ -270,53 +299,60 @@ export function AssignmentsTab({
                             sx={{
                               alignItems: "center",
                               color: "text.secondary",
-                              mx: 1,
                               border: "1px solid",
                               borderColor: "divider",
+                              bgcolor: "grey.50",
                               borderRadius: 1,
                               px: 1,
-                              py: 0.5,
+                              py: 0.25,
+                              flexShrink: 0,
+                              alignSelf: { xs: "flex-start", sm: "center" },
                             }}
                           >
-                            <Calendar size={16} />
-                            <Typography variant="caption">
+                            <Calendar size={13} />
+                            <Typography
+                              variant="caption"
+                              sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" }, fontWeight: 500 }}
+                            >
                               {formatServerDate(
                                 assignment.createdAt,
                                 "datetime",
                               )}
                             </Typography>
                           </Stack>
-                        </Stack>
+                        </Box>
 
                         {/* Description render */}
-                        <Box
-                          sx={{
-                            color: "text.secondary",
-                            fontSize: "0.875rem",
-                            lineHeight: 1.6,
-                            mb: 2,
-                            overflow: "hidden",
-                            display: "-webkit-box",
-                            WebkitBoxOrient: "vertical",
-                            WebkitLineClamp: 2,
-                            "& p": { m: 0 },
-                          }}
-                          dangerouslySetInnerHTML={{
-                            __html: assignment.description,
-                          }}
-                        />
-
-                        <Stack
-                          direction="row"
-                          spacing={2}
-                          sx={{ alignItems: "center", flexWrap: "wrap" }}
-                        ></Stack>
+                        {assignment.description && (
+                          <Box
+                            sx={{
+                              color: "text.secondary",
+                              fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                              lineHeight: 1.6,
+                              overflow: "hidden",
+                              display: "-webkit-box",
+                              WebkitBoxOrient: "vertical",
+                              WebkitLineClamp: 2,
+                              "& p": { m: 0 },
+                            }}
+                            dangerouslySetInnerHTML={{
+                              __html: assignment.description,
+                            }}
+                          />
+                        )}
                       </Box>
 
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={{ flexShrink: 0, alignItems: "center" }}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: { xs: "flex-end", sm: "initial" },
+                          gap: 1,
+                          flexShrink: 0,
+                          pt: { xs: 1, sm: 0 },
+                          borderTop: { xs: "1px dashed", sm: "none" },
+                          borderColor: "divider",
+                        }}
                       >
                         <ButtonAction
                           onClick={() =>
@@ -336,7 +372,7 @@ export function AssignmentsTab({
                           tooltip="Delete"
                           onClick={() => handleDeleteClick(assignment.id)}
                         />
-                      </Stack>
+                      </Box>
                     </Box>
                   </CardContent>
                 </Card>

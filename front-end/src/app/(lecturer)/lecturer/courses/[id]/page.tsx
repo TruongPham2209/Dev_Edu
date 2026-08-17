@@ -78,7 +78,13 @@ export default function LecturerCourseDetailPage() {
   return (
     <Container
       maxWidth="xl"
-      sx={{ py: 4, display: "flex", flexDirection: "column", gap: 4 }}
+      sx={{
+        py: { xs: 2.5, sm: 4 },
+        px: { xs: 2, sm: 3, md: 4 },
+        display: "flex",
+        flexDirection: "column",
+        gap: { xs: 2.5, sm: 4 },
+      }}
     >
       <CourseHero course={course} />
 
@@ -132,12 +138,12 @@ export default function LecturerCourseDetailPage() {
               boxShadow: "0 4px 24px rgba(0,0,0,0.02)",
             }}
           >
-            <CardContent sx={{ p: 4 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}
+                sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: { xs: 2, sm: 3 } }}
               >
                 <LayoutDashboard className="text-blue-500" size={24} />
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}>
                   Course Overview
                 </Typography>
               </Box>
@@ -146,7 +152,8 @@ export default function LecturerCourseDetailPage() {
                 sx={{
                   typography: "body1",
                   color: "text.secondary",
-                  lineHeight: 1.8,
+                  lineHeight: 1.7,
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
                 }}
               >
                 {course.description ? (

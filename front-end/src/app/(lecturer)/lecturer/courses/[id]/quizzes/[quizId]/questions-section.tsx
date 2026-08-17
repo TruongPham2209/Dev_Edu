@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
   Grid,
   Paper,
   Stack,
@@ -41,17 +42,29 @@ export function QuestionsSection({
 }: QuestionsSectionProps) {
   return (
     <Card variant="outlined" sx={{ borderRadius: 1 }}>
-      <CardContent sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2.5 }}>
-          Questions Management ({questions.length} / {totalRequiredQuestions} Total)
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 700,
+            mb: 2.5,
+            fontSize: { xs: "1rem", sm: "1.25rem" },
+          }}
+        >
+          Questions Management ({questions.length} / {totalRequiredQuestions}{" "}
+          Total)
         </Typography>
 
         {typeConfigs.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+          >
             Please add matrix type configs above to start adding questions.
           </Typography>
         ) : (
-          <Stack spacing={4}>
+          <Stack spacing={{ xs: 3, sm: 4 }}>
             {typeConfigs.map((cfg) => {
               let typeLabel = cfg.questionType as string;
               if (cfg.questionType === "SINGLE_CHOICE")
@@ -70,11 +83,19 @@ export function QuestionsSection({
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
-                      alignItems: "center",
+                      alignItems: { xs: "flex-start", sm: "center" },
                       mb: 1.5,
+                      flexDirection: { xs: "column", sm: "row" },
+                      gap: 1.25,
                     }}
                   >
-                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                      }}
+                    >
                       {typeLabel} ({typeQuestions.length} / {cfg.requiredCount})
                     </Typography>
 
@@ -85,18 +106,31 @@ export function QuestionsSection({
                           : ""
                       }
                     >
-                      <span>
+                      <Box
+                        component="span"
+                        sx={{
+                          width: { xs: "100%", sm: "auto" },
+                          display: "inline-block",
+                        }}
+                      >
                         <Button
                           variant="outlined"
                           size="small"
                           disabled={isPendingStatus}
                           startIcon={<Plus size={14} />}
                           onClick={() => onAddQuestion(cfg.questionType)}
-                          sx={{ borderRadius: 2, fontWeight: 700 }}
+                          sx={{
+                            borderRadius: 2,
+                            fontWeight: 700,
+                            fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                            width: "100%",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
+                          }}
                         >
                           Add Question
                         </Button>
-                      </span>
+                      </Box>
                     </Tooltip>
                   </Box>
 
@@ -104,14 +138,19 @@ export function QuestionsSection({
                     <Paper
                       variant="outlined"
                       sx={{
-                        p: 2,
+                        p: { xs: 2, sm: 2.5 },
                         borderRadius: 2,
                         bgcolor: "action.hover",
                         borderColor: "dashed",
                       }}
                     >
-                      <Typography variant="body2" color="text.secondary">
-                        No questions added for this type yet. Click &quot;Add Question&quot; to create one.
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+                      >
+                        No questions added for this type yet. Click &quot;Add
+                        Question&quot; to create one.
                       </Typography>
                     </Paper>
                   ) : (
@@ -121,8 +160,8 @@ export function QuestionsSection({
                           key={q.id}
                           variant="outlined"
                           sx={{
-                            p: 2,
-                            borderRadius: 1,
+                            p: { xs: 1.75, sm: 2 },
+                            borderRadius: 1.5,
                             bgcolor: "background.paper",
                           }}
                         >
@@ -130,21 +169,64 @@ export function QuestionsSection({
                             sx={{
                               display: "flex",
                               justifyContent: "space-between",
-                              alignItems: "flex-start",
-                              mb: 1,
+                              alignItems: { xs: "flex-start", sm: "center" },
+                              mb: 1.5,
+                              flexDirection: { xs: "column", sm: "row" },
+                              gap: 1.25,
                             }}
                           >
-                            <Typography
-                              variant="subtitle2"
+                            {/* Question Title & Points Badge */}
+                            <Box
                               sx={{
-                                fontWeight: 700,
-                                color: "primary.main",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                width: { xs: "100%", sm: "auto" },
+                                gap: 1,
                               }}
                             >
-                              Question {idx + 1} ({q.points} pts)
-                            </Typography>
+                              <Typography
+                                variant="subtitle2"
+                                sx={{
+                                  fontWeight: 800,
+                                  color: "primary.main",
+                                  fontSize: { xs: "0.875rem", sm: "0.95rem" },
+                                }}
+                              >
+                                Question {idx + 1}
+                              </Typography>
+                              <Chip
+                                label={`${q.points} pts`}
+                                size="small"
+                                variant="outlined"
+                                sx={{
+                                  height: 20,
+                                  fontSize: "0.7rem",
+                                  fontWeight: 700,
+                                  bgcolor: "primary.50",
+                                  borderColor: "rgba(59, 130, 246, 0.25)",
+                                  color: "primary.dark",
+                                }}
+                              />
+                            </Box>
 
-                            <Stack direction="row" spacing={1}>
+                            {/* Action Buttons Group */}
+                            <Stack
+                              direction="row"
+                              spacing={0.75}
+                              sx={{
+                                width: { xs: "100%", sm: "auto" },
+                                justifyContent: {
+                                  xs: "flex-end",
+                                  sm: "flex-start",
+                                },
+                                pt: { xs: 0.5, sm: 0 },
+                                borderTop: {
+                                  xs: "1px dashed rgba(148, 163, 184, 0.2)",
+                                  sm: "none",
+                                },
+                              }}
+                            >
                               <Tooltip
                                 title={
                                   isPendingStatus
@@ -161,7 +243,14 @@ export function QuestionsSection({
                                     onClick={() => onDuplicateQuestion(q)}
                                     sx={{
                                       borderRadius: 1.5,
-                                      fontSize: "0.75rem",
+                                      fontSize: {
+                                        xs: "0.725rem",
+                                        sm: "0.75rem",
+                                      },
+                                      px: { xs: 1, sm: 1.25 },
+                                      py: 0.3,
+                                      whiteSpace: "nowrap",
+                                      flexShrink: 0,
                                     }}
                                   >
                                     Duplicate
@@ -185,7 +274,14 @@ export function QuestionsSection({
                                     onClick={() => onEditQuestion(q)}
                                     sx={{
                                       borderRadius: 1.5,
-                                      fontSize: "0.75rem",
+                                      fontSize: {
+                                        xs: "0.725rem",
+                                        sm: "0.75rem",
+                                      },
+                                      px: { xs: 1, sm: 1.25 },
+                                      py: 0.3,
+                                      whiteSpace: "nowrap",
+                                      flexShrink: 0,
                                     }}
                                   >
                                     Edit
@@ -209,7 +305,14 @@ export function QuestionsSection({
                                     onClick={() => onDeleteQuestion(q)}
                                     sx={{
                                       borderRadius: 1.5,
-                                      fontSize: "0.75rem",
+                                      fontSize: {
+                                        xs: "0.725rem",
+                                        sm: "0.75rem",
+                                      },
+                                      px: { xs: 1, sm: 1.25 },
+                                      py: 0.3,
+                                      whiteSpace: "nowrap",
+                                      flexShrink: 0,
                                     }}
                                   >
                                     Delete
@@ -224,7 +327,11 @@ export function QuestionsSection({
                             dangerouslySetInnerHTML={{
                               __html: q.content,
                             }}
-                            sx={{ mb: 1.5 }}
+                            sx={{
+                              mb: 1.5,
+                              fontSize: { xs: "0.825rem", sm: "0.875rem" },
+                              overflowX: "auto",
+                            }}
                           />
 
                           {q.options && q.options.length > 0 && (
@@ -236,7 +343,11 @@ export function QuestionsSection({
                                       px: 1.5,
                                       py: 0.8,
                                       borderRadius: 1.5,
-                                      fontSize: "0.82rem",
+                                      fontSize: {
+                                        xs: "0.775rem",
+                                        sm: "0.82rem",
+                                      },
+                                      wordBreak: "break-word",
                                       bgcolor: opt.isCorrect
                                         ? "rgba(34, 197, 94, 0.1)"
                                         : "action.hover",
@@ -249,7 +360,8 @@ export function QuestionsSection({
                                         : "1px solid transparent",
                                     }}
                                   >
-                                    {opt.isCorrect ? "✓ " : "• "} {opt.optionText}
+                                    {opt.isCorrect ? "✓ " : "• "}{" "}
+                                    {opt.optionText}
                                   </Box>
                                 </Grid>
                               ))}

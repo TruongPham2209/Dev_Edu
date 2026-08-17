@@ -172,32 +172,45 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
           alignItems: "center",
           borderBottom: 1,
           borderColor: "divider",
-          px: 3,
-          py: 2,
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
           bgcolor: "grey.50",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: 36,
+              height: 36,
               borderRadius: 2,
               bgcolor: "primary.50",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "primary.main",
-              mt: 0.5,
+              flexShrink: 0,
             }}
           >
             <Paperclip size={20} />
           </Box>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                fontSize: { xs: "1.1rem", sm: "1.25rem" },
+              }}
+            >
               Attached materials
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+              }}
+            >
               List of learning materials, lecture slides, or additional
               readings.
             </Typography>
@@ -207,13 +220,14 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
           <IconButton
             onClick={handleOpenDialog}
             sx={{
-              width: 42,
-              height: 42,
-              borderRadius: 3,
+              width: 40,
+              height: 40,
+              borderRadius: 2.5,
               bgcolor: "primary.main",
               color: "white",
               boxShadow: "0 4px 12px rgba(25, 118, 210, 0.18)",
               transition: "all 0.2s ease",
+              flexShrink: 0,
 
               "&:hover": {
                 bgcolor: "primary.dark",
@@ -222,12 +236,12 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
               },
             }}
           >
-            <FilePlus2 size={20} strokeWidth={2.2} />
+            <FilePlus2 size={18} strokeWidth={2.2} />
           </IconButton>
         </Tooltip>
       </Box>
 
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
         {materials.length === 0 ? (
           <EmptyState
             title="No materials yet"
@@ -262,80 +276,98 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                       },
                     }}
                   >
-                    <CardContent sx={{ p: "16px !important" }}>
-                      <Stack
-                        direction="row"
-                        spacing={2}
+                    <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                      <Box
                         sx={{
-                          alignItems: "center",
+                          display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
+                          alignItems: { xs: "stretch", sm: "center" },
                           justifyContent: "space-between",
+                          gap: { xs: 1.5, sm: 2 },
                         }}
                       >
-                        <Stack
-                          direction="row"
-                          spacing={2}
-                          sx={{ alignItems: "center", minWidth: 0 }}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: { xs: 1.25, sm: 1.75 },
+                            minWidth: 0,
+                            flex: 1,
+                          }}
                         >
                           <Box
                             sx={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: 2.5,
+                              width: { xs: 40, sm: 44 },
+                              height: { xs: 40, sm: 44 },
+                              borderRadius: 2,
                               bgcolor: "grey.50",
                               border: "1px solid",
-                              borderColor: "grey.100",
+                              borderColor: "grey.200",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               flexShrink: 0,
                             }}
                           >
-                            {getFileIcon(fileName, 24)}
+                            {getFileIcon(fileName, 22)}
                           </Box>
-                          <Box sx={{ minWidth: 0 }}>
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Typography
                               variant="subtitle1"
                               sx={{
                                 fontWeight: 700,
                                 color: "#1e293b",
+                                fontSize: { xs: "0.875rem", sm: "0.975rem" },
+                                lineHeight: 1.35,
+                                display: "-webkit-box",
+                                WebkitLineClamp: { xs: 2, sm: 1 },
+                                WebkitBoxOrient: "vertical",
                                 overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
+                                wordBreak: "break-word",
                               }}
+                              title={material.title}
                             >
                               {material.title}
                             </Typography>
                             <Stack
                               direction="row"
-                              spacing={1.5}
+                              spacing={1}
                               sx={{
                                 alignItems: "center",
                                 flexWrap: "wrap",
                                 mt: 0.5,
+                                color: "text.secondary",
                               }}
                             >
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  color: "text.secondary",
-                                  fontWeight: 500,
+                                  fontWeight: 600,
+                                  fontSize: { xs: "0.7rem", sm: "0.775rem" },
+                                  color: "primary.main",
+                                  bgcolor: "rgba(37, 99, 235, 0.08)",
+                                  px: 0.75,
+                                  py: 0.2,
+                                  borderRadius: 0.75,
                                 }}
                               >
-                                {extension} format
+                                {extension}
                               </Typography>
                               <Box
                                 sx={{
-                                  width: 4,
-                                  height: 4,
+                                  width: 3,
+                                  height: 3,
                                   borderRadius: "50%",
-                                  bgcolor: "grey.300",
+                                  bgcolor: "grey.400",
                                 }}
                               />
                               <Typography
                                 variant="caption"
-                                sx={{ color: "text.secondary" }}
+                                sx={{
+                                  color: "text.secondary",
+                                  fontSize: { xs: "0.7rem", sm: "0.775rem" },
+                                }}
                               >
-                                Uploaded at:{" "}
                                 {formatServerDate(
                                   material.uploadedAt,
                                   "datetime",
@@ -343,12 +375,19 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                               </Typography>
                             </Stack>
                           </Box>
-                        </Stack>
+                        </Box>
 
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          sx={{ flexShrink: 0 }}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: { xs: "flex-end", sm: "initial" },
+                            gap: 1,
+                            flexShrink: 0,
+                            pt: { xs: 1, sm: 0 },
+                            borderTop: { xs: "1px dashed", sm: "none" },
+                            borderColor: "divider",
+                          }}
                         >
                           <ButtonAction
                             color="primary"
@@ -364,8 +403,8 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                             tooltip="Delete material"
                             onClick={() => handleDeleteClick(material.id)}
                           />
-                        </Stack>
-                      </Stack>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Collapse>

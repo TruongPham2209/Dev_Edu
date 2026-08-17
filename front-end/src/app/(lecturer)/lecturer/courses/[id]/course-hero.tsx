@@ -8,10 +8,22 @@ export const CourseHero = ({ course }: { course: CourseResponse }) => {
   return (
     <Stack spacing={2} sx={{ width: "100%" }}>
       <Breadcrumbs
-        separator={<ChevronRight size={14} />}
+        separator={<ChevronRight size={14} style={{ flexShrink: 0, marginTop: 3 }} />}
         aria-label="breadcrumb"
         sx={{
-          "& .MuiBreadcrumbs-separator": { mx: 1, color: "text.disabled" },
+          "& .MuiBreadcrumbs-ol": {
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+          },
+          "& .MuiBreadcrumbs-li": {
+            display: "inline-flex",
+            alignItems: "flex-start",
+          },
+          "& .MuiBreadcrumbs-separator": {
+            mx: { xs: 0.75, sm: 1 },
+            mt: "3px",
+            color: "text.disabled",
+          },
         }}
       >
         <MuiLink
@@ -19,26 +31,34 @@ export const CourseHero = ({ course }: { course: CourseResponse }) => {
           underline="hover"
           href="/lecturer"
           sx={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
             gap: 0.5,
             fontSize: "0.85rem",
             fontWeight: 500,
             color: "text.secondary",
+            lineHeight: 1.4,
             "&:hover": { color: "primary.main" },
           }}
         >
-          <Home size={14} />
+          <Home size={14} style={{ flexShrink: 0 }} />
           Dashboard
         </MuiLink>
         <Typography
+          component="span"
           sx={{
-            display: "flex",
-            alignItems: "center",
+            display: "-webkit-box",
+            WebkitLineClamp: { xs: 2, sm: 1 },
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            wordBreak: "break-word",
             fontSize: "0.85rem",
             fontWeight: 600,
             color: "text.primary",
+            lineHeight: 1.4,
           }}
+          title={course.title}
         >
           {course.title}
         </Typography>

@@ -55,7 +55,7 @@ export function SubmissionHistoryTab({
   }, [historyHasMore, historyLoading, history.length, onLoadMoreHistory]);
 
   return (
-    <Box sx={{ maxH: 420, overflowY: "auto", pr: 1, py: 1 }}>
+    <Box sx={{ maxH: { xs: 320, sm: 420 }, overflowY: "auto", pr: 0.5, py: 1 }}>
       {historyLoading && history.length === 0 ? (
         <Stack component="div" spacing={3} sx={{ pl: 1 }}>
           {/* Skeleton Activity Row 1 */}
@@ -79,7 +79,7 @@ export function SubmissionHistoryTab({
             <Card
               variant="outlined"
               sx={{
-                p: 1.8,
+                p: { xs: 1.25, sm: 1.8 },
                 borderRadius: 1,
                 borderColor: "rgba(148,163,184,0.1)",
               }}
@@ -107,7 +107,7 @@ export function SubmissionHistoryTab({
             <Card
               variant="outlined"
               sx={{
-                p: 1.8,
+                p: { xs: 1.25, sm: 1.8 },
                 borderRadius: 1,
                 borderColor: "rgba(148,163,184,0.1)",
               }}
@@ -128,30 +128,34 @@ export function SubmissionHistoryTab({
       ) : history.length === 0 ? (
         <Box
           sx={{
-            p: 4,
+            p: { xs: 2, sm: 4 },
             textAlign: "center",
             bgcolor: "grey.25",
             borderRadius: 1,
             border: "1px dashed rgba(148, 163, 184, 0.18)",
           }}
         >
-          <Activity size={28} style={{ color: "#cbd5e1", marginBottom: 8 }} />
+          <Activity size={26} style={{ color: "#cbd5e1", marginBottom: 8 }} />
           <Typography
             variant="body2"
-            sx={{ color: "text.secondary", fontWeight: 600 }}
+            sx={{
+              color: "text.secondary",
+              fontWeight: 600,
+              fontSize: { xs: "0.825rem", sm: "0.875rem" },
+            }}
           >
             No activity history recorded
           </Typography>
         </Box>
       ) : (
-        <Box sx={{ position: "relative", pl: 1 }}>
+        <Box sx={{ position: "relative", pl: 0.5 }}>
           {history.map((item, index) => (
             <Box
               key={item.id}
               sx={{
                 position: "relative",
-                pl: 4,
-                pb: index === history.length - 1 ? 0 : 3,
+                pl: { xs: 3.5, sm: 4 },
+                pb: index === history.length - 1 ? 0 : 2.5,
               }}
             >
               {/* Vertical connective line */}
@@ -191,7 +195,7 @@ export function SubmissionHistoryTab({
               <Box
                 sx={{
                   bgcolor: "white",
-                  p: 1.5,
+                  p: { xs: 1.25, sm: 1.5 },
                   borderRadius: 1,
                   border: "1px solid rgba(148, 163, 184, 0.12)",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.01)",
@@ -199,7 +203,11 @@ export function SubmissionHistoryTab({
               >
                 <Typography
                   variant="body2"
-                  sx={{ fontWeight: 700, color: "text.primary" }}
+                  sx={{
+                    fontWeight: 700,
+                    color: "text.primary",
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                  }}
                 >
                   {item.details}
                 </Typography>
@@ -207,7 +215,7 @@ export function SubmissionHistoryTab({
                   component="div"
                   direction="row"
                   spacing={1.5}
-                  sx={{ alignItems: "center", mt: 0.8 }}
+                  sx={{ alignItems: "center", mt: 0.8, flexWrap: "wrap" }}
                 >
                   <Chip
                     label={item.status}
@@ -228,6 +236,7 @@ export function SubmissionHistoryTab({
                       display: "flex",
                       alignItems: "center",
                       gap: 0.5,
+                      fontSize: { xs: "0.7rem", sm: "0.75rem" },
                     }}
                   >
                     <Clock size={11} />

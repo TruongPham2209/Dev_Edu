@@ -40,11 +40,22 @@ export function ProgressSummaryCard({
         bgcolor: "background.paper",
       }}
     >
-      <CardContent sx={{ p: 2.5 }}>
-        <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 2.5, md: 3 } }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            mb: 1,
+            fontSize: { xs: "1rem", sm: "1.15rem" },
+          }}
+        >
           Progress Summary
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 2, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
+        >
           Question configuration status relative to matrix requirements.
         </Typography>
 
@@ -78,7 +89,13 @@ export function ProgressSummaryCard({
                       mb: 0.5,
                     }}
                   >
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                      }}
+                    >
                       {label}
                     </Typography>
                     <Chip
@@ -116,10 +133,12 @@ export function ProgressSummaryCard({
             startIcon={<Send size={16} />}
             onClick={onSubmitClick}
             sx={{
-              py: 1.2,
+              py: { xs: 1.2, sm: 1.4 },
               borderRadius: 2.5,
               fontWeight: 800,
-              fontSize: "0.95rem",
+              fontSize: { xs: "0.875rem", sm: "0.95rem" },
+              whiteSpace: "nowrap",
+              flexShrink: 0,
             }}
           >
             Submit Quiz For Approval
@@ -129,9 +148,7 @@ export function ProgressSummaryCard({
             <Chip
               icon={<CheckCircle2 size={14} />}
               label={`Status: ${quizDetail?.status}`}
-              color={
-                quizDetail?.status === "APPROVED" ? "success" : "info"
-              }
+              color={quizDetail?.status === "APPROVED" ? "success" : "info"}
               sx={{ fontWeight: 700 }}
             />
           </Box>

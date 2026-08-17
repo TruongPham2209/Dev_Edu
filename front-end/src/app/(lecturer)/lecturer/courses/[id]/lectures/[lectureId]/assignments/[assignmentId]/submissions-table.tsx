@@ -57,21 +57,25 @@ export function SubmissionsTable({
         sx={{
           borderBottom: 1,
           borderColor: "divider",
-          px: 3,
-          py: 2,
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
           bgcolor: "grey.50",
         }}
       >
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 800, color: "#1e293b" }}
+          sx={{
+            fontWeight: 800,
+            color: "#1e293b",
+            fontSize: { xs: "0.95rem", sm: "1rem" },
+          }}
         >
           Student submissions
         </Typography>
       </Box>
       <CardContent sx={{ p: 0 }}>
         {submissionsLoading && submissions.length === 0 ? (
-          <Box sx={{ p: 4 }}>
+          <Box sx={{ p: { xs: 2, sm: 4 } }}>
             <Stack spacing={2}>
               <Skeleton
                 variant="rectangular"
@@ -91,7 +95,7 @@ export function SubmissionsTable({
             </Stack>
           </Box>
         ) : submissions.length === 0 ? (
-          <Box sx={{ p: 4 }}>
+          <Box sx={{ p: { xs: 2, sm: 4 } }}>
             <EmptyState
               title="No submissions yet"
               subtitle="This assignment has not been completed or submitted by any student yet."
@@ -99,8 +103,10 @@ export function SubmissionsTable({
             />
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
+          <TableContainer
+            sx={{ overflowX: "auto !important", maxWidth: "100%" }}
+          >
+            <Table sx={{ minWidth: 560 }}>
               <TableHead sx={{ bgcolor: "grey.50" }}>
                 <TableRow>
                   <TableCell
@@ -108,7 +114,7 @@ export function SubmissionsTable({
                       fontWeight: 700,
                       color: "text.secondary",
                       fontSize: "0.85rem",
-                      pl: 3,
+                      pl: { xs: 2, sm: 3 },
                     }}
                   >
                     Student
@@ -136,7 +142,7 @@ export function SubmissionsTable({
                       fontWeight: 700,
                       color: "text.secondary",
                       fontSize: "0.85rem",
-                      pr: 3,
+                      pr: { xs: 2, sm: 3 },
                       textAlign: "right",
                     }}
                   >
@@ -154,7 +160,7 @@ export function SubmissionsTable({
                     }}
                   >
                     {/* Student Info */}
-                    <TableCell sx={{ pl: 3 }}>
+                    <TableCell sx={{ pl: { xs: 2, sm: 3 } }}>
                       <Stack
                         direction="row"
                         spacing={1.5}
@@ -174,7 +180,11 @@ export function SubmissionsTable({
                         </Avatar>
                         <Typography
                           variant="body2"
-                          sx={{ fontWeight: 700, color: "text.primary" }}
+                          sx={{
+                            fontWeight: 700,
+                            color: "text.primary",
+                            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                          }}
                         >
                           {submission.studentUsername}
                         </Typography>
@@ -185,7 +195,11 @@ export function SubmissionsTable({
                     <TableCell>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.primary", fontWeight: 500 }}
+                        sx={{
+                          color: "text.primary",
+                          fontWeight: 500,
+                          fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                        }}
                       >
                         {formatServerDate(submission.submittedAt, "datetime")}
                       </Typography>
@@ -201,9 +215,10 @@ export function SubmissionsTable({
                           triggerDownload(submission.fileObjectKey)
                         }
                         sx={{
-                          maxWidth: 260,
+                          maxWidth: { xs: 160, sm: 260 },
                           borderRadius: 1.5,
                           cursor: "pointer",
+                          fontSize: { xs: "0.75rem", sm: "0.8125rem" },
                           "&:hover": {
                             bgcolor: "grey.100",
                             borderColor: "success.main",
@@ -214,7 +229,9 @@ export function SubmissionsTable({
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell sx={{ pr: 3, textAlign: "right" }}>
+                    <TableCell
+                      sx={{ pr: { xs: 2, sm: 3 }, textAlign: "right" }}
+                    >
                       <Stack
                         direction="row"
                         spacing={1}
