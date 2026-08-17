@@ -59,7 +59,7 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
             key={assignment.id}
             elevation={0}
             sx={{
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               border: "1px solid",
               borderColor: "divider",
               borderRadius: 1.5,
@@ -72,14 +72,14 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
             }}
           >
             <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              sx={{ alignItems: { xs: "flex-start", sm: "center" } }}
+              direction="row"
+              spacing={{ xs: 1.5, sm: 2 }}
+              sx={{ alignItems: "center" }}
             >
               <Box
                 sx={{
-                  width: 44,
-                  height: 44,
+                  width: { xs: 36, sm: 44 },
+                  height: { xs: 36, sm: 44 },
                   borderRadius: 1,
                   bgcolor: alpha(theme.palette.text.primary, 0.04),
                   color: "text.secondary",
@@ -89,18 +89,18 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
                   flexShrink: 0,
                 }}
               >
-                <ClipboardList size={22} />
+                <ClipboardList size={20} />
               </Box>
 
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Stack
                   direction="row"
                   spacing={1}
-                  sx={{ alignItems: "center", mb: 0.5 }}
+                  sx={{ alignItems: "center", mb: 0.5, flexWrap: "wrap" }}
                 >
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 700, color: "text.primary" }}
+                    sx={{ fontWeight: 700, color: "text.primary", fontSize: { xs: "0.85rem", sm: "0.875rem" } }}
                   >
                     {assignment.title}
                   </Typography>
@@ -112,8 +112,8 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
                       variant="outlined"
                       sx={{
                         fontWeight: 700,
-                        height: 20,
-                        fontSize: "0.65rem",
+                        height: 18,
+                        fontSize: "0.625rem",
                         borderRadius: 0.5,
                       }}
                     />
@@ -125,8 +125,8 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
                       variant="outlined"
                       sx={{
                         fontWeight: 700,
-                        height: 20,
-                        fontSize: "0.65rem",
+                        height: 18,
+                        fontSize: "0.625rem",
                         borderRadius: 0.5,
                       }}
                     />
@@ -138,12 +138,12 @@ export function TabAssignments({ lectureId }: TabAssignmentsProps) {
                   component="div"
                   color="text.secondary"
                   sx={{
-                    mb: 1,
+                    mb: 0.5,
                     display: "-webkit-box",
                     WebkitLineClamp: 1,
                     WebkitBoxOrient: "vertical",
                     overflow: "hidden",
-                    fontSize: "0.825rem",
+                    fontSize: { xs: "0.775rem", sm: "0.825rem" },
                     "& *": {
                       margin: 0,
                       display: "inline",

@@ -101,7 +101,7 @@ export const FormInput = forwardRef<any, FormInputProps>(
             position: "relative",
             display: "flex",
             alignItems: "stretch",
-            minHeight: 44,
+            minHeight: { xs: 40, sm: 44 },
             borderRadius: "12px",
             overflow: multiline ? "hidden" : "visible",
 
@@ -139,8 +139,8 @@ export const FormInput = forwardRef<any, FormInputProps>(
           {icon && isStart && (
             <Box
               sx={{
-                width: 44,
-                minWidth: 44,
+                width: { xs: 38, sm: 44 },
+                minWidth: { xs: 38, sm: 44 },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -198,10 +198,10 @@ export const FormInput = forwardRef<any, FormInputProps>(
               resize: multiline ? "vertical" : "none",
               fontFamily: "inherit",
 
-              px: 1.75,
-              py: 1.15,
+              px: { xs: 1.5, sm: 1.75 },
+              py: { xs: 0.9, sm: 1.15 },
 
-              fontSize: 14,
+              fontSize: { xs: 13.5, sm: 14 },
               fontWeight: 500,
               color: theme.palette.text.primary,
 

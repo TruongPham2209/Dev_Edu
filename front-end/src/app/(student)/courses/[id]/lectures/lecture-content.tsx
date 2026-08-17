@@ -121,14 +121,14 @@ export function LectureContent({
 
         <Box>
           <Stack
-            direction="row"
-            spacing={1.5}
-            sx={{ mb: 1, alignItems: "center" }}
+            direction={{ xs: "column", sm: "row" }}
+            spacing={{ xs: 1, sm: 1.5 }}
+            sx={{ mb: 1, alignItems: { xs: "flex-start", sm: "center" }, flexWrap: "wrap" }}
           >
             <Typography
               variant="h6"
               component="h1"
-              sx={{ fontWeight: 800, letterSpacing: "-0.01em" }}
+              sx={{ fontWeight: 800, letterSpacing: "-0.01em", fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.75rem" } }}
             >
               {lecture.title}
             </Typography>
@@ -164,12 +164,12 @@ export function LectureContent({
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ maxWidth: "800px", lineHeight: 1.5, fontSize: "0.875rem" }}
+            sx={{ maxWidth: "800px", lineHeight: 1.5, fontSize: { xs: "0.825rem", sm: "0.875rem" } }}
           >
             {lecture.summary}
           </Typography>
 
-          <Stack direction="row" spacing={3} sx={{ mt: 2 }}>
+          <Stack direction="row" spacing={2.5} sx={{ mt: 1.5, flexWrap: "wrap" }}>
             {lecture.duration > 0 && (
               <Stack
                 direction="row"
@@ -207,7 +207,7 @@ export function LectureContent({
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               borderRadius: 1.5,
               border: "1px solid",
               borderColor: "divider",
@@ -231,9 +231,10 @@ export function LectureContent({
           size="small"
           sx={{
             borderRadius: 1,
-            px: 2,
+            px: { xs: 1.5, sm: 2.5 },
             textTransform: "none",
             fontWeight: 600,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
           }}
         >
           Previous
@@ -255,9 +256,10 @@ export function LectureContent({
           size="small"
           sx={{
             borderRadius: 1,
-            px: 3,
+            px: { xs: 1.75, sm: 3 },
             textTransform: "none",
             fontWeight: 700,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
             bgcolor:
               !nextLecture && (lecture.isCompleted || !lecture.videoObjectKey)
                 ? "success.main"

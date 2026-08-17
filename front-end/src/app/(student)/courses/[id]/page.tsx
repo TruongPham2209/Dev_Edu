@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import { use } from "react";
 import { CourseAbout } from "./course-about";
 import { CourseContent } from "./course-content";
+import { StudentCourseDetailSkeleton } from "./course-detail-skeleton";
 import { CoursePurchaseSection } from "./course-purchase-section";
 import { CourseReviewsSection } from "./course-reviews-section";
 import { HeroSection } from "./hero-section";
@@ -34,18 +35,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { data: allCoursesData } = useCoursesQuery();
 
   if (loadingCourse) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          py: 8,
-          minHeight: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <StudentCourseDetailSkeleton />;
   }
 
   if (courseError || !course) {
@@ -61,7 +51,7 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
       sx={{
         bgcolor: "#f1f5f9",
         minHeight: "100vh",
-        pb: 12,
+        pb: { xs: 6, sm: 10, md: 12 },
         backgroundImage:
           "radial-gradient(circle at top center, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)",
         overflowX: "clip",
@@ -69,24 +59,24 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
     >
       <Container
         maxWidth="lg"
-        sx={{ position: "relative", zIndex: 1, pt: { xs: 4, md: 6, lg: 8 } }}
+        sx={{ position: "relative", zIndex: 1, pt: { xs: 2.5, sm: 4, lg: 8 }, pb: { xs: 8, sm: 4 } }}
       >
-        <Grid container spacing={4}>
+        <Grid container spacing={{ xs: 2.5, sm: 3.5, md: 4 }}>
           <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-            <HeroSection course={course} />
-
-            {/* MOBILE ONLY: Purchase Card stacks perfectly below Hero content */}
-            <Box sx={{ display: { xs: "block", md: "none" }, mb: 6 }}>
-              <CoursePurchaseSection
-                course={course}
-                isEnrolled={course.registered}
-                lectures={lectures}
-              />
-            </Box>
+            <HeroSection
+              course={course}
+              mobilePurchaseCard={
+                <CoursePurchaseSection
+                  course={course}
+                  isEnrolled={course.registered}
+                  lectures={lectures}
+                />
+              }
+            />
 
             {/* MAIN CONTENT */}
             <Box sx={{ pb: 4 }}>
-              <Stack spacing={8}>
+              <Stack spacing={{ xs: 4, sm: 6, md: 8 }}>
                 <CourseAbout description={course.description} />
                 <CourseContent lectures={lectures} />
                 <CourseReviewsSection

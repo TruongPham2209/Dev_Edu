@@ -1,5 +1,6 @@
 "use client";
 
+import { ColumnDef, DataTable } from "@/components/common/data-table";
 import { InfoDialog } from "@/components/common/info-dialog";
 import { QuizStatusChip } from "@/components/dialog/quiz/quiz-status-chip";
 import {
@@ -19,12 +20,6 @@ import {
   Paper,
   Skeleton,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from "@mui/material";
 import {
@@ -222,13 +217,13 @@ export function QuizAssignmentDetailModal({
         ) : (
           <Stack spacing={3} sx={{ pt: 1 }}>
             {/* Status & Key Stats */}
-            <Grid container spacing={2}>
+            <Grid container spacing={{ xs: 1.5, sm: 2 }}>
               {/* 1. Duration */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4 }}>
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, sm: 2 },
                     textAlign: "center",
                     borderRadius: 2.5,
                     height: "100%",
@@ -250,18 +245,24 @@ export function QuizAssignmentDetailModal({
                   >
                     Duration
                   </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "0.9rem", sm: "1rem" },
+                    }}
+                  >
                     {assignment.durationMinutes} Mins
                   </Typography>
                 </Paper>
               </Grid>
 
               {/* 2. Attempts Limit */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4 }}>
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, sm: 2 },
                     textAlign: "center",
                     borderRadius: 2.5,
                     height: "100%",
@@ -279,18 +280,24 @@ export function QuizAssignmentDetailModal({
                   >
                     Attempts Taken
                   </Typography>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "0.9rem", sm: "1rem" },
+                    }}
+                  >
                     {attemptsCount} / {assignment.maxAttempts}
                   </Typography>
                 </Paper>
               </Grid>
 
               {/* 3. Remaining */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4 }}>
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, sm: 2 },
                     textAlign: "center",
                     borderRadius: 2.5,
                     height: "100%",
@@ -316,6 +323,7 @@ export function QuizAssignmentDetailModal({
                     variant="subtitle1"
                     sx={{
                       fontWeight: 700,
+                      fontSize: { xs: "0.9rem", sm: "1rem" },
                       color: attemptsLeft > 0 ? "success.main" : "error.main",
                     }}
                   >
@@ -325,11 +333,11 @@ export function QuizAssignmentDetailModal({
               </Grid>
 
               {/* 4. Start Time */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4 }}>
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, sm: 2 },
                     textAlign: "center",
                     borderRadius: 2.5,
                     height: "100%",
@@ -353,7 +361,10 @@ export function QuizAssignmentDetailModal({
                   </Typography>
                   <Typography
                     variant="caption"
-                    sx={{ fontWeight: 700, fontSize: "0.825rem" }}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "0.75rem", sm: "0.825rem" },
+                    }}
                   >
                     {formatServerDate(assignment.startTime, "datetime")}
                   </Typography>
@@ -361,11 +372,11 @@ export function QuizAssignmentDetailModal({
               </Grid>
 
               {/* 5. End Time */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4 }}>
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, sm: 2 },
                     textAlign: "center",
                     borderRadius: 2.5,
                     height: "100%",
@@ -389,7 +400,10 @@ export function QuizAssignmentDetailModal({
                   </Typography>
                   <Typography
                     variant="caption"
-                    sx={{ fontWeight: 700, fontSize: "0.825rem" }}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "0.75rem", sm: "0.825rem" },
+                    }}
                   >
                     {assignment.endTime
                       ? formatServerDate(assignment.endTime, "datetime")
@@ -399,11 +413,11 @@ export function QuizAssignmentDetailModal({
               </Grid>
 
               {/* 6. Status */}
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Grid size={{ xs: 6, sm: 6, md: 4 }}>
                 <Paper
                   variant="outlined"
                   sx={{
-                    p: 2,
+                    p: { xs: 1.5, sm: 2 },
                     textAlign: "center",
                     borderRadius: 2.5,
                     height: "100%",
@@ -451,7 +465,7 @@ export function QuizAssignmentDetailModal({
             </Paper>
 
             {/* Attempt History Section */}
-            <Box sx={{ mt: 1 }}>
+            <Box sx={{ mt: 1, width: "100%" }}>
               <Box
                 sx={{
                   display: "flex",
@@ -481,91 +495,98 @@ export function QuizAssignmentDetailModal({
                   No previous submitted attempts found for this assignment.
                 </Typography>
               ) : (
-                <TableContainer
-                  component={Paper}
-                  variant="outlined"
-                  sx={{ borderRadius: 2 }}
-                >
-                  <Table size="small">
-                    <TableHead sx={{ bgcolor: "action.hover" }}>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 700 }}>Attempt</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>
-                          Submitted At
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }} align="center">
-                          Score
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 700 }} align="right">
-                          Action
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {submittedAttempts.map((attempt) => (
-                        <TableRow key={attempt.attemptId} hover>
-                          <TableCell sx={{ fontWeight: 600 }}>
-                            #{attempt.attemptNumber ?? "-"}
-                          </TableCell>
-                          <TableCell sx={{ fontSize: "0.825rem" }}>
-                            {attempt.submittedAt
-                              ? formatServerDate(
-                                  attempt.submittedAt,
-                                  "datetime",
-                                )
-                              : "Submitting..."}
-                          </TableCell>
-                          <TableCell>
-                            <QuizStatusChip status={attempt.status} />
-                          </TableCell>
-                          <TableCell align="center">
-                            {attempt.totalScore != null ? (
-                              <Chip
-                                label={`${attempt.totalScore} / ${attempt.maxScore}`}
-                                color="primary"
-                                variant="outlined"
-                                size="small"
-                                sx={{
-                                  fontWeight: 700,
-                                  height: 22,
-                                  fontSize: "0.75rem",
-                                }}
-                              />
-                            ) : (
-                              <Typography
-                                variant="caption"
-                                color="text.secondary"
-                              >
-                                Pending Grading
-                              </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell align="right">
-                            <Link
-                              href={`/courses/${courseId}/quizzes/attempts/${attempt.attemptId}/result`}
-                              passHref
-                            >
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                startIcon={<Eye size={14} />}
-                                sx={{
-                                  borderRadius: 1.5,
-                                  textTransform: "none",
-                                  py: 0.25,
-                                  fontSize: "0.775rem",
-                                }}
-                              >
-                                View Result
-                              </Button>
-                            </Link>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                (() => {
+                  const attemptColumns: ColumnDef<any>[] = [
+                    {
+                      header: "Attempt",
+                      width: "70px",
+                      render: (attempt: any) => (
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          #{attempt.attemptNumber ?? "-"}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      header: "Submitted At",
+                      width: "140px",
+                      render: (attempt: any) => (
+                        <Typography
+                          variant="body2"
+                          sx={{ fontSize: "0.825rem" }}
+                        >
+                          {attempt.submittedAt
+                            ? formatServerDate(attempt.submittedAt, "datetime")
+                            : "Submitting..."}
+                        </Typography>
+                      ),
+                    },
+                    {
+                      header: "Status",
+                      width: "120px",
+                      render: (attempt: any) => (
+                        <QuizStatusChip status={attempt.status} />
+                      ),
+                    },
+                    {
+                      header: "Score",
+                      width: "100px",
+                      align: "center",
+                      render: (attempt: any) =>
+                        attempt.totalScore != null ? (
+                          <Chip
+                            label={`${attempt.totalScore} / ${attempt.maxScore}`}
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                              fontWeight: 700,
+                              height: 22,
+                              fontSize: "0.75rem",
+                            }}
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            Pending Grading
+                          </Typography>
+                        ),
+                    },
+                    {
+                      header: "Action",
+                      width: "120px",
+                      align: "right",
+                      render: (attempt: any) => (
+                        <Link
+                          href={`/courses/${courseId}/quizzes/attempts/${attempt.attemptId}/result`}
+                          passHref
+                        >
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<Eye size={14} />}
+                            sx={{
+                              borderRadius: 1.5,
+                              textTransform: "none",
+                              py: 0.25,
+                              fontSize: "0.775rem",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            View Result
+                          </Button>
+                        </Link>
+                      ),
+                    },
+                  ];
+
+                  return (
+                    <DataTable
+                      columns={attemptColumns}
+                      data={submittedAttempts}
+                      keyExtractor={(item: any) => item.attemptId}
+                      minWidth={550}
+                    />
+                  );
+                })()
               )}
             </Box>
 
@@ -600,7 +621,12 @@ export function QuizAssignmentDetailModal({
                 }
                 disabled={!canAttempt}
                 onClick={() => setConfirmOpen(true)}
-                sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
+                sx={{
+                  borderRadius: 2,
+                  px: 3,
+                  fontWeight: 700,
+                  width: { xs: "100%", sm: "auto" },
+                }}
               >
                 {!canAttempt && attemptsCount >= maxAttempts
                   ? "No Attempts Remaining"
@@ -621,15 +647,24 @@ export function QuizAssignmentDetailModal({
         headerIcon={<ShieldAlert size={22} color="#0284c7" />}
         maxWidth="xs"
       >
-        <Box sx={{ textAlign: "center", py: 1 }}>
-          <Typography variant="body1" color="text.secondary">
+        <Box sx={{ textAlign: "center", py: { xs: 0.5, sm: 1 } }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ fontSize: { xs: "0.875rem", sm: "0.95rem" } }}
+          >
             Are you sure you want to start the quiz{" "}
             <b>"{assignment?.assignmentName || "Quiz Assignment"}"</b>?
           </Typography>
           <Alert
             severity="info"
             icon={<ShieldAlert size={18} />}
-            sx={{ mt: 2, borderRadius: 2, textAlign: "left" }}
+            sx={{
+              mt: 2,
+              borderRadius: 2,
+              textAlign: "left",
+              fontSize: { xs: "0.8rem", sm: "0.85rem" },
+            }}
           >
             Timer ({assignment?.durationMinutes} mins) will begin immediately
             upon confirmation.
@@ -637,8 +672,9 @@ export function QuizAssignmentDetailModal({
           <Box
             sx={{
               display: "flex",
+              flexDirection: { xs: "column-reverse", sm: "row" },
               justifyContent: "flex-end",
-              gap: 1.5,
+              gap: { xs: 1, sm: 1.5 },
               mt: 3,
             }}
           >
@@ -646,7 +682,11 @@ export function QuizAssignmentDetailModal({
               variant="outlined"
               onClick={() => setConfirmOpen(false)}
               disabled={startMutation.isPending}
-              sx={{ borderRadius: 2 }}
+              sx={{
+                borderRadius: 2,
+                width: { xs: "100%", sm: "auto" },
+                fontWeight: 600,
+              }}
             >
               Cancel
             </Button>
@@ -662,7 +702,12 @@ export function QuizAssignmentDetailModal({
                   <Play size={16} />
                 )
               }
-              sx={{ borderRadius: 2, px: 3, fontWeight: 700 }}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                fontWeight: 700,
+                width: { xs: "100%", sm: "auto" },
+              }}
             >
               {startMutation.isPending ? "Starting Quiz..." : "Yes, Start Quiz"}
             </Button>

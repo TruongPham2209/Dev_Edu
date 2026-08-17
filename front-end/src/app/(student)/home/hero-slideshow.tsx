@@ -43,8 +43,8 @@ export function HeroSlideshow({
         position: "relative",
         width: "100%",
         maxWidth: 600,
-        aspectRatio: "16/10",
-        borderRadius: 4,
+        aspectRatio: { xs: "16/11", sm: "16/10" },
+        borderRadius: { xs: 3, sm: 4 },
         overflow: "hidden",
         boxShadow:
           "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
@@ -79,36 +79,40 @@ export function HeroSlideshow({
         <>
           <IconButton
             onClick={prevSlide}
+            size="small"
             sx={{
               position: "absolute",
               top: "50%",
-              left: 8,
+              left: { xs: 6, sm: 12 },
               transform: "translateY(-50%)",
-              bgcolor: "rgba(255, 255, 255, 0.5)",
-              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.8)" },
+              bgcolor: "rgba(255, 255, 255, 0.65)",
+              p: { xs: 0.5, sm: 1 },
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.9)" },
               zIndex: 2,
             }}
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} />
           </IconButton>
           <IconButton
             onClick={nextSlide}
+            size="small"
             sx={{
               position: "absolute",
               top: "50%",
-              right: 8,
+              right: { xs: 6, sm: 12 },
               transform: "translateY(-50%)",
-              bgcolor: "rgba(255, 255, 255, 0.5)",
-              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.8)" },
+              bgcolor: "rgba(255, 255, 255, 0.65)",
+              p: { xs: 0.5, sm: 1 },
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.9)" },
               zIndex: 2,
             }}
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={20} />
           </IconButton>
           <Box
             sx={{
               position: "absolute",
-              bottom: 16,
+              bottom: { xs: 10, sm: 16 },
               left: "50%",
               transform: "translateX(-50%)",
               display: "flex",
@@ -121,17 +125,17 @@ export function HeroSlideshow({
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 sx={{
-                  width: 8,
-                  height: 8,
+                  width: { xs: 7, sm: 8 },
+                  height: { xs: 7, sm: 8 },
                   borderRadius: "50%",
                   bgcolor:
                     index === currentIndex
-                      ? "rgba(255, 255, 255, 0.9)"
-                      : "rgba(255, 255, 255, 0.4)",
+                      ? "rgba(255, 255, 255, 0.95)"
+                      : "rgba(255, 255, 255, 0.45)",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.9)",
+                    bgcolor: "rgba(255, 255, 255, 0.95)",
                   },
                 }}
               />

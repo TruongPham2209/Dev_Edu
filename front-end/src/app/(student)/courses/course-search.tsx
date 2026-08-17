@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchInput } from "@/components/common/form/search-input";
-import { Box, Chip, Typography } from "@mui/material";
+import { alpha, Box, Chip, Typography } from "@mui/material";
 import { Search, TrendingUp } from "lucide-react";
 
 interface CourseSearchProps {
@@ -16,8 +16,9 @@ export const CourseSearch = ({
   setDebouncedKeyword,
 }: CourseSearchProps) => {
   return (
-    <Box sx={{ mb: { xs: 6, md: 8 }, px: { xs: 0, sm: 2 } }}>
-      <Box sx={{ textAlign: "center", mb: 3 }}>
+    <>
+      {/* Title */}
+      <Box sx={{ textAlign: "center", mb: { xs: 2, sm: 3 }, px: { xs: 0, sm: 2 } }}>
         <Typography
           variant="h5"
           sx={{
@@ -26,18 +27,30 @@ export const CourseSearch = ({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 1.5,
+            gap: { xs: 1, sm: 1.5 },
+            fontSize: { xs: "1.2rem", sm: "1.5rem" },
+            lineHeight: 1.3,
           }}
         >
-          <Search size={28} color="#38bdf8" /> What do you want to learn today?
+          <Search size={24} color="#38bdf8" style={{ flexShrink: 0 }} /> What do
+          you want to learn today?
         </Typography>
       </Box>
 
+      {/* Sticky Search Input Wrapper - Direct Child of Page Stack */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          position: "relative",
+          position: "sticky",
+          top: { xs: 72, sm: 76 },
+          zIndex: 100,
+          py: 1,
+          px: { xs: 1, sm: 2 },
+          bgcolor: (theme) => alpha(theme.palette.background.default, 0.9),
+          backdropFilter: "blur(12px)",
+          borderRadius: 4,
+          boxShadow: "0 4px 20px -5px rgba(15, 23, 42, 0.05)",
+          transition: "all 0.3s ease",
+          mb: { xs: 2, sm: 2.5 },
         }}
       >
         <SearchInput
@@ -54,8 +67,10 @@ export const CourseSearch = ({
         sx={{
           display: "flex",
           justifyContent: "center",
-          gap: 1.5,
-          mt: 3,
+          alignItems: "center",
+          gap: { xs: 1, sm: 1.5 },
+          mb: { xs: 4, sm: 6, md: 8 },
+          px: { xs: 0, sm: 2 },
           flexWrap: "wrap",
         }}
       >
@@ -66,6 +81,7 @@ export const CourseSearch = ({
             display: "flex",
             alignItems: "center",
             fontWeight: 600,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
           }}
         >
           Trends:
@@ -89,6 +105,7 @@ export const CourseSearch = ({
               bgcolor: "#f1f5f9",
               color: "#475569",
               fontWeight: 600,
+              fontSize: { xs: "0.75rem", sm: "0.8125rem" },
               border: "1px solid transparent",
               "&:hover": {
                 bgcolor: "#e0f2fe",
@@ -101,6 +118,6 @@ export const CourseSearch = ({
           />
         ))}
       </Box>
-    </Box>
+    </>
   );
 };

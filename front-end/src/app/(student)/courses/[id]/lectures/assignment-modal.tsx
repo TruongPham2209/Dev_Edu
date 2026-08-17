@@ -171,10 +171,11 @@ export function AssignmentModal({
       slotProps={{
         paper: {
           sx: {
-            borderRadius: 1.5,
+            borderRadius: { xs: 2, sm: 1.5 },
             overflow: "hidden",
-            height: "80vh",
+            height: { xs: "90vh", sm: "80vh" },
             maxHeight: 700,
+            m: { xs: 1.5, sm: 2 },
             display: "flex",
             flexDirection: "column",
             boxShadow: theme.shadows[10],
@@ -195,14 +196,14 @@ export function AssignmentModal({
         <DialogTitle
           component="div"
           sx={{
-            p: 2,
+            p: { xs: 1.5, sm: 2 },
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             bgcolor: "background.default",
           }}
         >
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
             <Box
               sx={{
                 p: 0.75,
@@ -212,9 +213,18 @@ export function AssignmentModal({
                 display: "flex",
               }}
             >
-              <FileText size={20} />
+              <FileText size={18} />
             </Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                fontSize: { xs: "0.95rem", sm: "1.1rem" },
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
               {assignment.title}
             </Typography>
           </Stack>
@@ -224,8 +234,8 @@ export function AssignmentModal({
         </DialogTitle>
       </Box>
 
-      <DialogContent sx={{ p: 0, flex: 1, overflowY: "auto" }}>
-        <Box sx={{ p: 2.5 }}>
+      <DialogContent sx={{ p: 0, flex: 1, overflowY: "auto", display: "block" }}>
+        <Box sx={{ p: { xs: 1.5, sm: 2.5 } }}>
           <Stack spacing={4}>
             {/* Instructions Section */}
             <Box>

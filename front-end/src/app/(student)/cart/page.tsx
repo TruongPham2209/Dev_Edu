@@ -29,13 +29,20 @@ function CartPageContent() {
         width: "100%",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 2 }, mb: { xs: 2.5, sm: 4 } }}>
         <Box
-          sx={{ p: 1.5, bgcolor: "#e0f2fe", borderRadius: 2, display: "flex" }}
+          sx={{ p: { xs: 1.25, sm: 1.5 }, bgcolor: "#e0f2fe", borderRadius: 2, display: "flex", flexShrink: 0 }}
         >
-          <ShoppingCart size={28} color="#0284c7" />
+          <ShoppingCart size={24} color="#0284c7" />
         </Box>
-        <Typography variant="h4" sx={{ fontWeight: 800, color: "#0f172a" }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 800,
+            color: "#0f172a",
+            fontSize: { xs: "1.35rem", sm: "1.75rem", md: "2.125rem" },
+          }}
+        >
           Purchases & Cart
         </Typography>
       </Box>
@@ -44,12 +51,13 @@ function CartPageContent() {
         sx={{
           borderBottom: 1,
           borderColor: "divider",
-          mb: 5,
+          mb: { xs: 3, sm: 4, md: 5 },
           position: "sticky",
-          top: 70,
+          top: { xs: 56, sm: 64, md: 70 },
           zIndex: 10,
           bgcolor: "rgba(255,255,255,0.9)",
           backdropFilter: "blur(8px)",
+          overflowX: "auto",
         }}
       >
         <AnimatedTabs

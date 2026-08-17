@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  alpha,
   Box,
   Button,
   Chip,
@@ -28,12 +29,22 @@ export function ForumSearch({
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <Box sx={{ mb: { xs: 5, md: 6 }, px: { xs: 0, sm: 2 } }}>
+    <>
+      {/* Sticky Search Input Bar Only */}
       <Box
         sx={{
+          position: "sticky",
+          top: { xs: 72, sm: 76 },
+          zIndex: 100,
+          py: 1,
+          px: { xs: 1, sm: 2 },
+          bgcolor: (theme) => alpha(theme.palette.background.default, 0.9),
+          backdropFilter: "blur(12px)",
+          borderRadius: 4,
+          boxShadow: "0 4px 20px -5px rgba(15, 23, 42, 0.05)",
+          transition: "all 0.3s ease",
           display: "flex",
           justifyContent: "center",
-          position: "relative",
         }}
       >
         <TextField
@@ -48,9 +59,9 @@ export function ForumSearch({
               startAdornment: (
                 <InputAdornment position="start">
                   <Search
-                    size={24}
+                    size={20}
                     color={isFocused ? "#0284c7" : "#94a3b8"}
-                    style={{ transition: "color 0.3s", marginLeft: 8 }}
+                    style={{ transition: "color 0.3s", marginLeft: 4 }}
                   />
                 </InputAdornment>
               ),
@@ -66,6 +77,9 @@ export function ForumSearch({
                         borderRadius: 50,
                         textTransform: "none",
                         fontWeight: 700,
+                        px: { xs: 2, sm: 2.5 },
+                        py: { xs: 0.5, sm: 0.75 },
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         bgcolor: "#0ea5e9",
                         boxShadow: "none",
                         "&:hover": { bgcolor: "#0284c7", boxShadow: "none" },
@@ -84,8 +98,8 @@ export function ForumSearch({
               borderRadius: 50,
               backgroundColor: "#ffffff",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              fontSize: { xs: "1rem", md: "1.125rem" },
-              padding: "6px 8px 6px 16px",
+              fontSize: { xs: "0.875rem", sm: "1rem", md: "1.125rem" },
+              padding: { xs: "4px 6px 4px 10px", sm: "6px 8px 6px 16px" },
               boxShadow: isFocused
                 ? "0 15px 30px -10px rgba(14, 165, 233, 0.2)"
                 : "0 8px 20px -8px rgba(15, 23, 42, 0.08)",
@@ -108,13 +122,15 @@ export function ForumSearch({
         />
       </Box>
 
-      {/* Quick Suggestion Tags */}
+      {/* Static Popular Suggestion Tags (Scrolls Away) */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
-          gap: 1,
-          mt: 2.5,
+          alignItems: "center",
+          gap: { xs: 0.75, sm: 1 },
+          mt: { xs: 1.5, sm: 2 },
+          mb: { xs: 3, sm: 4, md: 5 },
           flexWrap: "wrap",
         }}
       >
@@ -125,7 +141,8 @@ export function ForumSearch({
             display: "flex",
             alignItems: "center",
             fontWeight: 600,
-            mr: 1,
+            mr: 0.5,
+            fontSize: { xs: "0.75rem", sm: "0.8rem" },
           }}
         >
           Popular:
@@ -140,12 +157,12 @@ export function ForumSearch({
               bgcolor: "#f1f5f9",
               color: "#475569",
               fontWeight: 600,
-              fontSize: "0.75rem",
+              fontSize: { xs: "0.725rem", sm: "0.75rem" },
               "&:hover": { bgcolor: "#e0f2fe", color: "#0369a1" },
             }}
           />
         ))}
       </Box>
-    </Box>
+    </>
   );
 }

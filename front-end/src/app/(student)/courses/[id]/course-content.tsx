@@ -25,25 +25,40 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
-          mb: 2,
+          gap: { xs: 1.25, sm: 2 },
+          mb: { xs: 2, sm: 3 },
         }}
       >
         <Box
           sx={{
-            p: 1.5,
+            p: { xs: 1.25, sm: 1.5 },
             bgcolor: "#eff6ff",
             borderRadius: 3,
             color: "#2563eb",
+            display: "flex",
+            flexShrink: 0,
           }}
         >
-          <BookOpen size={28} />
+          <BookOpen size={24} />
         </Box>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: "#0f172a" }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              color: "#0f172a",
+              fontSize: { xs: "1.2rem", sm: "1.5rem" },
+            }}
+          >
             Course Content
           </Typography>
-          <Typography sx={{ color: "#64748b", mt: 0.5 }}>
+          <Typography
+            sx={{
+              color: "#64748b",
+              mt: 0.5,
+              fontSize: { xs: "0.85rem", sm: "0.95rem" },
+            }}
+          >
             Detailed learning roadmap designed systematically
           </Typography>
         </Box>
@@ -52,7 +67,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 1,
+          borderRadius: { xs: 2, sm: 3 },
           border: "1px solid #e2e8f0",
           overflow: "hidden",
           boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
@@ -62,8 +77,8 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
           <Box
             sx={{
               bgcolor: "#f8fafc",
-              px: 3,
-              py: 2.5,
+              px: { xs: 2, sm: 3 },
+              py: { xs: 1.75, sm: 2.5 },
               borderBottom: "1px solid #e2e8f0",
               display: "flex",
               justifyContent: "space-between",
@@ -74,7 +89,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
               sx={{
                 fontWeight: 800,
                 color: "#1e293b",
-                fontSize: "1.125rem",
+                fontSize: { xs: "0.95rem", sm: "1.125rem" },
               }}
             >
               Total {lectures.length} lectures
@@ -89,7 +104,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "column",
-              height: 300,
+              height: 260,
               borderRadius: 1,
               bgcolor: "#e2e8f0",
             }}
@@ -120,81 +135,113 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
                 }}
               >
                 <AccordionSummary
-                  expandIcon={<ChevronDown size={20} color="#64748b" />}
+                  expandIcon={<ChevronDown size={18} color="#64748b" />}
                   sx={{
-                    px: 3,
-                    py: 1.5,
-                    "& .MuiAccordionSummary-content": { my: 0 },
+                    px: { xs: 1.5, sm: 2.5, md: 3 },
+                    py: { xs: 1.25, sm: 1.75 },
+                    "& .MuiAccordionSummary-content": {
+                      my: 0,
+                      width: "100%",
+                      overflow: "hidden",
+                    },
                   }}
                 >
                   <Box
                     sx={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: 2.5,
+                      alignItems: { xs: "flex-start", sm: "center" },
+                      gap: { xs: 1.25, sm: 2 },
                       width: "100%",
+                      pr: { xs: 0.5, sm: 1 },
                     }}
                   >
                     <Box
                       sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        bgcolor: "#e0e7ff",
-                        color: "#4f46e5",
+                        width: { xs: 30, sm: 34 },
+                        height: { xs: 30, sm: 34 },
+                        borderRadius: "10px",
+                        bgcolor: "#eff6ff",
+                        color: "#2563eb",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontWeight: 700,
-                        fontSize: "0.875rem",
+                        fontWeight: 800,
+                        fontSize: { xs: "0.8rem", sm: "0.875rem" },
                         flexShrink: 0,
+                        mt: { xs: 0.25, sm: 0 },
                       }}
                     >
                       {index + 1}
                     </Box>
-                    <Typography
-                      sx={{
-                        fontWeight: 600,
-                        color: "#1e293b",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      {lecture.title}
-                    </Typography>
+
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          color: "#0f172a",
+                          fontSize: { xs: "0.875rem", sm: "0.975rem" },
+                          lineHeight: 1.5,
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {lecture.title}
+                      </Typography>
+                    </Box>
+
                     <Box
                       sx={{
-                        ml: "auto",
                         display: "flex",
                         alignItems: "center",
-                        gap: 1,
+                        gap: 0.5,
+                        bgcolor: "#f1f5f9",
                         color: "#64748b",
-                        fontSize: "0.875rem",
-                        mr: 1,
+                        px: { xs: 1, sm: 1.25 },
+                        py: 0.5,
+                        borderRadius: "16px",
+                        fontSize: { xs: "0.725rem", sm: "0.8rem" },
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        flexShrink: 0,
                       }}
                     >
                       {lecture.duration > 0 ? (
                         <>
-                          <PlayCircle size={16} />
+                          <PlayCircle size={14} color="#0ea5e9" />
                           {Math.floor(lecture.duration / 60)}:
                           {String(lecture.duration % 60).padStart(2, "0")}
                         </>
                       ) : (
                         <>
-                          <FileText size={16} />
+                          <FileText size={14} color="#6366f1" />
                           Document
                         </>
                       )}
                     </Box>
                   </Box>
                 </AccordionSummary>
-                <AccordionDetails sx={{ px: 3, pb: 4, pt: 0 }}>
-                  <Box sx={{ pl: 7 }}>
+                <AccordionDetails
+                  sx={{
+                    px: { xs: 1.5, sm: 2.5, md: 3 },
+                    pb: { xs: 2, sm: 3 },
+                    pt: 0,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      ml: { xs: 0, sm: 5.25 },
+                      p: { xs: 1.5, sm: 2 },
+                      borderRadius: "10px",
+                      bgcolor: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderLeft: "3px solid #6366f1",
+                    }}
+                  >
                     <Typography
                       variant="body2"
                       sx={{
-                        color: "#64748b",
+                        color: "#475569",
                         lineHeight: 1.7,
-                        fontSize: "0.95rem",
+                        fontSize: { xs: "0.825rem", sm: "0.9rem" },
                       }}
                     >
                       {lecture.summary ||

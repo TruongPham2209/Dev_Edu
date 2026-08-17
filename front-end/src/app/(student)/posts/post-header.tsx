@@ -69,8 +69,8 @@ export function PostHeader({ post }: PostHeaderProps) {
   };
 
   return (
-    <Box sx={{ mb: 4 }}>
-      <Stack spacing={3}>
+    <Box sx={{ mb: { xs: 2.5, sm: 4 } }}>
+      <Stack spacing={{ xs: 2, sm: 3 }}>
         <Box
           sx={{
             display: "flex",
@@ -78,49 +78,56 @@ export function PostHeader({ post }: PostHeaderProps) {
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: 2,
+            gap: 1.5,
           }}
         >
-          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
             <Avatar
               src={post.authorAvatarUrl || undefined}
-              sx={{ width: 48, height: 48, bgcolor: "primary.main" }}
+              sx={{ width: { xs: 40, sm: 48 }, height: { xs: 40, sm: 48 }, bgcolor: "primary.main" }}
             >
               {post.authorFullName?.[0]?.toUpperCase() ||
                 post.authorUsername?.[0]?.toUpperCase() ||
                 "U"}
             </Avatar>
             <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: { xs: "0.95rem", sm: "1.05rem" } }}>
                 {post.authorFullName || post.authorUsername}
               </Typography>
-              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                <Typography variant="body2" color="text.secondary">
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={{ xs: 0.5, sm: 2 }}
+                sx={{ alignItems: { xs: "flex-start", sm: "center" }, flexWrap: "wrap" }}
+              >
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: "0.775rem", sm: "0.875rem" } }}>
                   {formatServerDate(post.createdAt, "datetime")}
                 </Typography>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    color: "text.secondary",
-                  }}
-                >
-                  <Eye size={16} />
-                  <Typography variant="caption">{post.views || 0}</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    color: "text.secondary",
-                  }}
-                >
-                  <MessageSquare size={16} />
-                  <Typography variant="caption">
-                    {post.comments || 0}
-                  </Typography>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      color: "text.secondary",
+                    }}
+                  >
+                    <Eye size={15} />
+                    <Typography variant="caption" sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem" } }}>{post.views || 0}</Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      color: "text.secondary",
+                    }}
+                  >
+                    <MessageSquare size={15} />
+                    <Typography variant="caption" sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem" } }}>
+                      {post.comments || 0}
+                    </Typography>
+                  </Box>
                 </Box>
               </Stack>
             </Box>
@@ -130,25 +137,29 @@ export function PostHeader({ post }: PostHeaderProps) {
             <Tooltip title="History">
               <IconButton
                 onClick={() => setIsHistoryModalOpen(true)}
+                size="small"
                 sx={{
                   bgcolor: "background.paper",
                   boxShadow: 1,
+                  p: { xs: 0.8, sm: 1 },
                   "&:hover": { bgcolor: "action.hover" },
                 }}
               >
-                <History size={20} />
+                <History size={18} />
               </IconButton>
             </Tooltip>
             <Tooltip title={isSaved ? "Unsave" : "Save"}>
               <IconButton
                 onClick={handleToggleSave}
                 disabled={isSaving}
+                size="small"
                 sx={(theme) => ({
                   bgcolor: isSaved
                     ? alpha(theme.palette.primary.main, 0.1)
                     : "background.paper",
                   color: isSaved ? "primary.main" : "text.secondary",
                   boxShadow: 1,
+                  p: { xs: 0.8, sm: 1 },
                   "&:hover": {
                     bgcolor: isSaved
                       ? alpha(theme.palette.primary.main, 0.2)
@@ -158,7 +169,7 @@ export function PostHeader({ post }: PostHeaderProps) {
                   transform: isSaving ? "scale(0.9)" : "scale(1)",
                 })}
               >
-                {isSaved ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+                {isSaved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
               </IconButton>
             </Tooltip>
           </Stack>
@@ -171,9 +182,10 @@ export function PostHeader({ post }: PostHeaderProps) {
             gutterBottom
             sx={{
               fontWeight: 800,
-              fontSize: { xs: "2rem", md: "2.5rem" },
-              lineHeight: 1.2,
-              mb: post.thumbUrl ? 3 : 0,
+              fontSize: { xs: "1.35rem", sm: "1.85rem", md: "2.5rem" },
+              lineHeight: 1.25,
+              mb: post.thumbUrl ? { xs: 2, sm: 3 } : 0,
+              wordBreak: "break-word",
             }}
           >
             {post.title}
@@ -182,8 +194,8 @@ export function PostHeader({ post }: PostHeaderProps) {
             <Box
               sx={{
                 width: "100%",
-                maxHeight: 450,
-                borderRadius: 1,
+                maxHeight: { xs: 240, sm: 360, md: 450 },
+                borderRadius: { xs: 1.5, sm: 2 },
                 overflow: "hidden",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
               }}

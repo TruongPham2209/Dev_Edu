@@ -169,8 +169,8 @@ export function SearchInput({
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={handleSearch}
                     sx={{
-                      width: 42,
-                      height: 42,
+                      width: { xs: 36, sm: 42 },
+                      height: { xs: 36, sm: 42 },
                       borderRadius: "14px",
 
                       background:
@@ -201,9 +201,9 @@ export function SearchInput({
         }}
         sx={{
           "& .MuiOutlinedInput-root": {
-            minHeight: 56,
+            minHeight: { xs: 48, sm: 56 },
 
-            px: 1.2,
+            px: { xs: 1, sm: 1.2 },
 
             borderRadius: "999px",
 
@@ -229,7 +229,7 @@ export function SearchInput({
 
             "& input": {
               py: 0,
-              fontSize: "0.98rem",
+              fontSize: { xs: "0.875rem", sm: "0.98rem" },
               fontWeight: 500,
               color: "#0f172a",
             },

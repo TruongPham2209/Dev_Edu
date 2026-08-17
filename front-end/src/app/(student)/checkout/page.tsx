@@ -193,19 +193,19 @@ function CheckoutContent() {
 
   return (
     <Fade in={!loading} timeout={800}>
-      <Box sx={{ pb: { xs: 24, md: 1 }, pt: { xs: 2, md: 0 } }}>
+      <Box sx={{ pb: { xs: 22, sm: 24, md: 2 }, pt: { xs: 1, md: 0 } }}>
         <CheckoutHeader onBack={handleBackToCart} disabled={isProcessing} />
 
-        <Grid container spacing={{ xs: 4, md: 6 }}>
+        <Grid container spacing={{ xs: 3, md: 5, lg: 6 }}>
           {/* Left Column: Items and Payment Methods */}
           <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-            <Stack spacing={5}>
+            <Stack spacing={{ xs: 3.5, sm: 5 }}>
               {/* Items Section */}
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 800, mb: 3 }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, mb: { xs: 2, sm: 3 }, fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                   Order Details
                 </Typography>
-                <Stack spacing={3}>
+                <Stack spacing={{ xs: 1.5, sm: 2.5 }}>
                   {data.items?.map((item) => (
                     <CourseCard key={item.id} course={item} />
                   ))}
@@ -214,18 +214,18 @@ function CheckoutContent() {
 
               {/* Payment Methods Section */}
               <Box>
-                <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
+                <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5, fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                   Payment Method
                 </Typography>
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ mb: 3, fontWeight: 500 }}
+                  sx={{ mb: { xs: 2, sm: 3 }, fontWeight: 500, fontSize: { xs: "0.825rem", sm: "0.875rem" } }}
                 >
                   All transactions are secure and encrypted.
                 </Typography>
 
-                <Stack spacing={2}>
+                <Stack spacing={{ xs: 1.5, sm: 2 }}>
                   <PaymentMethodCard
                     method="VNPAY"
                     name="VNPAY"
@@ -300,7 +300,7 @@ function CheckoutContent() {
 
 export default function CheckoutPage() {
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 0, md: 2 } }}>
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
       <Suspense fallback={<CheckoutSkeletons />}>
         <CheckoutContent />
       </Suspense>

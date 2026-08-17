@@ -72,8 +72,8 @@ export function PostVersionList({
           >
             <Box
               sx={{
-                p: 2.5,
-                pl: 3,
+                p: { xs: 1.75, sm: 2.5 },
+                pl: { xs: 2.25, sm: 3 },
               }}
             >
               {/* HEADER */}
@@ -81,31 +81,59 @@ export function PostVersionList({
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  gap: 2,
-                  mb: 2,
+                  alignItems: { xs: "flex-start", sm: "center" },
+                  gap: { xs: 1, sm: 2 },
+                  mb: 1.5,
                 }}
               >
                 {/* LEFT */}
-                <Stack spacing={1}>
+                <Stack spacing={0.75} sx={{ minWidth: 0, flex: 1 }}>
                   <Stack
-                    direction="row"
-                    spacing={1.25}
-                    sx={{ alignItems: "center" }}
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={{ xs: 0.75, sm: 1.25 }}
+                    sx={{ alignItems: { xs: "flex-start", sm: "center" }, flexWrap: "wrap" }}
                   >
                     <Box
                       sx={{
-                        px: 1.4,
-                        py: 0.5,
-                        borderRadius: 2,
-                        bgcolor: "primary.main",
-                        color: "primary.contrastText",
-                        fontWeight: 700,
-                        fontSize: 13,
-                        letterSpacing: 0.3,
-                        boxShadow: "0 4px 12px rgba(25,118,210,0.25)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        flexWrap: "wrap",
                       }}
                     >
-                      v{versionNumber}
+                      <Box
+                        sx={{
+                          px: 1.2,
+                          py: 0.4,
+                          borderRadius: 2,
+                          bgcolor: "primary.main",
+                          color: "primary.contrastText",
+                          fontWeight: 700,
+                          fontSize: 12,
+                          letterSpacing: 0.3,
+                          boxShadow: "0 4px 12px rgba(25,118,210,0.25)",
+                          flexShrink: 0,
+                        }}
+                      >
+                        v{versionNumber}
+                      </Box>
+
+                      {mode === "manage" && version.status && (
+                        <Chip
+                          label={version.status}
+                          size="small"
+                          color={getStatusColor(version.status) as any}
+                          sx={{
+                            fontWeight: 700,
+                            borderRadius: 2,
+                            height: 24,
+                            fontSize: "0.75rem",
+                            "& .MuiChip-label": {
+                              px: 1,
+                            },
+                          }}
+                        />
+                      )}
                     </Box>
 
                     <Typography
@@ -114,26 +142,13 @@ export function PostVersionList({
                         fontWeight: 700,
                         color: "text.primary",
                         letterSpacing: -0.2,
+                        fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                        lineHeight: 1.3,
+                        wordBreak: "break-word",
                       }}
                     >
                       {version.title || `Post Version ${versionNumber}`}
                     </Typography>
-
-                    {mode === "manage" && version.status && (
-                      <Chip
-                        label={version.status}
-                        size="small"
-                        color={getStatusColor(version.status) as any}
-                        sx={{
-                          fontWeight: 700,
-                          borderRadius: 2,
-                          height: 26,
-                          "& .MuiChip-label": {
-                            px: 1.2,
-                          },
-                        }}
-                      />
-                    )}
                   </Stack>
 
                   <Stack
@@ -146,6 +161,7 @@ export function PostVersionList({
                       sx={{
                         color: "text.secondary",
                         fontWeight: 500,
+                        fontSize: { xs: "0.75rem", sm: "0.8rem" },
                       }}
                     >
                       {formatServerDate(version.createdAt || version.updatedAt)}
@@ -156,12 +172,13 @@ export function PostVersionList({
                 {/* ACTIONS */}
                 <Stack
                   direction="row"
-                  spacing={1}
+                  spacing={0.5}
                   className="version-actions"
                   sx={{
-                    opacity: 0,
-                    transform: "translateX(8px)",
+                    opacity: { xs: 1, md: 0 },
+                    transform: { xs: "none", md: "translateX(8px)" },
                     transition: "all .25s ease",
+                    flexShrink: 0,
                   }}
                 >
                   <ButtonAction

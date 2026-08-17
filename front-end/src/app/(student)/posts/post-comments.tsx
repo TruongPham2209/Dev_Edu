@@ -110,17 +110,17 @@ export function PostComments({
 
   return (
     <Box
-      sx={{ mt: 6, pt: 4, borderTop: 1, borderColor: "divider" }}
+      sx={{ mt: { xs: 4, sm: 6 }, pt: { xs: 3, sm: 4 }, borderTop: 1, borderColor: "divider" }}
       id="comments"
     >
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 3 }}>
-        <MessageSquare size={24} />
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: { xs: 2, sm: 3 } }}>
+        <MessageSquare size={22} />
+        <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: "1.15rem", sm: "1.5rem" } }}>
           {title || "Comments"}
         </Typography>
       </Stack>
 
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: { xs: 3, sm: 4 } }}>
         <CommentInput
           placeholder={
             isAuthenticated

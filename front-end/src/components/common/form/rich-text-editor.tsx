@@ -2,12 +2,14 @@
 
 import { getPreSignedUploadUrl } from "@/lib/api/files";
 import {
+  alpha,
   Box,
   CircularProgress,
   IconButton,
   Paper,
   Stack,
   Tooltip,
+  useTheme,
 } from "@mui/material";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -34,6 +36,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   minHeight?: number;
   disableImage?: boolean;
+  error?: boolean;
 }
 
 const extensions = [
@@ -54,14 +57,19 @@ export const RichTextEditor = ({
   onImageUpload,
   minHeight = 200,
   disableImage = false,
+  error = false,
 }: RichTextEditorProps) => {
+  const theme = useTheme();
   const [uploading, setUploading] = useState(false);
+  const [focused, setFocused] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
     extensions,
     content: value,
     immediatelyRender: false,
+    onFocus: () => setFocused(true),
+    onBlur: () => setFocused(false),
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -118,36 +126,47 @@ export const RichTextEditor = ({
 
   // Generate uniform styling for premium active and inactive states
   const getButtonSx = (active: boolean) => ({
-    borderRadius: 1.5,
-    p: 1,
+    borderRadius: "8px",
+    p: { xs: 0.6, sm: 0.8 },
     transition: "all 0.15s ease-in-out",
-    bgcolor: active ? "rgba(37, 99, 235, 0.08)" : "transparent",
-    color: active ? "primary.main" : "text.secondary",
+    bgcolor: active ? alpha(theme.palette.primary.main, 0.12) : "transparent",
+    color: active ? theme.palette.primary.main : theme.palette.text.secondary,
     border: "1px solid",
-    borderColor: active ? "rgba(37, 99, 235, 0.2)" : "transparent",
+    borderColor: active
+      ? alpha(theme.palette.primary.main, 0.25)
+      : "transparent",
     "&:hover": {
-      bgcolor: active ? "rgba(37, 99, 235, 0.12)" : "action.hover",
-      color: active ? "primary.dark" : "text.primary",
+      bgcolor: active
+        ? alpha(theme.palette.primary.main, 0.18)
+        : alpha(theme.palette.text.primary, 0.06),
+      color: active ? theme.palette.primary.dark : theme.palette.text.primary,
     },
   });
 
   return (
-    <Paper
-      variant="outlined"
+    <Box
       sx={{
+        width: "100%",
         overflow: "hidden",
-        borderRadius: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.02)",
+        borderRadius: "12px",
+        bgcolor: "#ffffff",
+        border: `1.5px solid ${
+          error ? "#ef4444" : focused ? "#6366f1" : "#e2e8f0"
+        }`,
+        boxShadow: focused
+          ? "0 0 0 4px rgba(99,102,241,0.12)"
+          : "0 1px 3px rgba(0,0,0,0.02)",
+        transition: "all 0.2s ease",
+        "&:hover": {
+          borderColor: error ? "#ef4444" : focused ? "#6366f1" : "#cbd5e1",
+        },
       }}
     >
       <Box
         sx={{
-          borderBottom: 1,
-          borderColor: "divider",
-          p: 1,
-          bgcolor: "grey.50",
+          borderBottom: "1px solid #e2e8f0",
+          p: { xs: 0.75, sm: 1 },
+          bgcolor: "#f8fafc",
         }}
       >
         <Stack
@@ -161,7 +180,7 @@ export const RichTextEditor = ({
               onClick={() => editor.chain().focus().toggleBold().run()}
               sx={getButtonSx(editor.isActive("bold"))}
             >
-              <Bold size={18} />
+              <Bold size={16} />
             </IconButton>
           </Tooltip>
 
@@ -171,11 +190,11 @@ export const RichTextEditor = ({
               onClick={() => editor.chain().focus().toggleItalic().run()}
               sx={getButtonSx(editor.isActive("italic"))}
             >
-              <Italic size={18} />
+              <Italic size={16} />
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ width: "1px", height: 20, bgcolor: "divider", mx: 0.5 }} />
+          <Box sx={{ width: "1px", height: 16, bgcolor: "#cbd5e1", mx: 0.5 }} />
 
           <Tooltip title="Heading 1" arrow placement="top">
             <IconButton
@@ -185,7 +204,7 @@ export const RichTextEditor = ({
               }
               sx={getButtonSx(editor.isActive("heading", { level: 1 }))}
             >
-              <Heading1 size={18} />
+              <Heading1 size={16} />
             </IconButton>
           </Tooltip>
 
@@ -197,11 +216,11 @@ export const RichTextEditor = ({
               }
               sx={getButtonSx(editor.isActive("heading", { level: 2 }))}
             >
-              <Heading2 size={18} />
+              <Heading2 size={16} />
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ width: "1px", height: 20, bgcolor: "divider", mx: 0.5 }} />
+          <Box sx={{ width: "1px", height: 16, bgcolor: "#cbd5e1", mx: 0.5 }} />
 
           <Tooltip title="Bullet List" arrow placement="top">
             <IconButton
@@ -209,7 +228,7 @@ export const RichTextEditor = ({
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               sx={getButtonSx(editor.isActive("bulletList"))}
             >
-              <List size={18} />
+              <List size={16} />
             </IconButton>
           </Tooltip>
 
@@ -219,7 +238,7 @@ export const RichTextEditor = ({
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
               sx={getButtonSx(editor.isActive("orderedList"))}
             >
-              <ListOrdered size={18} />
+              <ListOrdered size={16} />
             </IconButton>
           </Tooltip>
 
@@ -229,7 +248,7 @@ export const RichTextEditor = ({
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
               sx={getButtonSx(editor.isActive("blockquote"))}
             >
-              <Quote size={18} />
+              <Quote size={16} />
             </IconButton>
           </Tooltip>
 
@@ -239,11 +258,11 @@ export const RichTextEditor = ({
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               sx={getButtonSx(editor.isActive("codeBlock"))}
             >
-              <Code size={18} />
+              <Code size={16} />
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ width: "1px", height: 20, bgcolor: "divider", mx: 0.5 }} />
+          <Box sx={{ width: "1px", height: 16, bgcolor: "#cbd5e1", mx: 0.5 }} />
 
           <Tooltip title="Insert Link" arrow placement="top">
             <IconButton
@@ -256,7 +275,7 @@ export const RichTextEditor = ({
               }}
               sx={getButtonSx(editor.isActive("link"))}
             >
-              <LinkIcon size={18} />
+              <LinkIcon size={16} />
             </IconButton>
           </Tooltip>
 
@@ -269,9 +288,9 @@ export const RichTextEditor = ({
                 sx={getButtonSx(false)}
               >
                 {uploading ? (
-                  <CircularProgress size={18} color="inherit" />
+                  <CircularProgress size={16} color="inherit" />
                 ) : (
-                  <ImageIcon size={18} />
+                  <ImageIcon size={16} />
                 )}
               </IconButton>
             </Tooltip>
@@ -289,73 +308,75 @@ export const RichTextEditor = ({
       )}
       <Box
         sx={{
-          p: 3,
+          p: { xs: 1.5, sm: 2 },
+          bgcolor: "#ffffff",
           "& .ProseMirror": {
-            minHeight,
+            minHeight: { xs: Math.min(120, minHeight), sm: minHeight },
             outline: "none",
-            fontSize: "1rem",
+            fontSize: { xs: "0.875rem", sm: "0.95rem" },
             lineHeight: 1.7,
             fontFamily:
               '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            color: "text.primary",
-            "& p": { margin: "0 0 1em 0" },
+            color: "#0f172a",
+            "& p": { margin: "0 0 0.75em 0" },
             "& h1, & h2, & h3": {
-              marginTop: "1.6em",
-              marginBottom: "0.8em",
+              marginTop: "1.2em",
+              marginBottom: "0.6em",
               fontWeight: 700,
-              color: "text.primary",
+              color: "#0f172a",
               letterSpacing: "-0.01em",
             },
-            "& h1": { fontSize: "1.8rem" },
-            "& h2": { fontSize: "1.4rem" },
-            "& ul": { paddingLeft: "1.8em", listStyleType: "disc", mb: "1em" },
-            "& ol": {
-              paddingLeft: "1.8em",
-              listStyleType: "decimal",
-              mb: "1em",
+            "& h1": { fontSize: "1.6rem" },
+            "& h2": { fontSize: "1.3rem" },
+            "& ul": {
+              paddingLeft: "1.5em",
+              listStyleType: "disc",
+              mb: "0.75em",
             },
-            "& li": { mb: "0.4em" },
+            "& ol": {
+              paddingLeft: "1.5em",
+              listStyleType: "decimal",
+              mb: "0.75em",
+            },
+            "& li": { mb: "0.3em" },
             "& blockquote": {
-              borderLeft: "4px solid",
-              borderColor: "primary.main",
-              pl: 3,
-              py: 1,
+              borderLeft: "4px solid #6366f1",
+              pl: 2.5,
+              py: 0.75,
               ml: 0,
-              my: "1.5em",
-              bgcolor: "rgba(37, 99, 235, 0.02)",
-              color: "text.secondary",
+              my: "1em",
+              bgcolor: "rgba(99, 102, 241, 0.04)",
+              color: "#475569",
               fontStyle: "italic",
-              borderRadius: "0 8px 8px 0",
+              borderRadius: "0 6px 6px 0",
             },
             "& pre": {
               background: "#0f172a",
               color: "#f8fafc",
               p: 2,
-              borderRadius: 2,
+              borderRadius: 1.5,
               overflowX: "auto",
               fontFamily: '"Fira Code", "JetBrains Mono", monospace',
-              fontSize: "0.9rem",
-              border: "1px solid",
-              borderColor: "grey.800",
-              my: "1.5em",
+              fontSize: "0.85rem",
+              border: "1px solid #1e293b",
+              my: "1em",
             },
             "& code": {
               fontFamily: '"Fira Code", "JetBrains Mono", monospace',
               background: "rgba(225, 29, 72, 0.06)",
               color: "#e11d48",
-              px: 1,
-              py: 0.3,
+              px: 0.75,
+              py: 0.2,
               borderRadius: 1,
               fontSize: "0.85em",
             },
             "& img": {
               maxWidth: "100%",
               height: "auto",
-              borderRadius: 2,
-              my: 3,
-              boxShadow: "0 12px 32px rgba(0,0,0,0.06)",
-              border: "1px solid",
-              borderColor: "divider",
+              borderRadius: 1.5,
+              my: 2,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+              border: "1px solid #e2e8f0",
               transition: "transform 0.2s ease-in-out",
               "&:hover": {
                 transform: "scale(1.005)",
@@ -366,6 +387,6 @@ export const RichTextEditor = ({
       >
         <EditorContent editor={editor} />
       </Box>
-    </Paper>
+    </Box>
   );
 };

@@ -36,8 +36,8 @@ export function PaymentMethodCard({
         position: "relative",
         border: "2px solid",
         borderColor: selected ? "primary.main" : "divider",
-        borderRadius: 1,
-        p: 2.5,
+        borderRadius: { xs: 2, sm: 2.5 },
+        p: { xs: 1.5, sm: 2.5 },
         bgcolor: selected
           ? alpha(theme.palette.primary.main, 0.04)
           : disabled
@@ -56,19 +56,19 @@ export function PaymentMethodCard({
         display: "flex",
         alignItems: "center",
         width: "100%",
-        gap: 2,
+        gap: { xs: 1.5, sm: 2 },
       }}
     >
       {/* Logo */}
       <Box
         sx={{
-          width: 80,
-          height: 64,
+          width: { xs: 56, sm: 80 },
+          height: { xs: 46, sm: 64 },
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 0.5,
+          borderRadius: 1,
           bgcolor: "background.default",
           border: "1px solid",
           borderColor: "divider",
@@ -81,8 +81,8 @@ export function PaymentMethodCard({
             src={logoUrl}
             alt={name}
             sx={{
-              width: 48,
-              height: 48,
+              width: { xs: 34, sm: 48 },
+              height: { xs: 34, sm: 48 },
               objectFit: "contain",
               filter: disabled ? "grayscale(100%)" : "none",
               opacity: disabled ? 0.5 : 1,
@@ -106,6 +106,7 @@ export function PaymentMethodCard({
             variant="subtitle1"
             sx={{
               fontWeight: 800,
+              fontSize: { xs: "0.9rem", sm: "1.05rem" },
               color: disabled ? "text.disabled" : "text.primary",
             }}
           >
@@ -118,8 +119,8 @@ export function PaymentMethodCard({
               label="Recommended"
               color="error"
               sx={{
-                height: 22,
-                fontSize: "0.75rem",
+                height: 20,
+                fontSize: "0.7rem",
                 fontWeight: 700,
               }}
             />
@@ -130,8 +131,8 @@ export function PaymentMethodCard({
               size="small"
               label="Coming Soon"
               sx={{
-                height: 22,
-                fontSize: "0.75rem",
+                height: 20,
+                fontSize: "0.7rem",
                 fontWeight: 700,
               }}
             />
@@ -141,6 +142,7 @@ export function PaymentMethodCard({
         <Typography
           variant="body2"
           color={disabled ? "text.disabled" : "text.secondary"}
+          sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" }, lineHeight: 1.4 }}
         >
           {description}
         </Typography>
@@ -149,8 +151,8 @@ export function PaymentMethodCard({
       {/* Radio */}
       <Box
         sx={{
-          width: 24,
-          height: 24,
+          width: { xs: 20, sm: 24 },
+          height: { xs: 20, sm: 24 },
           borderRadius: "50%",
           border: "2px solid",
           borderColor: selected ? "primary.main" : "text.disabled",
@@ -164,8 +166,8 @@ export function PaymentMethodCard({
         {selected && (
           <Box
             sx={{
-              width: 12,
-              height: 12,
+              width: { xs: 10, sm: 12 },
+              height: { xs: 10, sm: 12 },
               borderRadius: "50%",
               bgcolor: "primary.main",
             }}

@@ -447,7 +447,7 @@ export function QuestionResultCard({
         headerIcon={<HelpCircle size={20} color="#2563eb" />}
         maxWidth="md"
       >
-        <Box sx={{ p: 1 }}>
+        <Box sx={{ p: { xs: 0, sm: 1 } }}>
           {/* Header Badges & Points */}
           <Box
             sx={{
@@ -463,7 +463,8 @@ export function QuestionResultCard({
               <Chip
                 label={`Q${idx + 1}`}
                 color="primary"
-                sx={{ fontWeight: 800 }}
+                size="small"
+                sx={{ fontWeight: 800, height: 22 }}
               />
               <Chip
                 label={
@@ -617,32 +618,33 @@ export function QuestionResultCard({
                           <CheckCircle2
                             size={20}
                             color="#16a34a"
-                            style={{ flexShrink: 0 }}
+                            style={{ flexShrink: 0, marginTop: 2 }}
                           />
                         )}
                         {isUserSelected && !isCorrectOption && (
                           <XCircle
-                            size={20}
+                            size={16}
                             color="#dc2626"
-                            style={{ flexShrink: 0 }}
+                            style={{ flexShrink: 0, marginTop: 2 }}
                           />
                         )}
                         {!isUserSelected && isCorrectOption && (
                           <Check
-                            size={20}
+                            size={16}
                             color="#16a34a"
-                            style={{ flexShrink: 0 }}
+                            style={{ flexShrink: 0, marginTop: 2 }}
                           />
                         )}
                         {!isUserSelected && !isCorrectOption && (
                           <Box
                             sx={{
-                              width: 18,
-                              height: 18,
+                              width: 14,
+                              height: 14,
                               borderRadius: "50%",
                               border: "1px solid",
                               borderColor: "divider",
                               flexShrink: 0,
+                              mt: 0.25,
                             }}
                           />
                         )}
@@ -652,19 +654,32 @@ export function QuestionResultCard({
                             fontWeight:
                               isCorrectOption || isUserSelected ? 700 : 500,
                             color: textColor,
+                            fontSize: { xs: "0.825rem", sm: "0.875rem" },
+                            lineHeight: 1.45,
                           }}
                         >
                           {opt.optionText}
                         </Typography>
                       </Box>
 
-                      <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        sx={{
+                          flexShrink: 0,
+                          alignSelf: { xs: "flex-end", sm: "center" },
+                        }}
+                      >
                         {isUserSelected && isCorrectOption && (
                           <Chip
                             label="Your Choice ✓"
                             color="success"
                             size="small"
-                            sx={{ fontWeight: 700 }}
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.675rem",
+                              height: 20,
+                            }}
                           />
                         )}
                         {isUserSelected && !isCorrectOption && (
@@ -672,7 +687,11 @@ export function QuestionResultCard({
                             label="Your Choice ✗"
                             color="error"
                             size="small"
-                            sx={{ fontWeight: 700 }}
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.675rem",
+                              height: 20,
+                            }}
                           />
                         )}
                         {!isUserSelected && isCorrectOption && (
@@ -681,7 +700,11 @@ export function QuestionResultCard({
                             color="success"
                             variant="outlined"
                             size="small"
-                            sx={{ fontWeight: 700 }}
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.675rem",
+                              height: 20,
+                            }}
                           />
                         )}
                       </Stack>
@@ -694,22 +717,31 @@ export function QuestionResultCard({
 
           {/* Full Essay Answer & Feedback */}
           {isEssay && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+            <Box sx={{ mt: 1.5 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 700, mb: 0.75, fontSize: "0.85rem" }}
+              >
                 Student's Essay Response
               </Typography>
               <Paper
                 variant="outlined"
                 sx={{
-                  p: 2.5,
+                  p: { xs: 1.25, sm: 1.75 },
                   bgcolor: "background.paper",
-                  borderRadius: 2,
+                  borderRadius: 1.5,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
-                  mb: 2.5,
+                  mb: 1.75,
                 }}
               >
-                <Typography variant="body1" sx={{ lineHeight: 1.7 }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    lineHeight: 1.6,
+                    fontSize: { xs: "0.85rem", sm: "0.925rem" },
+                  }}
+                >
                   {q.answerText || "(No answer text submitted)"}
                 </Typography>
               </Paper>
@@ -717,16 +749,22 @@ export function QuestionResultCard({
               {q.feedback && (
                 <Alert
                   severity="info"
-                  icon={<MessageSquare size={20} />}
-                  sx={{ borderRadius: 2, p: 2 }}
+                  icon={<MessageSquare size={18} />}
+                  sx={{ borderRadius: 1.5, p: { xs: 1.25, sm: 1.5 } }}
                 >
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 700, mb: 0.5 }}
+                    sx={{ fontWeight: 700, mb: 0.25, fontSize: "0.825rem" }}
                   >
                     Instructor Feedback:
                   </Typography>
-                  <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      lineHeight: 1.5,
+                      fontSize: { xs: "0.825rem", sm: "0.875rem" },
+                    }}
+                  >
                     {q.feedback}
                   </Typography>
                 </Alert>

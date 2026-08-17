@@ -67,7 +67,7 @@ export function TabMaterials({ lectureId }: TabMaterialsProps) {
           key={material.id}
           elevation={0}
           sx={{
-            p: 2,
+            p: { xs: 1.5, sm: 2 },
             border: "1px solid",
             borderColor: "divider",
             borderRadius: 1.5,
@@ -80,14 +80,14 @@ export function TabMaterials({ lectureId }: TabMaterialsProps) {
           }}
         >
           <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{ alignItems: { xs: "flex-start", sm: "center" } }}
+            direction="row"
+            spacing={{ xs: 1.5, sm: 2 }}
+            sx={{ alignItems: "center" }}
           >
             <Box
               sx={{
-                width: 44,
-                height: 44,
+                width: { xs: 36, sm: 44 },
+                height: { xs: 36, sm: 44 },
                 borderRadius: 1,
                 bgcolor: alpha(theme.palette.text.primary, 0.04),
                 color: "text.secondary",
@@ -97,25 +97,30 @@ export function TabMaterials({ lectureId }: TabMaterialsProps) {
                 flexShrink: 0,
               }}
             >
-              {getFileIcon(material.fileObjectKey, 22)}
+              {getFileIcon(material.fileObjectKey, 20)}
             </Box>
 
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 variant="subtitle2"
-                sx={{ fontWeight: 700, color: "text.primary", mb: 0.25 }}
+                sx={{
+                  fontWeight: 700,
+                  color: "text.primary",
+                  mb: 0.25,
+                  fontSize: { xs: "0.85rem", sm: "0.875rem" },
+                }}
               >
                 {material.title}
               </Typography>
               <Stack
                 direction="row"
-                spacing={2}
-                sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}
+                spacing={1.5}
+                sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.5 }}
               >
                 {material.fileOriginalName && (
                   <Stack
                     direction="row"
-                    spacing={0.75}
+                    spacing={0.5}
                     sx={{ alignItems: "center", color: "text.disabled" }}
                   >
                     <FileDown size={12} />
@@ -129,11 +134,10 @@ export function TabMaterials({ lectureId }: TabMaterialsProps) {
                 )}
                 <Stack
                   direction="row"
-                  spacing={0.75}
+                  spacing={0.5}
                   sx={{
                     alignItems: "center",
                     color: "text.disabled",
-                    ml: "10px !important",
                   }}
                 >
                   <FileIcon size={12} />

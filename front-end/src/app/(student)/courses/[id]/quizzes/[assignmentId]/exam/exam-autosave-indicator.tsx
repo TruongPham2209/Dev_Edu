@@ -12,12 +12,19 @@ export function ExamAutosaveIndicator({ state }: ExamAutosaveIndicatorProps) {
   if (state === "SAVING") {
     return (
       <Chip
-        icon={<Loader2 size={16} className="animate-spin" />}
+        icon={<Loader2 size={13} className="animate-spin" />}
         label="Saving..."
         color="info"
         variant="outlined"
         size="small"
-        sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        sx={{
+          fontWeight: 600,
+          borderRadius: 9999,
+          height: { xs: 26, sm: 28 },
+          fontSize: { xs: "0.7rem", sm: "0.75rem" },
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+        }}
       />
     );
   }
@@ -25,24 +32,38 @@ export function ExamAutosaveIndicator({ state }: ExamAutosaveIndicatorProps) {
   if (state === "ERROR") {
     return (
       <Chip
-        icon={<AlertCircle size={16} />}
+        icon={<AlertCircle size={13} />}
         label="Error saving"
         color="error"
         variant="outlined"
         size="small"
-        sx={{ fontWeight: 600, borderRadius: 1.5 }}
+        sx={{
+          fontWeight: 600,
+          borderRadius: 9999,
+          height: { xs: 26, sm: 28 },
+          fontSize: { xs: "0.7rem", sm: "0.75rem" },
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+        }}
       />
     );
   }
 
   return (
     <Chip
-      icon={<CheckCircle2 size={16} />}
+      icon={<CheckCircle2 size={13} />}
       label="Auto-saved"
       color="success"
       variant="outlined"
       size="small"
-      sx={{ fontWeight: 600, borderRadius: 1.5 }}
+      sx={{
+        fontWeight: 600,
+        borderRadius: 9999,
+        height: { xs: 26, sm: 28 },
+        fontSize: { xs: "0.7rem", sm: "0.75rem" },
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+      }}
     />
   );
 }

@@ -103,12 +103,12 @@ export function PostHistoryModal({
         headerIcon={<History size={24} />}
         maxWidth="md"
         paperSx={{
-          height: "75vh",
+          height: { xs: "85vh", sm: "75vh" },
           maxHeight: 800,
         }}
       >
         {mode === "manage" && (
-          <Box sx={{ mb: -1 }}>
+          <Box sx={{ mb: { xs: 1, sm: 0 } }}>
             <FilterSelect
               label="Filter by Status"
               value={filterStatus}

@@ -83,7 +83,7 @@ export function ImagePreview({
             justifyContent: "center",
             position: "relative",
             outline: "none",
-            p: 3,
+            p: { xs: 1.5, sm: 3 },
             boxSizing: "border-box",
           }}
         >
@@ -95,8 +95,8 @@ export function ImagePreview({
             }}
             sx={{
               position: "absolute",
-              top: 24,
-              right: 24,
+              top: { xs: 16, sm: 24 },
+              right: { xs: 16, sm: 24 },
               color: "rgba(255, 255, 255, 0.8)",
               bgcolor: "rgba(15, 23, 42, 0.6)",
               backdropFilter: "blur(4px)",
@@ -110,7 +110,7 @@ export function ImagePreview({
             }}
             aria-label="Close image preview"
           >
-            <X size={24} />
+            <X size={22} />
           </IconButton>
 
           {/* Loading spinner */}
@@ -134,8 +134,8 @@ export function ImagePreview({
             onError={handleImageError}
             onLoad={handleImageLoad}
             sx={{
-              maxWidth: "90vw",
-              maxHeight: "85vh",
+              maxWidth: "92vw",
+              maxHeight: { xs: "75vh", sm: "85vh" },
               objectFit: "contain",
               borderRadius: 2,
               boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",

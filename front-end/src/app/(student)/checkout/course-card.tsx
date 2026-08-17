@@ -1,8 +1,7 @@
 "use client";
 
 import type { CourseItemResponse } from "@/lib/type/enrollments";
-import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
-import { User } from "lucide-react";
+import { Box, Chip, Paper, Typography } from "@mui/material";
 
 interface CourseCardProps {
   course: CourseItemResponse;
@@ -10,7 +9,6 @@ interface CourseCardProps {
 
 export function CourseCard({ course }: CourseCardProps) {
   const { title, thumbnailUrl, originalPrice, discountedPrice } = course;
-  console.log(course);
 
   const discountPercent =
     originalPrice && discountedPrice && originalPrice > discountedPrice
@@ -21,13 +19,14 @@ export function CourseCard({ course }: CourseCardProps) {
     <Paper
       elevation={0}
       sx={{
-        p: 2.5,
+        p: { xs: 1.5, sm: 2.5 },
         border: "1px solid",
         borderColor: "divider",
-        borderRadius: 1,
+        borderRadius: { xs: 2, sm: 2.5 },
         display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        gap: 3,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: { xs: 1.5, sm: 3 },
         transition: "all 0.2s ease",
         "&:hover": {
           borderColor: "primary.main",
@@ -43,16 +42,17 @@ export function CourseCard({ course }: CourseCardProps) {
         }
         alt={title}
         sx={{
-          width: { xs: "100%", sm: 220 },
-          height: { xs: 200, sm: 140 },
+          width: { xs: 80, sm: 170, md: 220 },
+          height: { xs: 56, sm: 110, md: 135 },
           objectFit: "cover",
-          borderRadius: 1,
+          borderRadius: 1.5,
           flexShrink: 0,
         }}
       />
       <Box
         sx={{
           flexGrow: 1,
+          minWidth: 0,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -64,8 +64,13 @@ export function CourseCard({ course }: CourseCardProps) {
             color="text.primary"
             sx={{
               fontWeight: 800,
-              mb: 1.5,
+              mb: { xs: 0.5, sm: 1.5 },
               lineHeight: 1.3,
+              fontSize: { xs: "0.925rem", sm: "1.1rem" },
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
             }}
           >
             {title}
@@ -75,12 +80,16 @@ export function CourseCard({ course }: CourseCardProps) {
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            gap: 2,
+            alignItems: "baseline",
+            gap: { xs: 1, sm: 1.5 },
             flexWrap: "wrap",
           }}
         >
-          <Typography variant="h6" color="primary" sx={{ fontWeight: 900 }}>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{ fontWeight: 900, fontSize: { xs: "0.95rem", sm: "1.15rem" } }}
+          >
             {discountedPrice?.toLocaleString("vi-VN")}đ
           </Typography>
           {originalPrice && originalPrice > (discountedPrice || 0) && (
@@ -88,16 +97,27 @@ export function CourseCard({ course }: CourseCardProps) {
               <Typography
                 variant="body2"
                 color="text.disabled"
-                sx={{ textDecoration: "line-through", fontWeight: 600 }}
+                sx={{
+                  textDecoration: "line-through",
+                  fontWeight: 600,
+                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                }}
               >
                 {originalPrice.toLocaleString("vi-VN")}đ
               </Typography>
-              <Chip
-                size="small"
-                label={`-${discountPercent}%`}
-                color="error"
-                sx={{ fontWeight: 800, borderRadius: 1.5, height: 24 }}
-              />
+              {discountPercent > 0 && (
+                <Chip
+                  size="small"
+                  label={`-${discountPercent}%`}
+                  color="error"
+                  sx={{
+                    fontWeight: 800,
+                    borderRadius: 1.5,
+                    height: 22,
+                    fontSize: "0.7rem",
+                  }}
+                />
+              )}
             </>
           )}
         </Box>

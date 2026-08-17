@@ -1,6 +1,8 @@
 "use client";
 
+import { ExamAutosaveIndicator } from "@/app/(student)/courses/[id]/quizzes/[assignmentId]/exam/exam-autosave-indicator";
 import { ExamQuestionNav } from "@/app/(student)/courses/[id]/quizzes/[assignmentId]/exam/exam-question-nav";
+import { ExamTimer } from "@/app/(student)/courses/[id]/quizzes/[assignmentId]/exam/exam-timer";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { SessionLockDialog } from "@/components/dialog/quiz/session-lock-dialog";
@@ -18,8 +20,10 @@ import {
   Chip,
   Container,
   Divider,
+  Drawer,
   FormControlLabel,
   Grid,
+  IconButton,
   Paper,
   Radio,
   RadioGroup,
@@ -27,7 +31,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, LayoutGrid, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
@@ -46,6 +50,7 @@ export default function CourseStudentExamRoomPage({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
+  const [isNavDrawerOpen, setIsNavDrawerOpen] = useState<boolean>(false);
 
   const { data: latestAttemptData, isLoading: isAttemptLoading } =
     useAttemptQuery(attemptId);
@@ -116,103 +121,122 @@ export default function CourseStudentExamRoomPage({
   if (!attemptId || isAttemptLoading || !startData) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 1 }}>
-        <Container maxWidth="xl">
-          <Box sx={{ mb: 3 }}>
+        <Container maxWidth="xl" sx={{ px: { xs: 1.5, sm: 3, md: 4 }, py: { xs: 1.5, sm: 2 } }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 1,
+              mb: 2,
+            }}
+          >
             <Skeleton
               variant="rounded"
-              width={160}
+              width={140}
               height={36}
               sx={{ borderRadius: 2 }}
             />
+            <Skeleton
+              variant="rounded"
+              width={220}
+              height={36}
+              sx={{ borderRadius: 9999, display: { xs: "block", md: "none" } }}
+            />
           </Box>
-          <Grid container spacing={4}>
+
+          <Grid container spacing={{ xs: 2.5, md: 4 }}>
             {/* Left Question Card Skeleton */}
             <Grid size={{ xs: 12, md: 8 }}>
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: 1,
                   borderColor: "divider",
-                  p: 3.5,
-                  minHeight: 450,
+                  minHeight: { xs: 350, sm: 450 },
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Stack direction="row" spacing={1.5}>
-                    <Skeleton
-                      variant="rounded"
-                      width={110}
-                      height={32}
-                      sx={{ borderRadius: 2 }}
-                    />
-                    <Skeleton
-                      variant="rounded"
-                      width={90}
-                      height={32}
-                      sx={{ borderRadius: 2 }}
-                    />
+                <CardContent sx={{ p: { xs: 2, sm: 3.5 } }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      justifyContent: "space-between",
+                      alignItems: { xs: "flex-start", sm: "center" },
+                      gap: { xs: 1, sm: 1.5 },
+                      mb: 2,
+                    }}
+                  >
+                    <Stack direction="row" spacing={1.5}>
+                      <Skeleton
+                        variant="rounded"
+                        width={110}
+                        height={32}
+                        sx={{ borderRadius: 2 }}
+                      />
+                      <Skeleton
+                        variant="rounded"
+                        width={90}
+                        height={32}
+                        sx={{ borderRadius: 2 }}
+                      />
+                    </Stack>
+                    <Skeleton variant="text" width={70} height={24} />
+                  </Box>
+                  <Divider sx={{ mb: 2.5 }} />
+                  <Skeleton
+                    variant="text"
+                    width="90%"
+                    height={28}
+                    sx={{ mb: 1 }}
+                  />
+                  <Skeleton
+                    variant="text"
+                    width="70%"
+                    height={28}
+                    sx={{ mb: 4 }}
+                  />
+
+                  <Stack spacing={2} sx={{ mb: 4 }}>
+                    {[1, 2, 3, 4].map((i) => (
+                      <Skeleton
+                        key={i}
+                        variant="rounded"
+                        height={56}
+                        sx={{ borderRadius: 1.5 }}
+                      />
+                    ))}
                   </Stack>
-                  <Skeleton variant="text" width={70} height={24} />
-                </Box>
-                <Divider sx={{ mb: 3 }} />
-                <Skeleton
-                  variant="text"
-                  width="90%"
-                  height={28}
-                  sx={{ mb: 1 }}
-                />
-                <Skeleton
-                  variant="text"
-                  width="70%"
-                  height={28}
-                  sx={{ mb: 4 }}
-                />
 
-                <Stack spacing={2} sx={{ mb: 4 }}>
-                  {[1, 2, 3, 4].map((i) => (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      pt: 3,
+                      borderTop: 1,
+                      borderColor: "divider",
+                    }}
+                  >
                     <Skeleton
-                      key={i}
                       variant="rounded"
-                      height={56}
-                      sx={{ borderRadius: 2.5 }}
+                      width={100}
+                      height={40}
+                      sx={{ borderRadius: 2 }}
                     />
-                  ))}
-                </Stack>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    pt: 3,
-                    borderTop: 1,
-                    borderColor: "divider",
-                  }}
-                >
-                  <Skeleton
-                    variant="rounded"
-                    width={100}
-                    height={40}
-                    sx={{ borderRadius: 2 }}
-                  />
-                  <Skeleton
-                    variant="rounded"
-                    width={100}
-                    height={40}
-                    sx={{ borderRadius: 2 }}
-                  />
-                </Box>
+                    <Skeleton
+                      variant="rounded"
+                      width={100}
+                      height={40}
+                      sx={{ borderRadius: 2 }}
+                    />
+                  </Box>
+                </CardContent>
               </Card>
             </Grid>
 
             {/* Right Sticky Question Nav Skeleton */}
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: "none", md: "block" } }}>
               <Box
                 sx={{
                   position: "sticky",
@@ -354,9 +378,18 @@ export default function CourseStudentExamRoomPage({
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: 1 }}>
-      <Container maxWidth="xl">
-        {/* Back to Quizzes Button */}
-        <Box sx={{ mb: 1 }}>
+      <Container maxWidth="xl" sx={{ px: { xs: 1.5, sm: 3, md: 4 }, py: { xs: 1.5, sm: 2 } }}>
+        {/* Back to Quizzes Button & Mobile Sticky Header Bar */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 1,
+            mb: 2,
+          }}
+        >
           <Button
             startIcon={<ArrowLeft size={18} />}
             onClick={() => setIsExitModalOpen(true)}
@@ -364,26 +397,69 @@ export default function CourseStudentExamRoomPage({
           >
             Back to Quizzes
           </Button>
+
+          {/* Mobile & Tablet Action Bar (< md) */}
+          <Paper
+            elevation={0}
+            sx={{
+              display: { xs: "flex", md: "none" },
+              alignItems: "center",
+              gap: { xs: 0.75, sm: 1 },
+              p: 0.5,
+              px: { xs: 1, sm: 1.5 },
+              borderRadius: 9999,
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              maxWidth: "100%",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
+            <ExamTimer timeRemainingSeconds={timeRemaining} compact />
+            <ExamAutosaveIndicator state={autosaveState} />
+            <Button
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => setIsNavDrawerOpen(true)}
+              startIcon={<LayoutGrid size={14} />}
+              sx={{
+                borderRadius: 9999,
+                fontWeight: 700,
+                fontSize: { xs: "0.725rem", sm: "0.75rem" },
+                px: { xs: 1.25, sm: 1.75 },
+                py: 0.5,
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+                lineHeight: 1.2,
+              }}
+            >
+              Matrix ({answeredCount}/{questions.length})
+            </Button>
+          </Paper>
         </Box>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={{ xs: 2.5, md: 4 }}>
           <Grid size={{ xs: 12, md: 8 }}>
             {currentQuestion && (
               <Card
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: { xs: 2, sm: 3 },
                   border: 1,
                   borderColor: "divider",
-                  minHeight: 450,
+                  minHeight: { xs: 350, sm: 450 },
                 }}
               >
-                <CardContent sx={{ p: 3.5 }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3.5 } }}>
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: "row",
+                      flexDirection: { xs: "column", sm: "row" },
                       justifyContent: "space-between",
-                      alignItems: "center",
+                      alignItems: { xs: "flex-start", sm: "center" },
+                      gap: { xs: 1, sm: 1.5 },
                       mb: 2,
                     }}
                   >
@@ -393,6 +469,7 @@ export default function CourseStudentExamRoomPage({
                         flexDirection: "row",
                         gap: 1.5,
                         alignItems: "center",
+                        flexWrap: "wrap",
                       }}
                     >
                       <Chip
@@ -420,11 +497,11 @@ export default function CourseStudentExamRoomPage({
                     </Typography>
                   </Box>
 
-                  <Divider sx={{ mb: 3 }} />
+                  <Divider sx={{ mb: 2.5 }} />
 
                   <Typography
                     variant="h6"
-                    sx={{ fontWeight: 600, mb: 3, lineHeight: 1.6 }}
+                    sx={{ fontWeight: 600, mb: 3, lineHeight: 1.6, fontSize: { xs: "1rem", sm: "1.25rem" } }}
                     dangerouslySetInnerHTML={{
                       __html: currentQuestion.content,
                     }}
@@ -612,7 +689,8 @@ export default function CourseStudentExamRoomPage({
             )}
           </Grid>
 
-          <Grid size={{ xs: 12, md: 4 }}>
+          {/* Desktop Question Nav (md and above) */}
+          <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: "none", md: "block" } }}>
             <Box
               sx={{
                 position: "sticky",
@@ -643,6 +721,69 @@ export default function CourseStudentExamRoomPage({
           </Grid>
         </Grid>
       </Container>
+
+      {/* Mobile/Tablet Question Nav Bottom Sheet Drawer */}
+      <Drawer
+        anchor="bottom"
+        open={isNavDrawerOpen}
+        onClose={() => setIsNavDrawerOpen(false)}
+        slotProps={{
+          backdrop: { sx: { backdropFilter: "blur(4px)" } },
+          paper: {
+            sx: {
+              borderRadius: "20px 20px 0 0",
+              maxHeight: "85vh",
+              display: "flex",
+              flexDirection: "column",
+              bgcolor: "background.paper",
+            },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            p: 2,
+            px: 2.5,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            position: "sticky",
+            top: 0,
+            bgcolor: "background.paper",
+            zIndex: 1,
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+            Question Matrix ({answeredCount}/{questions.length})
+          </Typography>
+          <IconButton onClick={() => setIsNavDrawerOpen(false)} size="small">
+            <X size={20} />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ p: 2, overflowY: "auto", flex: 1 }}>
+          <ExamQuestionNav
+            questions={questions}
+            currentIndex={currentQuestionIndex}
+            answersMap={answersMap}
+            onSelectQuestion={(idx) => {
+              setCurrentQuestionIndex(idx);
+              setIsNavDrawerOpen(false);
+            }}
+            quizTitle={startData.quizTitle}
+            attemptNumber={startData.attemptNumber}
+            autosaveState={autosaveState}
+            timeRemainingSeconds={timeRemaining}
+            onSubmitClick={() => {
+              setIsNavDrawerOpen(false);
+              setIsSubmitModalOpen(true);
+            }}
+            submitPending={submitMutation.isPending}
+          />
+        </Box>
+      </Drawer>
 
       <SessionLockDialog open={isSessionLocked} message={sessionLockMessage} />
 

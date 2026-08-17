@@ -56,13 +56,13 @@ export function EnrollmentList() {
 
   if (loading) {
     return (
-      <Stack spacing={3} sx={{ flex: 1, minWidth: 0, pb: 10 }}>
+      <Stack spacing={2.5} sx={{ flex: 1, minWidth: 0, pb: { xs: 6, sm: 10 } }}>
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton
             key={i}
             variant="rectangular"
-            height={180}
-            sx={{ borderRadius: 1 }}
+            height={160}
+            sx={{ borderRadius: 2 }}
           />
         ))}
       </Stack>
@@ -73,10 +73,11 @@ export function EnrollmentList() {
     return (
       <Box
         sx={{
-          py: 10,
+          py: { xs: 6, sm: 10 },
+          px: { xs: 2, sm: 4 },
           textAlign: "center",
           bgcolor: "#f8fafc",
-          borderRadius: 4,
+          borderRadius: { xs: 3, sm: 4 },
           border: "1px dashed #cbd5e1",
         }}
       >
@@ -91,6 +92,9 @@ export function EnrollmentList() {
           sx={{
             mt: 3,
             borderRadius: 50,
+            px: { xs: 3, sm: 4 },
+            py: { xs: 1, sm: 1.2 },
+            fontSize: { xs: "0.875rem", sm: "0.95rem" },
             textTransform: "none",
             fontWeight: 700,
           }}
@@ -106,8 +110,8 @@ export function EnrollmentList() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        gap: { xs: 4, lg: 6 },
-        pb: 10,
+        gap: { xs: 3, lg: 6 },
+        pb: { xs: 6, sm: 10 },
       }}
     >
       {/* Left Column: Items */}

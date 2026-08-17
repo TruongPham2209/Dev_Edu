@@ -128,11 +128,11 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
     <Paper
       elevation={0}
       sx={{
-        p: { xs: 3, md: 4 },
-        borderRadius: 1,
+        p: { xs: 2, sm: 3, md: 4 },
+        borderRadius: { xs: 2, sm: 3 },
         border: "1px solid rgba(0,0,0,0.05)",
         bgcolor: "#ffffff",
-        mb: 4,
+        mb: { xs: 3, sm: 4 },
         position: "relative",
         overflow: "hidden",
       }}
@@ -143,7 +143,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
           top: 0,
           left: 0,
           right: 0,
-          height: "120px",
+          height: { xs: "90px", sm: "120px" },
           background: "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 100%)",
           zIndex: 0,
         }}
@@ -155,85 +155,124 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
           zIndex: 1,
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
-          gap: 4,
-          alignItems: { xs: "center", sm: "flex-end" },
-          mt: 4,
+          flexWrap: { sm: "wrap", md: "nowrap" },
+          gap: { xs: 2, sm: 3, md: 4 },
+          alignItems: { xs: "center", sm: "center", md: "flex-end" },
+          justifyContent: "space-between",
+          mt: { xs: 2, sm: 3, md: 4 },
         }}
       >
-        <Box sx={{ position: "relative" }}>
-          <Avatar
-            src={user.avatarUrl || undefined}
-            onClick={() => {
-              if (user.avatarUrl) setOpenPreview(true);
-            }}
-            sx={{
-              width: 120,
-              height: 120,
-              border: "4px solid #fff",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.1)",
-              bgcolor: "#0ea5e9",
-              fontSize: "3rem",
-              fontWeight: 700,
-              cursor: user.avatarUrl ? "pointer" : "default",
-            }}
-          >
-            {user.fullName.charAt(0).toUpperCase()}
-          </Avatar>
-          <Button
-            onClick={() => setOpenAvatar(true)}
-            sx={{
-              position: "absolute",
-              bottom: 0,
-              right: 0,
-              minWidth: "auto",
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              bgcolor: "#fff",
-              color: "#475569",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              "&:hover": { bgcolor: "#f8fafc", color: "#0f172a" },
-            }}
-          >
-            <Camera size={18} />
-          </Button>
+        {/* Avatar & User Details */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "center", sm: "center", md: "flex-end" },
+            gap: { xs: 2, sm: 3 },
+            flex: 1,
+            minWidth: 0,
+            textAlign: { xs: "center", sm: "left" },
+          }}
+        >
+          {/* Avatar */}
+          <Box sx={{ position: "relative", flexShrink: 0 }}>
+            <Avatar
+              src={user.avatarUrl || undefined}
+              onClick={() => {
+                if (user.avatarUrl) setOpenPreview(true);
+              }}
+              sx={{
+                width: { xs: 88, sm: 100, md: 120 },
+                height: { xs: 88, sm: 100, md: 120 },
+                border: "4px solid #fff",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.1)",
+                bgcolor: "#0ea5e9",
+                fontSize: { xs: "2.2rem", sm: "2.5rem", md: "3rem" },
+                fontWeight: 700,
+                cursor: user.avatarUrl ? "pointer" : "default",
+              }}
+            >
+              {user.fullName.charAt(0).toUpperCase()}
+            </Avatar>
+            <Button
+              onClick={() => setOpenAvatar(true)}
+              sx={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                minWidth: "auto",
+                width: { xs: 32, sm: 34, md: 36 },
+                height: { xs: 32, sm: 34, md: 36 },
+                borderRadius: "50%",
+                bgcolor: "#fff",
+                color: "#475569",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                "&:hover": { bgcolor: "#f8fafc", color: "#0f172a" },
+              }}
+            >
+              <Camera size={16} />
+            </Button>
+          </Box>
+
+          {/* Text Details */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                mb: 0.25,
+                fontSize: { xs: "1.35rem", sm: "1.5rem", md: "2rem" },
+                lineHeight: 1.2,
+              }}
+            >
+              {user.fullName}
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                color: "#64748b",
+                mb: { xs: 1.5, sm: 1.5 },
+                fontSize: { xs: "0.875rem", sm: "0.925rem", md: "1rem" },
+              }}
+            >
+              @{user.username}
+            </Typography>
+
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={{ xs: 1, sm: 2, md: 3 }}
+              sx={{
+                color: "#475569",
+                alignItems: { xs: "center", sm: "flex-start" },
+                fontSize: { xs: "0.825rem", sm: "0.85rem" },
+                flexWrap: "wrap",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Mail size={16} color="#64748b" />
+                <Typography variant="body2" sx={{ fontSize: "inherit" }}>
+                  {user.email}
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Shield size={16} color="#64748b" />
+                <Typography variant="body2" sx={{ fontSize: "inherit" }}>
+                  {getRoleLabel(user.role)}
+                </Typography>
+              </Box>
+            </Stack>
+          </Box>
         </Box>
 
-        <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 800, color: "#0f172a", mb: 0.5 }}
-          >
-            {user.fullName}
-          </Typography>
-          <Typography variant="subtitle1" sx={{ color: "#64748b", mb: 2 }}>
-            @{user.username}
-          </Typography>
-
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={3}
-            sx={{
-              color: "#475569",
-              alignItems: { xs: "center", sm: "flex-start" },
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Mail size={16} />
-              <Typography variant="body2">{user.email}</Typography>
-            </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Shield size={16} />
-              <Typography variant="body2">{getRoleLabel(user.role)}</Typography>
-            </Box>
-          </Stack>
-        </Box>
-
+        {/* Change Password Button */}
         <Box
           sx={{
             display: "flex",
             gap: 2,
-            alignSelf: { xs: "center", sm: "flex-end" },
+            alignSelf: { xs: "stretch", sm: "center", md: "flex-end" },
+            width: { xs: "100%", sm: "auto" },
+            flexShrink: 0,
           }}
         >
           <Button
@@ -243,8 +282,17 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
             sx={{
               borderRadius: 2,
               color: "#334155",
-              borderColor: "#e2e8f0",
-              "&:hover": { bgcolor: "#f8fafc", borderColor: "#cbd5e1" },
+              borderColor: "#cbd5e1",
+              bgcolor: "#ffffff",
+              textTransform: "none",
+              fontWeight: 600,
+              px: { xs: 2.5, sm: 2.5, md: 3 },
+              py: { xs: 1, sm: 1 },
+              fontSize: { xs: "0.875rem", sm: "0.9rem" },
+              whiteSpace: "nowrap",
+              width: { xs: "100%", sm: "auto" },
+              boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+              "&:hover": { bgcolor: "#f8fafc", borderColor: "#94a3b8" },
             }}
           >
             Change password

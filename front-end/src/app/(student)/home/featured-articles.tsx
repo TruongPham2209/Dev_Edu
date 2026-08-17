@@ -25,7 +25,7 @@ export async function FeaturedArticlesSection() {
       sx={{
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-        gap: 4,
+        gap: { xs: 2.5, sm: 3, md: 4 },
       }}
     >
       {articles.map((article) => (
@@ -42,8 +42,8 @@ export async function FeaturedArticlesSection() {
             sx={{
               display: "flex",
               flexDirection: { xs: "column", sm: "row" },
-              gap: 3,
-              p: 2,
+              gap: { xs: 2, sm: 3 },
+              p: { xs: 1.75, sm: 2 },
               borderRadius: 2,
               border: "1px solid #e2e8f0",
               transition: "all 0.2s ease",
@@ -62,10 +62,11 @@ export async function FeaturedArticlesSection() {
                 "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&q=80"
               }
               sx={{
-                width: { xs: "100%", sm: 220 },
-                height: 140,
+                width: { xs: "100%", sm: 200, md: 220 },
+                height: { xs: 160, sm: 130 },
                 objectFit: "cover",
                 borderRadius: 1,
+                flexShrink: 0,
               }}
             />
             <Box
@@ -74,6 +75,7 @@ export async function FeaturedArticlesSection() {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                minWidth: 0,
               }}
             >
               <Typography
@@ -81,7 +83,7 @@ export async function FeaturedArticlesSection() {
                 sx={{
                   fontWeight: 700,
                   mb: 1,
-                  fontSize: "1.1rem",
+                  fontSize: { xs: "1rem", sm: "1.1rem" },
                   lineHeight: 1.4,
                 }}
               >
@@ -96,6 +98,7 @@ export async function FeaturedArticlesSection() {
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
+                  fontSize: { xs: "0.8125rem", sm: "0.875rem" },
                 }}
               >
                 {article.shortDescription}
@@ -124,7 +127,7 @@ export function FeaturedArticlesFallback() {
       sx={{
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
-        gap: 4,
+        gap: { xs: 2.5, sm: 3, md: 4 },
       }}
     >
       {Array.from({ length: 4 }).map((_, index) => (
@@ -133,8 +136,8 @@ export function FeaturedArticlesFallback() {
           sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
-            gap: 3,
-            p: 2,
+            gap: { xs: 2, sm: 3 },
+            p: { xs: 1.75, sm: 2 },
             borderRadius: 3,
             border: "1px solid #e2e8f0",
             bgcolor: "#ffffff",
@@ -144,9 +147,10 @@ export function FeaturedArticlesFallback() {
           <Skeleton
             variant="rectangular"
             sx={{
-              width: { xs: "100%", sm: 220 },
-              height: 140,
+              width: { xs: "100%", sm: 200, md: 220 },
+              height: { xs: 160, sm: 130 },
               borderRadius: 2,
+              flexShrink: 0,
             }}
           />
           <Box
@@ -155,6 +159,7 @@ export function FeaturedArticlesFallback() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
+              minWidth: 0,
             }}
           >
             <Skeleton variant="text" width="90%" height={28} sx={{ mb: 1 }} />

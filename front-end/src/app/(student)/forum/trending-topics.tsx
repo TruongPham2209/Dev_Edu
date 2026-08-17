@@ -43,12 +43,12 @@ export function TrendingTopics({
         bgcolor: "#ffffff",
         boxShadow: "0 4px 20px -5px rgba(0,0,0,0.05)",
         border: "1px solid rgba(0,0,0,0.03)",
-        mb: 4,
+        mb: { xs: 3, sm: 4 },
       }}
     >
       <Box
         sx={{
-          p: 2.5,
+          p: { xs: 2, sm: 2.5 },
           borderBottom: "1px solid #f1f5f9",
           display: "flex",
           alignItems: "center",
@@ -58,7 +58,11 @@ export function TrendingTopics({
         <Flame size={20} color="#ef4444" />
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 800, color: "#0f172a" }}
+          sx={{
+            fontWeight: 800,
+            color: "#0f172a",
+            fontSize: { xs: "0.95rem", sm: "1rem" },
+          }}
         >
           Trending Topics
         </Typography>
@@ -70,7 +74,7 @@ export function TrendingTopics({
               key={i}
               onClick={() => onSelectTopic?.(topic.title)}
               sx={{
-                p: 2.5,
+                p: { xs: 2, sm: 2.5 },
                 borderBottom: "1px solid #f8fafc",
                 cursor: onSelectTopic ? "pointer" : "default",
                 "&:hover": onSelectTopic ? { bgcolor: "#f8fafc" } : {},

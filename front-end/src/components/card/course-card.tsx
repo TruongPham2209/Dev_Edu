@@ -53,7 +53,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
         <Box
           sx={{
             position: "relative",
-            height: 160,
+            height: { xs: 150, sm: 160 },
             overflow: "hidden",
             flexShrink: 0,
           }}
@@ -100,8 +100,8 @@ export function CourseCard({ course }: { course: CourseResponse }) {
             display: "flex",
             flexDirection: "column",
             flex: 1,
-            p: 2.5,
-            pb: "20px !important",
+            p: { xs: 2, sm: 2.5 },
+            pb: { xs: "16px !important", sm: "20px !important" },
           }}
         >
           <Typography
@@ -116,7 +116,8 @@ export function CourseCard({ course }: { course: CourseResponse }) {
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              height: "2.8em",
+              fontSize: { xs: "0.9375rem", sm: "1rem" },
+              minHeight: { xs: "auto", sm: "2.8em" },
             }}
           >
             {course.title}
@@ -132,9 +133,9 @@ export function CourseCard({ course }: { course: CourseResponse }) {
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
               textOverflow: "ellipsis",
-              fontSize: "0.875rem",
+              fontSize: { xs: "0.8125rem", sm: "0.875rem" },
               lineHeight: 1.5,
-              height: "3em",
+              minHeight: { xs: "auto", sm: "3em" },
             }}
           >
             {course.description?.replace(/<[^>]*>?/gm, "")}

@@ -2,8 +2,8 @@ import { Box, Container, Grid, Skeleton, Stack } from "@mui/material";
 
 export function PostDetailSkeleton() {
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Grid container spacing={4}>
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2.5, sm: 4 } }}>
+      <Grid container spacing={{ xs: 3, md: 4 }}>
         {/* Left Side: Main Content */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Stack spacing={4}>

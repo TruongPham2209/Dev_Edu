@@ -54,7 +54,9 @@ export function ReviewDialog({ open, onClose, courseId }: ReviewDialogProps) {
       headerIcon={<Star size={24} color="#f59e0b" />}
       maxWidth="sm"
       paperSx={{
-        minHeight: "50vh",
+        minHeight: { xs: "auto", sm: "40vh" },
+        margin: { xs: 1.5, sm: 3 },
+        borderRadius: { xs: "20px", sm: "24px" },
       }}
     >
       {isLoading ? (
@@ -68,10 +70,10 @@ export function ReviewDialog({ open, onClose, courseId }: ReviewDialogProps) {
           actionLabel="Retry"
         />
       ) : review ? (
-        <Box sx={{ py: 2 }}>
+        <Box sx={{ py: { xs: 1, sm: 2 } }}>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 700, color: "#0f172a", mb: 1 }}
+            sx={{ fontWeight: 700, color: "#0f172a", mb: 1, fontSize: { xs: "0.95rem", sm: "1.1rem" } }}
           >
             Your Review
           </Typography>
@@ -80,31 +82,33 @@ export function ReviewDialog({ open, onClose, courseId }: ReviewDialogProps) {
             variant="body1"
             sx={{
               color: "#334155",
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               bgcolor: "#f8fafc",
               borderRadius: 2,
               border: "1px solid #e2e8f0",
+              fontSize: { xs: "0.85rem", sm: "0.95rem" },
+              lineHeight: 1.6,
             }}
           >
             {review.comment}
           </Typography>
         </Box>
       ) : (
-        <Box sx={{ py: 2 }}>
+        <Box sx={{ py: { xs: 1, sm: 2 } }}>
           <Box
             sx={{
               display: "flex",
               alignItems: "flex-start",
-              gap: 1.5,
-              mb: 3,
-              p: 2,
+              gap: { xs: 1.25, sm: 1.5 },
+              mb: { xs: 2, sm: 3 },
+              p: { xs: 1.5, sm: 2 },
               bgcolor: "rgba(245, 158, 11, 0.1)",
               borderRadius: 2,
               color: "#d97706",
             }}
           >
-            <AlertCircle size={20} style={{ flexShrink: 0, marginTop: 2 }} />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
+            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: { xs: "0.8rem", sm: "0.875rem" }, lineHeight: 1.5 }}>
               Please note that your review cannot be undone once submitted. Make
               sure your feedback is helpful and constructive.
             </Typography>

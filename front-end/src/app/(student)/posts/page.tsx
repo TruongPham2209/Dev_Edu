@@ -81,12 +81,12 @@ export async function PostDetailContent({ postId }: { postId: string }) {
   }
 
   return (
-    <Container maxWidth="xl">
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2.5, sm: 4 } }}>
       {/* Breadcrumbs */}
       <Breadcrumbs
         separator={<ChevronRight size={14} />}
         aria-label="breadcrumb"
-        sx={{ mb: 3, "& .MuiBreadcrumbs-ol": { alignItems: "center" } }}
+        sx={{ mb: { xs: 2, sm: 3 }, "& .MuiBreadcrumbs-ol": { alignItems: "center" } }}
       >
         <Link href="/forum" style={{ textDecoration: "none" }}>
           <Box
@@ -97,15 +97,15 @@ export async function PostDetailContent({ postId }: { postId: string }) {
               "&:hover": { color: "#0d4661ff" },
             }}
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={20} />
             <Box
               sx={{
                 color: "#64748b",
                 textDecoration: "none",
-                fontSize: "1rem",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
                 fontWeight: 500,
                 "&:hover": { color: "#0d4661ff" },
-                ml: 0.8,
+                ml: 0.5,
               }}
             >
               Back to Forum
@@ -114,7 +114,7 @@ export async function PostDetailContent({ postId }: { postId: string }) {
         </Link>
       </Breadcrumbs>
 
-      <Grid container spacing={6}>
+      <Grid container spacing={{ xs: 3, md: 5, lg: 6 }}>
         {/* Left Side: Main Content */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Box sx={{ pr: { md: 2 } }}>

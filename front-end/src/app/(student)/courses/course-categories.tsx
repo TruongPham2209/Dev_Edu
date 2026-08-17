@@ -18,17 +18,31 @@ export const CourseCategories = ({
   return (
     <Box
       sx={{
-        mb: 8,
-        p: 3,
+        mb: { xs: 5, sm: 8 },
+        p: { xs: 2, sm: 3 },
         bgcolor: "#ffffff",
-        borderRadius: 4,
+        borderRadius: { xs: 3, sm: 4 },
         boxShadow: "0 4px 20px -10px rgba(0,0,0,0.05)",
         border: "1px solid rgba(0,0,0,0.02)",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
-        <LayoutGrid size={24} color="#0f172a" />
-        <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.25,
+          mb: { xs: 2, sm: 3 },
+        }}
+      >
+        <LayoutGrid size={20} color="#0f172a" style={{ flexShrink: 0 }} />
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            color: "#0f172a",
+            fontSize: { xs: "1.1rem", sm: "1.25rem" },
+          }}
+        >
           Roadmap & Topics
         </Typography>
       </Box>
@@ -36,10 +50,10 @@ export const CourseCategories = ({
       <Box
         sx={{
           display: "flex",
-          gap: 1.5,
+          gap: { xs: 1, sm: 1.5 },
           overflowX: "auto",
-          pb: 2,
-          "&::-webkit-scrollbar": { height: 6 },
+          pb: 1.5,
+          "&::-webkit-scrollbar": { height: 5 },
           "&::-webkit-scrollbar-track": {
             background: "#f8fafc",
             borderRadius: 10,
@@ -55,15 +69,16 @@ export const CourseCategories = ({
           variant={selectedCategory === null ? "contained" : "outlined"}
           onClick={() => setSelectedCategory(null)}
           disableElevation
-          startIcon={<Flame size={18} />}
+          startIcon={<Flame size={16} />}
           sx={{
+            flexShrink: 0,
             borderRadius: 12,
-            px: 3,
-            py: 1.2,
+            px: { xs: 2, sm: 3 },
+            py: { xs: 0.85, sm: 1.2 },
             whiteSpace: "nowrap",
             fontWeight: 700,
             textTransform: "none",
-            fontSize: "0.95rem",
+            fontSize: { xs: "0.85rem", sm: "0.95rem" },
             color: selectedCategory === null ? "#fff" : "#475569",
             background:
               selectedCategory === null
@@ -101,13 +116,14 @@ export const CourseCategories = ({
               onClick={() => setSelectedCategory(cat.id)}
               disableElevation
               sx={{
+                flexShrink: 0,
                 borderRadius: 12,
-                px: 3,
-                py: 1.2,
+                px: { xs: 2, sm: 3 },
+                py: { xs: 0.85, sm: 1.2 },
                 whiteSpace: "nowrap",
                 fontWeight: 600,
                 textTransform: "none",
-                fontSize: "0.95rem",
+                fontSize: { xs: "0.85rem", sm: "0.95rem" },
                 color: isActive ? "#fff" : "#475569",
                 background: isActive
                   ? "linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)"

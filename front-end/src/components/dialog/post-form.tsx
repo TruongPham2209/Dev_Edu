@@ -148,7 +148,7 @@ export function PostFormDialog({
       isSubmitDisabled={!isValid || saving}
       maxWidth="md"
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 3 } }}>
         <FormInput
           label="Title *"
           placeholder="Enter post title"
@@ -182,7 +182,7 @@ export function PostFormDialog({
           error={touched.shortDescription && errors.shortDescription}
           helperText="Short description is required and must be at most 500 characters"
           multiline
-          minRows={3}
+          minRows={2}
         />
 
         <Box>
@@ -196,7 +196,11 @@ export function PostFormDialog({
           >
             <Typography
               variant="subtitle2"
-              sx={{ fontWeight: 600, color: "text.primary" }}
+              sx={{
+                fontWeight: 600,
+                color: "text.primary",
+                fontSize: { xs: "0.85rem", sm: "0.875rem" },
+              }}
             >
               Thumbnail Image *
             </Typography>
@@ -205,6 +209,7 @@ export function PostFormDialog({
                 size="small"
                 variant="text"
                 onClick={() => setPreviewOpen(true)}
+                sx={{ fontSize: { xs: "0.775rem", sm: "0.85rem" } }}
               >
                 Preview Image
               </Button>
@@ -223,7 +228,7 @@ export function PostFormDialog({
                 ? "Thumbnail is required"
                 : ""
             }
-            height={200}
+            height={180}
             accept="image/*"
           />
           <ImagePreview
@@ -236,7 +241,11 @@ export function PostFormDialog({
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 600, color: "text.primary" }}
+            sx={{
+              fontWeight: 600,
+              color: "text.primary",
+              fontSize: { xs: "0.85rem", sm: "0.875rem" },
+            }}
           >
             Content *
           </Typography>
@@ -249,6 +258,8 @@ export function PostFormDialog({
             onImageUpload={(url, objectKey) => {
               setUploadedImages((prev) => [...prev, { url, objectKey }]);
             }}
+            minHeight={160}
+            error={touched.content && errors.content}
           />
           {touched.content && errors.content && (
             <FormHelperText error sx={{ mx: 1.5, mt: 0.5 }}>

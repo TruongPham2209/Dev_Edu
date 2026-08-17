@@ -1,6 +1,6 @@
 import { InfoDialog } from "@/components/common/info-dialog";
 import { formatServerDate } from "@/lib/util/date-utils";
-import { Box, Chip, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { Calendar, FileText } from "lucide-react";
 import { getStatusColor } from "../../../lib/util/status-utils";
 
@@ -25,20 +25,19 @@ export function VersionDetailDialog({
       headerIcon={<FileText size={24} />}
       maxWidth="md"
       paperSx={{
-        height: "75vh",
+        height: { xs: "85vh", sm: "75vh" },
         maxHeight: 800,
       }}
     >
       {selectedVersion && (
-        <>
+        <Stack spacing={{ xs: 2, sm: 2.5 }}>
           {/* HERO HEADER */}
           <Box
             sx={{
               position: "relative",
               overflow: "hidden",
               borderRadius: 1,
-              p: 3,
-              mb: 2,
+              p: { xs: 2, sm: 3 },
               border: "1px solid",
               borderColor: "divider",
               bgcolor: "background.paper",
@@ -68,22 +67,23 @@ export function VersionDetailDialog({
             {/* META */}
             <Stack
               direction="row"
-              spacing={1.25}
+              spacing={1}
               sx={{
-                mb: 2,
+                mb: { xs: 1.5, sm: 2 },
                 alignItems: "center",
                 flexWrap: "wrap",
+                gap: 1,
               }}
             >
               <Box
                 sx={{
-                  px: 1.5,
-                  py: 0.75,
+                  px: 1.25,
+                  py: 0.5,
                   borderRadius: 2,
                   bgcolor: "primary.main",
                   color: "primary.contrastText",
                   fontWeight: 700,
-                  fontSize: 13,
+                  fontSize: { xs: 11, sm: 13 },
                   letterSpacing: 0.3,
                   boxShadow: "0 4px 12px rgba(25,118,210,0.25)",
                 }}
@@ -96,21 +96,22 @@ export function VersionDetailDialog({
                   display: "flex",
                   alignItems: "center",
                   gap: 0.75,
-                  px: 1.5,
-                  py: 0.7,
+                  px: 1.25,
+                  py: 0.5,
                   borderRadius: 2,
                   bgcolor: "action.hover",
                   border: "1px solid",
                   borderColor: "divider",
                 }}
               >
-                <Calendar size={15} />
+                <Calendar size={14} />
 
                 <Typography
                   variant="caption"
                   sx={{
                     fontWeight: 600,
                     color: "text.secondary",
+                    fontSize: { xs: "0.75rem", sm: "0.8rem" },
                   }}
                 >
                   {formatServerDate(
@@ -127,14 +128,37 @@ export function VersionDetailDialog({
                   sx={{
                     fontWeight: 700,
                     borderRadius: 2,
-                    height: 30,
+                    height: 26,
+                    fontSize: "0.75rem",
                     "& .MuiChip-label": {
-                      px: 1.5,
+                      px: 1.2,
                     },
                   }}
                 />
               )}
             </Stack>
+
+            {/* AUTHOR DETAILS IF PRESENT */}
+            {(selectedVersion.authorFullName || selectedVersion.authorUsername) && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 1.5 }}>
+                <Avatar
+                  src={selectedVersion.authorAvatarUrl || undefined}
+                  sx={{ width: 32, height: 32, fontSize: "0.85rem", bgcolor: "#0ea5e9", fontWeight: 700 }}
+                >
+                  {(selectedVersion.authorFullName || selectedVersion.authorUsername || "U").charAt(0).toUpperCase()}
+                </Avatar>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary", lineHeight: 1.2 }}>
+                    {selectedVersion.authorFullName || selectedVersion.authorUsername}
+                  </Typography>
+                  {selectedVersion.authorUsername && selectedVersion.authorFullName && (
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.75rem" }}>
+                      @{selectedVersion.authorUsername}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            )}
 
             {/* TITLE */}
             <Typography
@@ -142,9 +166,11 @@ export function VersionDetailDialog({
               sx={{
                 fontWeight: 800,
                 lineHeight: 1.2,
-                letterSpacing: -1,
-                mb: 2,
+                letterSpacing: -0.5,
+                mb: { xs: 1, sm: 1.5 },
                 color: "text.primary",
+                fontSize: { xs: "1.25rem", sm: "1.75rem", md: "2.1rem" },
+                wordBreak: "break-word",
               }}
             >
               {selectedVersion.title}
@@ -156,13 +182,57 @@ export function VersionDetailDialog({
                 variant="body1"
                 sx={{
                   color: "text.secondary",
-                  lineHeight: 1.9,
-                  fontSize: "1.02rem",
+                  lineHeight: 1.7,
+                  fontSize: { xs: "0.875rem", sm: "1.02rem" },
                   maxWidth: 900,
+                  mb: selectedVersion.thumbUrl ? 2 : 0,
                 }}
               >
                 {selectedVersion.shortDescription}
               </Typography>
+            )}
+
+            {/* THUMBNAIL COVER IMAGE */}
+            {selectedVersion.thumbUrl && (
+              <Box
+                sx={{
+                  width: "100%",
+                  maxHeight: { xs: 200, sm: 320 },
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  mt: 1.5,
+                  border: "1px solid #e2e8f0",
+                  bgcolor: "#f8fafc",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={selectedVersion.thumbUrl}
+                  alt={selectedVersion.title || "Post thumbnail"}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+              </Box>
+            )}
+
+            {/* REJECTION REASON BANNER */}
+            {(selectedVersion.rejectionReason || selectedVersion.reason || selectedVersion.note) && (
+              <Box
+                sx={{
+                  p: 2,
+                  mt: 2,
+                  borderRadius: 2,
+                  bgcolor: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  color: "#991b1b",
+                }}
+              >
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+                  Rejection Reason:
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
+                  {selectedVersion.rejectionReason || selectedVersion.reason || selectedVersion.note}
+                </Typography>
+              </Box>
             )}
           </Box>
 
@@ -268,7 +338,7 @@ export function VersionDetailDialog({
               }}
             />
           </Box>
-        </>
+        </Stack>
       )}
     </InfoDialog>
   );

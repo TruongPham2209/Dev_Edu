@@ -24,7 +24,7 @@ export function OrderSummary({
     <Paper
       elevation={0}
       sx={{
-        p: 3,
+        p: { xs: 2, sm: 2.5, md: 3 },
         border: { xs: "none", md: "1px solid" },
         borderTop: { xs: "1px solid", md: "1px solid" },
         borderColor: "divider",
@@ -35,8 +35,8 @@ export function OrderSummary({
         width: { xs: "100%", md: "auto" },
         top: { xs: "auto", md: 100 },
         zIndex: { xs: 1000, md: "auto" },
-        borderRadius: { xs: "24px 24px 0 0", md: 4 },
-        boxShadow: { xs: "0 -8px 30px rgba(0,0,0,0.1)", md: "none" },
+        borderRadius: { xs: "20px 20px 0 0", md: 4 },
+        boxShadow: { xs: "0 -8px 30px rgba(0,0,0,0.12)", md: "none" },
         bgcolor: "background.paper",
       }}
     >
@@ -108,12 +108,12 @@ export function OrderSummary({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: { xs: 2, md: 3 },
+          mb: { xs: 1.5, md: 3 },
         }}
       >
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 700, color: "text.secondary" }}
+          sx={{ fontWeight: 700, color: "text.secondary", fontSize: { xs: "0.875rem", sm: "1rem" } }}
         >
           Total Amount
         </Typography>
@@ -121,6 +121,7 @@ export function OrderSummary({
           variant="h4"
           sx={{
             fontWeight: 900,
+            fontSize: { xs: "1.35rem", sm: "1.75rem", md: "2rem" },
             color: "primary.main",
             background: (theme) =>
               `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
@@ -158,10 +159,10 @@ export function OrderSummary({
         disabled={isProcessing}
         startIcon={<Lock size={18} />}
         sx={{
-          py: 2,
+          py: { xs: 1.25, sm: 1.75 },
           borderRadius: 3,
           fontWeight: 800,
-          fontSize: "1.1rem",
+          fontSize: { xs: "0.95rem", sm: "1.1rem" },
           textTransform: "none",
           boxShadow: (theme) => `0 8px 16px ${theme.palette.primary.main}40`,
           "&:hover": {
@@ -182,10 +183,11 @@ export function OrderSummary({
         onClick={onCancel}
         disabled={isProcessing}
         sx={{
-          py: 1.5,
-          mt: 2,
+          py: { xs: 0.8, sm: 1.25 },
+          mt: { xs: 1, sm: 1.5 },
           borderRadius: 3,
           fontWeight: 700,
+          fontSize: { xs: "0.85rem", sm: "0.95rem" },
           textTransform: "none",
         }}
       >

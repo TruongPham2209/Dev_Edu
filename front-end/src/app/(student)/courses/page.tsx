@@ -28,7 +28,8 @@ export default function CourseDetailPage() {
   const {
     data: coursesData,
     isLoading: loading,
-    isFetchingNextPage: loadingMore,
+    isFetching,
+    isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
     error: coursesError,
@@ -37,6 +38,7 @@ export default function CourseDetailPage() {
     categoryId: selectedCategory || undefined,
   });
 
+  const loadingMore = isFetchingNextPage || (isFetching && !loading);
   const categories = categoriesData || [];
   const courses = coursesData?.pages.flatMap((page) => page.contents) || [];
   const nextCursor = hasNextPage ? "has_more" : null; // course-list expects nextCursor to be truthy to show load more
@@ -53,7 +55,7 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <Stack spacing={0} sx={{ pb: 10 }}>
+    <Stack spacing={0} sx={{ pb: { xs: 6, sm: 10 } }}>
       <CourseSearch
         searchKeyword={searchKeyword}
         setSearchKeyword={setSearchKeyword}

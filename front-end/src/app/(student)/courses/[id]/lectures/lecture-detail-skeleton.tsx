@@ -4,8 +4,8 @@ import { Box, Container, Grid, Paper, Skeleton, Stack } from "@mui/material";
 
 export function LectureSkeleton() {
   return (
-    <Container maxWidth="xl" sx={{ py: 4, scrollbarGutter: "stable" }}>
-      <Grid container spacing={4}>
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 }, scrollbarGutter: "stable" }}>
+      <Grid container spacing={{ xs: 3, lg: 4 }}>
         <Grid size={{ xs: 12, lg: 8.5 }}>
           <Stack spacing={4}>
             {/* Header Skeleton (Matches LectureContent header) */}

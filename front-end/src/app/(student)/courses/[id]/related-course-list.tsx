@@ -20,25 +20,40 @@ export const RelatedCourseList = ({
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
-          mb: 4,
+          gap: { xs: 1.25, sm: 2 },
+          mb: { xs: 2.5, sm: 4 },
         }}
       >
         <Box
           sx={{
-            p: 1.5,
+            p: { xs: 1.25, sm: 1.5 },
             bgcolor: "#f3e8ff",
             borderRadius: 3,
             color: "#9333ea",
+            display: "flex",
+            flexShrink: 0,
           }}
         >
-          <Award size={28} />
+          <Award size={24} />
         </Box>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: "#0f172a" }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 800,
+              color: "#0f172a",
+              fontSize: { xs: "1.2rem", sm: "1.5rem" },
+            }}
+          >
             Related courses
           </Typography>
-          <Typography sx={{ color: "#64748b", mt: 0.5 }}>
+          <Typography
+            sx={{
+              color: "#64748b",
+              mt: 0.5,
+              fontSize: { xs: "0.85rem", sm: "0.95rem" },
+            }}
+          >
             You may also be interested in
           </Typography>
         </Box>

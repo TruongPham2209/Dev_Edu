@@ -16,9 +16,13 @@ import { useMemo } from "react";
 
 interface HeroSectionProps {
   course: CourseResponse;
+  mobilePurchaseCard?: React.ReactNode;
 }
 
-export const HeroSection = ({ course }: HeroSectionProps) => {
+export const HeroSection = ({
+  course,
+  mobilePurchaseCard,
+}: HeroSectionProps) => {
   const { data: categories = [] } = useCategoriesQuery();
 
   const categoryName = useMemo(() => {
@@ -31,7 +35,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
     <Box
       sx={{
         position: "relative",
-        mb: { xs: 6, md: 8 },
+        mb: { xs: 4, sm: 6, md: 8 },
       }}
     >
       <Box sx={{ position: "relative", zIndex: 1 }}>
@@ -39,7 +43,10 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
         <Breadcrumbs
           separator={<ChevronRight size={14} />}
           aria-label="breadcrumb"
-          sx={{ mb: 3, "& .MuiBreadcrumbs-ol": { alignItems: "center" } }}
+          sx={{
+            mb: { xs: 2, sm: 3 },
+            "& .MuiBreadcrumbs-ol": { alignItems: "center" },
+          }}
         >
           <Box
             component={Link}
@@ -67,28 +74,15 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
           >
             Courses
           </Box>
-          <Typography
-            sx={{
-              color: "#0f172a",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-              display: "-webkit-box",
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-          >
-            {course.title}
-          </Typography>
         </Breadcrumbs>
 
         {/* Badges & Categories */}
         <Box
           sx={{
-            mb: 3,
+            mb: { xs: 2, sm: 3 },
             display: "flex",
             alignItems: "center",
-            gap: 2,
+            gap: 1.5,
             flexWrap: "wrap",
           }}
         >
@@ -146,8 +140,13 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
           variant="h1"
           sx={{
             fontWeight: 900,
-            mb: 2,
-            fontSize: { xs: "2rem", md: "2.75rem", lg: "3.25rem" },
+            mb: { xs: 1.5, sm: 2 },
+            fontSize: {
+              xs: "1.5rem",
+              sm: "2.25rem",
+              md: "2.75rem",
+              lg: "3.25rem",
+            },
             lineHeight: 1.2,
             letterSpacing: "-0.03em",
             color: "#0f172a",
@@ -156,14 +155,26 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
           {course.title}
         </Typography>
 
+        {/* MOBILE ONLY: Purchase Card with Video Preview & Price right under Title */}
+        {mobilePurchaseCard && (
+          <Box
+            sx={{
+              display: { xs: "block", md: "none" },
+              my: { xs: 2.5, sm: 4 },
+            }}
+          >
+            {mobilePurchaseCard}
+          </Box>
+        )}
+
         <Typography
           variant="h6"
           sx={{
             color: "#475569",
-            mb: 4,
+            mb: { xs: 3, sm: 4 },
             fontWeight: 400,
             lineHeight: 1.6,
-            fontSize: { xs: "1rem", md: "1.125rem" },
+            fontSize: { xs: "0.9rem", sm: "1rem", md: "1.125rem" },
             maxWidth: "95%",
             letterSpacing: "-0.01em",
             display: "-webkit-box",
@@ -180,8 +191,8 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            gap: { xs: 1.5, md: 3 },
-            mb: 4,
+            gap: { xs: 1.25, sm: 2, md: 3 },
+            mb: { xs: 3, sm: 4 },
           }}
         >
           <Box
@@ -192,7 +203,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
               bgcolor: "#ffffff",
               px: 2,
               py: 1,
-              borderRadius: 1,
+              borderRadius: 1.5,
               border: "1px solid #e2e8f0",
               boxShadow: "0 4px 15px -10px rgba(0,0,0,0.05)",
             }}
@@ -205,7 +216,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
                 color: "#0284c7",
               }}
             >
-              <User size={20} />
+              <User size={18} />
             </Box>
             <Box>
               <Typography
@@ -223,7 +234,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
               <Typography
                 sx={{
                   fontWeight: 800,
-                  fontSize: "1rem",
+                  fontSize: { xs: "0.9rem", sm: "1rem" },
                   color: "#0f172a",
                 }}
               >
@@ -239,7 +250,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
               bgcolor: "#ffffff",
               px: 2,
               py: 1,
-              borderRadius: 1,
+              borderRadius: 1.5,
               border: "1px solid #e2e8f0",
               boxShadow: "0 4px 15px -10px rgba(0,0,0,0.05)",
             }}
@@ -252,7 +263,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
                 color: "#7c3aed",
               }}
             >
-              <Clock size={20} />
+              <Clock size={18} />
             </Box>
             <Box>
               <Typography
@@ -270,7 +281,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
               <Typography
                 sx={{
                   fontWeight: 800,
-                  fontSize: "1rem",
+                  fontSize: { xs: "0.9rem", sm: "1rem" },
                   color: "#0f172a",
                 }}
               >
@@ -287,11 +298,11 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
             alignItems: "center",
             gap: 2,
             bgcolor: "#ffffff",
-            px: 2,
+            px: { xs: 1.5, sm: 2 },
             py: 1,
-            borderRadius: 1,
+            borderRadius: 1.5,
             border: "1px solid #e2e8f0",
-            width: "fit-content",
+            width: { xs: "100%", sm: "fit-content" },
             boxShadow: "0 10px 30px -10px rgba(0,0,0,0.05)",
           }}
         >
@@ -299,11 +310,11 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
             max={4}
             sx={{
               "& .MuiAvatar-root": {
-                width: 48,
-                height: 48,
+                width: { xs: 40, sm: 48 },
+                height: { xs: 40, sm: 48 },
                 background: "linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)",
                 fontWeight: 800,
-                fontSize: "1.125rem",
+                fontSize: { xs: "0.95rem", sm: "1.125rem" },
                 border: "2px solid #ffffff",
                 color: "white",
               },
@@ -333,7 +344,7 @@ export const HeroSection = ({ course }: HeroSectionProps) => {
             <Typography
               sx={{
                 fontWeight: 800,
-                fontSize: "1.125rem",
+                fontSize: { xs: "0.95rem", sm: "1.125rem" },
                 color: "#0f172a",
                 letterSpacing: "-0.01em",
               }}

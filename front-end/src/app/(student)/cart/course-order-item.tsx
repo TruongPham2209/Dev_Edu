@@ -9,12 +9,13 @@ import {
   Checkbox,
   Chip,
   IconButton,
+  Stack,
   Typography,
 } from "@mui/material";
 import { CheckCircle2, PlayCircle, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { ReviewDialog } from "./review-dialog";
+import { ReviewDialog } from "../../../components/dialog/review-dialog";
 
 const stripHtml = (html: string = "") => {
   return html.replace(/<[^>]*>/g, "").trim();
@@ -66,110 +67,73 @@ export function CourseOrderItem({
     >
       <CardContent
         sx={{
-          p: { xs: 1, sm: 2 },
-          display: "flex",
-          alignItems: "stretch",
-          gap: 2.5,
-          flexDirection: { xs: "column", sm: "row" },
-          flex: 1,
+          p: { xs: 2, sm: 2.5 },
+          "&:last-child": { pb: { xs: 2, sm: 2.5 } },
         }}
       >
-        {tabContext === "cart" && onSelect && (
-          <Box sx={{ alignSelf: { xs: "flex-start", sm: "center" } }}>
-            <Checkbox
-              checked={!!selected}
-              onChange={(e) => onSelect(courseId, e.target.checked)}
-              sx={{ color: "#cbd5e1", "&.Mui-checked": { color: "#0284c7" } }}
-            />
-          </Box>
-        )}
-
-        <Box
-          component={Link}
-          href={`/courses/${courseId}`}
-          sx={{
-            width: { xs: "100%", sm: 160 },
-            height: { xs: 180, sm: "auto" },
-            minHeight: { sm: 120 },
-            borderRadius: 1,
-            overflow: "hidden",
-            flexShrink: 0,
-            position: "relative",
-            display: "block",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.1)",
-              borderRadius: 1,
-            },
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={thumbnailUrl}
-            alt={title}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        </Box>
-
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1.5,
-            width: "100%",
-            justifyContent: "space-between",
-          }}
-        >
+        <Stack spacing={{ xs: 1.5, sm: 2 }}>
+          {/* ROW 1: Image + Title + Trash/Chip */}
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: 2,
+              alignItems: "center",
+              gap: { xs: 1.5, sm: 2 },
+              width: "100%",
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            {tabContext === "cart" && onSelect && (
+              <Checkbox
+                checked={!!selected}
+                onChange={(e) => onSelect(courseId, e.target.checked)}
+                sx={{
+                  p: 0.5,
+                  color: "#cbd5e1",
+                  "&.Mui-checked": { color: "#0284c7" },
+                }}
+              />
+            )}
+
+            <Box
+              component={Link}
+              href={`/courses/${courseId}`}
+              sx={{
+                width: { xs: 80, sm: 110, md: 130 },
+                height: { xs: 54, sm: 72, md: 82 },
+                borderRadius: 0.5,
+                overflow: "hidden",
+                flexShrink: 0,
+                position: "relative",
+                display: "block",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={thumbnailUrl}
+                alt={title}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </Box>
+
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography
                 component={Link}
                 href={`/courses/${courseId}`}
-                variant="subtitle1"
                 sx={{
                   fontWeight: 800,
                   color: "#0f172a",
                   textDecoration: "none",
-                  fontSize: "1.1rem",
+                  fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.1rem" },
                   lineHeight: 1.4,
-                  mb: 0.5,
-                  "&:hover": { color: "#0284c7" },
                   display: "-webkit-box",
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
+                  "&:hover": { color: "#0284c7" },
                 }}
               >
                 {title}
               </Typography>
-              {item.description && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#64748b",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {stripHtml(item.description)}
-                </Typography>
-              )}
             </Box>
 
             {tabContext === "cart" && onRemove && (
@@ -195,31 +159,59 @@ export function CourseOrderItem({
                   bgcolor: "#dcfce7",
                   color: "#166534",
                   fontWeight: 700,
+                  flexShrink: 0,
                   "& .MuiChip-icon": { color: "#166534" },
                 }}
               />
             )}
           </Box>
 
+          {/* ROW 2: Description */}
+          {item.description && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "#64748b",
+                fontSize: { xs: "0.825rem", sm: "0.875rem" },
+                lineHeight: 1.6,
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {stripHtml(item.description)}
+            </Typography>
+          )}
+
+          {/* ROW 3: Price, Purchased Date, Actions (Review / Learn) */}
           <Box
             sx={{
-              mt: "auto",
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "flex-end",
+              alignItems: "center",
+              pt: 1.25,
+              borderTop: "1px solid #f1f5f9",
               flexWrap: "wrap",
-              gap: 2,
+              gap: 1.5,
             }}
           >
-            {tabContext === "cart" && (
-              <Box>
+            {/* Left Side: Price & Purchased Date */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
                 <Typography
-                  variant="h6"
                   sx={{
                     fontWeight: 800,
                     color: "#0ea5e9",
+                    fontSize: { xs: "1rem", sm: "1.15rem" },
                     lineHeight: 1,
-                    mb: 0.5,
                   }}
                 >
                   {discountedPrice != null
@@ -233,109 +225,87 @@ export function CourseOrderItem({
                       color: "#94a3b8",
                       textDecoration: "line-through",
                       fontWeight: 600,
+                      fontSize: { xs: "0.75rem", sm: "0.8rem" },
                     }}
                   >
                     {originalPrice.toLocaleString()}đ
                   </Typography>
                 )}
               </Box>
-            )}
 
-            {tabContext === "order" && (
-              <Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 800,
-                    color: "#0f172a",
-                    lineHeight: 1,
-                    mb: 0.5,
-                  }}
-                >
-                  {discountedPrice != null
-                    ? `${discountedPrice.toLocaleString()}đ`
-                    : "Free"}
-                </Typography>
-                {originalPrice != null && originalPrice > discountedPrice && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "#94a3b8",
-                      textDecoration: "line-through",
-                      fontWeight: 600,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    {originalPrice.toLocaleString()}đ
-                  </Typography>
-                )}
+              {tabContext === "order" && (
                 <Typography
                   variant="body2"
-                  sx={{ color: "#64748b", fontWeight: 600 }}
+                  sx={{
+                    color: "#64748b",
+                    fontWeight: 500,
+                    fontSize: { xs: "0.775rem", sm: "0.85rem" },
+                  }}
                 >
-                  Purchased at:{" "}
-                  {formatServerDate(item.timestamp || item.createdAt)}
+                  Purchased:{" "}
+                  <span style={{ color: "#334155", fontWeight: 600 }}>
+                    {formatServerDate(item.timestamp || item.createdAt)}
+                  </span>
                 </Typography>
-                {orderStatus === "COMPLETED" && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Star size={16} />}
-                    onClick={() => setReviewDialogOpen(true)}
-                    sx={{
-                      mt: 1.5,
-                      borderRadius: 8,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      borderColor: "#cbd5e1",
-                      color: "#475569",
-                      "&:hover": {
-                        bgcolor: "#f8fafc",
-                        borderColor: "#94a3b8",
-                      },
-                    }}
-                  >
-                    Review Now
-                  </Button>
-                )}
-              </Box>
-            )}
+              )}
+            </Box>
 
-            {tabContext === "enrolled" && (
-              <Button
-                component={Link}
-                href={`/courses/${courseId}/lectures`}
-                variant="contained"
-                size="small"
-                startIcon={<PlayCircle size={16} />}
-                sx={{
-                  bgcolor: "#0ea5e9",
-                  color: "#fff",
+            {/* Right Side: Action Button */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {tabContext === "order" && orderStatus === "COMPLETED" && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Star size={15} />}
+                  onClick={() => setReviewDialogOpen(true)}
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: { xs: "0.8rem", sm: "0.85rem" },
+                    borderColor: "#cbd5e1",
+                    color: "#475569",
+                    py: 0.5,
+                    px: 1.5,
+                    "&:hover": {
+                      bgcolor: "#f8fafc",
+                      borderColor: "#94a3b8",
+                    },
+                  }}
+                >
+                  Review Now
+                </Button>
+              )}
 
-                  borderRadius: 50,
-                  textTransform: "none",
-
-                  fontWeight: 700,
-                  px: 3,
-                  py: 1,
-
-                  boxShadow: "0 4px 14px rgba(14,165,233,0.25)",
-
-                  "&:hover": {
-                    bgcolor: "#0284c7",
-                    boxShadow: "0 6px 20px rgba(14,165,233,0.35)",
-                    transform: "translateY(-1px)",
-                  },
-
-                  transition: "all .2s ease",
-                }}
-              >
-                Enroll
-              </Button>
-            )}
+              {tabContext === "enrolled" && (
+                <Button
+                  component={Link}
+                  href={`/courses/${courseId}/lectures`}
+                  variant="contained"
+                  size="small"
+                  startIcon={<PlayCircle size={15} />}
+                  sx={{
+                    bgcolor: "#0ea5e9",
+                    color: "#fff",
+                    borderRadius: "20px",
+                    textTransform: "none",
+                    fontWeight: 800,
+                    fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    px: 2.5,
+                    py: 0.6,
+                    boxShadow: "0 4px 14px rgba(14,165,233,0.25)",
+                    "&:hover": {
+                      bgcolor: "#0284c7",
+                      boxShadow: "0 6px 20px rgba(14,165,233,0.35)",
+                    },
+                  }}
+                >
+                  Learn Now
+                </Button>
+              )}
+            </Box>
           </Box>
-        </Box>
+        </Stack>
       </CardContent>
 
       <ReviewDialog

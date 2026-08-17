@@ -51,18 +51,28 @@ export default function ProfilePage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: "auto", width: "100%", pb: 8 }}>
+    <Box
+      sx={{
+        maxWidth: 1000,
+        mx: "auto",
+        width: "100%",
+        px: { xs: 2, sm: 3, md: 4 },
+        pt: { xs: 2, sm: 3 },
+        pb: { xs: 6, sm: 8 },
+      }}
+    >
       <ProfileHeader user={user} onAvatarChange={handleAvatarChange} />
 
       <Box
         sx={{
           borderBottom: 1,
           borderColor: "divider",
-          mb: 3,
+          mb: { xs: 2.5, sm: 3 },
           position: "sticky",
-          top: 70,
+          top: { xs: 56, sm: 64, md: 70 },
           bgcolor: "background.default",
           zIndex: 10,
+          overflowX: "auto",
         }}
       >
         <AnimatedTabs

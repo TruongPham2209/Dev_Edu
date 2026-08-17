@@ -17,9 +17,8 @@ export async function FeaturedCoursesSection() {
             sm: "repeat(2, 1fr)",
             md: "repeat(3, 1fr)",
             lg: "repeat(4, 1fr)",
-            xl: "repeat(5, 1fr)",
           },
-          gap: 3,
+          gap: { xs: 2, sm: 2.5, md: 3 },
         }}
       >
         {featuredCourses.map((course) => (
@@ -47,9 +46,8 @@ export function FeaturedCoursesFallback() {
           sm: "repeat(2, 1fr)",
           md: "repeat(3, 1fr)",
           lg: "repeat(4, 1fr)",
-          xl: "repeat(5, 1fr)",
         },
-        gap: 3,
+        gap: { xs: 2, sm: 2.5, md: 3 },
       }}
     >
       {Array.from({ length: 5 }).map((_, index) => (

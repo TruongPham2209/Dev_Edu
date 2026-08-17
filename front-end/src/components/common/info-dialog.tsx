@@ -58,7 +58,7 @@ export function InfoDialog({
         },
       }}
       sx={{
-        "& .MuiPaper-root": {
+        "& .MuiDialog-paper": {
           position: "relative",
           overflow: "hidden",
           borderRadius: "24px",
@@ -103,18 +103,18 @@ export function InfoDialog({
         component="div"
         sx={{
           position: "relative",
-          px: 4,
-          pt: 4,
-          pb: 2,
+          px: { xs: 2.5, sm: 4 },
+          pt: { xs: 2.5, sm: 4 },
+          pb: { xs: 1.5, sm: 2 },
         }}
       >
         {/* Accent line */}
         <Box
           sx={{
             position: "absolute",
-            left: 32,
-            top: 24,
-            width: 56,
+            left: { xs: 20, sm: 32 },
+            top: { xs: 16, sm: 24 },
+            width: { xs: 40, sm: 56 },
             height: 4,
             borderRadius: 999,
             background: "rgba(59,130,246,0.7)",
@@ -123,26 +123,26 @@ export function InfoDialog({
 
         <Box
           sx={{
-            mt: 2,
+            mt: { xs: 1, sm: 2 },
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 2,
+            gap: 1.5,
           }}
         >
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
+              gap: { xs: 1.25, sm: 2 },
             }}
           >
             {/* Icon container */}
             <Box
               sx={{
-                width: 52,
-                height: 52,
-                borderRadius: "18px",
+                width: { xs: 42, sm: 52 },
+                height: { xs: 42, sm: 52 },
+                borderRadius: { xs: "14px", sm: "18px" },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -150,6 +150,7 @@ export function InfoDialog({
                 color: "#334155",
                 border: "1px solid rgba(15,23,42,0.06)",
                 boxShadow: "0 10px 24px rgba(99,102,241,0.35)",
+                flexShrink: 0,
               }}
             >
               {headerIcon}
@@ -161,8 +162,9 @@ export function InfoDialog({
                 sx={{
                   fontWeight: 700,
                   color: "#1e293b",
-                  lineHeight: 1.1,
+                  lineHeight: 1.2,
                   letterSpacing: "-0.02em",
+                  fontSize: { xs: "1.15rem", sm: "1.5rem" },
                 }}
               >
                 {title}
@@ -171,9 +173,10 @@ export function InfoDialog({
               <Typography
                 variant="body2"
                 sx={{
-                  mt: 0.5,
+                  mt: 0.25,
                   color: "#64748b",
                   fontWeight: 500,
+                  fontSize: { xs: "0.8rem", sm: "0.875rem" },
                 }}
               >
                 Review the details below
@@ -185,18 +188,13 @@ export function InfoDialog({
           <IconButton
             onClick={handleCloseDialog}
             sx={{
-              width: 40,
-              height: 40,
+              width: { xs: 36, sm: 40 },
+              height: { xs: 36, sm: 40 },
               borderRadius: "14px",
               background: "rgba(148,163,184,0.12)",
               border: "1px solid rgba(148,163,184,0.18)",
               transition: "all .2s ease",
-
-              // "&:hover": {
-              //   background: "rgba(239,68,68,0.12)",
-              //   color: "#ef4444",
-              //   transform: "rotate(90deg) scale(1.05)",
-              // },
+              flexShrink: 0,
               "&:hover": {
                 background: "rgba(15,23,42,0.06)",
               },
@@ -210,11 +208,11 @@ export function InfoDialog({
       {/* CONTENT */}
       <DialogContent
         sx={{
-          px: 4,
-          py: 3,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
+          px: { xs: 2.5, sm: 4 },
+          py: { xs: 1.5, sm: 3 },
+          display: "block",
+          flex: 1,
+          overflowY: "auto",
         }}
       >
         {children}
@@ -223,9 +221,9 @@ export function InfoDialog({
       {/* ACTIONS */}
       <DialogActions
         sx={{
-          px: 4,
-          pb: 4,
-          pt: 2,
+          px: { xs: 2.5, sm: 4 },
+          pb: { xs: 2.5, sm: 4 },
+          pt: { xs: 1, sm: 2 },
           gap: 1.5,
         }}
       >

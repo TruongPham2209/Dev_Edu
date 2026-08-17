@@ -194,6 +194,9 @@ export function PostedPostsTab() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1.5,
+          mb: { xs: 1, sm: 2 },
         }}
       >
         <FilterSelect
@@ -203,14 +206,17 @@ export function PostedPostsTab() {
         />
         <Button
           variant="contained"
+          size="small"
           startIcon={<Sparkles size={16} />}
           onClick={() => setIsCreatingPost(true)}
           sx={{
             bgcolor: "#0f172a",
             borderRadius: 50,
-            px: 3,
+            px: { xs: 2, sm: 3 },
+            py: 0.8,
             textTransform: "none",
             fontWeight: 600,
+            fontSize: { xs: "0.825rem", sm: "0.875rem" },
             boxShadow: "none",
             "&:hover": {
               bgcolor: "#1e293b",

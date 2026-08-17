@@ -24,10 +24,10 @@ export async function RelatedPostsSidebar({
         position: { xs: "static", md: "sticky" },
         top: { md: 88 }, // Adjust based on header height
         alignSelf: "start",
-        pb: 4,
+        pb: { xs: 2, sm: 4 },
       }}
     >
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 3 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: { xs: 2, sm: 3 }, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}>
         Related Posts
       </Typography>
 

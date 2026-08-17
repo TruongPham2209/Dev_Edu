@@ -27,47 +27,52 @@ import { use, useState } from "react";
 
 function QuizCardSkeleton() {
   return (
-    <Card variant="outlined" sx={{ borderRadius: 1, p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          mb: 2,
-        }}
-      >
-        <Box sx={{ flex: 1, pr: 1 }}>
-          <Skeleton variant="text" width="65%" height={28} sx={{ mb: 0.5 }} />
-          <Skeleton variant="rounded" width={70} height={20} />
+    <Card variant="outlined" sx={{ borderRadius: 1.5 }}>
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", sm: "flex-start" },
+            gap: { xs: 1, sm: 1.5 },
+            mb: 2,
+          }}
+        >
+          <Box sx={{ flex: 1, pr: 1, width: "100%" }}>
+            <Skeleton variant="text" width="65%" height={28} sx={{ mb: 0.5 }} />
+            <Skeleton variant="rounded" width={70} height={20} />
+          </Box>
+          <Skeleton variant="rounded" width={80} height={24} sx={{ flexShrink: 0 }} />
         </Box>
-        <Skeleton variant="rounded" width={80} height={24} />
-      </Box>
 
-      <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 1.5 }} />
 
-      <Stack direction="row" spacing={3} sx={{ mb: 3 }}>
-        <Skeleton variant="text" width={110} height={20} />
-        <Skeleton variant="text" width={100} height={20} />
-      </Stack>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Stack spacing={0.5}>
-          <Skeleton variant="text" width={130} height={18} />
-          <Skeleton variant="text" width={130} height={18} />
+        <Stack direction="row" spacing={3} sx={{ mb: 2 }}>
+          <Skeleton variant="text" width={110} height={20} />
         </Stack>
-        <Skeleton
-          variant="rounded"
-          width={110}
-          height={32}
-          sx={{ borderRadius: 2 }}
-        />
-      </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "stretch", sm: "center" },
+            gap: { xs: 1.5, sm: 1 },
+          }}
+        >
+          <Stack spacing={0.5}>
+            <Skeleton variant="text" width={130} height={18} />
+            <Skeleton variant="text" width={130} height={18} />
+          </Stack>
+          <Skeleton
+            variant="rounded"
+            width={110}
+            height={32}
+            sx={{ borderRadius: 2, width: { xs: "100%", sm: 110 } }}
+          />
+        </Box>
+      </CardContent>
     </Card>
   );
 }
@@ -93,10 +98,10 @@ export default function CourseQuizzesPage({
 
   if (isLoadingCourse || isLoadingAssignments) {
     return (
-      <Container maxWidth="lg" sx={{ py: 5 }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2.5, sm: 4, md: 5 } }}>
         <QuizHero courseId={courseId} />
         <Box sx={{ mt: 3 }}>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {[1, 2, 3, 4].map((i) => (
               <Grid key={i} size={{ xs: 12, md: 6 }}>
                 <QuizCardSkeleton />
@@ -109,7 +114,7 @@ export default function CourseQuizzesPage({
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
+    <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2.5, sm: 4, md: 5 } }}>
       {/* Hero Header Section */}
       <QuizHero courseId={courseId} roleAccess="STUDENT" />
 
@@ -126,7 +131,7 @@ export default function CourseQuizzesPage({
         />
       ) : (
         <Box sx={{ mt: 3 }}>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {assignments.map((assignment) => {
               const assignmentName =
                 assignment.assignmentName ||
@@ -139,7 +144,7 @@ export default function CourseQuizzesPage({
                     variant="outlined"
                     onClick={() => setSelectedAssignment(assignment)}
                     sx={{
-                      borderRadius: 1,
+                      borderRadius: 1.5,
                       cursor: "pointer",
                       transition: "all 0.25s ease-in-out",
                       bgcolor: "background.paper",
@@ -150,19 +155,21 @@ export default function CourseQuizzesPage({
                       },
                     }}
                   >
-                    <CardContent sx={{ p: 3 }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                       <Box
                         sx={{
                           display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
                           justifyContent: "space-between",
-                          alignItems: "flex-start",
+                          alignItems: { xs: "flex-start", sm: "flex-start" },
+                          gap: { xs: 1, sm: 1.5 },
                           mb: 2,
                         }}
                       >
                         <Box sx={{ flex: 1, pr: 1 }}>
                           <Typography
                             variant="h6"
-                            sx={{ fontWeight: 700, mb: 0.5 }}
+                            sx={{ fontWeight: 700, mb: 0.5, fontSize: { xs: "1rem", sm: "1.2rem" } }}
                           >
                             {assignmentName}
                           </Typography>
@@ -174,16 +181,16 @@ export default function CourseQuizzesPage({
                           icon={<Clock size={12} />}
                           color="primary"
                           variant="outlined"
-                          sx={{ fontWeight: 600 }}
+                          sx={{ fontWeight: 600, flexShrink: 0 }}
                         />
                       </Box>
 
-                      <Divider sx={{ my: 2 }} />
+                      <Divider sx={{ my: 1.5 }} />
 
                       <Stack
                         direction="row"
                         spacing={3}
-                        sx={{ color: "text.secondary", mb: 3 }}
+                        sx={{ color: "text.secondary", mb: 2 }}
                       >
                         <Typography
                           variant="caption"
@@ -201,8 +208,10 @@ export default function CourseQuizzesPage({
                       <Box
                         sx={{
                           display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
                           justifyContent: "space-between",
-                          alignItems: "center",
+                          alignItems: { xs: "stretch", sm: "center" },
+                          gap: { xs: 1.5, sm: 1 },
                         }}
                       >
                         <Stack spacing={0.5}>
@@ -239,7 +248,7 @@ export default function CourseQuizzesPage({
                           variant="contained"
                           size="small"
                           startIcon={<Info size={14} />}
-                          sx={{ borderRadius: 2, fontWeight: 700, px: 2 }}
+                          sx={{ borderRadius: 2, fontWeight: 700, px: 2, width: { xs: "100%", sm: "auto" } }}
                         >
                           View Quiz
                         </Button>

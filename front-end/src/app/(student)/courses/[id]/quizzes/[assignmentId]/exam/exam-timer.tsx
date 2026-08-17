@@ -5,9 +5,13 @@ import { AlertTriangle, Clock } from "lucide-react";
 
 interface ExamTimerProps {
   timeRemainingSeconds: number;
+  compact?: boolean;
 }
 
-export function ExamTimer({ timeRemainingSeconds = 0 }: ExamTimerProps) {
+export function ExamTimer({
+  timeRemainingSeconds = 0,
+  compact = false,
+}: ExamTimerProps) {
   const safeSeconds =
     isNaN(timeRemainingSeconds) || timeRemainingSeconds < 0
       ? 0
@@ -31,6 +35,53 @@ export function ExamTimer({ timeRemainingSeconds = 0 }: ExamTimerProps) {
   const isCritical = safeSeconds <= 60 && safeSeconds > 0;
   const isWarning = safeSeconds <= 300 && safeSeconds > 60;
 
+  if (compact) {
+    return (
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 0.75,
+          px: 1.25,
+          py: 0.4,
+          height: { xs: 26, sm: 28 },
+          borderRadius: 9999,
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+          bgcolor: isCritical
+            ? "error.main"
+            : isWarning
+              ? "error.50"
+              : "action.hover",
+          border: 1,
+          borderColor: isCritical
+            ? "error.dark"
+            : isWarning
+              ? "error.main"
+              : "divider",
+          color: isCritical
+            ? "error.contrastText"
+            : isWarning
+              ? "error.main"
+              : "text.primary",
+          animation: isCritical
+            ? "urgentPulse 1s infinite"
+            : isWarning
+              ? "pulse 1.5s infinite"
+              : "none",
+        }}
+      >
+        <Clock size={13} />
+        <Typography
+          variant="caption"
+          sx={{ fontWeight: 800, fontFamily: "monospace", fontSize: "0.825rem", lineHeight: 1.2 }}
+        >
+          {formattedTime}
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Stack spacing={1} sx={{ width: "100%" }}>
       <Box
@@ -38,7 +89,7 @@ export function ExamTimer({ timeRemainingSeconds = 0 }: ExamTimerProps) {
           display: "inline-flex",
           alignItems: "center",
           gap: 1,
-          px: 2,
+          px: { xs: 1.5, sm: 2 },
           py: 0.75,
           borderRadius: 3,
           bgcolor: isCritical
@@ -74,10 +125,10 @@ export function ExamTimer({ timeRemainingSeconds = 0 }: ExamTimerProps) {
           },
         }}
       >
-        <Clock size={20} />
+        <Clock size={18} />
         <Typography
           variant="subtitle1"
-          sx={{ fontWeight: 800, fontFamily: "monospace" }}
+          sx={{ fontWeight: 800, fontFamily: "monospace", fontSize: { xs: "0.95rem", sm: "1rem" } }}
         >
           {formattedTime}
         </Typography>
@@ -87,12 +138,12 @@ export function ExamTimer({ timeRemainingSeconds = 0 }: ExamTimerProps) {
         <Alert
           severity="error"
           variant="filled"
-          icon={<AlertTriangle size={18} />}
+          icon={<AlertTriangle size={16} />}
           sx={{
             borderRadius: 2,
             py: 0.5,
             px: 1.5,
-            fontSize: "0.825rem",
+            fontSize: { xs: "0.775rem", sm: "0.825rem" },
             fontWeight: 700,
             alignItems: "center",
           }}

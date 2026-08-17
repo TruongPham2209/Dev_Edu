@@ -152,8 +152,11 @@ export function FileUpload({
         onDrop={handleDrop}
         sx={{
           width: "100%",
-          height,
-          borderRadius: 3,
+          height:
+            typeof height === "number"
+              ? { xs: Math.min(160, height), sm: height }
+              : height,
+          borderRadius: 1,
           border: "2px dashed",
           borderColor: activeError
             ? "error.main"

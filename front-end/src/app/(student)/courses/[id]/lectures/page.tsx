@@ -165,15 +165,15 @@ export default function StudentLecturePage() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4, scrollbarGutter: "stable" }}>
-      <Grid container spacing={4}>
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 }, pt: { xs: 2, sm: 3, md: 4 }, pb: { xs: 10, lg: 4 }, scrollbarGutter: "stable" }}>
+      <Grid container spacing={{ xs: 3, lg: 4 }}>
         {/* Main Content Area */}
         <Grid size={{ xs: 12, lg: 8.5 }}>
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: 4,
+              gap: { xs: 2.5, sm: 4 },
             }}
           >
             <LectureContent
@@ -191,7 +191,7 @@ export default function StudentLecturePage() {
               }}
             />
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: { xs: 2.5, sm: 3 } }} />
 
             {/* Tabs Section */}
             {(() => {
@@ -231,7 +231,7 @@ export default function StudentLecturePage() {
 
               return (
                 <Box sx={{ width: "100%" }}>
-                  <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                  <Box sx={{ borderBottom: 1, borderColor: "divider", overflowX: "auto" }}>
                     <AnimatedTabs
                       value={tabValue.toString()}
                       onChange={(val) => setTabValue(Number(val))}
@@ -260,7 +260,7 @@ export default function StudentLecturePage() {
         <Grid size={{ xs: 12, lg: 3.5 }}>
           <Box
             sx={{
-              position: { lg: "sticky" },
+              position: { xs: "static", lg: "sticky" },
               top: { lg: 100 },
               maxHeight: { lg: "calc(100vh - 120px)" },
               overflowY: { lg: "auto" },

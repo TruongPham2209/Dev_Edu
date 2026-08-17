@@ -60,7 +60,7 @@ export function ExamQuestionNav({
   return (
     <Box
       sx={{
-        p: 3,
+        p: { xs: 2, sm: 3 },
         bgcolor: "background.paper",
         borderRadius: 3,
         border: 1,
@@ -81,7 +81,7 @@ export function ExamQuestionNav({
         >
           <Typography
             variant="h6"
-            sx={{ fontWeight: 800, color: "primary.main", lineHeight: 1.3 }}
+            sx={{ fontWeight: 800, color: "primary.main", lineHeight: 1.3, fontSize: { xs: "1rem", sm: "1.25rem" } }}
           >
             {quizTitle || "Online Quiz"}
           </Typography>
@@ -128,13 +128,13 @@ export function ExamQuestionNav({
       </Box>
 
       {/* Question Matrix Grid */}
-      <Grid container spacing={1.5}>
+      <Grid container spacing={1.25}>
         {questions.map((q, idx) => {
           const answered = isQuestionAnswered(q);
           const active = idx === currentIndex;
 
           return (
-            <Grid key={q.id} size={{ xs: 4 }}>
+            <Grid key={q.id} size={{ xs: 3, sm: 4 }}>
               <Button
                 variant={active || answered ? "contained" : "outlined"}
                 disableElevation

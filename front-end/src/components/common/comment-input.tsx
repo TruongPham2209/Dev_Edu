@@ -82,11 +82,11 @@ export function CommentInput({
         <Stack
           direction="row"
           spacing={1.5}
-          sx={{ alignItems: "center", mb: 1.5, ml: 6 }}
+          sx={{ alignItems: "center", mb: 1.5, ml: { xs: 0, sm: 6 }, flexWrap: "wrap" }}
         >
           <Typography
             variant="body2"
-            sx={{ fontWeight: 600, color: "text.secondary" }}
+            sx={{ fontWeight: 600, color: "text.secondary", fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
           >
             {ratingLabel}
           </Typography>

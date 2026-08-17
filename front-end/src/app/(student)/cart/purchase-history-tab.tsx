@@ -111,9 +111,19 @@ export function PurchaseHistoryTabContent() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1.5,
+          mb: { xs: 2.5, sm: 4 },
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700, color: "#0f172a" }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            color: "#0f172a",
+            fontSize: { xs: "1.1rem", sm: "1.25rem" },
+          }}
+        >
           Your Orders
         </Typography>
         <FilterSelect
@@ -125,12 +135,12 @@ export function PurchaseHistoryTabContent() {
 
       {/* Left Column: Items */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Stack spacing={4}>
+        <Stack spacing={{ xs: 2.5, sm: 4 }}>
           {orders.map((order) => (
             <Card
               key={order.id}
               sx={{
-                borderRadius: 3,
+                borderRadius: { xs: 2, sm: 3 },
                 boxShadow: "0 4px 20px -5px rgba(0,0,0,0.08)",
                 border: "1px solid #e2e8f0",
                 overflow: "hidden",
@@ -139,43 +149,64 @@ export function PurchaseHistoryTabContent() {
               {/* Order Header */}
               <Box
                 sx={{
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 1.5, sm: 2.5 },
                   bgcolor: "#f8fafc",
                   borderBottom: "1px solid #e2e8f0",
                   display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
+                  flexDirection: { xs: "row", sm: "row" },
                   justifyContent: "space-between",
-                  alignItems: { xs: "flex-start", sm: "center" },
-                  gap: 2,
+                  alignItems: "center",
+                  gap: 1.5,
                 }}
               >
                 <Box>
                   <Typography
                     variant="subtitle2"
-                    sx={{ color: "#64748b", mb: 0.5, fontWeight: 600 }}
+                    sx={{
+                      color: "#64748b",
+                      mb: 0.25,
+                      fontWeight: 600,
+                      fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                    }}
                   >
                     Order ID:{" "}
                     <span style={{ color: "#0f172a", fontWeight: 800 }}>
                       #{order.id.split("-")[0].toUpperCase()}
                     </span>
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#64748b" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#64748b",
+                      fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                    }}
+                  >
                     Placed on:{" "}
                     <span style={{ color: "#0f172a", fontWeight: 600 }}>
                       {formatServerDate(order.createdAt)}
                     </span>
                   </Typography>
                 </Box>
-                <Box sx={{ textAlign: { xs: "left", sm: "right" } }}>
+                <Box sx={{ textAlign: "right" }}>
                   <Typography
                     variant="subtitle2"
-                    sx={{ color: "#64748b", mb: 0.5, fontWeight: 600 }}
+                    sx={{
+                      color: "#64748b",
+                      mb: 0.25,
+                      fontWeight: 600,
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    }}
                   >
                     Total Amount
                   </Typography>
                   <Typography
                     variant="h6"
-                    sx={{ color: "#0ea5e9", fontWeight: 800, lineHeight: 1 }}
+                    sx={{
+                      color: "#0ea5e9",
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      fontSize: { xs: "1.05rem", sm: "1.25rem" },
+                    }}
                   >
                     {order.totalAmount.toLocaleString()}đ
                   </Typography>
@@ -185,10 +216,10 @@ export function PurchaseHistoryTabContent() {
               {/* Order Items */}
               <Box
                 sx={{
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 1.25, sm: 2.5 },
                   display: "flex",
                   flexDirection: "column",
-                  gap: 3,
+                  gap: { xs: 1.5, sm: 2.5 },
                   bgcolor: "#ffffff",
                 }}
               >

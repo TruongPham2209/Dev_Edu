@@ -13,6 +13,7 @@ import type { PostRequest } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -155,9 +156,11 @@ export default function ForumPage() {
   };
 
   return (
-    <Stack spacing={0} sx={{ pb: 10 }}>
-      {/* 1. HERO SECTION */}
-      <ForumHero />
+    <Stack spacing={0} sx={{ pb: { xs: 6, sm: 10 } }}>
+      {/* 1. HERO SECTION (Desktop & Tablet md+ only) */}
+      <Box sx={{ display: { xs: "none", md: "block" } }}>
+        <ForumHero />
+      </Box>
 
       {/* 2. SEARCH SECTION */}
       <ForumSearch
@@ -166,7 +169,12 @@ export default function ForumPage() {
         onSearch={handleSearch}
       />
 
-      {/* 3. MAIN CONTENT GRID (Feed + Sidebar) */}
+      {/* 3. MOBILE ONLY: TRENDING TOPICS AT TOP */}
+      <Box sx={{ display: { xs: "block", lg: "none" }, mb: { xs: 3, sm: 4 } }}>
+        <TrendingTopics onSelectTopic={handleSearch} />
+      </Box>
+
+      {/* 4. MAIN CONTENT GRID (Feed + Sidebar) */}
       <Box
         sx={{
           display: "flex",
@@ -179,9 +187,11 @@ export default function ForumPage() {
           <Box
             sx={{
               display: "flex",
-              alignItems: "center",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: { xs: "stretch", sm: "center" },
               justifyContent: "space-between",
-              mb: 3,
+              gap: { xs: 2, sm: 0 },
+              mb: { xs: 2.5, sm: 3 },
             }}
           >
             <Typography
@@ -192,9 +202,10 @@ export default function ForumPage() {
                 display: "flex",
                 alignItems: "center",
                 gap: 1.5,
+                fontSize: { xs: "1.25rem", sm: "1.5rem" },
               }}
             >
-              <TrendingUp size={24} color="#0284c7" />
+              <TrendingUp size={22} color="#0284c7" />
               Latest Discussions
             </Typography>
             <Button
@@ -204,7 +215,10 @@ export default function ForumPage() {
               sx={{
                 bgcolor: "#0f172a",
                 borderRadius: 50,
-                px: 3,
+                px: { xs: 3, sm: 3 },
+                py: { xs: 1, sm: 0.8 },
+                width: { xs: "100%", sm: "auto" },
+                justifyContent: "center",
                 textTransform: "none",
                 fontWeight: 600,
                 boxShadow: "none",
@@ -293,9 +307,15 @@ export default function ForumPage() {
           )}
         </Box>
 
-        {/* RIGHT COLUMN: Sidebar (Trending/Stats) */}
-        <Box sx={{ width: { xs: "100%", lg: 320 }, flexShrink: 0 }}>
-          <Box sx={{ position: "sticky", top: 100 }}>
+        {/* RIGHT COLUMN: Sidebar (Desktop lg+ only) */}
+        <Box
+          sx={{
+            width: { xs: "100%", lg: 320 },
+            flexShrink: 0,
+            display: { xs: "none", lg: "block" },
+          }}
+        >
+          <Box sx={{ position: "sticky", top: 140 }}>
             {/* Pinned/Trending Card */}
             <TrendingTopics onSelectTopic={handleSearch} />
 

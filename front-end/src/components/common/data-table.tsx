@@ -143,13 +143,29 @@ export function DataTable<T>({
         component={Paper}
         variant="outlined"
         sx={{
-          borderRadius: 1,
+          borderRadius: 1.5,
           borderColor: "rgba(0,0,0,0.08)",
           boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
-          overflow: "hidden",
+          width: "100%",
+          maxWidth: "100%",
+          overflowX: "auto !important",
+          WebkitOverflowScrolling: "touch",
+          "&::-webkit-scrollbar": {
+            height: 6,
+          },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "divider",
+            borderRadius: 1,
+          },
         }}
       >
-        <Table stickyHeader sx={{ minWidth, tableLayout: "fixed" }}>
+        <Table
+          stickyHeader
+          sx={{
+            minWidth: minWidth || "100%",
+            width: "100%",
+          }}
+        >
           <TableHead>
             <TableRow>
               {columns.map((col, index) => (
@@ -161,7 +177,9 @@ export function DataTable<T>({
                     bgcolor: "#f8fafc",
                     color: "text.secondary",
                     textAlign: col.align || "left",
-                    py: 2,
+                    py: { xs: 1.25, sm: 1.75 },
+                    px: { xs: 1.5, sm: 2 },
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {col.header}
@@ -206,7 +224,12 @@ export function DataTable<T>({
                     {columns.map((col, colIndex) => (
                       <TableCell
                         key={`td-${colIndex}`}
-                        sx={{ textAlign: col.align || "left", py: 2 }}
+                        sx={{
+                          textAlign: col.align || "left",
+                          py: { xs: 1.25, sm: 1.75 },
+                          px: { xs: 1.5, sm: 2 },
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {col.render(item, index)}
                       </TableCell>
@@ -235,10 +258,10 @@ export function DataTable<T>({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              p: 2.5,
+              p: { xs: 1.5, sm: 2.5 },
               borderTop: "1px solid rgba(15, 23, 42, 0.08)",
               flexWrap: "wrap",
-              gap: 2,
+              gap: 1.5,
               bgcolor: "#f8fafc",
               borderBottomLeftRadius: 8,
               borderBottomRightRadius: 8,
@@ -246,7 +269,11 @@ export function DataTable<T>({
           >
             <Typography
               variant="body2"
-              sx={{ color: "text.secondary", fontWeight: 600 }}
+              sx={{
+                color: "text.secondary",
+                fontWeight: 600,
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+              }}
             >
               Showing page {page + 1} of {totalPages || 1}{" "}
               {totalElements !== undefined && `(${totalElements} items)`}

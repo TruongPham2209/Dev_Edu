@@ -13,15 +13,16 @@ export function CheckoutHeader({ onBack, disabled }: CheckoutHeaderProps) {
   const theme = useTheme();
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ mb: { xs: 2.5, sm: 4 } }}>
       <Button
         startIcon={<ChevronLeft size={18} />}
         onClick={onBack}
         disabled={disabled}
         sx={{
-          mb: 2,
+          mb: { xs: 1.5, sm: 2 },
           color: "text.secondary",
           fontWeight: 600,
+          fontSize: { xs: "0.85rem", sm: "0.95rem" },
           textTransform: "none",
         }}
       >
@@ -33,15 +34,21 @@ export function CheckoutHeader({ onBack, disabled }: CheckoutHeaderProps) {
         sx={{
           justifyContent: "space-between",
           alignItems: { xs: "flex-start", sm: "center" },
-          gap: 2,
+          gap: 1.5,
         }}
       >
         <Chip
-          icon={<ShieldCheck size={18} />}
+          icon={<ShieldCheck size={16} />}
           label="Secure Checkout"
           color="success"
           variant="outlined"
-          sx={{ fontWeight: 700, borderRadius: 2, pl: 0.5, borderWidth: 2 }}
+          sx={{
+            fontWeight: 700,
+            borderRadius: 2,
+            pl: 0.5,
+            borderWidth: 2,
+            fontSize: { xs: "0.8rem", sm: "0.875rem" },
+          }}
         />
       </Stack>
     </Box>

@@ -89,7 +89,9 @@ export function FormDialog({
         "& .MuiPaper-root": {
           position: "relative",
           overflow: "hidden",
-          borderRadius: "28px",
+          borderRadius: { xs: "20px", sm: "28px" },
+          margin: { xs: 1.5, sm: 4 },
+          width: { xs: "calc(100% - 24px)", sm: "100%" },
           border: "1px solid rgba(255,255,255,0.12)",
           background: `
             linear-gradient(
@@ -110,7 +112,7 @@ export function FormDialog({
           position: "absolute",
           inset: 0,
           padding: "1px",
-          borderRadius: "28px",
+          borderRadius: { xs: "20px", sm: "28px" },
           background: `
             linear-gradient(
               135deg,
@@ -147,18 +149,18 @@ export function FormDialog({
         component="div"
         sx={{
           position: "relative",
-          px: 4,
-          pt: 4,
-          pb: 2,
+          px: { xs: 2.5, sm: 4 },
+          pt: { xs: 2.5, sm: 4 },
+          pb: 1.5,
         }}
       >
         {/* Accent line */}
         <Box
           sx={{
             position: "absolute",
-            left: 32,
-            top: 24,
-            width: 56,
+            left: { xs: 20, sm: 32 },
+            top: { xs: 16, sm: 24 },
+            width: { xs: 40, sm: 56 },
             height: 4,
             borderRadius: 999,
             background: "linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%)",
@@ -167,32 +169,33 @@ export function FormDialog({
 
         <Box
           sx={{
-            mt: 2,
+            mt: { xs: 1, sm: 2 },
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 2,
+            gap: 1.5,
           }}
         >
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
+              gap: { xs: 1.5, sm: 2 },
             }}
           >
             {/* Icon container */}
             <Box
               sx={{
-                width: 52,
-                height: 52,
-                borderRadius: "18px",
+                width: { xs: 44, sm: 52 },
+                height: { xs: 44, sm: 52 },
+                borderRadius: { xs: "14px", sm: "18px" },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                 color: "white",
                 boxShadow: "0 10px 24px rgba(99,102,241,0.35)",
+                flexShrink: 0,
               }}
             >
               {headerIcon}
@@ -206,6 +209,7 @@ export function FormDialog({
                   color: "#0f172a",
                   lineHeight: 1.1,
                   letterSpacing: "-0.02em",
+                  fontSize: { xs: "1.2rem", sm: "1.5rem" },
                 }}
               >
                 {title}
@@ -217,6 +221,7 @@ export function FormDialog({
                   mt: 0.5,
                   color: "#64748b",
                   fontWeight: 500,
+                  fontSize: { xs: "0.775rem", sm: "0.875rem" },
                 }}
               >
                 Please check the information before confirming
@@ -229,12 +234,13 @@ export function FormDialog({
             onClick={handleCloseDialog}
             disabled={isSubmitting}
             sx={{
-              width: 40,
-              height: 40,
+              width: { xs: 36, sm: 40 },
+              height: { xs: 36, sm: 40 },
               borderRadius: "14px",
               background: "rgba(148,163,184,0.12)",
               border: "1px solid rgba(148,163,184,0.18)",
               transition: "all .2s ease",
+              flexShrink: 0,
 
               "&:hover": {
                 background: "rgba(239,68,68,0.12)",
@@ -251,11 +257,11 @@ export function FormDialog({
       {/* CONTENT */}
       <DialogContent
         sx={{
-          px: 4,
-          py: 3,
+          px: { xs: 2.5, sm: 4 },
+          py: { xs: 2, sm: 3 },
           display: "flex",
           flexDirection: "column",
-          gap: 3,
+          gap: { xs: 2, sm: 3 },
         }}
       >
         {children}
@@ -264,10 +270,11 @@ export function FormDialog({
       {/* ACTIONS */}
       <DialogActions
         sx={{
-          px: 4,
-          pb: 4,
-          pt: 2,
+          px: { xs: 2.5, sm: 4 },
+          pb: { xs: 2.5, sm: 4 },
+          pt: { xs: 1.5, sm: 2 },
           gap: 1.5,
+          flexDirection: { xs: "column-reverse", sm: "row" },
         }}
       >
         <Button
@@ -275,10 +282,11 @@ export function FormDialog({
           disabled={isSubmitting}
           variant="outlined"
           sx={{
-            minWidth: 110,
+            width: { xs: "100%", sm: "auto" },
+            minWidth: { xs: "100%", sm: 110 },
             borderRadius: "14px",
             px: 2.5,
-            py: 1.2,
+            py: { xs: 1, sm: 1.2 },
             borderColor: "rgba(148,163,184,0.25)",
             color: "#475569",
             fontWeight: 700,
@@ -307,10 +315,11 @@ export function FormDialog({
             )
           }
           sx={{
-            minWidth: 150,
+            width: { xs: "100%", sm: "auto" },
+            minWidth: { xs: "100%", sm: 150 },
             borderRadius: "14px",
             px: 3,
-            py: 1.2,
+            py: { xs: 1, sm: 1.2 },
             fontWeight: 800,
             textTransform: "none",
             background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",

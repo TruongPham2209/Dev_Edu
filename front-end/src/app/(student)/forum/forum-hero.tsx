@@ -9,7 +9,7 @@ export function ForumHero() {
       sx={{
         width: "100%",
         minHeight: { xs: 320, md: 400 },
-        borderRadius: { xs: 4, md: 6 },
+        borderRadius: { xs: 2, md: 3 },
         background: "linear-gradient(145deg, #f8fafc 0%, #e0f2fe 100%)",
         color: "#0f172a",
         position: "relative",
@@ -34,7 +34,7 @@ export function ForumHero() {
         }}
       />
 
-      <Box sx={{ p: { xs: 4, sm: 6, md: 8 }, zIndex: 1, width: "100%" }}>
+      <Box sx={{ p: { xs: 3, sm: 5, md: 8 }, zIndex: 1, width: "100%" }}>
         <Box sx={{ maxWidth: 700 }}>
           <Box
             sx={{
@@ -44,10 +44,10 @@ export function ForumHero() {
               bgcolor: "rgba(255, 255, 255, 0.6)",
               backdropFilter: "blur(10px)",
               border: "1px solid rgba(56, 189, 248, 0.3)",
-              px: 2.5,
-              py: 1,
+              px: { xs: 2, sm: 2.5 },
+              py: 0.75,
               borderRadius: 10,
-              mb: 4,
+              mb: { xs: 2.5, sm: 4 },
             }}
           >
             <MessageSquare size={16} color="#0284c7" />
@@ -57,6 +57,7 @@ export function ForumHero() {
                 fontWeight: 700,
                 color: "#0369a1",
                 letterSpacing: "0.02em",
+                fontSize: { xs: "0.8rem", sm: "0.875rem" },
               }}
             >
               DevEdu Community
@@ -67,8 +68,8 @@ export function ForumHero() {
             variant="h2"
             sx={{
               fontWeight: 900,
-              mb: 3,
-              fontSize: { xs: "2.25rem", sm: "3rem", md: "3.75rem" },
+              mb: { xs: 2, sm: 3 },
+              fontSize: { xs: "1.65rem", sm: "2.5rem", md: "3.75rem" },
               lineHeight: 1.15,
               letterSpacing: "-0.03em",
               color: "#0f172a",
@@ -84,8 +85,8 @@ export function ForumHero() {
             variant="body1"
             sx={{
               color: "#475569",
-              mb: 5,
-              fontSize: { xs: "1.125rem", md: "1.25rem" },
+              mb: { xs: 3, sm: 5 },
+              fontSize: { xs: "0.95rem", sm: "1.125rem", md: "1.25rem" },
               lineHeight: 1.6,
               maxWidth: 600,
             }}
@@ -94,22 +95,33 @@ export function ForumHero() {
             Every question matters.
           </Typography>
 
-          <Stack direction="row" spacing={4}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Stack direction="row" spacing={{ xs: 2.5, sm: 4 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1, sm: 1.5 },
+              }}
+            >
               <Box
                 sx={{
-                  p: 1.5,
+                  p: { xs: 1.25, sm: 1.5 },
                   bgcolor: "#fff",
                   borderRadius: 3,
                   boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
                 }}
               >
-                <Users size={24} color="#0284c7" />
+                <Users size={20} color="#0284c7" />
               </Box>
               <Box>
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 800, lineHeight: 1.2, color: "#0f172a" }}
+                  sx={{
+                    fontWeight: 800,
+                    lineHeight: 1.2,
+                    color: "#0f172a",
+                    fontSize: { xs: "1rem", sm: "1.25rem" },
+                  }}
                 >
                   25k+
                 </Typography>
@@ -121,21 +133,32 @@ export function ForumHero() {
                 </Typography>
               </Box>
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: { xs: 1, sm: 1.5 },
+              }}
+            >
               <Box
                 sx={{
-                  p: 1.5,
+                  p: { xs: 1.25, sm: 1.5 },
                   bgcolor: "#fff",
                   borderRadius: 3,
                   boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
                 }}
               >
-                <TrendingUp size={24} color="#0284c7" />
+                <TrendingUp size={20} color="#0284c7" />
               </Box>
               <Box>
                 <Typography
                   variant="h6"
-                  sx={{ fontWeight: 800, lineHeight: 1.2, color: "#0f172a" }}
+                  sx={{
+                    fontWeight: 800,
+                    lineHeight: 1.2,
+                    color: "#0f172a",
+                    fontSize: { xs: "1rem", sm: "1.25rem" },
+                  }}
                 >
                   10k+
                 </Typography>
