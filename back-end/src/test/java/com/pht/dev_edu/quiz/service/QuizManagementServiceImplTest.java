@@ -38,12 +38,15 @@ import com.pht.dev_edu.quiz.dto.request.QuizRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizReviewRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizTypeConfigRequest;
 import com.pht.dev_edu.quiz.dto.response.QuizDetailResponse;
+import com.pht.dev_edu.quiz.dto.response.QuizQuestionOptionResponse;
+import com.pht.dev_edu.quiz.dto.response.QuizQuestionResponse;
 import com.pht.dev_edu.quiz.dto.response.QuizResponse;
 import com.pht.dev_edu.quiz.dto.response.QuizTypeConfigResponse;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
 import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.QuizAssignmentRepo;
+import com.pht.dev_edu.quiz.repo.QuizQuestionOptionRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionTypeConfigRepo;
 import com.pht.dev_edu.quiz.repo.QuizRepo;
@@ -199,6 +202,8 @@ class QuizManagementServiceImplTest {
     QuizQuestionTypeConfigRepo typeConfigRepo;
     @Mock
     QuizQuestionRepo questionRepo;
+    @Mock
+    QuizQuestionOptionRepo optionRepo;
     @Mock
     QuizAssignmentRepo assignmentRepo;
     @Mock
@@ -553,5 +558,59 @@ class QuizManagementServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.getContents().size());
+    }
+
+    @Test
+    @DisplayName("duplicateQuiz - should duplicate quiz, type configs, questions, and options successfully")
+    void duplicateQuiz_Success() {
+        QuizResponse existingQuizResponse = QuizResponse.builder()
+                .id(quizId)
+                .title("Original Quiz")
+                .courseId(courseId)
+                .description("Original Description")
+                .build();
+        QuizTypeConfigResponse typeConfigResponse = QuizTypeConfigResponse.builder()
+                .questionType(QuestionType.SINGLE_CHOICE)
+                .requiredCount(5)
+                .pointsPerQuestion(BigDecimal.valueOf(2.0))
+                .scoringMethod(ScoringMethod.AUTO)
+                .build();
+        QuizQuestionOptionResponse optionResponse = QuizQuestionOptionResponse.builder()
+                .optionText("Option A")
+                .isCorrect(true)
+                .orderIndex(1)
+                .build();
+        QuizQuestionResponse questionResponse = QuizQuestionResponse.builder()
+                .id(UUID.randomUUID())
+                .questionType(QuestionType.SINGLE_CHOICE)
+                .content("Question 1")
+                .points(BigDecimal.valueOf(2.0))
+                .orderIndex(1)
+                .options(List.of(optionResponse))
+                .build();
+
+        QuizDetailResponse detailResponse = QuizDetailResponse.builder()
+                .quiz(existingQuizResponse)
+                .typeConfigs(List.of(typeConfigResponse))
+                .questions(List.of(questionResponse))
+                .build();
+
+        when(quizService.getQuizDetailResponseFromCache(quizId)).thenReturn(detailResponse);
+        when(quizMapper.toResponse(any(QuizEntity.class))).thenAnswer(inv -> {
+            QuizEntity q = inv.getArgument(0);
+            return QuizResponse.builder().id(q.getId()).title(q.getTitle()).status(q.getStatus()).build();
+        });
+
+        QuizResponse response = quizManagementService.duplicateQuiz(quizId, username, authorities);
+
+        assertNotNull(response);
+        assertEquals(QuizStatus.DRAFT, response.getStatus());
+        assertEquals("Original Quiz", response.getTitle());
+        verify(quizAccessService).validateAccessByQuiz(username, authorities, quizId);
+        verify(quizRepo).save(any(QuizEntity.class));
+        verify(typeConfigRepo).saveAll(any());
+        verify(questionRepo).save(any());
+        verify(optionRepo).saveAll(any());
+        verify(auditService).log(eq("QUIZ"), any(), eq(QuizAuditAction.CREATE_QUIZ), eq(username), any(), any(), any());
     }
 }

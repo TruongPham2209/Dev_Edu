@@ -1,5 +1,15 @@
 package com.pht.dev_edu.quiz.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
@@ -25,6 +35,7 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptAnswerRepo;
 import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizEssayGradingRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -58,7 +69,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
 
     @Override
     public CustomPaging<QuizEssaySubmissionResponse> getEssaySubmissions(
-            UUID quizId, String essayStatus, String nextCursor, String graderUsername, Set<String> authorities) {
+            UUID quizId, String essayStatus, String nextCursor, String graderUsername,
+            Set<String> authorities) {
         quizAccessService.validateAccessByQuiz(graderUsername, authorities, quizId);
 
         String normalizedStatus = StringUtils.hasText(essayStatus) ? essayStatus.toUpperCase().trim() : "ALL";
@@ -102,7 +114,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
     public AttemptResultResponse gradeEssayAnswer(UUID attemptId, UUID questionId, GradeEssayRequest request,
             String graderUsername, Set<String> authorities) {
         QuizAttemptEntity attempt = attemptRepo.findById(attemptId)
-                .orElseThrow(() -> new DataNotFoundException("Attempt not found with ID: " + attemptId));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Attempt not found with ID: " + attemptId));
         quizAccessService.validateAccessByQuiz(graderUsername, authorities, attempt.getQuizId());
 
         if (attempt.getStatus() != AttemptStatus.GRADING) {
@@ -110,7 +123,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
         }
 
         QuizQuestionEntity question = questionRepo.findByIdAndDeletedAtIsNull(questionId)
-                .orElseThrow(() -> new DataNotFoundException("Question not found with ID: " + questionId));
+                .orElseThrow(() -> new DataNotFoundException(
+                        "Question not found with ID: " + questionId));
 
         if (question.getQuestionType() != QuestionType.ESSAY) {
             throw new BadRequestException("Only ESSAY questions can be manually graded.");

@@ -10,6 +10,7 @@ import { QuizDetailDialog } from "@/components/dialog/quiz/quiz-detail-dialog";
 import { QuizStatusChip } from "@/components/dialog/quiz/quiz-status-chip";
 import {
   getQuizById,
+  useDuplicateQuizMutation,
   useQuizzesByCourseQuery,
   useSubmitQuizMutation,
 } from "@/lib/api/quizzes";
@@ -123,8 +124,26 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
     }
   };
 
-  const handleDuplicateClick = () => {
-    toast.warning("Quiz duplication feature is under development.");
+  const duplicateQuizMutation = useDuplicateQuizMutation({
+    onSuccess: (newQuiz) => {
+      toast.success(
+        `Quiz duplicated successfully! Check the Draft tab to view "${newQuiz.title}".`,
+      );
+      setSelectedStatusTab("DRAFT");
+      refetch();
+    },
+    onError: (err) => {
+      toast.error(`Failed to duplicate quiz: ${err.message}`);
+    },
+  });
+
+  const handleDuplicateClick = (quizId: string) => {
+    setActionLoadingQuizId(quizId);
+    duplicateQuizMutation.mutate(quizId, {
+      onSettled: () => {
+        setActionLoadingQuizId(null);
+      },
+    });
   };
 
   return (
@@ -298,15 +317,31 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
                     </Tooltip>
 
                     {/* 3. Duplicate Action: Always displayed */}
-                    <Tooltip title="Duplicate">
-                      <IconButton
-                        size="small"
-                        color="secondary"
-                        onClick={handleDuplicateClick}
-                      >
-                        <Copy size={18} />
-                      </IconButton>
-                    </Tooltip>
+                    {(() => {
+                      const isDuplicateLoading =
+                        actionLoadingQuizId === row.id &&
+                        duplicateQuizMutation.isPending;
+                      return (
+                        <Tooltip
+                          title={
+                            isDuplicateLoading ? "Duplicating..." : "Duplicate"
+                          }
+                        >
+                          <IconButton
+                            size="small"
+                            color="secondary"
+                            disabled={isDuplicateLoading}
+                            onClick={() => handleDuplicateClick(row.id)}
+                          >
+                            {isDuplicateLoading ? (
+                              <CircularProgress size={16} color="inherit" />
+                            ) : (
+                              <Copy size={18} />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      );
+                    })()}
 
                     {/* 4. Submit Action: Only when status is DRAFT */}
                     {row.status === "DRAFT" &&

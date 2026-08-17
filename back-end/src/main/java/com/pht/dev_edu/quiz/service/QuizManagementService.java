@@ -18,6 +18,8 @@ public interface QuizManagementService {
 
     QuizResponse updateQuiz(UUID quizId, QuizRequest request, String username, Set<String> authorities);
 
+    QuizResponse duplicateQuiz(UUID quizId, String username, Set<String> authorities);
+
     QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username, Set<String> authorities);
 
     List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, String username, Set<String> authorities);

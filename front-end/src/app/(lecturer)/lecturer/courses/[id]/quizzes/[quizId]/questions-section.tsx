@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Copy, Edit, Plus, Trash2 } from "lucide-react";
+import { Copy, Edit, FileSpreadsheet, Plus, Trash2 } from "lucide-react";
 
 interface QuestionsSectionProps {
   typeConfigs: QuizTypeConfigResponse[];
@@ -28,6 +28,7 @@ interface QuestionsSectionProps {
   onEditQuestion: (question: QuizQuestionResponse) => void;
   onDuplicateQuestion: (question: QuizQuestionResponse) => void;
   onDeleteQuestion: (question: QuizQuestionResponse) => void;
+  onImportQuestions: () => void;
 }
 
 export function QuestionsSection({
@@ -39,21 +40,50 @@ export function QuestionsSection({
   onEditQuestion,
   onDuplicateQuestion,
   onDeleteQuestion,
+  onImportQuestions,
 }: QuestionsSectionProps) {
   return (
     <Card variant="outlined" sx={{ borderRadius: 1 }}>
-      <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-        <Typography
-          variant="h6"
+      <CardContent sx={{ p: 3 }}>
+        <Box
           sx={{
-            fontWeight: 700,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             mb: 2.5,
-            fontSize: { xs: "1rem", sm: "1.25rem" },
+            flexWrap: "wrap",
+            gap: 1.5,
           }}
         >
-          Questions Management ({questions.length} / {totalRequiredQuestions}{" "}
-          Total)
-        </Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Questions Management ({questions.length} / {totalRequiredQuestions}{" "}
+            Total)
+          </Typography>
+
+          <Tooltip
+            title={
+              isPendingStatus
+                ? "Questions cannot be imported when Quiz is pending approval."
+                : typeConfigs.length === 0
+                  ? "Please add matrix type configs first."
+                  : ""
+            }
+          >
+            <span>
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="small"
+                disabled={isPendingStatus || typeConfigs.length === 0}
+                startIcon={<FileSpreadsheet size={16} />}
+                onClick={onImportQuestions}
+                sx={{ borderRadius: 2, fontWeight: 700 }}
+              >
+                Import Questions
+              </Button>
+            </span>
+          </Tooltip>
+        </Box>
 
         {typeConfigs.length === 0 ? (
           <Typography

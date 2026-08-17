@@ -17,12 +17,11 @@ import com.pht.dev_edu.quiz.dto.response.QuizDetailResponse;
 import com.pht.dev_edu.quiz.dto.response.QuizResponse;
 import com.pht.dev_edu.quiz.dto.response.QuizTypeConfigResponse;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
+import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
+import com.pht.dev_edu.quiz.entity.QuizQuestionOptionEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
 import com.pht.dev_edu.quiz.mapper.QuizMapper;
-import com.pht.dev_edu.quiz.repo.QuizAssignmentRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionTypeConfigRepo;
-import com.pht.dev_edu.quiz.repo.QuizRepo;
+import com.pht.dev_edu.quiz.repo.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,6 +44,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     QuizRepo quizRepo;
     QuizQuestionTypeConfigRepo typeConfigRepo;
     QuizQuestionRepo questionRepo;
+    QuizQuestionOptionRepo optionRepo;
     QuizAssignmentRepo assignmentRepo;
 
     QuizMapper quizMapper;
@@ -97,8 +97,70 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
     @Override
     @Transactional
+    public QuizResponse duplicateQuiz(UUID quizId, String username, Set<String> authorities) {
+        quizAccessService.validateAccessByQuiz(username, authorities, quizId);
+        var existingQuizDetail = quizService.getQuizDetailResponseFromCache(quizId);
+        var existingQuiz = existingQuizDetail.getQuiz();
+        var existingTypeConfigs = existingQuizDetail.getTypeConfigs();
+        var existingQuestions = existingQuizDetail.getQuestions();
+
+        var newQuiz = QuizEntity.builder()
+                .title(existingQuiz.getTitle())
+                .courseId(existingQuiz.getCourseId())
+                .description(existingQuiz.getDescription())
+                .status(QuizStatus.DRAFT)
+                .createdBy(username)
+                .build();
+        quizRepo.save(newQuiz);
+
+        if (!CollectionUtils.isEmpty(existingTypeConfigs)) {
+            var newTypeConfigs = existingTypeConfigs.stream().map(
+                            tc -> QuizQuestionTypeConfigEntity.builder()
+                                    .quizId(newQuiz.getId())
+                                    .requiredCount(tc.getRequiredCount())
+                                    .pointsPerQuestion(tc.getPointsPerQuestion())
+                                    .questionType(tc.getQuestionType())
+                                    .scoringMethod(tc.getScoringMethod())
+                                    .build())
+                    .toList();
+            typeConfigRepo.saveAll(newTypeConfigs);
+        }
+
+        if (!CollectionUtils.isEmpty(existingQuestions)) {
+            for (var eq : existingQuestions) {
+                var newQuestion = QuizQuestionEntity.builder()
+                        .quizId(newQuiz.getId())
+                        .questionType(eq.getQuestionType())
+                        .content(eq.getContent())
+                        .points(eq.getPoints())
+                        .orderIndex(eq.getOrderIndex())
+                        .build();
+                questionRepo.save(newQuestion);
+
+                if (!CollectionUtils.isEmpty(eq.getOptions())) {
+                    var newOptions = eq.getOptions().stream().map(
+                                    opt -> QuizQuestionOptionEntity.builder()
+                                            .questionId(newQuestion.getId())
+                                            .optionText(opt.getOptionText())
+                                            .isCorrect(opt.getIsCorrect())
+                                            .orderIndex(opt.getOrderIndex())
+                                            .build())
+                            .toList();
+                    optionRepo.saveAll(newOptions);
+                }
+            }
+        }
+
+        auditService.log("QUIZ", newQuiz.getId(), QuizAuditAction.CREATE_QUIZ, username, null, newQuiz,
+                "Duplicated quiz from " + quizId);
+
+        return quizMapper.toResponse(newQuiz);
+    }
+
+    @Override
+    @Transactional
     public QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username,
-            Set<String> authorities) {
+                                                      Set<String> authorities) {
         QuizEntity quiz = quizService.getQuizEntityOrThrow(quizId);
         quizAccessService.validateAccessByQuiz(username, authorities, quizId);
 
@@ -246,12 +308,14 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, QuizStatus status, String nextCursor, String username,
+    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, QuizStatus status, String nextCursor,
+                                                         String username,
                                                          Set<String> authorities) {
         quizAccessService.validateAccessByCourse(username, authorities, courseId);
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, status.name(), cursor.getId(), cursor.getTimeStamp(),
+        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, status.name(), cursor.getId(),
+                cursor.getTimeStamp(),
                 QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
                 quizzes,

@@ -41,6 +41,16 @@ public class QuizController {
         return ApiUtils.buildSuccessResponse(result);
     }
 
+    @PostMapping("/{id}/duplicate")
+    @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
+    public ResponseEntity<ApiResponse> duplicateQuiz(@PathVariable UUID id) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
+
+        var result = quizManagementService.duplicateQuiz(id, username, authorities);
+        return ApiUtils.buildSuccessResponse(result);
+    }
+
     // Update quiz information (only if quiz is in DRAFT status)
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
