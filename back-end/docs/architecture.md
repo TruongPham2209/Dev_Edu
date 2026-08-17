@@ -1,49 +1,49 @@
-# Kiến trúc hệ thống Dev-Edu Backend
+# Dev-Edu Backend System Architecture
 
-> Tài liệu này mô tả kiến trúc và cách tổ chức code của project Dev-Edu Backend, được sinh tự động từ codebase thực tế.
+> This document describes the architecture and codebase organization of the Dev-Edu Backend project.
 
 ---
 
-## Mục lục
+## Table of Contents
 
-- [1. Tổng quan kiến trúc](#1-tổng-quan-kiến-trúc)
-- [2. Cấu trúc package chính](#2-cấu-trúc-package-chính)
-- [3. Mô tả từng package](#3-mô-tả-từng-package)
-- [4. Kiến trúc phân tầng (Layered Architecture)](#4-kiến-trúc-phân-tầng-layered-architecture)
-- [5. Cách các layer tương tác](#5-cách-các-layer-tương-tác)
+- [1. Architecture Overview](#1-architecture-overview)
+- [2. Primary Package Structure](#2-primary-package-structure)
+- [3. Detailed Package Descriptions](#3-detailed-package-descriptions)
+- [4. Layered Architecture](#4-layered-architecture)
+- [5. Layer Interactions](#5-layer-interactions)
 - [6. Module-based Package Organization](#6-module-based-package-organization)
 
 ---
 
-## 1. Tổng quan kiến trúc
+## 1. Architecture Overview
 
-Dev-Edu Backend là một ứng dụng **Spring Boot 3.5** sử dụng **Java 21**, được tổ chức theo kiến trúc **Layered Architecture kết hợp Module-based Package Organization**. Mỗi module nghiệp vụ (user, course, enrollment, assignment, lecture, file, forum, livestream, quiz, notification, metric, tracking, chat) được tổ chức thành một package riêng biệt, bên trong mỗi module lại tuân thủ kiến trúc phân tầng: `controller → service → repository → entity`.
+Dev-Edu Backend is a **Spring Boot 3.5** application powered by **Java 21**, organized using a **Layered Architecture combined with Module-based Package Organization**. Each business module (user, course, enrollment, assignment, lecture, file, forum, livestream, quiz, notification, metric, tracking, chat) is structured into its own distinct package, containing the layered hierarchy: `controller → service → repository → entity`.
 
-Các thành phần dùng chung (cross-cutting concerns) được đặt trong package `common`.
+Cross-cutting concerns and shared infrastructure components reside within the `common` package.
 
 ---
 
-## 2. Cấu trúc package chính
+## 2. Primary Package Structure
 
-```
+```text
 com.pht.dev_edu/
-├── BackEndApplication.java          # Entry point
-├── common/                          # Thành phần dùng chung
-│   ├── config/                      # Cấu hình hệ thống
-│   ├── constant/                    # Hằng số hệ thống
-│   ├── dto/                         # DTO dùng chung
-│   ├── exception/                   # Xử lý exception
-│   │   ├── data/                    # Exception liên quan dữ liệu
-│   │   ├── io/                      # Exception liên quan I/O
-│   │   ├── security/                # Exception liên quan bảo mật
-│   │   └── server/                  # Exception liên quan server
-│   ├── generator/                   # Generator (UUID)
-│   ├── security/                    # Security filters & providers
-│   ├── service/                     # Service dùng chung
-│   ├── util/                        # Hàm tiện ích
-│   └── validation/                  # Validation groups
+├── BackEndApplication.java          # Main Application Entry Point
+├── common/                          # Cross-cutting Shared Components
+│   ├── config/                      # System Configurations
+│   ├── constant/                    # System Constants
+│   ├── dto/                         # Shared DTOs
+│   ├── exception/                   # Exception Handling Hierarchy
+│   │   ├── data/                    # Data Exception classes
+│   │   ├── io/                      # I/O Exception classes
+│   │   ├── security/                # Security Exception classes
+│   │   └── server/                  # Server Exception classes
+│   ├── generator/                   # ID Generators (UUIDv7)
+│   ├── security/                    # Security filters & OAuth2 Providers
+│   ├── service/                     # Shared Services
+│   ├── util/                        # Utility helper functions
+│   └── validation/                  # Bean Validation groups
 │
-├── user/                            # Module quản lý người dùng
+├── user/                            # User Management Module
 │   ├── controller/
 │   ├── dto/
 │   ├── entity/
@@ -51,16 +51,7 @@ com.pht.dev_edu/
 │   ├── repo/
 │   └── service/
 │
-├── course/                          # Module quản lý khóa học
-│   ├── controller/
-│   ├── dto/
-│   ├── entity/
-│   ├── mapper/
-│   ├── repo/
-│   ├── scheduler/
-│   └── service/
-│
-├── enrollment/                      # Module đăng ký & thanh toán
+├── course/                          # Course & Review Management Module
 │   ├── controller/
 │   ├── dto/
 │   ├── entity/
@@ -69,7 +60,7 @@ com.pht.dev_edu/
 │   ├── scheduler/
 │   └── service/
 │
-├── assignment/                      # Module bài tập
+├── enrollment/                      # Shopping Cart, Order & Payment Module
 │   ├── controller/
 │   ├── dto/
 │   ├── entity/
@@ -78,7 +69,7 @@ com.pht.dev_edu/
 │   ├── scheduler/
 │   └── service/
 │
-├── lecture/                         # Module bài giảng
+├── assignment/                      # Assignment & Submission Module
 │   ├── controller/
 │   ├── dto/
 │   ├── entity/
@@ -87,7 +78,16 @@ com.pht.dev_edu/
 │   ├── scheduler/
 │   └── service/
 │
-├── file/                            # Module quản lý file
+├── lecture/                         # Lecture Management Module
+│   ├── controller/
+│   ├── dto/
+│   ├── entity/
+│   ├── mapper/
+│   ├── repo/
+│   ├── scheduler/
+│   └── service/
+│
+├── file/                            # Storage & Upload Module
 │   ├── controller/
 │   ├── dto/
 │   ├── entity/
@@ -96,7 +96,7 @@ com.pht.dev_edu/
 │   ├── scheduler/
 │   └── service/
 │
-├── forum/                           # Module diễn đàn
+├── forum/                           # Forum & Discussion Module
 │   ├── controller/
 │   ├── document/                    # Elasticsearch document
 │   ├── dto/
@@ -106,27 +106,27 @@ com.pht.dev_edu/
 │   ├── scheduler/
 │   └── service/
 │
-├── livestream/                      # Module livestream
+├── livestream/                      # Livestream Module
 │   ├── entity/
 │   └── repo/
 │
-├── metric/                          # Module thống kê/dashboard
+├── metric/                          # Dashboard & Analytics Module
 │   ├── controller/
 │   ├── dto/
 │   ├── repo/
 │   └── service/
 │
-├── quiz/                            # Module trắc nghiệm & đề thi
+├── quiz/                            # Quiz & Examination Module
 │   ├── controller/                  # QuizController, QuizQuestionController, QuizAttemptController, QuizAssignmentController, QuizGradingController
 │   ├── dto/
 │   ├── entity/                      # QuizEntity, QuizQuestionEntity, QuizAttemptEntity...
-│   ├── kafka/                       # Kafka producer/consumer cho quiz events
+│   ├── kafka/                       # Kafka event handlers
 │   ├── mapper/
 │   ├── repo/
 │   ├── scheduler/
 │   └── service/
 │
-├── notification/                    # Module thông báo & FCM Device Token
+├── notification/                    # Notification & FCM Token Module
 │   ├── controller/                  # NotificationController, NotificationGroupController, DeviceTokenController
 │   ├── dto/
 │   ├── entity/                      # NotificationPersonalEntity, NotificationGroupEntity, DeviceTokenEntity...
@@ -134,7 +134,7 @@ com.pht.dev_edu/
 │   ├── repo/
 │   └── service/
 │
-├── tracking/                        # Module tracking & logging
+├── tracking/                        # Tracking & Logging Module
 │   ├── controller/
 │   ├── dto/
 │   ├── entity/
@@ -143,10 +143,10 @@ com.pht.dev_edu/
 │   ├── repo/
 │   └── service/
 │
-└── chat/                            # Module tư vấn khoá học AI Chatbot
+└── chat/                            # AI Chatbot Module
     ├── controller/                  # ChatController
     ├── dto/                         # Request, Response, CourseCard DTOs
-    │   └── openai/                  # OpenAI REST API DTOs (Tools, Messages, Request/Response)
+    │   └── openai/                  # OpenAI API DTOs (Tools, Messages)
     ├── entity/                      # CourseEmbeddingEntity, ChatConversationEntity, ChatMessageEntity
     ├── repository/                  # CourseEmbeddingRepository (pgvector HNSW), ChatConversationRepository, ChatMessageRepository
     └── service/                     # ChatService/Impl, CourseEmbeddingService/Impl, OpenAiService/Impl
@@ -154,168 +154,114 @@ com.pht.dev_edu/
 
 ---
 
-## 3. Mô tả từng package
+## 3. Detailed Package Descriptions
 
-### 3.1. `common` — Thành phần dùng chung
+### 3.1. `common` — Shared Infrastructure
 
-| Sub-package | Vai trò | Ví dụ |
+| Sub-package | Role | Examples |
 |---|---|---|
-| `config/` | Cấu hình hệ thống: security, CORS, caching, S3, Brevo mail, Elasticsearch, JWT, init data | `AuthorizationServerConfig`, `CachingConfig`, `S3Config` |
-| `constant/` | Định nghĩa hằng số: Kafka topics, Redis prefix/duration, Cron job names, Web endpoints | `KafkaTopicConstant`, `RedisPrefixConstant`, `WebEndpointConstant` |
-| `dto/` | DTO dùng chung: response wrapper, paging, enum | `ApiResponse`, `CustomPaging`, `RoleEnum`, `ItemStatus` |
-| `exception/` | Hệ thống exception phân tầng: `AbstractException` → các abstract class con → exception cụ thể | `GlobalExceptionHandler`, `BadRequestException`, `DataNotFoundException` |
-| `generator/` | ID generator sử dụng UUIDv7 | `UuidV7Generator` |
-| `security/` | OAuth2 custom grant type (password), security filters, handlers | `OAuth2PasswordGrantAuthenticationProvider`, `LoggingSecurityFilter` |
-| `service/` | Service dùng chung: batch delete processor, mail service | `DeleteProcessor`, `MailServiceImpl` |
-| `util/` | Utility classes: API response builder, exception message parser, paging, security context, Redis, Kafka, payment | `ApiUtils`, `PagingUtils`, `SecurityContextUtils`, `RedisUtils` |
-| `validation/` | Validation group interfaces cho Bean Validation | `CreateValidation`, `UpdateValidation`, `DeleteValidation` |
+| `config/` | System configurations: Security, CORS, Caching, S3, Brevo mail, Elasticsearch, JWT, data initialization | `AuthorizationServerConfig`, `CachingConfig`, `S3Config` |
+| `constant/` | System constants: Kafka topics, Redis prefixes/durations, Cron job identifiers, Web endpoints | `KafkaTopicConstant`, `RedisPrefixConstant`, `WebEndpointConstant` |
+| `dto/` | Common DTO wrappers: response models, pagination, global enums | `ApiResponse`, `CustomPaging`, `RoleEnum`, `ItemStatus` |
+| `exception/` | Layered exception hierarchy: `AbstractException` → Specialized base classes → Specific exceptions | `GlobalExceptionHandler`, `BadRequestException`, `DataNotFoundException` |
+| `generator/` | Time-ordered UUIDv7 generator | `UuidV7Generator` |
+| `security/` | Custom OAuth2 password grant providers, security filters, handlers | `OAuth2PasswordGrantAuthenticationProvider`, `LoggingSecurityFilter` |
+| `service/` | Common services: asynchronous batch deletion, transactional mail service | `DeleteProcessor`, `MailServiceImpl` |
+| `util/` | Utility classes: API response builders, exception formatters, pagination helpers, security context, Redis/Kafka/Payment helpers | `ApiUtils`, `PagingUtils`, `SecurityContextUtils`, `RedisUtils` |
+| `validation/` | Bean Validation marker interfaces | `CreateValidation`, `UpdateValidation`, `DeleteValidation` |
 
-### 3.2. `user` — Module quản lý người dùng
+### 3.2. `user` — User Management Module
 
-Quản lý xác thực (authentication), đăng ký, profile, thay đổi mật khẩu, và avatar.
+Handles user registration, authentication, profiles, password changes, and avatars.
 
-- **Controller**: `AuthController`, `ProfileController`, `UserController`
-- **Entity**: `UserEntity` (implements `UserDetails`), `RoleEntity`, `AuthProviderEntity`
-- **DTO**: `RegisterUser`, `UserInfoResponse`, `UserInfoProjection`
+### 3.3. `course` — Course Management Module
 
-### 3.3. `course` — Module quản lý khóa học
+Handles course categories, course listings, discounts, and student reviews.
 
-Quản lý danh mục (category), khóa học (course), giảm giá (discount), và đánh giá (review).
+### 3.4. `enrollment` — Shopping Cart & Payment Module
 
-- **Controller**: `CategoryController`, `CourseCategoryController`, `CourseDiscountController`, `ReviewController`
-- **Entity**: `CategoryEntity`, `CourseEntity`, `CourseDiscountEntity`, `CourseReviewEntity`, `CourseLecturerEntity`
-- **DTO**: `CategoryRequest`, `CourseRequest`, `CourseDiscountRequest`, `ReviewRequest`, và các projection/response
+Handles cart management, checkout orders, VNPay payment processing, and course enrollments.
 
-### 3.4. `enrollment` — Module đăng ký & thanh toán
+### 3.5. `assignment` — Assignment Module
 
-Quản lý giỏ hàng, đơn hàng, thanh toán (VnPay), và ghi danh khóa học.
+Manages assignment creation, student submissions, and instructor feedback.
 
-- **Controller**: `CartItemController`, `EnrollmentController`, `OrderController`, `PurchaseController`
-- **Entity**: `CartItemEntity`, `EnrollmentEntity`, `OrderEntity`, `OrderItemEntity`, `PaymentHistoryEntity`
-- **DTO**: `CheckoutRequest`, `PaymentRequest`, `PaymentMethod`, `PaymentStatus`, `PurchaseEntityType`
+### 3.6. `lecture` — Lecture Module
 
-### 3.5. `assignment` — Module bài tập
+Manages lecture content, attachments, student comments, and learning progress.
 
-Quản lý bài tập, nộp bài, và phản hồi giảng viên.
+### 3.7. `file` — File Storage Module
 
-- **Controller**: `AssignmentController`
-- **Entity**: `AssignmentEntity`, `SubmissionEntity`, `FeedbackEntity`
-- **DTO**: `AssignmentRequest`, `SubmissionRequest`, `FeedbackRequest`
+Handles file uploads via Cloudflare R2 / S3 pre-signed URLs.
 
-### 3.6. `lecture` — Module bài giảng
+### 3.8. `forum` — Forum Module
 
-Quản lý bài giảng, tài liệu (material), bình luận, và tiến độ học.
+Manages forum posts, version histories, comments, and Elasticsearch search integration.
 
-- **Controller**: `LectureController`, `CommentController` (LectureCommentController)
-- **Entity**: `LectureEntity`, `LectureMaterialEntity`, `LectureCommentEntity`, `LectureProgressEntity`
-- **DTO**: `LectureRequest`, `MaterialRequest`, `CommentRequest`, `ProgressSegmentRequest`
+### 3.9. `livestream` — Livestream Module
 
-### 3.7. `file` — Module quản lý file
+Provides entity models for streaming sessions.
 
-Quản lý upload file thông qua pre-signed URL (Cloudflare R2/S3).
+### 3.10. `metric` — Analytics & Dashboard Module
 
-- **Controller**: `FileController`
-- **Entity**: `FileUploadEntity`
-- **Kafka**: Consumer xử lý sự kiện xóa file
+Admin analytics reporting growth charts, revenue metrics, top courses, and top users.
 
-### 3.8. `forum` — Module diễn đàn
+### 3.11. `tracking` — Tracking & Logging Module
 
-Quản lý bài viết (post), phiên bản bài viết (post version), bình luận, tìm kiếm (Elasticsearch).
+Logs HTTP requests, system events, cron executions, and assignment submissions.
 
-- **Controller**: `PostController`, `CommentController` (ForumCommentController)
-- **Entity**: `PostEntity`, `PostVersionEntity`, `CommentEntity`, `SavedPostEntity`
-- **Document**: Elasticsearch document cho tìm kiếm bài viết
+### 3.12. `chat` — AI Chatbot Consultation Module
 
-### 3.9. `livestream` — Module livestream
+AI assistant providing course recommendations using OpenAI Chat Completions (Function Calling) and Vector Similarity (`pgvector`).
 
-Hiện tại chỉ có entity và repository cơ bản, chưa có controller/service hoàn chỉnh.
+### 3.13. `quiz` — Quiz & Examination Module
 
-### 3.10. `metric` — Module thống kê
+Manages question banks, automated exam grading, essay grading interfaces, and quiz assignments.
 
-Dashboard quản trị: tổng quan, biểu đồ tăng trưởng, doanh thu, top khóa học/người dùng.
+### 3.14. `notification` — Notification & FCM Device Token Module
 
-- **Controller**: `MetricController`
-- **DTO**: `DashboardOverviewDto`, `GrowthDataDto`, `GrowthPeriod`, `TopCourseDto`, `TopUserDto`
-
-### 3.11. `tracking` — Module tracking & logging
-
-Ghi log request, tracking sự kiện, theo dõi nộp bài (submission tracking).
-
-- **Controller**: `SubmissionTrackingController`
-- **Entity**: `LogRequestEntity`, `LogTrackingEntity`, `LogCronJobEntity`, `MailTrackingEntity`, `SubmissionTrackingEntity`
-- **Kafka**: Consumer xử lý sự kiện tracking
-
-### 3.12. `chat` — Module tư vấn khoá học AI Chatbot
-
-Tư vấn khoá học thông minh sử dụng OpenAI Chat Completions (Function Calling) và truy vấn Vector Similarity (pgvector).
-
-- **Controller**: `ChatController`
-- **Entity**: `CourseEmbeddingEntity` (lưu vector 1536 chiều), `ChatConversationEntity`, `ChatMessageEntity` (lưu JSONB `referenced_course_ids`)
-- **Repository**: `CourseEmbeddingRepository` (sử dụng PostgreSQL HNSW vector index `<=>` cosine distance & native upsert), `ChatConversationRepository`, `ChatMessageRepository`
-- **Service**: Tuân thủ chuẩn Interface / ServiceImpl:
-  - `ChatService` / `ChatServiceImpl`: Xử lý hội thoại, validate input <= 500 chars, phân biệt auth/anonymous, kiểm tra sở hữu conversation, tự động loại trừ khoá học học viên đã đăng ký, sinh course cards response, kiểm tra rò rỉ system prompt.
-  - `CourseEmbeddingService` / `CourseEmbeddingServiceImpl`: Xử lý bóc tách thẻ HTML (`stripHtmlTags`), tạo `source_text`, tính SHA-256 hash, sinh vector embedding qua OpenAI API, đồng bộ tự động khi khởi chạy app (`CommandLineRunner`).
-  - `OpenAiService` / `OpenAiServiceImpl`: REST Client gọi OpenAI Embedding & Chat Completions API với Tool Definitions (`search_courses_semantic`, `search_courses_filtered`).
-
-### 3.13. `quiz` — Module trắc nghiệm & đề thi
-
-Quản lý ngân hàng câu hỏi, tạo đề thi (quiz), làm bài (attempt), tính điểm tự động, chấm bài tự luận, và phân công bài quiz (assignment).
-
-- **Controller**: `QuizController`, `QuizQuestionController`, `QuizAttemptController`, `QuizAssignmentController`, `QuizGradingController`
-- **Entity**: `QuizEntity`, `QuizQuestionEntity`, `QuizQuestionOptionEntity`, `QuizAssignmentEntity`, `QuizAttemptEntity`, `QuizAttemptAnswerEntity`, `QuizAttemptAnswerLogEntity`, `QuizEssayGradingEntity`, `QuizAuditLogEntity`, `UserQuizSessionEntity`
-- **Kafka**: Producer/Consumer xử lý sự kiện nộp bài, chấm điểm và thông báo kết quả quiz
-
-### 3.14. `notification` — Module thông báo & FCM Device Token
-
-Quản lý thông báo cá nhân (personal), thông báo nhóm theo role (group), theo dõi trạng thái đã đọc, và đăng ký Firebase Cloud Messaging (FCM) device tokens.
-
-- **Controller**: `NotificationController`, `NotificationGroupController`, `DeviceTokenController`
-- **Entity**: `NotificationPersonalEntity`, `NotificationGroupEntity`, `NotificationGroupTargetEntity`, `NotificationGroupReadStatusEntity`, `DeviceTokenEntity`
-- **Push Notification**: Tích hợp Firebase Admin SDK đẩy push notification trực tiếp tới thiết bị học viên/giảng viên
+Manages personal and group notifications, read tracking, and Firebase Cloud Messaging (FCM) device tokens.
 
 ---
 
-## 4. Kiến trúc phân tầng (Layered Architecture)
+## 4. Layered Architecture
 
-Mỗi module nghiệp vụ tuân thủ kiến trúc phân tầng sau:
+Each business module follows a strict 4-tier architecture:
 
-```
+```text
 ┌─────────────────────────┐
-│     Controller Layer    │  ← Nhận HTTP request, validate, delegate
+│     Controller Layer    │  ← Handles HTTP requests, validation, delegation
 ├─────────────────────────┤
-│      Service Layer      │  ← Business logic, transaction
+│      Service Layer      │  ← Business logic, authorization checks, transactions
 ├─────────────────────────┤
-│    Repository Layer     │  ← Truy vấn database (JPA)
+│    Repository Layer     │  ← Database persistence (JPA)
 ├─────────────────────────┤
-│      Entity Layer       │  ← Domain model, JPA entity
+│      Entity Layer       │  ← Domain entities & ORM mapping
 └─────────────────────────┘
 ```
 
-### Vai trò chi tiết từng layer:
-
-| Layer | Naming | Annotation | Vai trò |
+| Layer | Naming | Annotation | Role |
 |---|---|---|---|
-| **Controller** | `*Controller` | `@RestController` | Nhận request HTTP, validate input (via `@Valid`/`@Validated`), lấy thông tin user từ `SecurityContextUtils`, gọi service, trả `ApiResponse` |
-| **Service** | `*Service` / `*ServiceImpl` | `@Service` | Chứa business logic, kiểm tra quyền logic-level, gọi repository, xử lý cache Redis, gửi event Kafka |
-| **Repository** | `*Repository` | extends `JpaRepository` | Truy vấn database thông qua Spring Data JPA, custom query bằng `@Query` |
-| **Entity** | `*Entity` | `@Entity` | Ánh xạ bảng database, sử dụng JPA annotations, có `@PrePersist` để auto-gen UUID và timestamp |
-| **Mapper** | `*Mapper` | `@Mapper` (MapStruct) | Chuyển đổi giữa Entity ↔ DTO/Response |
-| **DTO** | `*Request`, `*Response`, `*Projection` | Lombok `@Data` | Chứa dữ liệu request/response, có validation annotations |
-| **Scheduler** | Trong `scheduler/` | `@Scheduled` | Cron job dọn dẹp dữ liệu soft-deleted |
+| **Controller** | `*Controller` | `@RestController` | Receives HTTP requests, validates input (`@Valid`/`@Validated`), retrieves SecurityContext, delegates to services, returns standard `ApiResponse`. |
+| **Service** | `*Service` / `*ServiceImpl` | `@Service` | Contains business logic, code-level access authorization, repository calls, Redis caching, Kafka event publishing. |
+| **Repository** | `*Repository` | extends `JpaRepository` | Database persistence via Spring Data JPA and custom `@Query` definitions. |
+| **Entity** | `*Entity` | `@Entity` | ORM table mappings, `@PrePersist` UUIDv7 and timestamp generation. |
+| **Mapper** | `*Mapper` | `@Mapper` (MapStruct) | Compile-time mapping between Entity ↔ DTOs. |
+| **DTO** | `*Request`, `*Response`, `*Projection` | Lombok `@Data` | Request payload validation and response projections. |
 
 ---
 
-## 5. Cách các layer tương tác
+## 5. Layer Interactions
 
-```
+```text
 Client (Frontend)
     │
     ▼
 ┌─── Controller ───┐
 │  @PreAuthorize    │  ← Method-level security
 │  @Valid/@Validated │  ← Bean Validation
-│  SecurityContext   │  ← Lấy username/authorities
-│  ApiUtils.build    │  ← Wrap response
+│  SecurityContext   │  ← Current user & roles
+│  ApiUtils.build    │  ← Response wrapping
 └────────┬─────────┘
          │
          ▼
@@ -323,7 +269,6 @@ Client (Frontend)
 │  Business Logic   │
 │  Redis Cache      │  ← RedisUtils / RedisTemplate
 │  Kafka Events     │  ← KafkaTemplate.send()
-│  Authorization    │  ← Check authorities in code
 │  Transaction      │  ← @Transactional
 └────────┬─────────┘
          │
@@ -331,54 +276,22 @@ Client (Frontend)
 ┌─── Repository ───┐
 │  JPA Repository   │
 │  @Query           │
-│  Projection       │  ← Interface-based projections
+│  Projection       │  ← Interface projections
 └────────┬─────────┘
          │
          ▼
 ┌─── Database ─────┐
 │  PostgreSQL       │
-│  Flyway migration │
+│  Flyway Migration │
 └──────────────────┘
-```
-
-### Luồng xử lý bất đồng bộ (Kafka):
-
-```
-Service Layer
-    │
-    ├─→ KafkaTemplate.send(topic, event)
-    │
-    ▼
-Kafka Consumer (tracking/kafka, file/kafka)
-    │
-    ▼
-Tracking/Logging Repository → Database
 ```
 
 ---
 
 ## 6. Module-based Package Organization
 
-Project sử dụng cách tổ chức **package-by-feature** thay vì package-by-layer thuần túy:
+The project employs a **package-by-feature** strategy:
 
-- **Ưu điểm**: Mỗi module (user, course, enrollment...) là một đơn vị độc lập, dễ bảo trì, dễ tìm kiếm code liên quan.
-- **Cross-cutting**: Các thành phần dùng chung nằm trong `common/` (config, exception, util, constant, security).
-- **Nhất quán**: Mỗi module đều tuân thủ cùng cấu trúc: `controller/`, `service/`, `repo/`, `entity/`, `dto/`, `mapper/`, `scheduler/`.
-
-### Naming Convention tổng hợp:
-
-| Pattern | Ý nghĩa | Ví dụ |
-|---|---|---|
-| `*Entity` | JPA Entity, ánh xạ bảng DB | `UserEntity`, `CourseEntity` |
-| `*Request` | DTO cho request body | `CourseRequest`, `PaymentRequest` |
-| `*Response` | DTO cho response body | `UserInfoResponse`, `CourseResponse` |
-| `*Projection` | Interface projection cho JPA query | `CourseDetailProjection` |
-| `*Controller` | REST Controller | `CourseController` |
-| `*Service` / `*ServiceImpl` | Business logic | `CourseService`, `MailServiceImpl` |
-| `*Repository` | Spring Data JPA Repository | `UserRepository` |
-| `*Mapper` | MapStruct mapper | `CourseMapper` |
-| `*Config` | Spring Configuration class | `CachingConfig`, `S3Config` |
-| `*Constant` | Hằng số | `KafkaTopicConstant` |
-| `*Utils` | Static utility methods | `PagingUtils`, `ApiUtils` |
-| `*Enum` | Enum type | `RoleEnum`, `ItemStatus` |
-| `*Event` | Kafka event payload | `SubmissionEvent`, `FileDeleteEvent` |
+- **Modular**: Each feature package (`user`, `course`, `enrollment`...) is an isolated business unit.
+- **Cross-cutting**: System concerns live inside `common/`.
+- **Consistent Structure**: Every package uses standard sub-folders: `controller/`, `service/`, `repo/`, `entity/`, `dto/`, `mapper/`, `scheduler/`.

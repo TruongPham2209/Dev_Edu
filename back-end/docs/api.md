@@ -1,75 +1,75 @@
 # API Reference — Dev-Edu Backend
 
-> Tài liệu mô tả toàn bộ REST API đã được triển khai trong hệ thống, được sinh tự động từ codebase thực tế.
+> Comprehensive REST API reference documentation for the Dev-Edu Backend system.
 
 ---
 
-## Mục lục
+## Table of Contents
 
-- [Thông tin chung](#thông-tin-chung)
+- [General Information](#general-information)
 - [1. User Module](#1-user-module)
-  - [1.1 Đăng ký tài khoản](#11-đăng-ký-tài-khoản)
-  - [1.2 Tạo nhiều user (batch)](#12-tạo-nhiều-user-batch)
-  - [1.3 Lấy danh sách user](#13-lấy-danh-sách-user)
-  - [1.4 Đổi mật khẩu](#14-đổi-mật-khẩu)
-  - [1.5 Cập nhật avatar](#15-cập-nhật-avatar)
-  - [1.6 Đặt username cho Google Login](#16-đặt-username-cho-google-login)
-  - [1.7 Lấy thông tin user hiện tại](#17-lấy-thông-tin-user-hiện-tại)
+  - [1.1 User Registration](#11-user-registration)
+  - [1.2 Batch Create Users](#12-batch-create-users)
+  - [1.3 Get User List](#13-get-user-list)
+  - [1.4 Change Password](#14-change-password)
+  - [1.5 Update Avatar](#15-update-avatar)
+  - [1.6 Set Username for Google Login](#16-set-username-for-google-login)
+  - [1.7 Get Current User Profile](#17-get-current-user-profile)
 - [2. Course Module](#2-course-module)
-  - [2.1 Lấy tất cả danh mục](#21-lấy-tất-cả-danh-mục)
-  - [2.2 Tạo danh mục](#22-tạo-danh-mục)
-  - [2.3 Cập nhật danh mục](#23-cập-nhật-danh-mục)
-  - [2.4 Xóa danh mục](#24-xóa-danh-mục)
-  - [2.5 Lấy danh sách khóa học](#25-lấy-danh-sách-khóa-học)
-  - [2.6 Lấy khóa học nổi bật](#26-lấy-khóa-học-nổi-bật)
-  - [2.7 Lấy chi tiết khóa học](#27-lấy-chi-tiết-khóa-học)
-  - [2.8 Tạo khóa học](#28-tạo-khóa-học)
-  - [2.9 Cập nhật khóa học](#29-cập-nhật-khóa-học)
-  - [2.10 Xóa khóa học](#210-xóa-khóa-học)
-  - [2.11 Lấy danh sách giảm giá](#211-lấy-danh-sách-giảm-giá)
-  - [2.12 Tạo giảm giá](#212-tạo-giảm-giá)
-  - [2.13 Xóa giảm giá](#213-xóa-giảm-giá)
-  - [2.14 Lấy đánh giá khóa học](#214-lấy-đánh-giá-khóa-học)
-  - [2.15 Lấy đánh giá của tôi](#215-lấy-đánh-giá-của-tôi)
-  - [2.16 Tạo đánh giá](#216-tạo-đánh-giá)
-  - [2.17 Xóa đánh giá](#217-xóa-đánh-giá)
+  - [2.1 Get All Categories](#21-get-all-categories)
+  - [2.2 Create Category](#22-create-category)
+  - [2.3 Update Category](#23-update-category)
+  - [2.4 Delete Category](#24-delete-category)
+  - [2.5 Get Course List](#25-get-course-list)
+  - [2.6 Get Featured Courses](#26-get-featured-courses)
+  - [2.7 Get Course Details](#27-get-course-details)
+  - [2.8 Create Course](#28-create-course)
+  - [2.9 Update Course](#29-update-course)
+  - [2.10 Delete Course](#210-delete-course)
+  - [2.11 Get Discount List](#211-get-discount-list)
+  - [2.12 Create Discount](#212-create-discount)
+  - [2.13 Delete Discount](#213-delete-discount)
+  - [2.14 Get Course Reviews](#214-get-course-reviews)
+  - [2.15 Get My Reviews](#215-get-my-reviews)
+  - [2.16 Create Review](#216-create-review)
+  - [2.17 Delete Review](#217-delete-review)
 - [3. Enrollment Module](#3-enrollment-module)
-  - [3.1 Thêm khóa học vào giỏ hàng](#31-thêm-khóa-học-vào-giỏ-hàng)
-  - [3.2 Xóa khóa học khỏi giỏ hàng](#32-xóa-khóa-học-khỏi-giỏ-hàng)
-  - [3.3 Lấy danh sách giỏ hàng](#33-lấy-danh-sách-giỏ-hàng)
-  - [3.4 Lấy khóa học đã ghi danh](#34-lấy-khóa-học-đã-ghi-danh)
-  - [3.5 Lấy khóa học được phân công (Lecturer)](#35-lấy-khóa-học-được-phân-công-lecturer)
-  - [3.6 Lấy danh sách học viên đã ghi danh](#36-lấy-danh-sách-học-viên-đã-ghi-danh)
-  - [3.7 Checkout đơn hàng](#37-checkout-đơn-hàng)
-  - [3.8 Lấy chi tiết đơn hàng](#38-lấy-chi-tiết-đơn-hàng)
-  - [3.9 Lấy lịch sử đơn hàng](#39-lấy-lịch-sử-đơn-hàng)
-  - [3.10 Hủy đơn hàng](#310-hủy-đơn-hàng)
-  - [3.11 Thanh toán (Purchase)](#311-thanh-toán-purchase)
-  - [3.12 VnPay Return Callback](#312-vnpay-return-callback)
-  - [3.13 Hủy thanh toán](#313-hủy-thanh-toán)
+  - [3.1 Add Course to Cart](#31-add-course-to-cart)
+  - [3.2 Remove Course from Cart](#32-remove-course-from-cart)
+  - [3.3 Get Cart List](#33-get-cart-list)
+  - [3.4 Get Enrolled Courses](#34-get-enrolled-courses)
+  - [3.5 Get Assigned Courses (Lecturer)](#35-get-assigned-courses-lecturer)
+  - [3.6 Get Enrolled Students List](#36-get-enrolled-students-list)
+  - [3.7 Checkout Order](#37-checkout-order)
+  - [3.8 Get Order Details](#38-get-order-details)
+  - [3.9 Get Order History](#39-get-order-history)
+  - [3.10 Cancel Order](#310-cancel-order)
+  - [3.11 Purchase / Payment](#311-purchase--payment)
+  - [3.12 VNPay Return Callback](#312-vnpay-return-callback)
+  - [3.13 Cancel Payment](#313-cancel-payment)
 - [4. Lecture Module](#4-lecture-module)
 - [5. Assignment Module](#5-assignment-module)
 - [6. File Module](#6-file-module)
 - [7. Forum Module](#7-forum-module)
 - [8. Metric Module](#8-metric-module)
 - [10. Chat Module](#10-chat-module)
-  - [10.1 Gửi tin nhắn tư vấn khoá học](#101-gửi-tin-nhắn-tư-vấn-khoá-học)
-  - [10.2 Lấy danh sách hội thoại cũ](#102-lấy-danh-sách-hội-thoại-cũ)
-  - [10.3 Lấy chi tiết tin nhắn trong hội thoại](#103-lấy-chi-tiết-tin-nhắn-trong-hội-thoại)
+  - [10.1 Send Consultation Message](#101-send-consultation-message)
+  - [10.2 Get Conversation History](#102-get-conversation-history)
+  - [10.3 Get Message Details in Conversation](#103-get-message-details-in-conversation)
 - [11. Quiz Module](#11-quiz-module)
-  - [11.1 Quản lý bài kiểm tra trắc nghiệm](#111-quản-lý-bài-kiểm-tra-trắc-nghiệm)
-  - [11.2 Quản lý câu hỏi & phương án](#112-quản-lý-câu-hỏi--phương-án)
-  - [11.3 Giao bài tập Quiz](#113-giao-bài-tập-quiz)
-  - [11.4 Thực hiện làm bài Quiz](#114-thực-hiện-làm-bài-quiz)
-  - [11.5 Chấm điểm tự luận Quiz](#115-chấm-điểm-tự-luận-quiz)
+  - [11.1 Quiz Assessment Management](#111-quiz-assessment-management)
+  - [11.2 Questions & Options Management](#112-questions--options-management)
+  - [11.3 Assign Quiz](#113-assign-quiz)
+  - [11.4 Take Quiz Attempt](#114-take-quiz-attempt)
+  - [11.5 Essay Grading](#115-essay-grading)
 - [12. Notification Module](#12-notification-module)
-  - [12.1 Quản lý thông báo cá nhân](#121-quản-lý-thông-báo-cá-nhân)
-  - [12.2 Quản lý thông báo nhóm](#122-quản-lý-thông-báo-nhóm)
-  - [12.3 Đăng ký FCM Device Token](#123-đăng-ký-fcm-device-token)
+  - [12.1 Personal Notifications](#121-personal-notifications)
+  - [12.2 Group Notifications](#122-group-notifications)
+  - [12.3 Register FCM Device Token](#123-register-fcm-device-token)
 
 ---
 
-## Thông tin chung
+## General Information
 
 ### Base URL
 
@@ -77,11 +77,11 @@
 http://localhost:9000
 ```
 
-### Response Format (tất cả API)
+### Response Format (All APIs)
 
-Mọi API đều trả về cùng format `ApiResponse`:
+All API endpoints return data wrapped in the `ApiResponse` envelope:
 
-**Thành công (HTTP 200):**
+**Success (HTTP 200):**
 
 ```json
 {
@@ -93,172 +93,172 @@ Mọi API đều trả về cùng format `ApiResponse`:
 }
 ```
 
-**Lỗi (HTTP 200 — error status nằm trong body):**
+**Error (HTTP 200 — error status in payload body):**
 
 ```json
 {
   "success": false,
   "status": "BAD_REQUEST",
-  "message": "Mô tả lỗi",
+  "message": "Error description",
   "data": null,
   "timestamp": 1721234567890
 }
 ```
 
-> **Lưu ý quan trọng**: Tất cả response đều trả HTTP status 200, status code thực tế nằm trong field `status` của `ApiResponse`.
+> **Important Note**: All responses return HTTP status 200; actual business status codes reside in the `status` property of `ApiResponse`.
 
-### Xác thực (Authentication)
+### Authentication
 
-- Sử dụng **OAuth2 Bearer Token (JWT)** trong header `Authorization`.
-- Header: `Authorization: Bearer <access_token>`
-- Token được lấy thông qua OAuth2 token endpoint với custom password grant type.
+- Authenticate using **OAuth2 Bearer Token (JWT)** in the `Authorization` header.
+- Header format: `Authorization: Bearer <access_token>`
+- Tokens are issued via the OAuth2 token endpoint using custom password grant type.
 
-### Các status lỗi có thể xảy ra (chung cho tất cả API)
+### Possible Error Statuses (Global)
 
-| Status trong `ApiResponse.status` | Ý nghĩa |
+| Status in `ApiResponse.status` | Meaning |
 |---|---|
-| `UNAUTHORIZED` (401) | Chưa đăng nhập hoặc token hết hạn |
-| `FORBIDDEN` (403) | Không có quyền truy cập |
-| `BAD_REQUEST` (400) | Dữ liệu đầu vào không hợp lệ |
-| `CONFLICT` (409) | Vi phạm ràng buộc dữ liệu (unique, foreign key) |
-| `METHOD_NOT_ALLOWED` (405) | HTTP method không được hỗ trợ |
-| `REQUEST_TIMEOUT` (408) | Request hết thời gian |
-| `INTERNAL_SERVER_ERROR` (500) | Lỗi server |
+| `UNAUTHORIZED` (401) | Unauthenticated or expired token |
+| `FORBIDDEN` (403) | Insufficient permissions |
+| `BAD_REQUEST` (400) | Invalid input payload |
+| `CONFLICT` (409) | Data constraint violation (unique, foreign key) |
+| `METHOD_NOT_ALLOWED` (405) | HTTP method not supported |
+| `REQUEST_TIMEOUT` (408) | Request timed out |
+| `INTERNAL_SERVER_ERROR` (500) | Internal server error |
 
-### Role hệ thống
+### System Roles
 
-| Role | Mô tả |
+| Role | Description |
 |---|---|
-| `ADMIN` | Quản trị viên — toàn quyền |
-| `LECTURER` | Giảng viên — quản lý bài giảng, bài tập |
-| `STUDENT` | Học viên — học, nộp bài, thanh toán |
+| `ADMIN` | Administrator — full system access |
+| `LECTURER` | Instructor — manages lectures, materials, assignments, grading |
+| `STUDENT` | Student — enrolls, submits assignments, makes payments |
 
 ---
 
 ## 1. User Module
 
-### 1.1 Đăng ký tài khoản
+### 1.1 User Registration
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/users/register` |
-| **Permission** | `permitAll()` — Không cần đăng nhập |
-| **Mô tả** | Đăng ký tài khoản mới với role STUDENT |
+| **Permission** | Public (No authentication required) |
+| **Description** | Register a new account with STUDENT role |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `username` | `String` | ✅ | Chỉ chứa `[a-zA-Z0-9_]` |
-| `email` | `String` | ✅ | Phải là email hợp lệ |
-| `password` | `String` | ✅ | Tối thiểu 8 ký tự, gồm uppercase, lowercase, số, ký tự đặc biệt `@$!%*?&` |
-| `fullName` | `String` | ✅ | Không được trống |
+| `username` | `String` | ✅ | Alphanumeric characters and underscores only (`[a-zA-Z0-9_]`) |
+| `email` | `String` | ✅ | Must be a valid email address |
+| `password` | `String` | ✅ | Minimum 8 characters, requiring uppercase, lowercase, number, and special character `@$!%*?&` |
+| `fullName` | `String` | ✅ | Must not be blank |
 
-> **Lưu ý**: Field `role` trong DTO bị override thành `STUDENT` ở controller.
+> **Note**: The `role` field in the DTO is overridden to `STUDENT` in the controller.
 
-**Response thành công:** `"Register successful. Please login to continue."`
+**Success Response:** `"Register successful. Please login to continue."`
 
 ---
 
-### 1.2 Tạo nhiều user (batch)
+### 1.2 Batch Create Users
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/users/batch-users` |
 | **Permission** | `ADMIN` |
-| **Mô tả** | Tạo nhiều user cùng lúc |
+| **Description** | Batch create multiple user accounts simultaneously |
 
-**Request Body:** Mảng `RegisterUser[]` (cùng format như đăng ký, nhưng có thể chỉ định `role`).
+**Request Body:** Array of `RegisterUser[]` (same format as registration, but `role` can be specified).
 
-**Response thành công:** `"Create users successful."`
+**Success Response:** `"Create users successful."`
 
 ---
 
-### 1.3 Lấy danh sách user
+### 1.3 Get User List
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/users` |
 | **Permission** | `ADMIN` |
-| **Mô tả** | Tìm kiếm/lọc danh sách user có phân trang |
+| **Description** | Search and filter paginated list of users |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
-| `page` | `int` | ✅ | Số trang (0-based) |
-| `role` | `RoleEnum` | ✅ | Lọc theo role: `ADMIN`, `LECTURER`, `STUDENT` |
-| `keyword` | `String` | ✅ | Từ khóa tìm kiếm |
+| `page` | `int` | ✅ | Page number (0-based) |
+| `role` | `RoleEnum` | ✅ | Filter by role: `ADMIN`, `LECTURER`, `STUDENT` |
+| `keyword` | `String` | ✅ | Search keyword |
 
-**Response thành công:** Object `CustomPaging` chứa danh sách user. Page size mặc định: 15.
+**Success Response:** `CustomPaging` object containing user list. Default page size: 15.
 
 ---
 
-### 1.4 Đổi mật khẩu
+### 1.4 Change Password
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/users/change-password` |
-| **Permission** | Authenticated (bất kỳ role nào) |
-| **Mô tả** | Đổi mật khẩu cho user hiện tại |
+| **Permission** | Authenticated (Any role) |
+| **Description** | Change password for current logged-in user |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Mô tả |
+| Field | Type | Required | Description |
 |---|---|---|---|
-| `oldPassword` | `String` | ✅ | Mật khẩu cũ |
-| `newPassword` | `String` | ✅ | Mật khẩu mới |
+| `oldPassword` | `String` | ✅ | Old password |
+| `newPassword` | `String` | ✅ | New password |
 
-**Response thành công:** `"Change password successful."`
+**Success Response:** `"Change password successful."`
 
 ---
 
-### 1.5 Cập nhật avatar
+### 1.5 Update Avatar
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/users/avatar` |
 | **Permission** | Authenticated |
-| **Mô tả** | Cập nhật avatar cho user hiện tại |
+| **Description** | Update avatar for current logged-in user |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Mô tả |
+| Field | Type | Required | Description |
 |---|---|---|---|
-| `avatarObjectKey` | `String` | ✅ | Object key của file avatar đã upload |
+| `avatarObjectKey` | `String` | ✅ | Object key of uploaded avatar file |
 
-**Response thành công:** URL mới của avatar (String).
+**Success Response:** New avatar URL (String).
 
 ---
 
-### 1.6 Đặt username cho Google Login
+### 1.6 Set Username for Google Login
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/users/username` |
 | **Permission** | Authenticated |
-| **Mô tả** | Đặt username sau khi đăng nhập bằng Google |
+| **Description** | Set username after Google OAuth login |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Mô tả |
+| Field | Type | Required | Description |
 |---|---|---|---|
-| `email` | `String` | ✅ | Email từ tài khoản Google |
-| `username` | `String` | ✅ | Username mới |
+| `email` | `String` | ✅ | Email from Google account |
+| `username` | `String` | ✅ | New username |
 
-**Response thành công:** `"Username đã được cập nhật thành công."`
+**Success Response:** `"Username updated successfully."`
 
 ---
 
-### 1.7 Lấy thông tin user hiện tại
+### 1.7 Get Current User Profile
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/me` |
 | **Permission** | Authenticated |
-| **Mô tả** | Lấy thông tin profile của user đang đăng nhập |
+| **Description** | Get profile information of current logged-in user |
 
-**Response thành công:**
+**Success Response:**
 
 ```json
 {
@@ -275,56 +275,56 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 2. Course Module
 
-### 2.1 Lấy tất cả danh mục
+### 2.1 Get All Categories
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/categories` |
 | **Permission** | `permitAll()` (GET) |
-| **Mô tả** | Lấy danh sách tất cả danh mục. Non-ADMIN chỉ thấy danh mục `ACTIVE`. |
+| **Description** | Get list of all categories. Non-ADMIN users see ACTIVE categories only. |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
-| `status` | `ItemStatus` | ❌ | `ACTIVE`, `DELETED`, `ALL`. Non-ADMIN luôn bị override thành `ACTIVE` |
+| `status` | `ItemStatus` | ❌ | `ACTIVE`, `DELETED`, `ALL`. Non-ADMIN is overridden to `ACTIVE` |
 
 ---
 
-### 2.2 Tạo danh mục
+### 2.2 Create Category
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/categories` |
 | **Permission** | `ADMIN` |
-| **Mô tả** | Tạo danh mục mới |
+| **Description** | Create a new course category |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `id` | `UUID` | ❌ | **Phải null** khi tạo (validation group `CreateValidation`) |
-| `name` | `String` | ✅ | Không được trống |
-| `description` | `String` | ✅ | Không được trống |
-| `thumbnailObjectKey` | `String` | ✅ | Không được trống |
+| `id` | `UUID` | ❌ | **Must be null** during creation (validation group `CreateValidation`) |
+| `name` | `String` | ✅ | Must not be blank |
+| `description` | `String` | ✅ | Must not be blank |
+| `thumbnailObjectKey` | `String` | ✅ | Must not be blank |
 
 ---
 
-### 2.3 Cập nhật danh mục
+### 2.3 Update Category
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/categories` |
 | **Permission** | `ADMIN` |
-| **Mô tả** | Cập nhật danh mục |
+| **Description** | Update an existing category |
 
-**Request Body:** Cùng format `CategoryRequest` nhưng `id` **bắt buộc** (validation group `UpdateValidation`).
+**Request Body:** Same format as `CategoryRequest`, but `id` is **required** (validation group `UpdateValidation`).
 
 ---
 
-### 2.4 Xóa danh mục
+### 2.4 Delete Category
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/categories/{categoryId}` |
 | **Permission** | `ADMIN` |
@@ -333,42 +333,42 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 2.5 Lấy danh sách khóa học
+### 2.5 Get Course List
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/courses` |
 | **Permission** | `permitAll()` |
-| **Mô tả** | Lấy danh sách khóa học có phân trang dạng cursor. Non-ADMIN chỉ thấy `ACTIVE`. |
+| **Description** | Get cursor-paginated list of courses. Non-ADMIN users see ACTIVE courses only. |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
-| `sortBy` | `String` | ❌ | Trường sắp xếp |
-| `nextCursor` | `String` | ❌ | Cursor cho trang tiếp theo (Base64 encoded) |
-| `categoryId` | `UUID` | ❌ | Lọc theo danh mục |
-| `keyword` | `String` | ❌ | Từ khóa tìm kiếm |
-| `page` | `int` | ❌ | Trang (mặc định 0) |
-| `status` | `ItemStatus` | ❌ | Non-ADMIN bị override thành `ACTIVE` |
+| `sortBy` | `String` | ❌ | Sort field |
+| `nextCursor` | `String` | ❌ | Cursor for next page (Base64 encoded) |
+| `categoryId` | `UUID` | ❌ | Filter by category |
+| `keyword` | `String` | ❌ | Search keyword |
+| `page` | `int` | ❌ | Page number (default 0) |
+| `status` | `ItemStatus` | ❌ | Non-ADMIN requests are overridden to `ACTIVE` |
 
-**Response:** `CustomPaging` chứa danh sách khóa học. ADMIN: 10 items/page, others: 15 items/page.
+**Response:** `CustomPaging` containing course list. ADMIN: 10 items/page, others: 15 items/page.
 
 ---
 
-### 2.6 Lấy khóa học nổi bật
+### 2.6 Get Featured Courses
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/courses/highlighted` |
 | **Permission** | `permitAll()` |
-| **Mô tả** | Lấy danh sách khóa học nổi bật (có thể được cache trong Redis) |
+| **Description** | Get list of highlighted featured courses (cached in Redis) |
 
 ---
 
-### 2.7 Lấy chi tiết khóa học
+### 2.7 Get Course Details
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/courses/{courseId}/` |
 | **Permission** | `permitAll()` |
@@ -377,41 +377,41 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 2.8 Tạo khóa học
+### 2.8 Create Course
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/courses` |
 | **Permission** | `ADMIN` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `id` | `UUID` | ❌ | **Phải null** khi tạo |
-| `categoryId` | `UUID` | ✅ | ID danh mục |
-| `title` | `String` | ✅ | Tối đa 255 ký tự |
-| `description` | `String` | ✅ | Không được trống |
+| `id` | `UUID` | ❌ | **Must be null** during creation |
+| `categoryId` | `UUID` | ✅ | Category ID |
+| `title` | `String` | ✅ | Maximum 255 characters |
+| `description` | `String` | ✅ | Must not be blank |
 | `price` | `BigDecimal` | ❌ | ≥ 0.0 |
-| `thumbnailObjectKey` | `String` | ✅ | Object key thumbnail |
-| `lecturerUsernames` | `List<String>` | ✅ | Ít nhất 1 lecturer, mỗi phần tử không trống |
+| `thumbnailObjectKey` | `String` | ✅ | Thumbnail object key |
+| `lecturerUsernames` | `List<String>` | ✅ | At least 1 lecturer username required, elements must not be blank |
 
 ---
 
-### 2.9 Cập nhật khóa học
+### 2.9 Update Course
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/courses` |
 | **Permission** | `ADMIN` |
 
-**Request Body:** Cùng format `CourseRequest`, `id` **bắt buộc**.
+**Request Body:** Same format as `CourseRequest`, `id` is **required**.
 
 ---
 
-### 2.10 Xóa khóa học
+### 2.10 Delete Course
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/courses` |
 | **Permission** | `ADMIN` |
@@ -420,44 +420,44 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 2.11 Lấy danh sách giảm giá
+### 2.11 Get Discount List
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/course-discounts` |
 | **Permission** | `ADMIN` |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
-| `nextCursor` | `String` | ❌ | Cursor phân trang |
-| `courseId` | `UUID` | ❌ | Nếu có, lọc discount theo khóa học |
+| `nextCursor` | `String` | ❌ | Pagination cursor |
+| `courseId` | `UUID` | ❌ | Optional course filter |
 
 ---
 
-### 2.12 Tạo giảm giá
+### 2.12 Create Discount
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/course-discounts` |
 | **Permission** | `ADMIN` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `courseId` | `UUID` | ❌ | Null = áp dụng cho tất cả khóa học |
-| `description` | `String` | ✅ | Mô tả discount |
+| `courseId` | `UUID` | ❌ | Null = applies to all courses |
+| `description` | `String` | ✅ | Discount description |
 | `discountPercentage` | `BigDecimal` | ✅ | 0.01 – 100.00 |
-| `validFrom` | `LocalDate` | ✅ | Không được trong quá khứ (`@FutureOrPresent`) |
-| `validTo` | `LocalDate` | ✅ | Không được trong quá khứ (`@FutureOrPresent`) |
+| `validFrom` | `LocalDate` | ✅ | Must not be in the past (`@FutureOrPresent`) |
+| `validTo` | `LocalDate` | ✅ | Must not be in the past (`@FutureOrPresent`) |
 
 ---
 
-### 2.13 Xóa giảm giá
+### 2.13 Delete Discount
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/course-discounts` |
 | **Permission** | `ADMIN` |
@@ -466,25 +466,25 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 2.14 Lấy đánh giá khóa học
+### 2.14 Get Course Reviews
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/courses/reviews` |
 | **Permission** | `permitAll()` (GET) |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
-| `courseId` | `UUID` | ✅ | ID khóa học |
-| `nextCursor` | `String` | ❌ | Cursor phân trang |
+| `courseId` | `UUID` | ✅ | Course ID |
+| `nextCursor` | `String` | ❌ | Pagination cursor |
 
 ---
 
-### 2.15 Lấy đánh giá của tôi
+### 2.15 Get My Reviews
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/courses/reviews/me` |
 | **Permission** | `STUDENT` |
@@ -493,29 +493,29 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 2.16 Tạo đánh giá
+### 2.16 Create Review
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/courses/reviews` |
 | **Permission** | `STUDENT` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
 | `courseId` | `UUID` | ✅ | |
-| `content` | `String` | ✅ | Không được trống |
+| `content` | `String` | ✅ | Must not be blank |
 | `rating` | `int` | ✅ | 1 – 5 |
 
 ---
 
-### 2.17 Xóa đánh giá
+### 2.17 Delete Review
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/courses/reviews` |
-| **Permission** | Authenticated (STUDENT xóa của mình, ADMIN xóa bất kỳ) |
+| **Permission** | Authenticated (STUDENT deletes own review, ADMIN can delete any) |
 
 **Query Parameter:** `reviewId` — `UUID`
 
@@ -523,24 +523,24 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 3. Enrollment Module
 
-### 3.1 Thêm khóa học vào giỏ hàng
+### 3.1 Add Course to Cart
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/cart/items/courses` |
 | **Permission** | `STUDENT` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `courseId` | `String` (UUID format) | ✅ |
 
 ---
 
-### 3.2 Xóa khóa học khỏi giỏ hàng
+### 3.2 Remove Course from Cart
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/cart/items/courses` |
 | **Permission** | `STUDENT` |
@@ -549,9 +549,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 3.3 Lấy danh sách giỏ hàng
+### 3.3 Get Cart List
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/cart/items/courses` |
 | **Permission** | `STUDENT` |
@@ -560,9 +560,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 3.4 Lấy khóa học đã ghi danh
+### 3.4 Get Enrolled Courses
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/enrollments` |
 | **Permission** | `STUDENT` |
@@ -571,16 +571,16 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 3.5 Lấy khóa học được phân công (Lecturer)
+### 3.5 Get Assigned Courses (Lecturer)
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/enrollments/assigned-courses` |
 | **Permission** | `LECTURER` |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc |
+| Param | Type | Required |
 |---|---|---|
 | `nextCursor` | `String` | ❌ |
 | `keyword` | `String` | ❌ |
@@ -588,41 +588,41 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 3.6 Lấy danh sách học viên đã ghi danh
+### 3.6 Get Enrolled Students List
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/enrollments/enrolled-users` |
-| **Permission** | `LECTURER` hoặc `ADMIN` |
+| **Permission** | `LECTURER` or `ADMIN` |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc |
+| Param | Type | Required |
 |---|---|---|
 | `courseId` | `UUID` | ✅ |
 | `nextCursor` | `String` | ❌ |
 
 ---
 
-### 3.7 Checkout đơn hàng
+### 3.7 Checkout Order
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/orders/checkout` |
 | **Permission** | `STUDENT` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `entityIds` | `List<UUID>` | ✅ | Không được rỗng |
-| `entityType` | `PurchaseEntityType` | ✅ | `COURSE` hoặc `SUBSCRIPTION` |
+| `entityIds` | `List<UUID>` | ✅ | Must not be empty |
+| `entityType` | `PurchaseEntityType` | ✅ | `COURSE` or `SUBSCRIPTION` |
 
 ---
 
-### 3.8 Lấy chi tiết đơn hàng
+### 3.8 Get Order Details
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/orders` |
 | **Permission** | `STUDENT` |
@@ -631,25 +631,25 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 3.9 Lấy lịch sử đơn hàng
+### 3.9 Get Order History
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/orders/history` |
 | **Permission** | `STUDENT` |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Ràng buộc |
+| Param | Type | Required | Constraint |
 |---|---|---|---|
 | `nextCursor` | `String` | ❌ | |
-| `orderStatus` | `PaymentStatus` | ✅ | `COMPLETED`, `FAILED`, `CANCELLED` (không chấp nhận `PENDING`) |
+| `orderStatus` | `PaymentStatus` | ✅ | `COMPLETED`, `FAILED`, `CANCELLED` (`PENDING` not accepted) |
 
 ---
 
-### 3.10 Hủy đơn hàng
+### 3.10 Cancel Order
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/orders/cancel` |
 | **Permission** | `STUDENT` |
@@ -658,39 +658,39 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 3.11 Thanh toán (Purchase)
+### 3.11 Purchase / Payment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/enrollments` |
 | **Permission** | `STUDENT` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Mô tả |
+| Field | Type | Required | Description |
 |---|---|---|---|
-| `orderId` | `UUID` | ✅ | ID đơn hàng cần thanh toán |
+| `orderId` | `UUID` | ✅ | Order ID for payment |
 | `paymentMethod` | `PaymentMethod` | ✅ | `VNPAY`, `MOMO`, `ZALOPAY`, `PAYPAL`, `STRIPE` |
 
-> IP address được tự động lấy từ header `X-FORWARDED-FOR` hoặc `request.getRemoteAddr()`.
+> Client IP address is automatically resolved from `X-FORWARDED-FOR` header or `request.getRemoteAddr()`.
 
 ---
 
-### 3.12 VnPay Return Callback
+### 3.12 VNPay Return Callback
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/enrollments/vnpay-return` |
 | **Permission** | `STUDENT` |
-| **Mô tả** | Callback từ VnPay sau thanh toán |
+| **Description** | Callback endpoint invoked by VNPay following payment completion |
 
-**Query Parameters (từ VnPay):** `vnp_TxnRef`, `vnp_ResponseCode`
+**Query Parameters (from VNPay):** `vnp_TxnRef`, `vnp_ResponseCode`
 
 ---
 
-### 3.13 Hủy thanh toán
+### 3.13 Cancel Payment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/enrollments/cancel` |
 | **Permission** | `STUDENT` |
@@ -701,9 +701,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 4. Lecture Module
 
-### 4.1 Lấy bài giảng theo khóa học
+### 4.1 Get Lectures by Course
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/lectures` |
 | **Permission** | `permitAll()` |
@@ -712,54 +712,54 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 4.2 Lấy chi tiết bài giảng
+### 4.2 Get Lecture Details
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/lectures/{lectureId}` |
 | **Permission** | Authenticated |
 
 ---
 
-### 4.3 Lấy tài liệu bài giảng
+### 4.3 Get Lecture Materials
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/lectures/{lectureId}/materials` |
 | **Permission** | Authenticated |
 
 ---
 
-### 4.4 Tạo bài giảng
+### 4.4 Create Lecture
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/lectures` |
-| **Permission** | `LECTURER` hoặc `ADMIN` |
+| **Permission** | `LECTURER` or `ADMIN` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `id` | `UUID` | ❌ | **Phải null** khi tạo |
+| `id` | `UUID` | ❌ | **Must be null** during creation |
 | `courseId` | `UUID` | ✅ (create) | |
-| `title` | `String` | ✅ | Không được trống |
-| `summary` | `String` | ✅ | Không được trống |
+| `title` | `String` | ✅ | Must not be blank |
+| `summary` | `String` | ✅ | Must not be blank |
 | `content` | `String` | ❌ | |
-| `videoObjectKey` | `String` | ❌ (create) | **Phải null** khi update |
+| `videoObjectKey` | `String` | ❌ (create) | **Must be null** during update |
 
 ---
 
-### 4.5 Tạo tài liệu (Material)
+### 4.5 Create Material
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/lectures/materials` |
-| **Permission** | `LECTURER` hoặc `ADMIN` |
+| **Permission** | `LECTURER` or `ADMIN` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `lectureId` | `UUID` | ✅ |
 | `title` | `String` | ✅ |
@@ -767,49 +767,49 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 4.6 Cập nhật bài giảng
+### 4.6 Update Lecture
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/lectures` |
-| **Permission** | `LECTURER` hoặc `ADMIN` |
+| **Permission** | `LECTURER` or `ADMIN` |
 
-**Request Body:** Cùng `LectureRequest`, `id` **bắt buộc**, `videoObjectKey` **phải null**.
+**Request Body:** Same `LectureRequest` format, `id` **required**, `videoObjectKey` **must be null**.
 
 ---
 
-### 4.7 Xóa bài giảng
+### 4.7 Delete Lecture
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/lectures` |
-| **Permission** | `LECTURER` hoặc `ADMIN` |
+| **Permission** | `LECTURER` or `ADMIN` |
 
 **Query Parameter:** `lectureId` — `UUID`
 
 ---
 
-### 4.8 Xóa tài liệu
+### 4.8 Delete Material
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/lectures/materials` |
-| **Permission** | `LECTURER` hoặc `ADMIN` |
+| **Permission** | `LECTURER` or `ADMIN` |
 
 **Query Parameter:** `materialId` — `UUID`
 
 ---
 
-### 4.9 Cập nhật tiến độ xem video
+### 4.9 Update Video Progress
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/lectures/progress` |
 | **Permission** | `STUDENT` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
 | `lectureId` | `UUID` | ✅ | |
 | `segmentStart` | `Integer` | ✅ | ≥ 0 |
@@ -817,34 +817,34 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 4.10 Lấy bình luận bài giảng
+### 4.10 Get Lecture Comments
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/lectures/comments/filter` |
 | **Permission** | Authenticated |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Mô tả |
+| Field | Type | Required | Description |
 |---|---|---|---|
 | `lectureId` | `UUID` | ✅ | |
-| `parentCommentId` | `UUID` | ❌ | Null = lấy comment gốc |
-| `page` | `Integer` | ❌ | Mặc định 0 |
-| `size` | `Integer` | ❌ | Mặc định 10 |
+| `parentCommentId` | `UUID` | ❌ | Null = fetch top-level comments |
+| `page` | `Integer` | ❌ | Default 0 |
+| `size` | `Integer` | ❌ | Default 10 |
 
 ---
 
-### 4.11 Tạo bình luận bài giảng
+### 4.11 Create Lecture Comment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/lectures/comments` |
 | **Permission** | Authenticated |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `lectureId` | `UUID` | ✅ |
 | `parentCommentId` | `UUID` | ❌ |
@@ -852,9 +852,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 4.12 Xóa bình luận bài giảng
+### 4.12 Delete Lecture Comment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/lectures/comments` |
 | **Permission** | Authenticated |
@@ -865,33 +865,33 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 5. Assignment Module
 
-### 5.1 Lấy bài tập
+### 5.1 Get Assignments
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/assignments` |
 | **Permission** | Authenticated |
-| **Mô tả** | Lấy theo `lectureId` (danh sách) hoặc `assignmentId` (chi tiết). Ít nhất 1 trong 2 phải có. |
+| **Description** | Fetch by `lectureId` (list) or `assignmentId` (details). At least 1 parameter is required. |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc |
+| Param | Type | Required |
 |---|---|---|
-| `lectureId` | `UUID` | ❌ (nhưng 1 trong 2 phải có) |
-| `assignmentId` | `UUID` | ❌ (nhưng 1 trong 2 phải có) |
+| `lectureId` | `UUID` | ❌ (At least 1 required) |
+| `assignmentId` | `UUID` | ❌ (At least 1 required) |
 
 ---
 
-### 5.2 Tạo bài tập
+### 5.2 Create Assignment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/assignments` |
-| **Permission** | `ADMIN` hoặc `LECTURER` |
+| **Permission** | `ADMIN` or `LECTURER` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `lectureId` | `UUID` | ✅ |
 | `title` | `String` | ✅ |
@@ -899,43 +899,43 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 5.3 Xóa bài tập
+### 5.3 Delete Assignment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/assignments` |
-| **Permission** | `ADMIN` hoặc `LECTURER` |
+| **Permission** | `ADMIN` or `LECTURER` |
 
 **Query Parameter:** `assignmentId` — `UUID`
 
 ---
 
-### 5.4 Lấy feedback
+### 5.4 Get Feedback
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/assignments/feedbacks` |
-| **Permission** | Authenticated (STUDENT chỉ xem của mình) |
+| **Permission** | Authenticated (STUDENT sees own feedback only) |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
 | `assignmentId` | `UUID` | ✅ | |
-| `studentUsername` | `String` | ❌ | STUDENT: tự override thành username mình |
+| `studentUsername` | `String` | ❌ | STUDENT: Automatically overridden to current username |
 
 ---
 
-### 5.5 Tạo feedback
+### 5.5 Create Feedback
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/assignments/feedbacks` |
-| **Permission** | `ADMIN` hoặc `LECTURER` |
+| **Permission** | `ADMIN` or `LECTURER` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `assignmentId` | `UUID` | ✅ |
 | `studentUsername` | `String` | ✅ |
@@ -943,27 +943,27 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 5.6 Xóa feedback
+### 5.6 Delete Feedback
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/assignments/feedbacks` |
-| **Permission** | `ADMIN` hoặc `LECTURER` |
+| **Permission** | `ADMIN` or `LECTURER` |
 
 **Query Parameter:** `feedbackId` — `UUID`
 
 ---
 
-### 5.7 Lấy submissions
+### 5.7 Get Submissions
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/assignments/submissions` |
-| **Permission** | `ADMIN` hoặc `LECTURER` |
+| **Permission** | `ADMIN` or `LECTURER` |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Default |
+| Param | Type | Required | Default |
 |---|---|---|---|
 | `assignmentId` | `UUID` | ✅ | |
 | `page` | `int` | ❌ | 0 |
@@ -971,25 +971,25 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 5.8 Nộp bài
+### 5.8 Submit Assignment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/assignments/submissions` |
 | **Permission** | Authenticated |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `assignmentId` | `UUID` | ✅ |
 | `fileObjectKey` | `String` | ✅ |
 
 ---
 
-### 5.9 Hủy nộp bài
+### 5.9 Cancel Submission
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/assignments/submissions` |
 | **Permission** | Authenticated |
@@ -1000,16 +1000,16 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 6. File Module
 
-### 6.1 Tạo Pre-signed Upload URL
+### 6.1 Create Pre-signed Upload URL
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/files/pre-signed-url` |
 | **Permission** | Authenticated |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
 | `fileName` | `String` | ✅ | |
 | `contentType` | `String` | ✅ | MIME type |
@@ -1018,9 +1018,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 6.2 Lấy metadata file
+### 6.2 Get File Metadata
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/files/metadata` |
 | **Permission** | Authenticated |
@@ -1029,9 +1029,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 6.3 Lấy thông tin download
+### 6.3 Get Download Details
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/files/download` |
 | **Permission** | Authenticated |
@@ -1040,9 +1040,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 6.4 Xác nhận upload ảnh
+### 6.4 Confirm Image Upload
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/files/confirm-image-upload` |
 | **Permission** | Authenticated |
@@ -1053,9 +1053,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 7. Forum Module
 
-### 7.1 Lấy post versions (Admin)
+### 7.1 Get Post Versions (Admin)
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/versions` |
 | **Permission** | `ADMIN` |
@@ -1064,9 +1064,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.2 Lấy bài viết đã đăng
+### 7.2 Get Posted Articles
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/posted` |
 | **Permission** | Authenticated |
@@ -1075,9 +1075,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.3 Lấy versions theo post ID
+### 7.3 Get Versions by Post ID
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/versions/{postId}` |
 | **Permission** | Authenticated |
@@ -1086,36 +1086,36 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.4 Cập nhật trạng thái post version (Admin)
+### 7.4 Update Post Version Status (Admin)
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/forum/posts/versions` |
 | **Permission** | `ADMIN` |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `postVersionId` | `String` (UUID) | ✅ |
 | `postStatus` | `String` (PostStatus) | ✅ |
 
 ---
 
-### 7.5 Xóa post version
+### 7.5 Delete Post Version
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/forum/posts/versions` |
-| **Permission** | Authenticated (chủ sở hữu hoặc ADMIN) |
+| **Permission** | Authenticated (Post owner or ADMIN) |
 
 **Query Parameter:** `postVersionId` — `UUID`
 
 ---
 
-### 7.6 Lấy chi tiết bài viết
+### 7.6 Get Post Details
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts` |
 | **Permission** | `permitAll()` (GET) |
@@ -1124,50 +1124,50 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.7 Tạo bài viết
+### 7.7 Create Post
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/forum/posts` |
 | **Permission** | Authenticated |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc | Ràng buộc |
+| Field | Type | Required | Constraint |
 |---|---|---|---|
-| `postId` | `UUID` | ❌ | **Phải null** khi tạo |
+| `postId` | `UUID` | ❌ | **Must be null** during creation |
 | `thumbObjectKey` | `String` | ✅ | |
-| `title` | `String` | ✅ | Tối đa 255 ký tự |
-| `shortDescription` | `String` | ✅ | Tối đa 500 ký tự |
+| `title` | `String` | ✅ | Maximum 255 characters |
+| `shortDescription` | `String` | ✅ | Maximum 500 characters |
 | `content` | `String` | ✅ | |
 
 ---
 
-### 7.8 Cập nhật bài viết
+### 7.8 Update Post
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `PUT /api/v1/forum/posts` |
 | **Permission** | Authenticated |
 
-**Request Body:** Cùng `PostRequest`, `postId` **bắt buộc**.
+**Request Body:** Same `PostRequest` format, `postId` **required**.
 
 ---
 
-### 7.9 Xóa bài viết
+### 7.9 Delete Post
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/forum/posts` |
-| **Permission** | Authenticated (chủ sở hữu hoặc ADMIN) |
+| **Permission** | Authenticated (Post owner or ADMIN) |
 
 **Query Parameter:** `postId` — `UUID`
 
 ---
 
-### 7.10 Lấy bài viết đã lưu
+### 7.10 Get Saved Posts
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/saved` |
 | **Permission** | Authenticated |
@@ -1176,27 +1176,27 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.11 Lưu bài viết
+### 7.11 Save Post
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/forum/posts/{postId}/save` |
 | **Permission** | Authenticated |
 
 ---
 
-### 7.12 Bỏ lưu bài viết
+### 7.12 Unsave Post
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/forum/posts/{postId}/save` |
 | **Permission** | Authenticated |
 
 ---
 
-### 7.13 Feed bài viết
+### 7.13 Post Feed
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/feed` |
 | **Permission** | Authenticated |
@@ -1205,30 +1205,30 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.14 Tìm kiếm bài viết
+### 7.14 Search Posts
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/search` |
 | **Permission** | Authenticated |
-| **Mô tả** | Full-text search qua Elasticsearch |
+| **Description** | Full-text search powered by Elasticsearch |
 
 **Query Parameters:** `keyword` (`String`) ✅, `nextCursor` ❌
 
 ---
 
-### 7.15 Bài viết liên quan
+### 7.15 Related Posts
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/posts/{postId}/related` |
 | **Permission** | Authenticated |
 
 ---
 
-### 7.16 Lấy bình luận bài viết
+### 7.16 Get Post Comments
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/comments` |
 | **Permission** | `permitAll()` (GET) |
@@ -1237,9 +1237,9 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.17 Lấy reply comments
+### 7.17 Get Comment Replies
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/forum/comments/replies` |
 | **Permission** | `permitAll()` (GET) |
@@ -1248,16 +1248,16 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.18 Tạo bình luận
+### 7.18 Create Comment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/v1/forum/comments` |
 | **Permission** | Authenticated |
 
 **Request Body:**
 
-| Field | Type | Bắt buộc |
+| Field | Type | Required |
 |---|---|---|
 | `postId` | `UUID` | ✅ |
 | `content` | `String` | ✅ |
@@ -1265,12 +1265,12 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ---
 
-### 7.19 Xóa bình luận
+### 7.19 Delete Comment
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `DELETE /api/v1/forum/comments` |
-| **Permission** | Authenticated (chủ sở hữu hoặc ADMIN) |
+| **Permission** | Authenticated (Comment owner or ADMIN) |
 
 **Query Parameter:** `commentId` — `UUID`
 
@@ -1278,12 +1278,12 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 8. Metric Module
 
-> Tất cả API metric yêu cầu role `ADMIN`.
+> All metric endpoints require `ADMIN` role.
 > Base path: `/api/metrics`
 
 ### 8.1 Dashboard Overview
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/dashboard` |
 | **Permission** | `ADMIN` |
@@ -1292,7 +1292,7 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ### 8.2 Users Growth
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/users-growth` |
 | **Permission** | `ADMIN` |
@@ -1303,7 +1303,7 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ### 8.3 Courses Growth
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/courses-growth` |
 | **Permission** | `ADMIN` |
@@ -1314,7 +1314,7 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ### 8.4 Revenue Growth
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/revenue-growth` |
 | **Permission** | `ADMIN` |
@@ -1325,7 +1325,7 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ### 8.5 Activity Metrics
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/activity` |
 | **Permission** | `ADMIN` |
@@ -1336,7 +1336,7 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ### 8.6 Top Courses
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/top-courses` |
 | **Permission** | `ADMIN` |
@@ -1347,7 +1347,7 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ### 8.7 Top Users
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/metrics/top-users` |
 | **Permission** | `ADMIN` |
@@ -1358,52 +1358,52 @@ Mọi API đều trả về cùng format `ApiResponse`:
 
 ## 9. Tracking Module
 
-### 9.1 Lấy submission tracking logs
+### 9.1 Get Submission Tracking Logs
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/v1/assignments/submissions/tracking` |
-| **Permission** | Authenticated (STUDENT chỉ xem của mình) |
+| **Permission** | Authenticated (STUDENT sees own logs only) |
 
 **Query Parameters:**
 
-| Param | Type | Bắt buộc | Mô tả |
+| Param | Type | Required | Description |
 |---|---|---|---|
 | `assignmentId` | `UUID` | ✅ | |
-| `studentUsername` | `String` | ❌ | STUDENT: tự override; Non-student: bắt buộc |
+| `studentUsername` | `String` | ❌ | STUDENT: Automatically overridden; Non-student: Required |
 | `page` | `int` | ❌ | Default 0 |
 
 ---
 
 ## 10. Chat Module
 
-Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI Function Calling + PostgreSQL pgvector semantic search).
+Automated AI Chatbot course consultation module (powered by OpenAI Function Calling + PostgreSQL pgvector semantic search).
 
-### 10.1 Gửi tin nhắn tư vấn khoá học
+### 10.1 Send Consultation Message
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `POST /api/chat/messages` |
-| **Permission** | Public (Optional Auth: Có JWT sẽ cá nhân hoá & lưu lịch sử; không JWT xử lý như anonymous) |
+| **Permission** | Public (Optional Auth: JWT enables personalization & history saving; unauthenticated handled as anonymous) |
 
 **Request Body:**
 
 ```json
 {
   "conversationId": "uuid | null",
-  "message": "Cho mình hỏi khoá học backend phù hợp cho người mới bắt đầu",
+  "message": "Hi, please suggest backend courses suitable for beginners",
   "history": [
-    { "role": "user", "content": "Chào chatbot" },
-    { "role": "assistant", "content": "Chào bạn! Mình có thể giúp gì cho bạn?" }
+    { "role": "user", "content": "Hello chatbot" },
+    { "role": "assistant", "content": "Hello! How can I help you today?" }
   ]
 }
 ```
 
-| Field | Type | Bắt buộc | Mô tả |
+| Field | Type | Required | Description |
 |---|---|---|---|
-| `conversationId` | `UUID` | ❌ | Null nếu tạo hội thoại mới. Đăng nhập: BE validate conversationId thuộc sở hữu user. |
-| `message` | `String` | ✅ | Nội dung tin nhắn (tối đa 500 ký tự). |
-| `history` | `Array` | ❌ | Bắt buộc khi dùng anonymous (FE tự quản lý lịch sử). Bị bỏ qua khi đã đăng nhập (BE tự load từ DB). |
+| `conversationId` | `UUID` | ❌ | Null when starting a new conversation. Authenticated: Backend validates conversation ownership. |
+| `message` | `String` | ✅ | Message prompt content (Maximum 500 characters). |
+| `history` | `Array` | ❌ | Required for anonymous requests (Frontend manages history). Ignored when authenticated (Backend loads from DB). |
 
 **Response Data (`ChatMessageResponse`):**
 
@@ -1412,16 +1412,16 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
   "conversationId": "019ebac1-40fb-7a3f-a81e-5bb1533573d3",
   "reply": {
     "role": "assistant",
-    "content": "Dưới đây là một số khoá học lập trình backend dành cho người mới bắt đầu..."
+    "content": "Here are some backend programming courses suitable for beginners..."
   },
   "courses": [
     {
       "courseId": "019ebac1-40fb-7a3f-a81e-5bb1533573d4",
-      "title": "Lập trình Java Spring Boot Căn Bản",
-      "shortDescription": "Khóa học nhập môn Spring Boot từ zero đến hero",
+      "title": "Java Spring Boot Fundamentals",
+      "shortDescription": "Introductory Spring Boot course from zero to hero",
       "price": 499000.00,
       "thumbnailUrl": "https://pub-r2.dev/thumbnail.jpg",
-      "matchReason": "Phù hợp với nhu cầu học Java của bạn"
+      "matchReason": "Matched to your Java learning preferences"
     }
   ]
 }
@@ -1429,9 +1429,9 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
 
 ---
 
-### 10.2 Lấy danh sách hội thoại cũ
+### 10.2 Get Conversation History
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/chat/conversations` |
 | **Permission** | Authenticated (`STUDENT` / `LECTURER` / `ADMIN`) |
@@ -1442,7 +1442,7 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
 [
   {
     "id": "019ebac1-40fb-7a3f-a81e-5bb1533573d3",
-    "lastMessagePreview": "Dưới đây là một số khoá học lập trình backend dành cho người mới bắt đầu...",
+    "lastMessagePreview": "Here are some backend programming courses suitable for beginners...",
     "updatedAt": "2026-08-12T16:50:00"
   }
 ]
@@ -1450,14 +1450,14 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
 
 ---
 
-### 10.3 Lấy chi tiết tin nhắn trong hội thoại
+### 10.3 Get Message Details in Conversation
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoint** | `GET /api/chat/conversations/{id}/messages` |
-| **Permission** | Authenticated (User sở hữu hội thoại) |
+| **Permission** | Authenticated (Conversation owner) |
 
-**Path Variable:** `id` — `UUID` (ID hội thoại)
+**Path Variable:** `id` — `UUID` (Conversation ID)
 
 **Response Data (`List<ChatMessageDetailResponse>`):**
 
@@ -1466,7 +1466,7 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
   {
     "id": "019ebac1-40fb-7a3f-a81e-5bb1533573e1",
     "role": "user",
-    "content": "Cho mình hỏi khoá học backend phù hợp cho người mới bắt đầu",
+    "content": "Hi, please suggest backend courses suitable for beginners",
     "referencedCourseIds": null,
     "courses": [],
     "createdAt": "2026-08-12T16:49:50"
@@ -1474,18 +1474,18 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
   {
     "id": "019ebac1-40fb-7a3f-a81e-5bb1533573e2",
     "role": "assistant",
-    "content": "Dưới đây là một số khoá học lập trình backend dành cho người mới bắt đầu...",
+    "content": "Here are some backend programming courses suitable for beginners...",
     "referencedCourseIds": [
       "019ebac1-40fb-7a3f-a81e-5bb1533573d4"
     ],
     "courses": [
       {
         "courseId": "019ebac1-40fb-7a3f-a81e-5bb1533573d4",
-        "title": "Lập trình Java Spring Boot Căn Bản",
-        "shortDescription": "Khóa học nhập môn Spring Boot từ zero đến hero",
+        "title": "Java Spring Boot Fundamentals",
+        "shortDescription": "Introductory Spring Boot course from zero to hero",
         "price": 499000.00,
         "thumbnailUrl": "https://pub-r2.dev/thumbnail.jpg",
-        "matchReason": "Khoá học được gợi ý trong hội thoại"
+        "matchReason": "Course recommended in conversation"
       }
     ],
     "createdAt": "2026-08-12T16:50:00"
@@ -1497,47 +1497,47 @@ Module tư vấn khoá học tự động bằng AI Chatbot (sử dụng OpenAI 
 
 ## 11. Quiz Module
 
-Module tạo đề thi trắc nghiệm/tự luận, làm bài, chấm điểm tự động & giao bài tập quiz.
+Quiz assessment creation, essay/multiple-choice attempt management, automated scoring & quiz assignments.
 
-### 11.1 Quản lý bài kiểm tra trắc nghiệm
+### 11.1 Quiz Assessment Management
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `GET /api/v1/quizzes`<br>`POST /api/v1/quizzes`<br>`GET /api/v1/quizzes/{id}`<br>`PUT /api/v1/quizzes/{id}`<br>`DELETE /api/v1/quizzes/{id}` |
-| **Permission** | `LECTURER`, `ADMIN` (Tạo, Sửa, Xoá); `STUDENT` (Xem danh sách/chi tiết) |
+| **Permission** | `LECTURER`, `ADMIN` (CRUD); `STUDENT` (View list/details) |
 
 ---
 
-### 11.2 Quản lý câu hỏi & phương án
+### 11.2 Questions & Options Management
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `GET /api/v1/quizzes/{quizId}/questions`<br>`POST /api/v1/quizzes/{quizId}/questions`<br>`PUT /api/v1/quizzes/{quizId}/questions/{questionId}`<br>`DELETE /api/v1/quizzes/{quizId}/questions/{questionId}` |
 | **Permission** | `LECTURER`, `ADMIN` |
 
 ---
 
-### 11.3 Giao bài tập Quiz
+### 11.3 Assign Quiz
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `POST /api/v1/quizzes/{quizId}/assignments`<br>`GET /api/v1/quizzes/assignments`<br>`DELETE /api/v1/quizzes/assignments/{id}` |
 | **Permission** | `LECTURER`, `ADMIN` |
 
 ---
 
-### 11.4 Thực hiện làm bài Quiz
+### 11.4 Take Quiz Attempt
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `POST /api/v1/quizzes/attempts/start`<br>`POST /api/v1/quizzes/attempts/{attemptId}/save`<br>`POST /api/v1/quizzes/attempts/{attemptId}/submit`<br>`GET /api/v1/quizzes/attempts/{attemptId}/result` |
 | **Permission** | Authenticated (`STUDENT`) |
 
 ---
 
-### 11.5 Chấm điểm tự luận Quiz
+### 11.5 Essay Grading
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `GET /api/v1/quizzes/grading/pending`<br>`POST /api/v1/quizzes/grading/grade` |
 | **Permission** | `LECTURER`, `ADMIN` |
@@ -1546,29 +1546,29 @@ Module tạo đề thi trắc nghiệm/tự luận, làm bài, chấm điểm t�
 
 ## 12. Notification Module
 
-Module quản lý thông báo cá nhân, thông báo nhóm và đăng ký thiết bị push notification (FCM).
+Personal notification management, role-target group notifications, and Firebase Cloud Messaging (FCM) device token registration.
 
-### 12.1 Quản lý thông báo cá nhân
+### 12.1 Personal Notifications
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `GET /api/v1/notifications`<br>`PATCH /api/v1/notifications/{id}/read`<br>`PATCH /api/v1/notifications/read-all` |
 | **Permission** | Authenticated (`STUDENT`, `LECTURER`, `ADMIN`) |
 
 ---
 
-### 12.2 Quản lý thông báo nhóm
+### 12.2 Group Notifications
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `GET /api/v1/notifications/groups`<br>`POST /api/v1/notifications/groups`<br>`PATCH /api/v1/notifications/groups/{id}/read` |
-| **Permission** | `ADMIN` (Tạo); Authenticated (Xem & đánh dấu đã đọc theo Role target) |
+| **Permission** | `ADMIN` (Create); Authenticated (View & mark read by target role) |
 
 ---
 
-### 12.3 Đăng ký FCM Device Token
+### 12.3 Register FCM Device Token
 
-| Thuộc tính | Giá trị |
+| Property | Value |
 |---|---|
 | **Endpoints** | `POST /api/v1/device-tokens`<br>`DELETE /api/v1/device-tokens` |
 | **Permission** | Authenticated (`STUDENT`, `LECTURER`, `ADMIN`) |

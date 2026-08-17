@@ -1,12 +1,12 @@
 # Tech Stack & Dependencies — Dev-Edu Backend
 
-> Tài liệu này liệt kê toàn bộ tech stack và dependency đang được sử dụng trong project, cùng cách cấu hình và inject trong codebase.
+> This document lists the full technology stack and dependencies utilized across the project, including configuration details and dependency injection patterns.
 
 ---
 
-## Mục lục
+## Table of Contents
 
-- [1. Thông tin chung](#1-thông-tin-chung)
+- [1. General Information](#1-general-information)
 - [2. Framework & Runtime](#2-framework--runtime)
 - [3. Security & Authentication](#3-security--authentication)
 - [4. Database & ORM](#4-database--orm)
@@ -26,9 +26,9 @@
 
 ---
 
-## 1. Thông tin chung
+## 1. General Information
 
-| Thuộc tính | Giá trị |
+| Attribute | Value |
 |---|---|
 | **Group ID** | `com.pht` |
 | **Artifact ID** | `dev-edu` |
@@ -45,42 +45,42 @@
 ### Spring Boot 3.5.13
 
 - **Dependency**: `spring-boot-starter-parent` (parent POM)
-- **Mục đích**: Framework chính cho toàn bộ ứng dụng
-- **Cấu hình**: `application.properties`
+- **Purpose**: Core application framework
+- **Configuration**: `application.properties`
 - **Entry point**: `BackEndApplication.java` — `@SpringBootApplication`
 
 ### Spring Web (`spring-boot-starter-web`)
 
-- **Mục đích**: Xây dựng REST API
-- **Cấu hình tại**: `WebConfig.java`
-- **Beans được tạo**:
+- **Purpose**: REST API development
+- **Configured at**: `WebConfig.java`
+- **Configured Beans**:
   - `RestTemplate` — HTTP client bean
-  - `CorsConfigurationSource` — cấu hình CORS cho phép các origin `localhost:5500`, `localhost:5555`
-- **Annotations sử dụng**: `@EnableWebMvc`, `@EnableWebSecurity`
+  - `CorsConfigurationSource` — CORS configuration enabling origins `localhost:5500`, `localhost:5555`
+- **Annotations**: `@EnableWebMvc`, `@EnableWebSecurity`
 
 ### Spring Thymeleaf (`spring-boot-starter-thymeleaf`)
 
-- **Mục đích**: Server-side rendering cho trang login OAuth2 và các template HTML (email template, v.v.)
-- **Dependency bổ sung**: `thymeleaf-extras-springsecurity6` — tích hợp Spring Security vào Thymeleaf templates
-- **Cấu hình**: static resource handler trong `WebConfig.java` phục vụ file tĩnh từ `classpath:/static/images/`
+- **Purpose**: Server-side rendering for OAuth2 login pages and HTML templates (emails, etc.)
+- **Additional Dependency**: `thymeleaf-extras-springsecurity6` — Spring Security integration for Thymeleaf templates
+- **Configuration**: Static resource handler in `WebConfig.java` serving assets from `classpath:/static/images/`
 
 ### Spring Validation (`spring-boot-starter-validation`)
 
-- **Mục đích**: Bean Validation (JSR 380) cho request DTO
-- **Sử dụng**: `@Valid`, `@Validated`, `@NotBlank`, `@NotNull`, `@Size`, `@Pattern`, `@Email`, `@DecimalMin`, `@DecimalMax`, `@Min`, `@FutureOrPresent`, `@Null`
-- **Validation Groups**: `CreateValidation`, `UpdateValidation`, `DeleteValidation`, `SortValidation` — interface marker trong `common/validation/`
+- **Purpose**: Bean Validation (JSR 380) for request DTOs
+- **Annotations**: `@Valid`, `@Validated`, `@NotBlank`, `@NotNull`, `@Size`, `@Pattern`, `@Email`, `@DecimalMin`, `@DecimalMax`, `@Min`, `@FutureOrPresent`, `@Null`
+- **Validation Groups**: `CreateValidation`, `UpdateValidation`, `DeleteValidation`, `SortValidation` — marker interfaces under `common/validation/`
 
 ### Virtual Threads (Java 21)
 
-- **Cấu hình tại**: `CommonConfig.java`
-- **Bean**: `Executor taskExecutor()` — sử dụng `Executors.newThreadPerTaskExecutor(Thread.ofVirtual())`
-- **Mục đích**: Virtual thread executor cho xử lý bất đồng bộ (batch delete, async tasks)
+- **Configured at**: `CommonConfig.java`
+- **Bean**: `Executor taskExecutor()` — using `Executors.newThreadPerTaskExecutor(Thread.ofVirtual())`
+- **Purpose**: Virtual thread executor for non-blocking asynchronous processing (batch deletion, background tasks)
 
 ### Scheduling
 
-- **Annotation**: `@EnableScheduling` trong `CommonConfig.java`
-- **Mục đích**: Chạy cron job dọn dẹp dữ liệu (soft-deleted entities, expired files, expired payments)
-- **Các cron job**: được định nghĩa trong `CronJobConstant.java` và triển khai trong `scheduler/` package của mỗi module
+- **Annotation**: `@EnableScheduling` in `CommonConfig.java`
+- **Purpose**: Cron jobs for data cleanup (soft-deleted entities, expired files, expired payments)
+- **Cron Jobs**: Defined in `CronJobConstant.java` and implemented inside module `scheduler/` packages
 
 ---
 
@@ -88,39 +88,39 @@
 
 ### Spring Security (`spring-boot-starter-security`)
 
-- **Cấu hình tại**: `AuthorizationServerConfig.java`, `SecurityBeansConfig.java`
+- **Configured at**: `AuthorizationServerConfig.java`, `SecurityBeansConfig.java`
 - **Beans**:
   - `PasswordEncoder` — BCrypt version $2B, strength 9
-  - `SessionRegistry` — quản lý session
+  - `SessionRegistry` — Session management
   - `HttpSessionEventPublisher`
-- **Annotation**: `@EnableMethodSecurity` — bật `@PreAuthorize` ở method-level
+- **Annotation**: `@EnableMethodSecurity` — Method-level security with `@PreAuthorize`
 
 ### OAuth2 Authorization Server (`spring-boot-starter-oauth2-authorization-server`)
 
-- **Mục đích**: Hệ thống xác thực OAuth2 hoàn chỉnh, tự host Authorization Server
-- **Cấu hình tại**: `AuthorizationServerConfig.java`, `JwtConfig.java`, `InitDataConfig.java`
-- **Custom Password Grant Type**: Triển khai custom grant type `urn:custom:password` thông qua:
-  - `OAuth2PasswordGrantAuthenticationConverter` — converter request
-  - `OAuth2PasswordGrantAuthenticationProvider` — xử lý authentication
-  - `OAuth2PasswordGrantAuthenticationToken` — token model
-- **Registered Client**: Lưu trong DB (JDBC), cache bằng Caffeine in-memory
-  - Client mặc định: `web_client` / `web_client_secret`
+- **Purpose**: Full self-hosted OAuth2 Authorization Server
+- **Configured at**: `AuthorizationServerConfig.java`, `JwtConfig.java`, `InitDataConfig.java`
+- **Custom Password Grant Type**: Implemented custom grant `urn:custom:password`:
+  - `OAuth2PasswordGrantAuthenticationConverter` — Converts request
+  - `OAuth2PasswordGrantAuthenticationProvider` — Handles authentication logic
+  - `OAuth2PasswordGrantAuthenticationToken` — Token data structure
+- **Registered Client**: JDBC persistence, Caffeine in-memory cache
+  - Default client: `web_client` / `web_client_secret`
   - Grant types: `authorization_code`, `refresh_token`, `urn:custom:password`
-  - Access token TTL: 5 phút
-  - Refresh token TTL: 1 ngày
+  - Access token TTL: 5 minutes
+  - Refresh token TTL: 1 day
 - **JWT**:
-  - RSA key pair 3072-bit, generate tại runtime
+  - RSA key pair (3072-bit), generated at runtime
   - Custom claims: `roles`, `token_type`
-  - `JwtAuthenticationConverter` — extract roles từ JWT claims thành authorities
+  - `JwtAuthenticationConverter` — Extracts roles from JWT claims into granted authorities
 - **Security Filter Chains**:
   - **Order 1**: Authorization Server endpoints (token, OIDC)
   - **Order 2**: Web security — API endpoints, form login, logout
-- **Custom handlers**:
-  - `AuthEntryPointHandler` — xử lý authentication entry point
-  - `AuthFailureHandler` — xử lý login fail
-  - `AuthSuccessHandler` — xử lý login thành công
-  - `LoggingSecurityFilter` — log security events
-- **Public endpoints (không cần auth)**: Được định nghĩa trong `WebEndpointConstant.java`
+- **Custom Handlers**:
+  - `AuthEntryPointHandler` — Authentication entry point exception handling
+  - `AuthFailureHandler` — Login failure handling
+  - `AuthSuccessHandler` — Login success handling
+  - `LoggingSecurityFilter` — Logs security events
+- **Public Endpoints**: Defined in `WebEndpointConstant.java`
 
 ---
 
@@ -128,39 +128,35 @@
 
 ### PostgreSQL (`postgresql` driver & pgvector extension)
 
-- **Mục đích**: Database chính & lưu trữ vector embeddings cho AI Chatbot
-- **Image**: `pgvector/pgvector:pg16` (thay cho `postgres:16-alpine` tiêu chuẩn)
-- **Cấu hình**: env variables `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- **Purpose**: Primary database & vector embeddings storage for AI Chatbot
+- **Docker Image**: `pgvector/pgvector:pg16`
+- **Environment Configuration**: `POSTGRES_HOST`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - **Vector Search Engine**: Extension `vector`
-  - Kiểu dữ liệu: `vector(1536)` cho embedding 1536 chiều từ OpenAI
-  - Indexing: HNSW index với `vector_cosine_ops` cho phép tìm kiếm cosine similarity siêu tốc (`<=>`)
-  - Native Query Casting: `CAST(:embedding AS vector)` trong câu lệnh native `@Modifying` upsert
+  - Data type: `vector(1536)` for 1536-dimensional OpenAI embeddings
+  - Indexing: HNSW index with `vector_cosine_ops` for fast cosine similarity search (`<=>`)
+  - Native Query Casting: `CAST(:embedding AS vector)` within native `@Modifying` upsert statements
 - **Connection Pool**: HikariCP
-  - Max pool size: 20
-  - Min idle: 10
-  - Connection timeout: 30s
-  - Idle timeout: 10min
-  - Max lifetime: 30min
+  - Max pool size: 20, Min idle: 10, Connection timeout: 30s, Idle timeout: 10min, Max lifetime: 30min
 
 ### Spring Data JPA (`spring-boot-starter-data-jpa`)
 
-- **Mục đích**: ORM framework, repository pattern
-- **Hibernate dialect**: `PostgreSQLDialect`
-- **DDL mode**: `validate` — chỉ validate schema, không tự tạo bảng
-- **Sử dụng**:
-  - `JpaRepository` — base interface cho tất cả repository
-  - `@Query` — custom JPQL/native queries
-  - Interface-based projections (`*Projection`) cho truy vấn tối ưu
-  - `@PrePersist` — auto-generate UUID và timestamp
+- **Purpose**: ORM framework, repository pattern
+- **Hibernate Dialect**: `PostgreSQLDialect`
+- **DDL Mode**: `validate` — schema validation only
+- **Usage**:
+  - `JpaRepository` — base repository interface
+  - `@Query` — custom JPQL and native queries
+  - Interface-based projections (`*Projection`) for optimized query performance
+  - `@PrePersist` — auto-generating UUIDs and timestamps
 
 ### Flyway (`flyway-core`, `flyway-database-postgresql`)
 
-- **Mục đích**: Database migration management
-- **Cấu hình**:
+- **Purpose**: Database schema migration management
+- **Configuration**:
   - `spring.flyway.enabled=true`
   - `spring.flyway.baseline-on-migrate=true`
   - `spring.flyway.validate-on-migrate=true`
-- **Migration scripts**: `src/main/resources/db/migration/`
+- **Migration Scripts**: `src/main/resources/db/migration/`
 
 ---
 
@@ -168,25 +164,23 @@
 
 ### Redis (`spring-boot-starter-data-redis`)
 
-- **Mục đích**: Distributed cache
-- **Cấu hình tại**: `CachingConfig.java`
+- **Purpose**: Distributed cache
+- **Configured at**: `CachingConfig.java`
 - **Annotation**: `@EnableCaching`
 - **Bean**: `RedisTemplate<String, Object>`
   - Key serializer: `StringRedisSerializer`
-  - Value serializer: `GenericJackson2JsonRedisSerializer` (hỗ trợ Java Time API)
-- **Prefix naming**: Định nghĩa trong `RedisPrefixConstant.java`
-  - Format: `dev_edu:{entity_type}:{identifier}:`
-  - Ví dụ: `dev_edu:users:username:`, `dev_edu:courses:`, `dev_edu:courses:highlighted`
-- **Duration**: Định nghĩa trong `RedisDurationConstant.java`
-- **Utility**: `RedisUtils.java` — helper methods cho thao tác Redis
+  - Value serializer: `GenericJackson2JsonRedisSerializer` (supporting Java Time API)
+- **Prefix Naming**: Defined in `RedisPrefixConstant.java` (`dev_edu:{entity_type}:{identifier}:`)
+- **Duration**: Defined in `RedisDurationConstant.java`
+- **Utility**: `RedisUtils.java` — Helper methods for Redis operations
 
 ### Caffeine (`caffeine`)
 
-- **Mục đích**: In-memory cache cho `RegisteredClientRepository`
-- **Cấu hình tại**: `AuthorizationServerConfig.java`
-- **Cache**: 2 Caffeine cache instances cho client lookup (by ID và by clientId)
-  - Max size: 100 entries mỗi cache
-  - TTL: theo `RedisDurationConstant.REGISTERED_CLIENT_DURATION`
+- **Purpose**: In-memory caching for `RegisteredClientRepository`
+- **Configured at**: `AuthorizationServerConfig.java`
+- **Cache Instances**: 2 Caffeine caches for client lookup (by ID and by clientId)
+  - Max size: 100 entries per cache
+  - TTL: Configured via `RedisDurationConstant.REGISTERED_CLIENT_DURATION`
 
 ---
 
@@ -194,31 +188,27 @@
 
 ### Apache Kafka (`spring-kafka`)
 
-- **Mục đích**: Event-driven architecture cho async processing
-- **Cấu hình tại**: `application.properties`
+- **Purpose**: Event-driven architecture for asynchronous processing
+- **Configuration**: `application.properties`
   - Producer: `StringSerializer` + `JsonSerializer`
   - Consumer: `StringDeserializer`, group-id: `dev-edu-group`
-  - Auto-commit: disabled
-  - Ack mode: `manual_immediate`
-  - Concurrency: 3
-  - Max poll records: 1
-- **Topics** (định nghĩa trong `KafkaTopicConstant.java`):
+  - Auto-commit: disabled, Ack mode: `manual_immediate`, Concurrency: 3
+- **Topics** (Defined in `KafkaTopicConstant.java`):
 
-| Topic | Mục đích |
+| Topic | Purpose |
 |---|---|
-| `file-delete-topic` | Xóa file từ storage |
-| `video-duration-event-topic` | Lấy duration của video |
-| `mail-send-topic` | Gửi email |
-| `request-log-topic` | Log HTTP request |
-| `tracking-event-topic` | Event tracking |
-| `submission-event-topic` | Tracking nộp bài |
-| `cron-job-event-topic` | Log kết quả cron job |
-| `post-elastic-data-update-topic` | Sync bài viết lên Elasticsearch |
-| `post-interactive-elastic-data-update-topic` | Sync dữ liệu tương tác bài viết |
-| `post-elastic-data-delete-topic` | Xóa bài viết khỏi Elasticsearch |
+| `file-delete-topic` | File storage deletion |
+| `video-duration-event-topic` | Extract video duration |
+| `mail-send-topic` | Send email events |
+| `request-log-topic` | HTTP request logging |
+| `tracking-event-topic` | User tracking events |
+| `submission-event-topic` | Assignment submission tracking |
+| `cron-job-event-topic` | Cron job execution logging |
+| `post-elastic-data-update-topic` | Sync forum posts to Elasticsearch |
+| `post-interactive-elastic-data-update-topic` | Sync post interaction analytics |
+| `post-elastic-data-delete-topic` | Delete posts from Elasticsearch |
 
-- **Inject**: `KafkaTemplate<String, Object>` inject vào service classes
-- **Utility**: `KafkaUtils.java` — helper methods cho gửi event
+- **Utility**: `KafkaUtils.java` — Event publishing helper
 
 ---
 
@@ -226,12 +216,12 @@
 
 ### Elasticsearch (`elasticsearch-java` 8.14.1)
 
-- **Mục đích**: Full-text search cho bài viết forum
-- **Cấu hình tại**: `ElasticConfig.java`
-- **Bean**: `ElasticsearchClient` — sử dụng `RestClientTransport` + `JacksonJsonpMapper`
-- **Index**: Định nghĩa trong `ElasticIndexConstant.java`
-- **Sync**: Tự động sync dữ liệu từ PostgreSQL khi khởi động (`InitDataConfig.syncPostToElastic`)
-- **Cập nhật realtime**: Thông qua Kafka events
+- **Purpose**: Full-text search engine for forum posts
+- **Configured at**: `ElasticConfig.java`
+- **Bean**: `ElasticsearchClient` — using `RestClientTransport` + `JacksonJsonpMapper`
+- **Index**: Defined in `ElasticIndexConstant.java`
+- **Data Sync**: Automated synchronization from PostgreSQL upon startup (`InitDataConfig.syncPostToElastic`)
+- **Real-time Updates**: Handled via Kafka events
 
 ---
 
@@ -239,17 +229,12 @@
 
 ### Cloudflare R2 / AWS S3 SDK (`software.amazon.awssdk:s3` 2.31.50)
 
-- **Mục đích**: Object storage cho file upload (ảnh, video, tài liệu)
-- **Cấu hình tại**: `S3Config.java`
+- **Purpose**: Object storage for uploaded files (images, videos, documents)
+- **Configured at**: `S3Config.java`
 - **Beans**:
-  - `S3Presigner` — tạo pre-signed URL cho upload
-  - `S3Client` — thao tác trực tiếp với storage
-- **Config properties**:
-  - `cloudflare.r2.endpoint`
-  - `cloudflare.r2.access-key` / `secret-key`
-  - `cloudflare.r2.public-bucket-name` / `private-bucket-name`
-  - `cloudflare.r2.public-url`
-- **HTTP Client**: `software.amazon.awssdk:apache-client` — HTTP transport cho S3 SDK
+  - `S3Presigner` — Pre-signed URL generation for direct client uploads
+  - `S3Client` — Direct storage management
+- **HTTP Transport**: `software.amazon.awssdk:apache-client`
 
 ---
 
@@ -257,27 +242,22 @@
 
 ### Brevo SDK (`com.brevo:brevo` 1.1.0)
 
-- **Mục đích**: Gửi email transactional (đăng ký, thông báo, v.v.)
-- **Cấu hình tại**: `BrevoConfig.java`
-- **Beans**:
-  - `SendSmtpEmailSender` — thông tin người gửi
-  - `ApiClient` — Brevo API client với API key auth
-  - `TransactionalEmailsApi` — API gửi email
-- **Service**: `MailService` (interface) → `MailServiceImpl`
-- **Gửi qua Kafka**: Email events được gửi qua Kafka topic `mail-send-topic` và xử lý async
+- **Purpose**: Transactional email delivery (registrations, notifications, etc.)
+- **Configured at**: `BrevoConfig.java`
+- **Beans**: `SendSmtpEmailSender`, `ApiClient`, `TransactionalEmailsApi`
+- **Async Execution**: Emails dispatched via Kafka topic `mail-send-topic`
 
 ---
 
 ## 10. Payment Gateway
 
-### VnPay
+### VNPay
 
-- **Mục đích**: Cổng thanh toán online
-- **Cấu hình tại**: `application.properties`
-  - `vnpay.tmn-code`, `vnpay.hash-secret`, `vnpay.url`, `vnpay.return-url`
-- **Utility**: `PaymentUtils.java` — helper tạo URL thanh toán, verify chữ ký
-- **Controller**: `PurchaseController` xử lý VnPay return callback
-- **Enum hỗ trợ**: `PaymentMethod` (VNPAY, MOMO, ZALOPAY, PAYPAL, STRIPE — chỉ VnPay đang triển khai)
+- **Purpose**: Online payment processing
+- **Configuration**: `application.properties` (`vnpay.tmn-code`, `vnpay.hash-secret`, `vnpay.url`, `vnpay.return-url`)
+- **Utility**: `PaymentUtils.java` — URL creation & signature verification helpers
+- **Controller**: `PurchaseController` handling VNPay return callbacks
+- **Supported Payment Methods**: VNPay (Active), MoMo, ZaloPay, PayPal, Stripe
 
 ---
 
@@ -285,17 +265,13 @@
 
 ### MapStruct (`org.mapstruct` 1.5.5.Final)
 
-- **Mục đích**: Compile-time mapping giữa Entity ↔ DTO
-- **Cấu hình build**: Maven Compiler Plugin với annotation processor paths cho cả Lombok và MapStruct
+- **Purpose**: Compile-time object mapping (Entity ↔ DTO)
 - **Annotation**: `@Mapper(componentModel = "spring")`
-- **Vị trí**: `mapper/` package trong mỗi module
-- **Ví dụ**: `CourseMapper`, `UserMapper`, `LectureMapper`, `PostMapper`
+- **Mappers**: `CourseMapper`, `UserMapper`, `LectureMapper`, `PostMapper`, etc.
 
 ### Lombok (`org.projectlombok`)
 
-- **Mục đích**: Giảm boilerplate code
-- **Annotations thường dùng**: `@Data`, `@Builder`, `@Getter`, `@Setter`, `@RequiredArgsConstructor`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@FieldDefaults`, `@Slf4j`, `@ToString`
-- **Pattern nhất quán**: `@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)` cho service/controller; `@FieldDefaults(level = AccessLevel.PRIVATE)` cho DTO/entity
+- **Purpose**: Boilerplate code reduction (`@Data`, `@Builder`, `@Getter`, `@Setter`, `@RequiredArgsConstructor`, `@FieldDefaults`, `@Slf4j`)
 
 ---
 
@@ -303,8 +279,7 @@
 
 ### Flying Saucer (`org.xhtmlrenderer:flying-saucer-pdf` 9.13.3)
 
-- **Mục đích**: Generate PDF từ HTML/XHTML templates
-- **Sử dụng**: Không tìm thấy controller/service cụ thể sử dụng trực tiếp trong codebase hiện tại, có thể đang được phát triển
+- **Purpose**: HTML/XHTML to PDF template rendering
 
 ---
 
@@ -312,35 +287,17 @@
 
 ### UUID Creator (`com.github.f4b6a3:uuid-creator` 5.3.3)
 
-- **Mục đích**: Tạo UUIDv7 (time-ordered epoch) cho primary key
-- **Sử dụng tại**: `UuidV7Generator.java` và `@PrePersist` trong entity
-- **Method**: `UuidCreator.getTimeOrderedEpoch()`
-- **Ưu điểm**: UUIDv7 có tính chất thời gian, tối ưu cho indexing trong database
+- **Purpose**: UUIDv7 (time-ordered epoch) generation for primary keys
+- **Generator**: `UuidV7Generator.java` via `@PrePersist` hooks (`UuidCreator.getTimeOrderedEpoch()`)
 
 ---
 
 ## 14. Development & Build Tools
 
-### Spring Boot DevTools (`spring-boot-devtools`)
-
-- **Mục đích**: Hot reload trong development
-- **Scope**: runtime, optional
-
-### Spring Boot JSON (`spring-boot-starter-json`)
-
-- **Mục đích**: Jackson JSON serialization/deserialization
-- **Cấu hình JavaTimeModule**: trong `CachingConfig.java` và `PagingUtils.java`
-
-### Spring Boot Test (`spring-boot-starter-test`)
-
-- **Mục đích**: Testing framework
-- **Scope**: test
-- **Ghi chú**: Các dependency test bổ sung (JPA test, Redis test, Security test, WebMvc test) đang bị comment out trong `pom.xml`
-
-### Maven Compiler Plugin
-
-- **Cấu hình**: Java 21 source/target
-- **Annotation processors**: Lombok + MapStruct (thứ tự quan trọng)
+- **Spring Boot DevTools**: Hot reload support
+- **Spring Boot JSON**: Jackson JSON serialization (`JavaTimeModule`)
+- **Spring Boot Test**: Testing framework
+- **Maven Compiler Plugin**: Java 21 configuration with Lombok + MapStruct processors
 
 ---
 
@@ -348,35 +305,22 @@
 
 ### Spring Boot Actuator (`spring-boot-starter-actuator`)
 
-- **Mục đích**: Health check, metrics, tracing
-- **Endpoints exposed**: `health`, `info`, `metrics`, `trace`
-- **Health details**: `always` show
-- **Tracing sampling**: 100%
-- **Logging levels**:
-  - `com.pht.dev_edu`: DEBUG
-  - `org.springframework.web`: DEBUG
-  - `org.hibernate.SQL`: DEBUG
-  - `org.hibernate.orm.jdbc.bind`: TRACE
+- **Endpoints Exposed**: `health`, `info`, `metrics`, `trace`
+- **Logging Levels**: `com.pht.dev_edu`: DEBUG, `org.hibernate.SQL`: DEBUG
 
 ---
 
 ## 16. Containerization
 
-### Docker
-
-- **Dockerfile**: `Dockerfile.dev` — cho development
-- **Docker Compose** (`docker-compose.yml`):
+### Docker & Docker Compose (`docker-compose.yml`)
 
 | Service | Image | Port |
 |---|---|---|
-| `app` | Build từ Dockerfile.dev | 9000 |
+| `app` | Build from `Dockerfile.dev` | 9000 |
 | `postgres` | `pgvector/pgvector:pg16` | 5433→5432 |
 | `redis` | `redis:7-alpine` | 6380→6379 |
 | `elasticsearch` | `elasticsearch:8.14.1` | 9200 |
 | `kafka` | `apache/kafka:3.7.1` | 9092, 29092 |
-
-- **Volumes**: `m2-cache`, `postgres-data`, `redis-data`, `kafka-data`
-- **Health check**: PostgreSQL có healthcheck, app depends_on postgres healthy
 
 ---
 
@@ -384,29 +328,25 @@
 
 ### OpenAI REST API Integration
 
-- **Model Embedding**: `text-embedding-3-small` (1536 chiều)
-- **Model Chat Completions**: `gpt-4o-mini` (hoặc `gpt-4o`)
-- **HTTP Client**: Spring 6 / Spring Boot 3 `RestClient` (Base URL: `https://api.openai.com`)
-- **Header**: `Authorization: Bearer ${OPENAI_API_KEY}`
-- **OpenAI Function Calling (Tools)**:
-  - `search_courses_semantic(query)`: Tìm kiếm khoá học bằng ngữ nghĩa tự nhiên qua vector cosine similarity.
-  - `search_courses_filtered(category, level, priceMin, priceMax)`: Lọc khoá học chính xác theo tiêu chí.
+- **Embedding Model**: `text-embedding-3-small` (1536 dimensions)
+- **Chat Model**: `gpt-4o-mini`
+- **Function Calling Tools**:
+  - `search_courses_semantic(query)`: Semantic course search via vector cosine similarity.
+  - `search_courses_filtered(...)`: Parameter-based course filtering.
 
 ### Automated Vector Synchronization
 
-- **CommandLineRunner Initializer**: Cấu hình `@Order(4)` trong `InitDataConfig.java` tự động rà soát và tạo embedding cho các khoá học chưa có data hoặc bị thay đổi nội dung khi ứng dụng khởi chạy.
-- **HTML Stripping & Sanitization**: Bóc tách toàn bộ thẻ HTML trong mô tả khoá học (`stripHtmlTags`) và xoá bỏ prompt instruction nghi ngờ (`sanitizeText`) trước khi sinh vector.
-
+- **CommandLineRunner Initializer**: `@Order(4)` in `InitDataConfig.java` automatically indexes un-embedded or modified courses upon system startup.
 
 ---
 
-## Tóm tắt cơ chế Dependency Injection
+## Dependency Injection Summary
 
-| Cơ chế | Annotation | Nơi sử dụng |
+| Pattern | Annotation | Usage Scope |
 |---|---|---|
-| Constructor Injection | `@RequiredArgsConstructor` + `@FieldDefaults(makeFinal=true)` | Tất cả Controller, Service |
-| Configuration class | `@Configuration` + `@Bean` | `common/config/` |
-| Component scan | `@Component`, `@Service`, `@Repository` | Entity layers |
+| Constructor Injection | `@RequiredArgsConstructor` + `@FieldDefaults(makeFinal=true)` | All Controllers & Services |
+| Configuration Classes | `@Configuration` + `@Bean` | `common/config/` |
+| Component Scanning | `@Component`, `@Service`, `@Repository` | System layers |
 | Method Security | `@EnableMethodSecurity` + `@PreAuthorize` | SecurityBeansConfig + Controllers |
 | Scheduling | `@EnableScheduling` + `@Scheduled` | CommonConfig + Scheduler classes |
 | Caching | `@EnableCaching` | CachingConfig |
