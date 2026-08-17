@@ -40,8 +40,12 @@ export function ChatSidebar({
   return (
     <Box
       sx={{
-        width: open ? 260 : 0,
-        minWidth: open ? 260 : 0,
+        position: { xs: "absolute", sm: "relative" },
+        top: 0,
+        left: 0,
+        bottom: 0,
+        width: { xs: open ? "100%" : 0, sm: open ? 260 : 0 },
+        minWidth: { xs: open ? "100%" : 0, sm: open ? 260 : 0 },
         opacity: open ? 1 : 0,
         visibility: open ? "visible" : "hidden",
         transition:
@@ -54,15 +58,27 @@ export function ChatSidebar({
         borderColor: (theme) => alpha(theme.palette.divider, 0.8),
         flexShrink: 0,
         overflow: "hidden",
-        zIndex: 1,
+        zIndex: 10,
       }}
     >
-      <Box sx={{ p: 1.5, pb: 1, flexShrink: 0 }}>
+      <Box
+        sx={{
+          p: 1.5,
+          pb: 1,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+        }}
+      >
         <Button
           variant="contained"
           fullWidth
           startIcon={<Plus size={15} />}
-          onClick={onStartNewChat}
+          onClick={() => {
+            onStartNewChat();
+            onClose();
+          }}
           sx={{
             borderRadius: 2,
             py: 0.75,
@@ -78,6 +94,18 @@ export function ChatSidebar({
         >
           New Conversation
         </Button>
+
+        <IconButton
+          size="small"
+          onClick={onClose}
+          sx={{
+            display: { xs: "inline-flex", sm: "none" },
+            color: "text.secondary",
+            p: 0.75,
+          }}
+        >
+          <X size={18} />
+        </IconButton>
       </Box>
 
       <Divider sx={{ my: 0.5, flexShrink: 0 }} />
@@ -126,7 +154,10 @@ export function ChatSidebar({
                 <ListItemButton
                   key={conv.id}
                   selected={isSelected}
-                  onClick={() => onSelectConversation(conv.id)}
+                  onClick={() => {
+                    onSelectConversation(conv.id);
+                    onClose();
+                  }}
                   sx={{
                     borderRadius: 2,
                     mb: 0.5,

@@ -41,7 +41,8 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
     setIsMobile(mediaQueryMatch);
   }, [mediaQueryMatch]);
 
-  const drawerWidth = isCollapsed ? 88 : 280;
+  const effectiveCollapsed = isMobile ? false : isCollapsed;
+  const drawerWidth = effectiveCollapsed ? 88 : 280;
 
   const drawerContent = (
     <Box sx={{ pt: 1 }}>
@@ -51,10 +52,10 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
           pb: 2,
           display: "flex",
           alignItems: "center",
-          justifyContent: isCollapsed ? "center" : "space-between",
+          justifyContent: effectiveCollapsed ? "center" : "space-between",
         }}
       >
-        {!isCollapsed && (
+        {!effectiveCollapsed && (
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
               DevEdu
@@ -64,13 +65,15 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
             </Typography>
           </Box>
         )}
-        <IconButton
-          size="small"
-          onClick={() => setIsCollapsed((prev) => !prev)}
-          sx={{ color: "text.secondary" }}
-        >
-          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </IconButton>
+        {!isMobile && (
+          <IconButton
+            size="small"
+            onClick={() => setIsCollapsed((prev) => !prev)}
+            sx={{ color: "text.secondary" }}
+          >
+            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </IconButton>
+        )}
       </Box>
 
       <Box sx={{ borderTop: "1px solid rgba(15, 23, 42, 0.08)", py: 1 }}>
@@ -85,16 +88,19 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
             return (
               <ListItem key={item.label} disablePadding>
                 <Tooltip
-                  title={isCollapsed ? item.label : ""}
+                  title={effectiveCollapsed ? item.label : ""}
                   placement="right"
                   arrow
                 >
                   <ListItemButton
                     component={Link}
                     href={item.href}
+                    onClick={() => {
+                      if (isMobile) setDrawerOpen(false);
+                    }}
                     sx={{
                       py: 1.4,
-                      px: isCollapsed ? 2.25 : 2.5,
+                      px: effectiveCollapsed ? 2.25 : 2.5,
                       color: "text.primary",
                       borderRadius: 2,
                       mx: 1,
@@ -113,7 +119,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
                     <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
                       <Icon size={18} />
                     </ListItemIcon>
-                    {!isCollapsed && (
+                    {!effectiveCollapsed && (
                       <ListItemText
                         primary={item.label}
                         sx={{
@@ -137,7 +143,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   return (
     <Box
       sx={{
-        height: "100vh",
+        height: { xs: "100dvh", md: "100vh" },
         display: "flex",
         flexDirection: "column",
         position: "relative",
@@ -194,7 +200,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
             onClose={() => setDrawerOpen(false)}
             sx={{
               "& .MuiDrawer-paper": {
-                width: drawerWidth,
+                width: 280,
                 bgcolor: "rgba(255, 255, 255, 0.98)",
                 borderRight: "1px solid rgba(15, 23, 42, 0.08)",
               },
@@ -207,7 +213,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
         <Box
           sx={{
             flex: 1,
-            p: { xs: 2, md: 3 },
+            p: { xs: 1.5, sm: 2, md: 3 },
             position: "relative",
             overflow: "auto",
             height: "100%",
@@ -215,8 +221,8 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
         >
           <Box
             sx={{
-              p: { xs: 2, md: 3 },
-              borderRadius: 2,
+              p: { xs: 1.5, sm: 2.5, md: 3 },
+              borderRadius: { xs: 2, sm: 3 },
               border: "1px solid rgba(15, 23, 42, 0.08)",
               backgroundColor: "rgba(255, 255, 255, 0.9)",
               backdropFilter: "blur(14px)",

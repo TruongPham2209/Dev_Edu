@@ -26,7 +26,7 @@ export function QuickPrompts({ onSelectPrompt, disabled }: QuickPromptsProps) {
         </Typography>
       </Stack>
 
-      <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
+      <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.75 }}>
         {PROMPT_ITEMS.map((item) => (
           <Chip
             key={item.text}
@@ -39,10 +39,11 @@ export function QuickPrompts({ onSelectPrompt, disabled }: QuickPromptsProps) {
             sx={{
               borderRadius: 1.5,
               cursor: "pointer",
-              fontSize: "0.775rem",
+              fontSize: { xs: "0.725rem", sm: "0.775rem" },
               fontWeight: 600,
-              py: 1.75,
+              py: { xs: 1.5, sm: 1.75 },
               px: 0.5,
+              maxWidth: "100%",
               borderColor: (theme) => alpha(theme.palette.primary.main, 0.2),
               bgcolor: (theme) =>
                 theme.palette.mode === "dark"
@@ -50,6 +51,12 @@ export function QuickPrompts({ onSelectPrompt, disabled }: QuickPromptsProps) {
                   : alpha(theme.palette.primary.main, 0.04),
               backdropFilter: "blur(6px)",
               transition: "all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              "& .MuiChip-label": {
+                whiteSpace: "normal",
+                wordBreak: "break-word",
+                display: "inline-block",
+                py: 0.25,
+              },
               "& .MuiChip-icon": {
                 ml: 0.5,
               },

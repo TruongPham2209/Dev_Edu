@@ -74,9 +74,10 @@ export function ManageHeader({
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: { xs: 1, sm: 2 },
+            gap: { xs: 0.75, sm: 1.5, md: 2 },
             py: 1,
-            height: 72,
+            px: { xs: 1.5, sm: 3, md: 4 },
+            height: { xs: 64, sm: 72 },
           }}
         >
           {isMobile && onMenuClick && (
@@ -84,7 +85,7 @@ export function ManageHeader({
               onClick={onMenuClick}
               sx={{ minWidth: "auto", p: 1, color: "text.primary" }}
             >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </Button>
           )}
 
@@ -125,7 +126,7 @@ export function ManageHeader({
               fontWeight: 700,
               color: "text.secondary",
               flex: 1,
-              fontSize: { xs: "0.875rem", sm: "1rem" },
+              fontSize: { xs: "0.85rem", sm: "1rem" },
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -134,7 +135,7 @@ export function ManageHeader({
             {title}
           </Typography>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 1, md: 1.5 } }}>
             <Button
               component={Link}
               href="/home"
@@ -144,7 +145,8 @@ export function ManageHeader({
                 borderRadius: 999,
                 borderColor: "rgba(15, 23, 42, 0.12)",
                 color: "#0f172a",
-                p: { xs: 1, sm: "4px 16px" },
+                p: { xs: "6px", sm: "4px 16px" },
+                minWidth: { xs: "auto", sm: "unset" },
                 textTransform: "none",
                 fontWeight: 700,
                 "&:hover": {

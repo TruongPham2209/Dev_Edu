@@ -13,7 +13,7 @@ export function LecturerLayout({ children }: Readonly<LecturerLayoutProps>) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: { xs: "100dvh", lg: "100vh" },
         position: "relative",
         overflow: "clip",
         background: theme.background,
@@ -30,11 +30,17 @@ export function LecturerLayout({ children }: Readonly<LecturerLayoutProps>) {
       />
       <Box sx={{ position: "relative" }}>
         <ManageHeader title="Lecturer workspace" />
-        <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4 } }}>
+        <Container
+          maxWidth="xl"
+          sx={{
+            py: { xs: 2, sm: 3, md: 4 },
+            px: { xs: 1.5, sm: 3, md: 4 },
+          }}
+        >
           <Box
             sx={{
-              p: { xs: 2, md: 3 },
-              borderRadius: 3,
+              p: { xs: 1.5, sm: 2.5, md: 3 },
+              borderRadius: { xs: 2, sm: 3 },
               border: "1px solid rgba(15, 23, 42, 0.08)",
               backgroundColor: "rgba(255, 255, 255, 0.9)",
               backdropFilter: "blur(14px)",

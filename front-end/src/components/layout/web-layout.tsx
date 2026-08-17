@@ -10,7 +10,7 @@ export function StudentLayout({ children }: Readonly<StudentLayoutProps>) {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: { xs: "100dvh", md: "100vh" },
         display: "flex",
         flexDirection: "column",
         bgcolor: "#f8fafc",
@@ -24,7 +24,7 @@ export function StudentLayout({ children }: Readonly<StudentLayoutProps>) {
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          py: { xs: 2, md: 4 }, // Maintain a consistent, professional vertical spacing
+          py: { xs: 2, sm: 3, md: 4 },
         }}
       >
         <Container
@@ -33,7 +33,7 @@ export function StudentLayout({ children }: Readonly<StudentLayoutProps>) {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            px: { xs: 2, sm: 3, md: 4, lg: 6 }, // Proper responsive horizontal spacing
+            px: { xs: 1.5, sm: 3, md: 4, lg: 6 },
           }}
         >
           {children}

@@ -295,10 +295,11 @@ export function NotificationCenter() {
         slotProps={{
           paper: {
             sx: {
-              width: { xs: 340, sm: 420 },
-              maxHeight: 560,
-              borderRadius: 1,
-              boxShadow: "0 16px 40px rgba(15, 23, 42, 0.12)",
+              width: { xs: "calc(100vw - 32px)", sm: 420 },
+              maxWidth: { xs: 360, sm: 420 },
+              maxHeight: { xs: "calc(100dvh - 90px)", sm: 560 },
+              borderRadius: { xs: "14px", sm: "16px" },
+              boxShadow: "0 16px 40px rgba(15, 23, 42, 0.14)",
               border: "1px solid rgba(15, 23, 42, 0.08)",
               display: "flex",
               flexDirection: "column",
@@ -310,19 +311,24 @@ export function NotificationCenter() {
         {/* Dropdown Header */}
         <Box
           sx={{
-            px: 2.5,
-            py: 2,
+            px: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 2 },
             bgcolor: "#ffffff",
             borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            gap: 1,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography
               variant="subtitle1"
-              sx={{ fontWeight: 800, color: "#0f172a" }}
+              sx={{
+                fontWeight: 800,
+                color: "#0f172a",
+                fontSize: { xs: "0.9375rem", sm: "1rem" },
+              }}
             >
               Notifications
             </Typography>
@@ -345,8 +351,9 @@ export function NotificationCenter() {
               sx={{
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.8rem",
+                fontSize: { xs: "0.75rem", sm: "0.8rem" },
                 color: "#2563eb",
+                p: { xs: "2px 6px", sm: "4px 8px" },
                 "&:hover": { bgcolor: "rgba(37, 99, 235, 0.06)" },
               }}
             >
@@ -357,7 +364,12 @@ export function NotificationCenter() {
 
         {/* Notification List Body */}
         <Box
-          sx={{ flex: 1, overflowY: "auto", minHeight: 260, maxHeight: 400 }}
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            minHeight: { xs: 180, sm: 260 },
+            maxHeight: { xs: 380, sm: 400 },
+          }}
         >
           {isNotificationsLoading ? (
             <Box
@@ -397,14 +409,14 @@ export function NotificationCenter() {
                     <ListItemButton
                       onClick={() => handleItemClick(notification)}
                       sx={{
-                        py: 1.75,
-                        px: 2.5,
+                        py: { xs: 1.25, sm: 1.75 },
+                        px: { xs: 1.75, sm: 2.5 },
                         bgcolor: isUnread
                           ? "rgba(37, 99, 235, 0.04)"
                           : "transparent",
                         transition: "bgcolor 0.15s ease",
                         alignItems: "flex-start",
-                        gap: 1.5,
+                        gap: { xs: 1.25, sm: 1.5 },
                         "&:hover": {
                           bgcolor: isUnread
                             ? "rgba(37, 99, 235, 0.08)"
@@ -415,8 +427,8 @@ export function NotificationCenter() {
                       {/* Avatar / Icon */}
                       <Box
                         sx={{
-                          width: 36,
-                          height: 36,
+                          width: { xs: 32, sm: 36 },
+                          height: { xs: 32, sm: 36 },
                           borderRadius: "50%",
                           display: "flex",
                           alignItems: "center",
@@ -445,7 +457,7 @@ export function NotificationCenter() {
                             sx={{
                               fontWeight: isUnread ? 800 : 600,
                               color: isUnread ? "#0f172a" : "#334155",
-                              fontSize: "0.875rem",
+                              fontSize: { xs: "0.8125rem", sm: "0.875rem" },
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
@@ -456,8 +468,8 @@ export function NotificationCenter() {
                           {isUnread && (
                             <Box
                               sx={{
-                                width: 8,
-                                height: 8,
+                                width: 7,
+                                height: 7,
                                 borderRadius: "50%",
                                 bgcolor: "#2563eb",
                                 flexShrink: 0,
@@ -471,6 +483,7 @@ export function NotificationCenter() {
                             variant="caption"
                             sx={{
                               color: "text.secondary",
+                              fontSize: { xs: "0.75rem", sm: "0.8125rem" },
                               overflow: "hidden",
                               textOverflow: "ellipsis",
                               whiteSpace: "nowrap",
@@ -488,6 +501,7 @@ export function NotificationCenter() {
                             display: "flex",
                             alignItems: "center",
                             gap: 1,
+                            flexWrap: "wrap",
                             mt: 0.75,
                           }}
                         >
@@ -506,7 +520,7 @@ export function NotificationCenter() {
                             variant="caption"
                             sx={{
                               color: "text.secondary",
-                              fontSize: "0.725rem",
+                              fontSize: { xs: "0.6875rem", sm: "0.725rem" },
                             }}
                           >
                             {formatServerDate(
@@ -550,7 +564,7 @@ export function NotificationCenter() {
         {hasNextPage && (
           <Box
             sx={{
-              p: 1.5,
+              p: { xs: 1.25, sm: 1.5 },
               bgcolor: "#f8fafc",
               borderTop: "1px solid rgba(15, 23, 42, 0.06)",
               textAlign: "center",
@@ -563,7 +577,7 @@ export function NotificationCenter() {
               sx={{
                 textTransform: "none",
                 fontWeight: 700,
-                fontSize: "0.825rem",
+                fontSize: { xs: "0.775rem", sm: "0.825rem" },
                 color: "#2563eb",
                 "&:hover": { bgcolor: "rgba(37, 99, 235, 0.06)" },
               }}

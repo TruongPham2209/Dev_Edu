@@ -31,7 +31,7 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
   return (
     <Stack
       direction="row"
-      spacing={1.5}
+      spacing={{ xs: 1, sm: 1.5 }}
       sx={{
         justifyContent: isUser ? "flex-end" : "flex-start",
         alignItems: "flex-start",
@@ -43,15 +43,15 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
       {!isUser && (
         <Avatar
           sx={{
-            width: 34,
-            height: 34,
+            width: { xs: 30, sm: 34 },
+            height: { xs: 30, sm: 34 },
             background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
             color: "#ffffff",
             boxShadow: "0 4px 16px rgba(124, 58, 237, 0.35)",
             border: "1.5px solid rgba(255, 255, 255, 0.3)",
           }}
         >
-          <Bot size={19} />
+          <Bot size={17} />
         </Avatar>
       )}
 
@@ -65,8 +65,8 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
       >
         <Box
           sx={{
-            px: 2.25,
-            py: 1.75,
+            px: { xs: 1.75, sm: 2.25 },
+            py: { xs: 1.25, sm: 1.75 },
             borderRadius: isUser ? "12px 12px 3px 12px" : "12px 12px 12px 3px",
             background: isUser
               ? "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)"
@@ -84,8 +84,8 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
               : "0 4px 16px -2px rgba(15, 23, 42, 0.05)",
             wordBreak: "break-word",
             whiteSpace: "pre-wrap",
-            fontSize: "0.875rem",
-            lineHeight: 1.6,
+            fontSize: { xs: "0.8125rem", sm: "0.875rem" },
+            lineHeight: 1.55,
             fontWeight: isUser ? 500 : 400,
           }}
         >
@@ -132,8 +132,8 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
         <Avatar
           src={isAuthenticated && user?.avatarUrl ? user.avatarUrl : undefined}
           sx={{
-            width: 34,
-            height: 34,
+            width: { xs: 30, sm: 34 },
+            height: { xs: 30, sm: 34 },
             fontSize: "0.775rem",
             fontWeight: 700,
             background: "linear-gradient(135deg, #0f172a 0%, #3b82f6 100%)",

@@ -48,7 +48,7 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
         boxShadow: "0 4px 16px -2px rgba(15, 23, 42, 0.05)",
         transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
         overflow: "hidden",
-        p: 1.5,
+        p: { xs: 1.25, sm: 1.5 },
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
@@ -90,8 +90,8 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
       {/* Thumbnail Box */}
       <Box
         sx={{
-          width: 84,
-          height: 64,
+          width: { xs: 68, sm: 84 },
+          height: { xs: 52, sm: 64 },
           borderRadius: 1.5,
           overflow: "hidden",
           flexShrink: 0,
@@ -127,18 +127,18 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
               transition: "transform 0.4s ease",
             }}
           >
-            <BookOpen size={26} style={{ opacity: 0.95 }} />
+            <BookOpen size={24} style={{ opacity: 0.95 }} />
           </Box>
         )}
       </Box>
 
       {/* Info Body */}
-      <Box sx={{ ml: 1.75, flexGrow: 1, minWidth: 0 }}>
+      <Box sx={{ ml: { xs: 1.25, sm: 1.75 }, flexGrow: 1, minWidth: 0 }}>
         <Typography
           variant="subtitle2"
           sx={{
             fontWeight: 700,
-            fontSize: "0.85rem",
+            fontSize: { xs: "0.8rem", sm: "0.85rem" },
             lineHeight: 1.35,
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -157,7 +157,7 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
             variant="caption"
             sx={{
               fontWeight: 800,
-              fontSize: "0.825rem",
+              fontSize: { xs: "0.775rem", sm: "0.825rem" },
               background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -208,10 +208,10 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
           flexShrink: 0,
           borderRadius: 1.5,
           textTransform: "none",
-          fontSize: "0.75rem",
+          fontSize: { xs: "0.7rem", sm: "0.75rem" },
           fontWeight: 600,
-          py: 0.6,
-          px: 1.25,
+          py: 0.5,
+          px: { xs: 0.85, sm: 1.25 },
           color: "primary.main",
           bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
           border: "1px solid",

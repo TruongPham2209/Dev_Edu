@@ -19,11 +19,11 @@ export function ChatWidget() {
             onClick={toggleOpen}
             sx={{
               position: "fixed",
-              bottom: { xs: 20, sm: 28 },
-              right: { xs: 20, sm: 28 },
+              bottom: { xs: 16, sm: 28 },
+              right: { xs: 16, sm: 28 },
               zIndex: 1200,
-              width: 58,
-              height: 58,
+              width: { xs: 52, sm: 58 },
+              height: { xs: 52, sm: 58 },
               background: "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
               color: "#ffffff",
               boxShadow: "0 10px 30px -5px rgba(37, 99, 235, 0.5)",
@@ -42,7 +42,7 @@ export function ChatWidget() {
                 <Sparkles size={14} style={{ color: "#fbbf24", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
               }
             >
-              <Bot size={28} />
+              <Bot size={26} />
             </Badge>
           </Fab>
         </Tooltip>

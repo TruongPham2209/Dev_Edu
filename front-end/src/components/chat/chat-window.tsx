@@ -122,15 +122,19 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
                 left: "50%",
                 transform: "translate(-50%, -50%)",
                 width: { xs: "calc(100vw - 24px)", sm: 840, md: 900 },
-                height: { xs: "calc(100vh - 36px)", sm: 660, md: 700 },
-                maxHeight: "85vh",
-                maxWidth: "calc(100vw - 32px)",
-                borderRadius: 2,
+                height: { xs: "calc(100dvh - 24px)", sm: 660, md: 700 },
+                maxHeight: { xs: "calc(100dvh - 24px)", sm: "85vh" },
+                maxWidth: "calc(100vw - 24px)",
+                borderRadius: { xs: "16px", sm: "12px" },
               }
             : {
                 top: {
-                  xs: "calc(100vh - 90px - 12px)",
+                  xs: "auto",
                   sm: "calc(100vh - 620px - 24px)",
+                },
+                bottom: {
+                  xs: "16px",
+                  sm: "auto",
                 },
                 left: {
                   xs: "12px",
@@ -144,8 +148,9 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
                   xs: "calc(100vw - 24px)",
                   sm: isSidebarOpen && isAuthenticated ? 660 : 420,
                 },
-                height: { xs: "calc(100vh - 90px)", sm: 620 },
-                borderRadius: 2,
+                height: { xs: "min(500px, 72dvh)", sm: 620 },
+                maxHeight: { xs: "72dvh", sm: "none" },
+                borderRadius: { xs: "16px", sm: "12px" },
               }),
           display: "flex",
           flexDirection: "column",
@@ -154,8 +159,8 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
         {/* Premium Header */}
         <Box
           sx={{
-            p: isExpanded ? 2 : 1.5,
-            px: 2,
+            p: { xs: 1.25, sm: isExpanded ? 2 : 1.5 },
+            px: { xs: 1.5, sm: 2 },
             background:
               "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)",
             color: "#ffffff",
@@ -362,7 +367,7 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
             <Box
               sx={{
                 flexGrow: 1,
-                p: isExpanded ? 3 : 2,
+                p: { xs: 1.5, sm: isExpanded ? 3 : 2 },
                 overflowY: "auto",
                 display: "flex",
                 flexDirection: "column",
@@ -545,7 +550,7 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
             {/* Footer Input Area */}
             <Box
               sx={{
-                p: isExpanded ? 2 : 1.5,
+                p: { xs: 1.25, sm: isExpanded ? 2 : 1.5 },
                 bgcolor: "background.paper",
                 borderTop: "1px solid",
                 borderColor: (theme) => alpha(theme.palette.divider, 0.8),
