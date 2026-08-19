@@ -73,9 +73,9 @@ export default function AdminUsersPage() {
     refetch();
   };
 
-  const handleUserSaved = () => {
+  const handleUserSaved = async () => {
     setPage(0);
-    refetch();
+    await refetch();
   };
 
   const hasNextPage = page < totalPages - 1;

@@ -31,9 +31,17 @@ import { ForumHero } from "./forum-hero";
 import { ForumSearch } from "./forum-search";
 import { TrendingTopics } from "./trending-topics";
 
+const DEFAULT_INITIAL_POST: PostRequest = {
+  postId: null,
+  thumbObjectKey: "",
+  title: "",
+  shortDescription: "",
+  content: "",
+};
+
 export default function ForumPage() {
   const { handleError, showSuccess } = useApiWithToast();
-  const { isAuthenticated, roles } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
 
   const createPostMutation = useCreateForumPostMutation();
@@ -328,13 +336,7 @@ export default function ForumPage() {
       {isCreatingPost && (
         <PostFormDialog
           open={isCreatingPost}
-          initialValue={{
-            postId: null,
-            thumbObjectKey: "",
-            title: "",
-            shortDescription: "",
-            content: "",
-          }}
+          initialValue={DEFAULT_INITIAL_POST}
           saving={savingPost}
           onClose={() => setIsCreatingPost(false)}
           onSave={handleSavePost}

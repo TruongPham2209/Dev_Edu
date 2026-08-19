@@ -71,6 +71,7 @@ export function CourseTable({
     {
       header: "Description",
       skeletonVariant: "text-double",
+      width: 500,
       render: (course) => (
         <>
           <Typography

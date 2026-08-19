@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from "react";
 interface LectureFormDialogProps {
   open: boolean;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
   courseId: string;
   initialData?: LectureResponse;
 }
@@ -290,7 +290,7 @@ export function LectureFormDialog({
         showSuccess("Lecture created successfully!");
       }
 
-      onSaved();
+      await onSaved();
       onClose();
     } catch (err) {
       handleError(err, "Failed to save lecture");
@@ -310,7 +310,17 @@ export function LectureFormDialog({
       isSubmitDisabled={loading || !isFormValid}
       maxWidth="md"
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          pt: 2,
+          pointerEvents: loading ? "none" : "auto",
+          opacity: loading ? 0.7 : 1,
+          transition: "opacity 0.2s ease",
+        }}
+      >
         <FormInput
           label="Lecture title *"
           value={form.title}

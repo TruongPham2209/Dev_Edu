@@ -20,7 +20,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PostFormDialog } from "../../../components/dialog/post-form";
 
 import {
@@ -70,6 +70,28 @@ export function PostedPostsTab() {
   const [undoQueue, setUndoQueue] = useState<
     { post: PostResponse; timeoutId: NodeJS.Timeout }[]
   >([]);
+
+  const postFormInitialValue = useMemo(
+    () =>
+      editPost
+        ? {
+            postId: editPost.id,
+            thumbObjectKey: editPost.thumbUrl
+              ? editPost.thumbUrl.split("/").pop() || "existing-thumb"
+              : "existing-thumb",
+            title: editPost.title,
+            shortDescription: editPost.shortDescription,
+            content: editPost.content,
+          }
+        : {
+            postId: null,
+            thumbObjectKey: "",
+            title: "",
+            shortDescription: "",
+            content: "",
+          },
+    [editPost],
+  );
 
   const posts = rawPosts.filter((p) => !removedIds.has(p.id));
 
@@ -269,25 +291,7 @@ export function PostedPostsTab() {
       {(editPost || isCreatingPost) && (
         <PostFormDialog
           open={!!editPost || isCreatingPost}
-          initialValue={
-            editPost
-              ? {
-                  postId: editPost.id,
-                  thumbObjectKey: editPost.thumbUrl
-                    ? editPost.thumbUrl.split("/").pop() || "existing-thumb"
-                    : "existing-thumb",
-                  title: editPost.title,
-                  shortDescription: editPost.shortDescription,
-                  content: editPost.content,
-                }
-              : {
-                  postId: null,
-                  thumbObjectKey: "",
-                  title: "",
-                  shortDescription: "",
-                  content: "",
-                }
-          }
+          initialValue={postFormInitialValue}
           editingPost={editPost}
           saving={savingPost}
           onClose={() => {

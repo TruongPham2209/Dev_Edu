@@ -16,7 +16,7 @@ const passwordRegex =
 
 interface ManualTabProps {
   onReady: (isValid: boolean, submitFn: () => Promise<void>) => void;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
   onClose: () => void;
 }
 
@@ -75,7 +75,7 @@ export function ManualTab({ onReady, onSaved, onClose }: ManualTabProps) {
 
       await batchCreateUsersMutate([payload]);
       showSuccess("User created successfully!");
-      onSaved();
+      await onSaved();
       onClose();
     } catch (err) {
       handleError(err, "Could not create user");

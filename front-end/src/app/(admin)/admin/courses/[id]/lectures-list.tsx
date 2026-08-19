@@ -321,7 +321,9 @@ export const LecturesList = ({
       <LectureFormDialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSaved={fetchLectures}
+        onSaved={async () => {
+          await fetchLectures();
+        }}
         courseId={courseId}
         initialData={editingLecture}
       />

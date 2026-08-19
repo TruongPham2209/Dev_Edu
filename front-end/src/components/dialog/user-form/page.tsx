@@ -11,7 +11,7 @@ import { ManualTab } from "./manual-tab";
 interface UserFormDialogProps {
   open: boolean;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
 }
 
 export function UserFormDialog({
@@ -31,12 +31,9 @@ export function UserFormDialog({
     count: 0,
   });
 
-  const [resetKey, setResetKey] = useState(0);
-
   useEffect(() => {
     if (open) {
       setTabValue("manual");
-      setResetKey((prev) => prev + 1);
     }
   }, [open]);
 
@@ -70,10 +67,7 @@ export function UserFormDialog({
       isSubmitDisabled={isSubmitDisabled}
       maxWidth="md"
     >
-      <Box
-        key={resetKey}
-        sx={{ width: "100%", display: "flex", flexDirection: "column" }}
-      >
+      <Box sx={{ width: "100%", display: "flex", flexDirection: "column" }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 1, mt: -1 }}>
           <AnimatedTabs
             tabs={[

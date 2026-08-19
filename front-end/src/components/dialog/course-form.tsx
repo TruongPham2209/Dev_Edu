@@ -32,7 +32,7 @@ type CourseFormDialogProps = {
   editingCourse?: CourseResponse | null;
   saving?: boolean;
   onClose: () => void;
-  onSave: (payload: CourseRequest, selectedFile: File | null) => void;
+  onSave: (payload: CourseRequest, selectedFile: File | null) => Promise<void>;
 };
 
 export function CourseFormDialog({
@@ -142,7 +142,7 @@ export function CourseFormDialog({
 
   const isValid = useMemo(() => !Object.values(errors).some(Boolean), [errors]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setTouched(true);
     if (!isValid) return;
 
@@ -155,7 +155,7 @@ export function CourseFormDialog({
       thumbnailObjectKey: form.thumbnailObjectKey.trim(),
       lecturerUsernames: form.lecturerUsernames,
     };
-    onSave(payload, selectedFile);
+    await onSave(payload, selectedFile);
   };
 
   return (
@@ -175,6 +175,9 @@ export function CourseFormDialog({
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          pointerEvents: saving ? "none" : "auto",
+          opacity: saving ? 0.7 : 1,
+          transition: "opacity 0.2s ease",
         }}
       >
         {loadingDetails ? (

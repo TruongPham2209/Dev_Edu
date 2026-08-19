@@ -176,6 +176,8 @@ describe("MaterialFormDialog", () => {
     // Assert
     // Verify error text appears.
     // ----------------------------------------------------------------------------
-    expect(screen.getByText("File size exceeds 100MB")).toBeInTheDocument();
+    expect(
+      screen.getByText("File size must not exceed 100MB."),
+    ).toBeInTheDocument();
   });
 });

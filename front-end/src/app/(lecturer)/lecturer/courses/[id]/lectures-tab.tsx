@@ -248,8 +248,8 @@ export const LecturesTab = ({ courseId }: { courseId: string }) => {
       <LectureFormDialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSaved={() => {
-          refetch();
+        onSaved={async () => {
+          await refetch();
         }}
         courseId={courseId}
         initialData={editingLecture}

@@ -35,6 +35,9 @@ export default function AdminCoursesPage() {
   const [editingCourse, setEditingCourse] = useState<CourseResponse | null>(
     null,
   );
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Delete Confirmation State
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   // Preview Image State
@@ -144,6 +147,7 @@ export default function AdminCoursesPage() {
     payload: CourseRequest,
     selectedFile: File | null,
   ) => {
+    setIsSaving(true);
     try {
       let finalThumbnailObjectKey = payload.thumbnailObjectKey;
 
@@ -190,6 +194,8 @@ export default function AdminCoursesPage() {
       fetchCourses();
     } catch (error) {
       handleError(error, "Failed to save course");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -385,7 +391,7 @@ export default function AdminCoursesPage() {
         categories={categories}
         initialValue={initialFormState}
         editingCourse={editingCourse}
-        saving={saving}
+        saving={isSaving}
         onClose={() => setDialogOpen(false)}
         onSave={handleSave}
       />

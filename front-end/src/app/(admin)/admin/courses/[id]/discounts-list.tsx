@@ -327,8 +327,8 @@ export function DiscountsList({
       <DiscountFormDialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSaved={() => {
-          fetchInitialDiscounts();
+        onSaved={async () => {
+          await fetchInitialDiscounts();
         }}
         courseId={courseId}
       />

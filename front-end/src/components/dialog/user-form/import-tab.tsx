@@ -8,6 +8,7 @@ import {
   Button,
   IconButton,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -44,7 +45,7 @@ interface ImportTabProps {
     submitFn: () => Promise<void>,
     itemCount: number,
   ) => void;
-  onSaved: () => void;
+  onSaved: () => Promise<void>;
   onClose: () => void;
 }
 
@@ -66,7 +67,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
     try {
       await batchCreateUsersMutate(importedUsers);
       showSuccess(`Created ${importedUsers.length} users successfully!`);
-      onSaved();
+      await onSaved();
       onClose();
     } catch (err) {
       handleError(err, "Could not create users");
@@ -357,13 +358,12 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
         sx={{
-          display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 2,
+          alignItems: { xs: "flex-start", sm: "center" },
         }}
       >
         <Typography
@@ -383,16 +383,23 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             borderRadius: 2.5,
             textTransform: "none",
             fontWeight: 700,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
         >
           Download Template
         </Button>
-      </Box>
+      </Stack>
 
       {importedUsers.length === 0 && importErrors.length === 0 ? (
         // Drag and drop zone
         <Box
           sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 240,
             p: 4.5,
             border: "2px dashed",
             borderColor: dragActive ? "primary.main" : "divider",
@@ -447,65 +454,174 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
         </Box>
       ) : importErrors.length > 0 ? (
         // Error List Table
-        <Box>
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 2.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            width: "100%",
+            alignItems: "center",
+            mx: "auto",
+          }}
+        >
+          <Alert
+            severity="error"
+            action={
+              <Button
+                color="error"
+                size="small"
+                variant="outlined"
+                onClick={() => {
+                  setImportErrors([]);
+                  setFile(null);
+                }}
+                sx={{
+                  borderRadius: 2,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  bgcolor: "white",
+                  fontSize: "0.8rem",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Choose Another File
+              </Button>
+            }
+            sx={{
+              width: "100%",
+              borderRadius: 2.5,
+              alignItems: "center",
+              "& .MuiAlert-message": {
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+              },
+            }}
+          >
             <Typography variant="body2" sx={{ fontWeight: 700 }}>
-              Your file contains {importErrors.length} validation errors. Please
-              correct the Excel file and upload it again.
+              Your file contains {importErrors.length} validation error
+              {importErrors.length > 1 ? "s" : ""}. Please correct the Excel
+              file and upload it again.
             </Typography>
           </Alert>
+
           <TableContainer
             component={Paper}
             variant="outlined"
             sx={{
+              width: "100%",
+              mx: "auto",
               borderRadius: 3,
-              border: "1px solid rgba(0,0,0,0.08)",
-              maxHeight: 300,
+              border: "1px solid rgba(15, 23, 42, 0.08)",
+              maxHeight: 280,
             }}
           >
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: "grey.50" }}>
-                  <TableCell sx={{ fontWeight: 700 }}>Line</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Column / Field</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Current Value</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: "error.main" }}>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      width: 90,
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Line
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      width: 140,
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Column / Field
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      width: 160,
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Current Value
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      color: "error.main",
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
                     Error Description
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {importErrors.map((err, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell sx={{ fontWeight: 650 }}>
+                  <TableRow key={idx} hover>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        fontWeight: 650,
+                        whiteSpace: "nowrap",
+                        verticalAlign: "middle",
+                        py: 1,
+                      }}
+                    >
                       {err.row > 0 ? `Line ${err.row}` : "-"}
                     </TableCell>
                     <TableCell
                       sx={{
-                        textTransform: "capitalize",
                         fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        color: "text.primary",
+                        verticalAlign: "middle",
+                        py: 1,
                       }}
                     >
-                      {err.field}
+                      {err.field === "fullName"
+                        ? "Full Name"
+                        : err.field.charAt(0).toUpperCase() +
+                          err.field.slice(1)}
                     </TableCell>
                     <TableCell
                       sx={{
                         color: "text.secondary",
                         fontFamily: "monospace",
+                        whiteSpace: "nowrap",
+                        verticalAlign: "middle",
+                        py: 1,
                       }}
                     >
                       {err.value || <em style={{ opacity: 0.5 }}>Empty</em>}
                     </TableCell>
-                    <TableCell sx={{ color: "error.main", fontWeight: 500 }}>
+                    <TableCell
+                      sx={{
+                        color: "error.main",
+                        fontWeight: 500,
+                        verticalAlign: "middle",
+                        py: 1,
+                      }}
+                    >
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
-                          gap: 0.5,
+                          gap: 0.75,
                         }}
                       >
-                        <AlertCircle size={14} />
-                        {err.message}
+                        <AlertCircle size={15} style={{ flexShrink: 0 }} />
+                        <span>{err.message}</span>
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -513,34 +629,25 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
               </TableBody>
             </Table>
           </TableContainer>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-            <Button
-              variant="contained"
-              color="inherit"
-              size="small"
-              onClick={() => {
-                setImportErrors([]);
-                setFile(null);
-              }}
-              sx={{
-                borderRadius: 2,
-                textTransform: "none",
-                fontWeight: 700,
-              }}
-            >
-              Choose Another File
-            </Button>
-          </Box>
         </Box>
       ) : (
         // Success Imported Users List Table
-        <Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.5,
+            width: "100%",
+            alignItems: "center",
+            mx: "auto",
+          }}
+        >
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              mb: 1.5,
+              width: "100%",
             }}
           >
             <Box
@@ -575,40 +682,123 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
             component={Paper}
             variant="outlined"
             sx={{
+              width: "100%",
+              mx: "auto",
               borderRadius: 3,
-              border: "1px solid rgba(0,0,0,0.08)",
-              maxHeight: 300,
+              border: "1px solid rgba(15, 23, 42, 0.08)",
+              maxHeight: 280,
             }}
           >
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: "grey.50" }}>
-                  <TableCell sx={{ fontWeight: 700 }}>No</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Full Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Username</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700 }}>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      width: 60,
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    No
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Full Name
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Username
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Email
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
+                    Role
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      verticalAlign: "middle",
+                      py: 1.2,
+                    }}
+                  >
                     Action
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {importedUsers.map((usr, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell sx={{ color: "text.secondary" }}>
+                  <TableRow key={idx} hover>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: "text.secondary",
+                        verticalAlign: "middle",
+                        py: 1,
+                      }}
+                    >
                       {idx + 1}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: "text.primary" }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: "text.primary",
+                        verticalAlign: "middle",
+                        py: 1,
+                      }}
+                    >
                       {usr.fullName}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 600,
+                        verticalAlign: "middle",
+                        py: 1,
+                      }}
+                    >
                       {usr.username}
                     </TableCell>
-                    <TableCell sx={{ color: "text.secondary" }}>
+                    <TableCell
+                      sx={{
+                        color: "text.secondary",
+                        verticalAlign: "middle",
+                        py: 1,
+                      }}
+                    >
                       {usr.email}
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ verticalAlign: "middle", py: 1 }}>
                       <Typography
                         variant="caption"
                         sx={{
@@ -641,7 +831,10 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
                         {usr.role}
                       </Typography>
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell
+                      align="right"
+                      sx={{ verticalAlign: "middle", py: 1 }}
+                    >
                       <IconButton
                         size="small"
                         onClick={() => handleRemoveImportUser(idx)}

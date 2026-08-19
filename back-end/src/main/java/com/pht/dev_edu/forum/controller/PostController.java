@@ -44,7 +44,7 @@ public class PostController {
             @RequestParam(required = false) String lastCursor,
             @RequestParam PostStatus status
     ) {
-        var username = SecurityContextUtils.getCurrentUsername();
+        var username = SecurityContextUtils.getCurrentUsernameForController();
 
         var versions = postService.getPostedPosts(username, status, lastCursor);
         return ApiUtils.buildSuccessResponse(versions);
@@ -161,7 +161,7 @@ public class PostController {
     public ResponseEntity<?> getPostsInFeed(
             @RequestParam(required = false) String nextCursor
     ) {
-        var username = SecurityContextUtils.getCurrentUsernameForController();
+        var username = SecurityContextUtils.getCurrentUsername();
         var posts = searchPostService.getPostsInFeed(username, nextCursor);
         return ApiUtils.buildSuccessResponse(posts);
     }

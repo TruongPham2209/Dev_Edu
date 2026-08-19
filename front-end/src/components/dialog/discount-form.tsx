@@ -15,7 +15,7 @@ import { useEffect, useState } from "react";
 interface DiscountFormDialogProps {
   open: boolean;
   onClose: () => void;
-  onSaved: (discount: CourseDiscountResponse) => void;
+  onSaved: (discount: CourseDiscountResponse) => Promise<void>;
   courseId?: string | null;
 }
 
@@ -118,7 +118,7 @@ export function DiscountFormDialog({
           ? "Successfully created course discount!"
           : "Successfully created global discount!",
       );
-      onSaved(newDiscount);
+      await onSaved(newDiscount);
       onClose();
     } catch (err) {
       handleError(err, "Failed to create discount");
@@ -138,7 +138,17 @@ export function DiscountFormDialog({
       isSubmitDisabled={loading || !isFormValid}
       maxWidth="sm"
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pt: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          pt: 2,
+          pointerEvents: loading ? "none" : "auto",
+          opacity: loading ? 0.7 : 1,
+          transition: "opacity 0.2s ease",
+        }}
+      >
         {!courseId && (
           <Box
             sx={{

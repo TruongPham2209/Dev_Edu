@@ -24,6 +24,7 @@ export interface ColumnDef<T> {
   render: (item: T, index: number) => ReactNode;
   skeletonVariant?: TableColumnConfig["variant"];
   renderSkeleton?: () => ReactNode;
+  whiteSpace?: "nowrap" | "normal" | "pre-wrap";
 }
 
 interface DataTableProps<T> {
@@ -179,7 +180,9 @@ export function DataTable<T>({
                     textAlign: col.align || "left",
                     py: { xs: 1.25, sm: 1.75 },
                     px: { xs: 1.5, sm: 2 },
-                    whiteSpace: "nowrap",
+                    whiteSpace: col.whiteSpace || "nowrap",
+                    width: col.width,
+                    maxWidth: col.width,
                   }}
                 >
                   {col.header}
@@ -224,11 +227,15 @@ export function DataTable<T>({
                     {columns.map((col, colIndex) => (
                       <TableCell
                         key={`td-${colIndex}`}
+                        width={col.width}
                         sx={{
                           textAlign: col.align || "left",
                           py: { xs: 1.25, sm: 1.75 },
                           px: { xs: 1.5, sm: 2 },
-                          whiteSpace: "nowrap",
+                          whiteSpace:
+                            col.whiteSpace || (col.width ? "normal" : "nowrap"),
+                          width: col.width,
+                          maxWidth: col.width,
                         }}
                       >
                         {col.render(item, index)}

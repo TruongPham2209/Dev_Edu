@@ -40,7 +40,11 @@ async function createLecture(
 async function updateLecture(
   lecture: LectureRequest,
 ): Promise<LectureResponse> {
-  return apiPut<LectureResponse>("/api/v1/lectures", lecture);
+  const request = {
+    ...lecture,
+    videoObjectKey: null,
+  };
+  return apiPut<LectureResponse>("/api/v1/lectures", request);
 }
 
 async function deleteLecture(lectureId: string): Promise<void> {

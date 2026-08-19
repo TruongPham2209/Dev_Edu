@@ -84,8 +84,8 @@ export default function AdminDiscountsPage() {
     fetchDiscounts();
   };
 
-  const handleCreateSaved = (newDiscount: CourseDiscountResponse) => {
-    fetchDiscounts();
+  const handleCreateSaved = async (newDiscount: CourseDiscountResponse) => {
+    await fetchDiscounts();
   };
 
   const handleDeleteTrigger = (id: string) => {

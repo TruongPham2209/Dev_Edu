@@ -20,7 +20,7 @@ interface PostFormDialogProps {
   onSave: (
     payload: PostRequest,
     selectedFile: File | null,
-  ) => Promise<void> | void;
+  ) => Promise<void>;
 }
 
 export function PostFormDialog({
@@ -64,7 +64,7 @@ export function PostFormDialog({
       });
       setUploadedImages([]);
     }
-  }, [open, initialValue]);
+  }, [open, initialValue.postId]);
 
   const errors = useMemo(() => {
     const isUpdate = Boolean(initialValue.postId);
@@ -148,7 +148,16 @@ export function PostFormDialog({
       isSubmitDisabled={!isValid || saving}
       maxWidth="md"
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 3 } }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: { xs: 2, sm: 3 },
+          pointerEvents: saving ? "none" : "auto",
+          opacity: saving ? 0.7 : 1,
+          transition: "opacity 0.2s ease",
+        }}
+      >
         <FormInput
           label="Title *"
           placeholder="Enter post title"
