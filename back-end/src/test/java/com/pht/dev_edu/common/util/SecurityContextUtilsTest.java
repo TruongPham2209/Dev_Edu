@@ -1,9 +1,8 @@
 package com.pht.dev_edu.common.util;
 
-import com.pht.dev_edu.common.dto.RoleEnum;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,11 +14,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
+
+import com.pht.dev_edu.common.dto.RoleEnum;
 
 /*
  * <analysis>
@@ -271,17 +273,16 @@ class SecurityContextUtilsTest {
         assertThat(result).isEmpty();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("getCurrentUserAuthorities - should return authority strings when authenticated")
     void shouldReturnAuthorityStrings() {
         // Arrange
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
-        var authorities = List.of(
+        Collection<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_ADMIN"),
                 new SimpleGrantedAuthority("ROLE_LECTURER"));
-        when(auth.getAuthorities()).thenReturn((Collection) authorities);
+        doReturn(authorities).when(auth).getAuthorities();
 
         // Act
         Set<String> result = SecurityContextUtils.getCurrentUserAuthorities(auth);
@@ -312,4 +313,3 @@ class SecurityContextUtilsTest {
         assertThat(result).containsExactlyInAnyOrder(RoleEnum.STUDENT, RoleEnum.ADMIN);
     }
 }
-

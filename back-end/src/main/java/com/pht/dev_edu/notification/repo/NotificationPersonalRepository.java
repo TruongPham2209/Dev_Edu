@@ -1,17 +1,16 @@
 package com.pht.dev_edu.notification.repo;
 
-import com.pht.dev_edu.notification.entity.NotificationPersonalEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.pht.dev_edu.notification.entity.NotificationPersonalEntity;
+
 public interface NotificationPersonalRepository extends JpaRepository<NotificationPersonalEntity, UUID> {
     long countByUsernameAndIsReadFalse(String username);
 
@@ -38,5 +37,6 @@ public interface NotificationPersonalRepository extends JpaRepository<Notificati
             AND     n.username  = :username
             AND     n.isRead    = false
             """)
-    void markAsReadByIdAndUsername(@Param("id") UUID id, @Param("username") String username, @Param("readAt") LocalDateTime readAt);
+    void markAsReadByIdAndUsername(@Param("id") UUID id, @Param("username") String username,
+            @Param("readAt") LocalDateTime readAt);
 }

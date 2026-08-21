@@ -1,19 +1,18 @@
 package com.pht.dev_edu.quiz.repo;
 
-import com.pht.dev_edu.quiz.dto.enums.QuestionType;
-import com.pht.dev_edu.quiz.dto.projection.QuizEssaySubmissionProjection;
-import com.pht.dev_edu.quiz.entity.QuizAttemptAnswerEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.pht.dev_edu.quiz.dto.enums.QuestionType;
+import com.pht.dev_edu.quiz.dto.projection.QuizEssaySubmissionProjection;
+import com.pht.dev_edu.quiz.entity.QuizAttemptAnswerEntity;
+
 public interface QuizAttemptAnswerRepo extends JpaRepository<QuizAttemptAnswerEntity, UUID> {
     List<QuizAttemptAnswerEntity> findByAttemptId(UUID attemptId);
 
@@ -63,6 +62,5 @@ public interface QuizAttemptAnswerRepo extends JpaRepository<QuizAttemptAnswerEn
             @Param("essayStatus") String essayStatus,
             @Param("lastId") UUID lastId,
             @Param("lastTimestamp") LocalDateTime lastTimestamp,
-            @Param("limit") int limit
-    );
+            @Param("limit") int limit);
 }

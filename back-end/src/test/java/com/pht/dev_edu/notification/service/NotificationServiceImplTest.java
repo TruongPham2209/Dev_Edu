@@ -247,6 +247,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     @DisplayName("getUnifiedNotifications - should get unified notifications with valid user roles")
     void shouldGetUnifiedNotificationsWithValidUserRoles() throws Exception {
         // Arrange
@@ -276,7 +277,8 @@ class NotificationServiceImplTest {
     void shouldGetUnreadNotificationCountsSuccessfully() {
         // Arrange
         when(notificationPersonalService.getUnreadCount(USERNAME)).thenReturn(4L);
-        when(notificationGroupService.getUnreadGroupCountForUser(USERNAME, List.of("ROLE_STUDENT"))).thenReturn(6L);
+        when(notificationGroupService.getUnreadGroupCountForUser(USERNAME, List.of("ROLE_STUDENT")))
+                .thenReturn(6L);
 
         // Act
         UnreadCountResponse response = notificationService.getUnreadNotificationCounts(USERNAME,
@@ -314,7 +316,8 @@ class NotificationServiceImplTest {
         verify(notificationPersonalService).markAsRead(NOTIF_ID, USERNAME);
         verify(notificationGroupService, never()).markGroupNotificationAsRead(any(), any());
         redisUtilsMock.verify(() -> RedisUtils.invalidateCache(
-                RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.PERSONAL + ":" + NOTIF_ID));
+                RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.PERSONAL + ":"
+                        + NOTIF_ID));
     }
 
     // ==================== markAllNotificationsAsRead ====================
@@ -370,7 +373,8 @@ class NotificationServiceImplTest {
         when(notificationGroupRepository.findById(NOTIF_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> notificationService.getCachedNotification(NOTIF_ID, NotificationCategory.GROUP))
+        assertThatThrownBy(
+                () -> notificationService.getCachedNotification(NOTIF_ID, NotificationCategory.GROUP))
                 .isInstanceOf(DataNotFoundException.class)
                 .hasMessageContaining("Group notification not found with id: " + NOTIF_ID);
     }
@@ -397,7 +401,8 @@ class NotificationServiceImplTest {
                 .thenReturn(List.of(targetEntity));
 
         // Act
-        CachedNotification cached = notificationService.getCachedNotification(NOTIF_ID, NotificationCategory.GROUP);
+        CachedNotification cached = notificationService.getCachedNotification(NOTIF_ID,
+                NotificationCategory.GROUP);
 
         // Assert
         assertThat(cached).isNotNull();
@@ -413,7 +418,8 @@ class NotificationServiceImplTest {
         when(notificationRepository.findById(NOTIF_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThatThrownBy(() -> notificationService.getCachedNotification(NOTIF_ID, NotificationCategory.PERSONAL))
+        assertThatThrownBy(() -> notificationService.getCachedNotification(NOTIF_ID,
+                NotificationCategory.PERSONAL))
                 .isInstanceOf(DataNotFoundException.class)
                 .hasMessageContaining("Personal notification not found with id: " + NOTIF_ID);
     }
@@ -433,7 +439,8 @@ class NotificationServiceImplTest {
         when(notificationRepository.findById(NOTIF_ID)).thenReturn(Optional.of(entity));
 
         // Act
-        CachedNotification cached = notificationService.getCachedNotification(NOTIF_ID, NotificationCategory.PERSONAL);
+        CachedNotification cached = notificationService.getCachedNotification(NOTIF_ID,
+                NotificationCategory.PERSONAL);
 
         // Assert
         assertThat(cached).isNotNull();
@@ -492,6 +499,7 @@ class NotificationServiceImplTest {
         // Assert
         verify(notificationRepository).delete(entity);
         redisUtilsMock.verify(() -> RedisUtils.invalidateCache(
-                RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.PERSONAL + ":" + NOTIF_ID));
+                RedisPrefixConstant.NOTIFICATION_PREFIX + NotificationCategory.PERSONAL + ":"
+                        + NOTIF_ID));
     }
 }

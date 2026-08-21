@@ -121,7 +121,8 @@ import com.pht.dev_edu.enrollment.repo.EnrollmentRepository;
  *
  * Purpose
  * -------
- * Verify AI chat orchestration, conversation context management, tool execution,
+ * Verify AI chat orchestration, conversation context management, tool
+ * execution,
  * system prompt leak defense, and conversation history retrieval.
  *
  * Test Scope
@@ -379,6 +380,7 @@ class ChatServiceImplTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     @DisplayName("processChatMessage - should execute tool calls and build course cards successfully")
     void shouldExecuteToolCallsAndBuildCourseCardsSuccessfully() throws Exception {
         // Arrange
@@ -434,7 +436,8 @@ class ChatServiceImplTest {
                 .thenReturn(response1)
                 .thenReturn(response2);
 
-        when(objectMapper.readValue(eq("{\"query\":\"Java Spring\"}"), any(com.fasterxml.jackson.core.type.TypeReference.class)))
+        when(objectMapper.readValue(eq("{\"query\":\"Java Spring\"}"),
+                any(com.fasterxml.jackson.core.type.TypeReference.class)))
                 .thenReturn(java.util.Map.of("query", "Java Spring"));
         when(openAiService.createEmbedding("Java Spring")).thenReturn(List.of(0.1f));
         when(courseEmbeddingService.formatVector(any())).thenReturn("[0.1]");
@@ -479,7 +482,8 @@ class ChatServiceImplTest {
 
         // Assert
         assertThat(response.getReply().getContent())
-                .isEqualTo("Dạ, em là trợ lý tư vấn khoá học của Dev Edu. Anh/chị cần em hỗ trợ tư vấn khoá học nào ạ?");
+                .isEqualTo(
+                        "Dạ, em là trợ lý tư vấn khoá học của Dev Edu. Anh/chị cần em hỗ trợ tư vấn khoá học nào ạ?");
     }
 
     // ==================== getUserConversations ====================
@@ -510,7 +514,8 @@ class ChatServiceImplTest {
 
         ChatMessageEntity lastMsg = ChatMessageEntity.builder()
                 .conversationId(CONVERSATION_ID)
-                .content("Đây là tin nhắn dài hơn 80 ký tự để kiểm tra việc cắt tỉa preview hiển thị cho người dùng khi lấy danh sách hội thoại")
+                .content(
+                        "Đây là tin nhắn dài hơn 80 ký tự để kiểm tra việc cắt tỉa preview hiển thị cho người dùng khi lấy danh sách hội thoại")
                 .build();
 
         when(chatConversationRepository.findByUsernameOrderByUpdatedAtDesc(USERNAME))
