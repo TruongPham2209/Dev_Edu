@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import type { ChatConversationSummary } from "@/lib/type/chat";
+import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
   Button,
@@ -14,9 +16,8 @@ import {
   Typography,
   alpha,
 } from "@mui/material";
-import { Plus, MessageSquare, History, X } from "lucide-react";
-import type { ChatConversationSummary } from "@/lib/type/chat";
-import { formatServerDate } from "@/lib/util/date-utils";
+import { MessageSquare, Plus, Trash2, X } from "lucide-react";
+import { useState } from "react";
 
 export interface ChatSidebarProps {
   open: boolean;
@@ -26,6 +27,8 @@ export interface ChatSidebarProps {
   onSelectConversation: (id: string) => void;
   onStartNewChat: () => void;
   isLoading: boolean;
+  onDeleteConversation?: (id: string) => void;
+  isDeleting?: boolean;
 }
 
 export function ChatSidebar({
@@ -36,7 +39,10 @@ export function ChatSidebar({
   onSelectConversation,
   onStartNewChat,
   isLoading,
+  onDeleteConversation,
+  isDeleting,
 }: ChatSidebarProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   return (
     <Box
       sx={{
@@ -171,6 +177,9 @@ export function ChatSidebar({
                     "&:hover": {
                       bgcolor: (theme) =>
                         alpha(theme.palette.primary.main, 0.05),
+                      "& .delete-conv-btn": {
+                        opacity: 1,
+                      },
                     },
                   }}
                 >
@@ -197,12 +206,54 @@ export function ChatSidebar({
                       },
                     }}
                   />
+                  {onDeleteConversation && (
+                    <IconButton
+                      className="delete-conv-btn"
+                      size="small"
+                      aria-label="Delete conversation"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingId(conv.id);
+                      }}
+                      sx={{
+                        ml: 0.5,
+                        p: 0.5,
+                        color: "text.secondary",
+                        opacity: { xs: 1, sm: 0.5 },
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          color: "error.main",
+                          bgcolor: (theme) =>
+                            alpha(theme.palette.error.main, 0.1),
+                        },
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </IconButton>
+                  )}
                 </ListItemButton>
               );
             })}
           </List>
         )}
       </Box>
+
+      <ConfirmDialog
+        open={Boolean(deletingId)}
+        title="Delete Conversation"
+        description="Are you sure you want to delete this conversation? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmColor="error"
+        isLoading={Boolean(isDeleting)}
+        onConfirm={async () => {
+          if (deletingId && onDeleteConversation) {
+            await onDeleteConversation(deletingId);
+          }
+          setDeletingId(null);
+        }}
+        onCancel={() => setDeletingId(null)}
+      />
     </Box>
   );
 }

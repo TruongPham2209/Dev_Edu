@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import { useChat } from "@/hooks/use-chat";
 import { Badge, Fab, Tooltip } from "@mui/material";
 import { Bot, Sparkles } from "lucide-react";
-import { useChat } from "@/hooks/use-chat";
 import { ChatWindow } from "./chat-window";
 
 export function ChatWidget() {
@@ -39,7 +38,13 @@ export function ChatWidget() {
               overlap="circular"
               anchorOrigin={{ vertical: "top", horizontal: "right" }}
               badgeContent={
-                <Sparkles size={14} style={{ color: "#fbbf24", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }} />
+                <Sparkles
+                  size={14}
+                  style={{
+                    color: "#fbbf24",
+                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                  }}
+                />
               }
             >
               <Bot size={26} />

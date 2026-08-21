@@ -68,6 +68,10 @@ vi.mock("@/lib/api/chat", () => ({
     mutateAsync: vi.fn().mockResolvedValue(undefined),
     isPending: false,
   }),
+  useDeleteConversationMutation: () => ({
+    mutateAsync: vi.fn().mockResolvedValue(undefined),
+    isPending: false,
+  }),
   useChatConversationsQuery: () => ({
     data: [],
     isLoading: false,

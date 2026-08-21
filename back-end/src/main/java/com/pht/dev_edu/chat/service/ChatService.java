@@ -14,4 +14,6 @@ public interface ChatService {
     List<ChatConversationSummaryResponse> getUserConversations();
 
     List<ChatMessageDetailResponse> getConversationMessages(UUID conversationId);
+
+    void deleteConversation(UUID conversationId, String username);
 }

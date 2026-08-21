@@ -1,12 +1,11 @@
 "use client";
 
-import React from "react";
-import { Avatar, Box, Stack, Typography, alpha } from "@mui/material";
-import { Bot, User } from "lucide-react";
 import type { UiChatMessage } from "@/hooks/use-chat";
-import { CourseCardItem } from "./course-card-item";
 import { useAuth } from "@/lib/use-auth";
 import { formatServerDate } from "@/lib/util/date-utils";
+import { Avatar, Box, Stack, Typography, alpha } from "@mui/material";
+import { Bot, User } from "lucide-react";
+import { CourseCardItem } from "./course-card-item";
 
 export interface ChatMessageItemProps {
   message: UiChatMessage;
@@ -25,8 +24,8 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
         .slice(0, 2)
         .toUpperCase()
     : user?.username
-    ? user.username.slice(0, 2).toUpperCase()
-    : null;
+      ? user.username.slice(0, 2).toUpperCase()
+      : null;
 
   return (
     <Stack
@@ -142,11 +141,7 @@ export function ChatMessageItem({ message }: ChatMessageItemProps) {
             border: "1.5px solid rgba(255, 255, 255, 0.3)",
           }}
         >
-          {isAuthenticated && userInitials ? (
-            userInitials
-          ) : (
-            <User size={18} />
-          )}
+          {isAuthenticated && userInitials ? userInitials : <User size={18} />}
         </Avatar>
       )}
     </Stack>

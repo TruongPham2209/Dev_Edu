@@ -5,6 +5,8 @@ import com.pht.dev_edu.chat.dto.ChatMessageResponse;
 import com.pht.dev_edu.chat.service.ChatService;
 import com.pht.dev_edu.common.dto.ApiResponse;
 import com.pht.dev_edu.common.util.ApiUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
+
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +39,12 @@ public class ChatController {
     public ResponseEntity<ApiResponse> getConversationMessages(@PathVariable("id") UUID id) {
         var messages = chatService.getConversationMessages(id);
         return ApiUtils.buildSuccessResponse(messages);
+    }
+
+    @DeleteMapping("/conversations/{id}")
+    public ResponseEntity<ApiResponse> deleteConversation(@PathVariable("id") UUID id) {
+        String username = SecurityContextUtils.getCurrentUsernameForController();
+        chatService.deleteConversation(id, username);
+        return ApiUtils.buildSuccessResponse("Conversation deleted successfully");
     }
 }

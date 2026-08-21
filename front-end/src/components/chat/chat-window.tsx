@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import type { useChat } from "@/hooks/use-chat";
 import {
   Avatar,
   Box,
   Button,
-  CircularProgress,
   IconButton,
-  InputAdornment,
   Paper,
   Stack,
   TextField,
@@ -25,10 +23,10 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import type { useChat } from "@/hooks/use-chat";
+import React, { useEffect, useRef } from "react";
 import { ChatMessageItem } from "./chat-message-item";
-import { QuickPrompts } from "./quick-prompts";
 import { ChatSidebar } from "./chat-sidebar";
+import { QuickPrompts } from "./quick-prompts";
 
 export interface ChatWindowProps {
   chat: ReturnType<typeof useChat>;
@@ -51,6 +49,8 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
     sendMessage,
     startNewConversation,
     selectConversation,
+    deleteConversation,
+    isDeletingConversation,
     isLoading,
     conversations,
     isLoadingConversations,
@@ -170,7 +170,11 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
         >
           <Stack
             direction="row"
-            sx={{ alignItems: "center", justifyContent: "space-between", gap: 1 }}
+            sx={{
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
           >
             <Stack
               direction="row"
@@ -230,14 +234,22 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
                 <Typography
                   variant="subtitle2"
                   noWrap
-                  sx={{ fontWeight: 700, lineHeight: 1.2, fontSize: "0.875rem" }}
+                  sx={{
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    fontSize: "0.875rem",
+                  }}
                 >
                   DevEdu AI Advisor
                 </Typography>
                 <Typography
                   variant="caption"
                   noWrap
-                  sx={{ color: "#94a3b8", fontSize: "0.7rem", display: "block" }}
+                  sx={{
+                    color: "#94a3b8",
+                    fontSize: "0.7rem",
+                    display: "block",
+                  }}
                 >
                   {isExpanded
                     ? "Expanded Workspace • AI Course Advisor"
@@ -351,6 +363,8 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
               onSelectConversation={selectConversation}
               onStartNewChat={startNewConversation}
               isLoading={isLoadingConversations}
+              onDeleteConversation={deleteConversation}
+              isDeleting={isDeletingConversation}
             />
           )}
 
@@ -627,10 +641,7 @@ export function ChatWindow({ chat, onClose }: ChatWindowProps) {
                     },
                     "&.Mui-disabled": {
                       background: (theme) =>
-                        alpha(
-                          theme.palette.action.disabledBackground,
-                          0.6,
-                        ),
+                        alpha(theme.palette.action.disabledBackground, 0.6),
                       color: "text.disabled",
                       boxShadow: "none",
                     },

@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import type { CourseCardResponse } from "@/lib/type/chat";
+import { formatPrice } from "@/lib/util/date-utils";
 import {
   Box,
   Button,
@@ -12,9 +12,8 @@ import {
   Typography,
   alpha,
 } from "@mui/material";
-import { Sparkles, BookOpen, ChevronRight, ArrowUpRight } from "lucide-react";
-import type { CourseCardResponse } from "@/lib/type/chat";
-import { formatPrice } from "@/lib/util/date-utils";
+import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export interface CourseCardItemProps {
   course: CourseCardResponse;
@@ -152,7 +151,11 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
           {course.title}
         </Typography>
 
-        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.5 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", flexWrap: "wrap", gap: 0.5 }}
+        >
           <Typography
             variant="caption"
             sx={{
@@ -178,7 +181,8 @@ export function CourseCardItem({ course }: CourseCardItemProps) {
                 bgcolor: (theme) => alpha(theme.palette.secondary.main, 0.08),
                 color: "#7c3aed",
                 border: "1px solid",
-                borderColor: (theme) => alpha(theme.palette.secondary.main, 0.2),
+                borderColor: (theme) =>
+                  alpha(theme.palette.secondary.main, 0.2),
                 px: 0.25,
                 "& .MuiChip-label": { px: 0.5 },
               }}

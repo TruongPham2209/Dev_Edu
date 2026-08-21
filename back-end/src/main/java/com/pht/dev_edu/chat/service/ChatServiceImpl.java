@@ -10,6 +10,7 @@ import com.pht.dev_edu.chat.repository.ChatConversationRepository;
 import com.pht.dev_edu.chat.repository.ChatMessageRepository;
 import com.pht.dev_edu.chat.repository.CourseEmbeddingRepository;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
+import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.security.AccessDeniedException;
 import com.pht.dev_edu.common.exception.security.UnauthorizedException;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
@@ -65,7 +66,8 @@ public class ChatServiceImpl implements ChatService {
 
         // 2. Auth Context & Ownership
         String currentUsername = SecurityContextUtils.getCurrentUsername();
-        boolean isAuthenticated = (currentUsername != null && !currentUsername.isBlank() && !"anonymousUser".equalsIgnoreCase(currentUsername));
+        boolean isAuthenticated = (currentUsername != null && !currentUsername.isBlank()
+                && !"anonymousUser".equalsIgnoreCase(currentUsername));
         UUID conversationId = request.getConversationId();
 
         List<UUID> enrolledCourseIds = Collections.emptyList();
@@ -217,6 +219,17 @@ public class ChatServiceImpl implements ChatService {
                         .build())
                 .courses(courseCards)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void deleteConversation(UUID conversationId, String username) {
+        var conversation = chatConversationRepository.findById(conversationId)
+                .orElseThrow(() -> new DataNotFoundException("Conversation not found."));
+        if (!conversation.getUsername().equals(username)) {
+            throw new BadRequestException("Conversation not authorized.");
+        }
+        chatConversationRepository.delete(conversation);
     }
 
     private List<CourseEntity> executeToolCall(OpenAiToolCall toolCall, List<UUID> enrolledCourseIds) {

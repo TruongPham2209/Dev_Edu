@@ -5,7 +5,7 @@ import {
   useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
-import { apiGet, apiPost } from "./client";
+import { apiDelete, apiGet, apiPost } from "./client";
 import type {
   ChatConversationSummary,
   ChatMessageDetail,
@@ -21,7 +21,9 @@ export async function sendChatMessage(
   return apiPost<ChatMessageResponse>("/api/chat/messages", data);
 }
 
-export async function getChatConversations(): Promise<ChatConversationSummary[]> {
+export async function getChatConversations(): Promise<
+  ChatConversationSummary[]
+> {
   return apiGet<ChatConversationSummary[]>("/api/chat/conversations");
 }
 
@@ -29,6 +31,10 @@ export async function getConversationMessages(
   id: string,
 ): Promise<ChatMessageDetail[]> {
   return apiGet<ChatMessageDetail[]>(`/api/chat/conversations/${id}/messages`);
+}
+
+export async function deleteConversation(id: string) {
+  return apiDelete<void>(`/api/chat/conversations/${id}`);
 }
 
 // --- React Query Hooks ---
@@ -74,5 +80,19 @@ export function useConversationMessagesQuery(
     queryFn: () => getConversationMessages(id!),
     enabled: Boolean(id),
     ...options,
+  });
+}
+
+export function useDeleteConversationMutation(
+  options?: UseMutationOptions<void, Error, string>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteConversation,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["chat", "conversations"] });
+      options?.onSuccess?.(...args);
+    },
   });
 }

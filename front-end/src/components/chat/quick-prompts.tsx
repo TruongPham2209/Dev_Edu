@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
 import { Chip, Stack, Typography, alpha } from "@mui/material";
-import { Sparkles, Code, DollarSign, Compass, Terminal } from "lucide-react";
+import { Code, Compass, DollarSign, Sparkles, Terminal } from "lucide-react";
 
 export interface QuickPromptsProps {
   onSelectPrompt: (promptText: string) => void;
@@ -10,18 +9,38 @@ export interface QuickPromptsProps {
 }
 
 const PROMPT_ITEMS = [
-  { text: "Recommend Backend Development courses", icon: <Code size={13} style={{ color: "#2563eb" }} /> },
-  { text: "Courses under 500,000 VND", icon: <DollarSign size={13} style={{ color: "#10b981" }} /> },
-  { text: "Fullstack Web Developer roadmap", icon: <Compass size={13} style={{ color: "#7c3aed" }} /> },
-  { text: "Beginner Friendly Python courses", icon: <Terminal size={13} style={{ color: "#f59e0b" }} /> },
+  {
+    text: "Recommend Backend Development courses",
+    icon: <Code size={13} style={{ color: "#2563eb" }} />,
+  },
+  {
+    text: "Courses under 500,000 VND",
+    icon: <DollarSign size={13} style={{ color: "#10b981" }} />,
+  },
+  {
+    text: "Fullstack Web Developer roadmap",
+    icon: <Compass size={13} style={{ color: "#7c3aed" }} />,
+  },
+  {
+    text: "Beginner Friendly Python courses",
+    icon: <Terminal size={13} style={{ color: "#f59e0b" }} />,
+  },
 ];
 
 export function QuickPrompts({ onSelectPrompt, disabled }: QuickPromptsProps) {
   return (
     <Stack spacing={1.25} sx={{ p: 1, pb: 1.5, width: "100%" }}>
-      <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", px: 0.5 }}>
+      <Stack
+        direction="row"
+        spacing={0.75}
+        sx={{ alignItems: "center", px: 0.5 }}
+      >
         <Sparkles size={14} style={{ color: "#7c3aed" }} />
-        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, letterSpacing: "0.4px" }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ fontWeight: 700, letterSpacing: "0.4px" }}
+        >
           Suggested Prompts
         </Typography>
       </Stack>

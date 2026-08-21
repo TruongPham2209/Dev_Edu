@@ -6,6 +6,7 @@ import { useToast } from "@/lib/toast-context";
 import {
   useChatConversationsQuery,
   useConversationMessagesQuery,
+  useDeleteConversationMutation,
   useSendChatMessageMutation,
 } from "@/lib/api/chat";
 import type {
@@ -78,6 +79,7 @@ export function useChat() {
   }, [isOpen]);
 
   const sendMutation = useSendChatMessageMutation();
+  const deleteMutation = useDeleteConversationMutation();
 
   const toggleOpen = useCallback(() => {
     setIsOpen((prev) => !prev);
@@ -93,6 +95,30 @@ export function useChat() {
     setInputMessage("");
     setIsSidebarOpen(false);
   }, []);
+
+  const deleteConversation = useCallback(
+    async (id: string) => {
+      if (!isAuthenticated) return;
+      try {
+        await deleteMutation.mutateAsync(id);
+        toast.success("Conversation deleted successfully");
+        if (conversationId === id) {
+          startNewConversation();
+        }
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to delete conversation";
+        toast.error(errorMessage);
+      }
+    },
+    [
+      isAuthenticated,
+      deleteMutation,
+      conversationId,
+      startNewConversation,
+      toast,
+    ],
+  );
 
   const selectConversation = useCallback((id: string) => {
     setConversationId(id);
@@ -196,6 +222,8 @@ export function useChat() {
     sendMessage,
     startNewConversation,
     selectConversation,
+    deleteConversation,
+    isDeletingConversation: deleteMutation.isPending,
     isLoading: sendMutation.isPending || isLoadingMessages,
     conversations,
     isLoadingConversations,

@@ -79,6 +79,8 @@ describe("ChatWindow", () => {
     sendMessage: vi.fn(),
     startNewConversation: vi.fn(),
     selectConversation: vi.fn(),
+    deleteConversation: vi.fn(),
+    isDeletingConversation: false,
     isLoading: false,
     conversations: [],
     isLoadingConversations: false,

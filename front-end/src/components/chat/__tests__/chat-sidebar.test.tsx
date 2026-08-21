@@ -37,7 +37,7 @@
  * Unit test for ChatSidebar component.
  */
 
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ChatSidebar } from "../chat-sidebar";
 
@@ -113,5 +113,49 @@ describe("ChatSidebar", () => {
     // ----------------------------------------------------------------------------
     expect(baseProps.onStartNewChat).toHaveBeenCalled();
     expect(baseProps.onSelectConversation).toHaveBeenCalledWith("conv-2");
+  });
+
+  it("shouldOpenConfirmDialogAndTriggerOnDeleteConversationWhenConfirmed", async () => {
+    // ----------------------------------------------------------------------------
+    // Arrange & Act
+    // Render ChatSidebar with onDeleteConversation handler.
+    // ----------------------------------------------------------------------------
+    const onDeleteConversationMock = vi.fn();
+    render(
+      <ChatSidebar
+        {...baseProps}
+        onDeleteConversation={onDeleteConversationMock}
+      />,
+    );
+
+    // ----------------------------------------------------------------------------
+    // Act
+    // Click delete icon button on the first conversation.
+    // ----------------------------------------------------------------------------
+    const deleteButtons = screen.getAllByRole("button", {
+      name: /delete conversation/i,
+    });
+    fireEvent.click(deleteButtons[0]);
+
+    // ----------------------------------------------------------------------------
+    // Assert
+    // Verify confirmation dialog title is displayed.
+    // ----------------------------------------------------------------------------
+    expect(screen.getByText("Delete Conversation")).toBeInTheDocument();
+
+    // ----------------------------------------------------------------------------
+    // Act
+    // Confirm deletion within act block.
+    // ----------------------------------------------------------------------------
+    const confirmButton = screen.getByRole("button", { name: /^delete$/i });
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
+
+    // ----------------------------------------------------------------------------
+    // Assert
+    // Verify onDeleteConversation callback was invoked with conv-1.
+    // ----------------------------------------------------------------------------
+    expect(onDeleteConversationMock).toHaveBeenCalledWith("conv-1");
   });
 });
