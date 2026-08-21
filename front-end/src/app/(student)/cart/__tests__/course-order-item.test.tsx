@@ -63,6 +63,10 @@ vi.mock("@/lib/api/courses", () => ({
   useMyReviewQuery: vi.fn(),
 }));
 
+vi.mock("@/components/dialog/review-dialog", () => ({
+  ReviewDialog: () => null,
+}));
+
 describe("CourseOrderItem", () => {
   const mockItem = {
     id: "item-100",
@@ -143,6 +147,6 @@ describe("CourseOrderItem", () => {
     // Assert
     // Verify "Enroll" action link renders.
     // ----------------------------------------------------------------------------
-    expect(screen.getByRole("link", { name: /Enroll/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Learn Now/i })).toBeInTheDocument();
   });
 });

@@ -54,6 +54,14 @@ import { render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthSync } from "../auth-sync";
 
+vi.mock("@/lib/toast-context", () => ({
+  useToast: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  }),
+}));
+
 vi.mock("@/lib/auth-storage", () => ({
   getAuthToken: vi.fn(),
   getStoredUser: vi.fn(),

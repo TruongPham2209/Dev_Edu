@@ -43,12 +43,17 @@ import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PurchaseHistoryTabContent } from "../purchase-history-tab";
 
-vi.mock("../review-dialog", () => ({
+vi.mock("@/components/dialog/review-dialog", () => ({
   ReviewDialog: () => null,
 }));
 
 vi.mock("@/lib/api/enrollments", () => ({
   useOrderHistoryInfinateQuery: vi.fn(),
+}));
+
+vi.mock("@/lib/api/courses", () => ({
+  useMyReviewQuery: vi.fn().mockReturnValue({ data: null, isLoading: false }),
+  useCreateReviewMutation: vi.fn().mockReturnValue({ mutate: vi.fn() }),
 }));
 
 describe("PurchaseHistoryTabContent", () => {

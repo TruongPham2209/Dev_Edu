@@ -35,7 +35,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
   const [isMobile, setIsMobile] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
 
   useEffect(() => {
     setIsMobile(mediaQueryMatch);

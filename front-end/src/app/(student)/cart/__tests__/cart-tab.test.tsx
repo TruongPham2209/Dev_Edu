@@ -43,12 +43,12 @@
 
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import * as apiToast from "@/lib/use-api-with-toast";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CartTabContent } from "../cart-tab";
 
-vi.mock("../review-dialog", () => ({
+vi.mock("@/components/dialog/review-dialog", () => ({
   ReviewDialog: () => null,
 }));
 
@@ -164,7 +164,9 @@ describe("CartTabContent", () => {
     // Click Checkout button
     const checkoutBtn = screen.getByRole("button", { name: /Checkout/i });
     expect(checkoutBtn).not.toBeDisabled();
-    fireEvent.click(checkoutBtn);
+    await act(async () => {
+      fireEvent.click(checkoutBtn);
+    });
 
     // ----------------------------------------------------------------------------
     // Assert & Verify

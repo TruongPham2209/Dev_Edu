@@ -36,7 +36,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Layout from "../layout";
 
-vi.mock("@/components/layout/admin/page", () => ({
+vi.mock("@/components/layout/admin-layout", () => ({
   AdminLayout: ({ children }: any) => (
     <div data-testid="admin-layout-wrapper">{children}</div>
   ),

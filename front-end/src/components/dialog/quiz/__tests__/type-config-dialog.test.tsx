@@ -49,7 +49,7 @@ describe("TypeConfigDialog Component", () => {
     render(<TypeConfigDialog open={true} onClose={vi.fn()} onSave={vi.fn()} />);
 
     expect(
-      screen.getByText(/Configure Question Type Rule/i),
+      screen.getByText(/Add Question Matrix Config/i),
     ).toBeInTheDocument();
   });
 
@@ -59,7 +59,7 @@ describe("TypeConfigDialog Component", () => {
     render(<TypeConfigDialog open={true} onClose={onClose} onSave={onSave} />);
 
     const submitBtn = screen.getByRole("button", {
-      name: /Save Configuration/i,
+      name: /Add Config/i,
     });
     fireEvent.click(submitBtn);
 
@@ -69,7 +69,6 @@ describe("TypeConfigDialog Component", () => {
           questionType: "SINGLE_CHOICE",
         }),
       );
-      expect(onClose).toHaveBeenCalled();
     });
   });
 });

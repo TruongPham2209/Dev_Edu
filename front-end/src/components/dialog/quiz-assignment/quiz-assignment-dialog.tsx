@@ -19,11 +19,13 @@ interface QuizAssignmentDialogProps {
   quizTitle?: string;
 }
 
+const EMPTY_APPROVED_QUIZZES: QuizResponse[] = [];
+
 export function QuizAssignmentDialog({
   open,
   onClose,
   onSave,
-  approvedQuizzes = [],
+  approvedQuizzes = EMPTY_APPROVED_QUIZZES,
   loading = false,
   defaultQuizId = "",
   quizTitle = "",

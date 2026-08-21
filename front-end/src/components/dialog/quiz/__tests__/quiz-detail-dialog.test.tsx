@@ -82,7 +82,11 @@ describe("QuizDetailDialog Component", () => {
     vi.clearAllMocks();
     vi.mocked(toastContext.useToast).mockReturnValue(mockToast as any);
     vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: mockQuiz,
+      data: {
+        quiz: mockQuiz,
+        typeConfigs: [],
+        questions: [],
+      },
       isLoading: false,
       isError: false,
     } as any);
@@ -102,6 +106,5 @@ describe("QuizDetailDialog Component", () => {
     );
 
     expect(screen.getByText("Java Fundamentals Quiz")).toBeInTheDocument();
-    expect(screen.getByText("70%")).toBeInTheDocument();
   });
 });

@@ -56,6 +56,26 @@ vi.mock("@/lib/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 
+vi.mock("@/lib/api/notification", () => ({
+  useUnreadNotificationCountQuery: () => ({
+    data: 0,
+    isLoading: false,
+  }),
+  useNotificationsInfiniteQuery: () => ({
+    data: null,
+    isLoading: false,
+  }),
+  useMarkAllNotificationsReadMutation: () => ({
+    mutate: vi.fn(),
+  }),
+  useMarkNotificationAsReadMutation: () => ({
+    mutate: vi.fn(),
+  }),
+  useDeletePersonalNotificationMutation: () => ({
+    mutate: vi.fn(),
+  }),
+}));
+
 describe("AdminLayout Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();

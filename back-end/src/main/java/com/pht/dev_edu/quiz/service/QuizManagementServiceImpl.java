@@ -115,13 +115,13 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
         if (!CollectionUtils.isEmpty(existingTypeConfigs)) {
             var newTypeConfigs = existingTypeConfigs.stream().map(
-                            tc -> QuizQuestionTypeConfigEntity.builder()
-                                    .quizId(newQuiz.getId())
-                                    .requiredCount(tc.getRequiredCount())
-                                    .pointsPerQuestion(tc.getPointsPerQuestion())
-                                    .questionType(tc.getQuestionType())
-                                    .scoringMethod(tc.getScoringMethod())
-                                    .build())
+                    tc -> QuizQuestionTypeConfigEntity.builder()
+                            .quizId(newQuiz.getId())
+                            .requiredCount(tc.getRequiredCount())
+                            .pointsPerQuestion(tc.getPointsPerQuestion())
+                            .questionType(tc.getQuestionType())
+                            .scoringMethod(tc.getScoringMethod())
+                            .build())
                     .toList();
             typeConfigRepo.saveAll(newTypeConfigs);
         }
@@ -139,12 +139,12 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
                 if (!CollectionUtils.isEmpty(eq.getOptions())) {
                     var newOptions = eq.getOptions().stream().map(
-                                    opt -> QuizQuestionOptionEntity.builder()
-                                            .questionId(newQuestion.getId())
-                                            .optionText(opt.getOptionText())
-                                            .isCorrect(opt.getIsCorrect())
-                                            .orderIndex(opt.getOrderIndex())
-                                            .build())
+                            opt -> QuizQuestionOptionEntity.builder()
+                                    .questionId(newQuestion.getId())
+                                    .optionText(opt.getOptionText())
+                                    .isCorrect(opt.getIsCorrect())
+                                    .orderIndex(opt.getOrderIndex())
+                                    .build())
                             .toList();
                     optionRepo.saveAll(newOptions);
                 }
@@ -160,7 +160,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     @Override
     @Transactional
     public QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username,
-                                                      Set<String> authorities) {
+            Set<String> authorities) {
         QuizEntity quiz = quizService.getQuizEntityOrThrow(quizId);
         quizAccessService.validateAccessByQuiz(username, authorities, quizId);
 
@@ -308,13 +308,15 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, QuizStatus status, String nextCursor,
-                                                         String username,
-                                                         Set<String> authorities) {
+    public CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId,
+            String keyword, QuizStatus status, String nextCursor,
+            String username,
+            Set<String> authorities) {
         quizAccessService.validateAccessByCourse(username, authorities, courseId);
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId, status.name(), cursor.getId(),
+        var quizzes = quizRepo.findByCourseIdAndDeletedAtIsNull(courseId,
+                status != null ? status.name() : null, keyword, cursor.getId(),
                 cursor.getTimeStamp(),
                 QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
@@ -326,10 +328,11 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     }
 
     @Override
-    public CustomPaging<QuizResponse> getQuizzes(QuizStatus status, String nextCursor) {
+    public CustomPaging<QuizResponse> getQuizzes(QuizStatus status, String keyword, String nextCursor) {
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        var quizzes = quizRepo.findByStatusAndDeletedAtIsNull(status.name(), cursor.getId(), cursor.getTimeStamp(),
+        var quizzes = quizRepo.findByStatusAndDeletedAtIsNull(
+                status != null ? status.name() : null, keyword, cursor.getId(), cursor.getTimeStamp(),
                 QUIZ_PAGE_SIZE + 1);
         return PagingUtils.getPagedWithCursor(
                 quizzes,

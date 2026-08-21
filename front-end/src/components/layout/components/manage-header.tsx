@@ -43,7 +43,7 @@ export function ManageHeader({
   menuOpen,
   onMenuClick,
 }: ManageHeaderProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
   const { roles } = useAuth();
   const scrollTrigger = useScrollTrigger({
     disableHysteresis: true,

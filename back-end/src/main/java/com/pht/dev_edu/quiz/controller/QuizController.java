@@ -55,7 +55,7 @@ public class QuizController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> updateQuiz(@PathVariable("id") UUID quizId,
-                                                  @Valid @RequestBody QuizRequest request) {
+            @Valid @RequestBody QuizRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
@@ -78,15 +78,15 @@ public class QuizController {
     public ResponseEntity<ApiResponse> getQuizzesByCourse(
             @PathVariable UUID courseId,
             @RequestParam(name = "nextCursor", required = false) String nextCursor,
-            @RequestParam QuizStatus status
-    ) {
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam QuizStatus status) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
-        var pageResult = quizManagementService.getQuizzesByCourse(courseId, status, nextCursor, username, authorities);
+        var pageResult = quizManagementService.getQuizzesByCourse(courseId, keyword, status, nextCursor,
+                username, authorities);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
-
 
     // =============================================
     // -------------Type Config---------------------
@@ -95,7 +95,7 @@ public class QuizController {
     @PostMapping("/{id}/type-configs")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
     public ResponseEntity<ApiResponse> configureTypeConfig(@PathVariable("id") UUID quizId,
-                                                           @Valid @RequestBody QuizTypeConfigRequest request) {
+            @Valid @RequestBody QuizTypeConfigRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
@@ -116,14 +116,14 @@ public class QuizController {
 
     @DeleteMapping("/{id}/type-configs/{typeConfigId}")
     @PreAuthorize("hasAnyAuthority('LECTURER', 'ADMIN')")
-    public ResponseEntity<ApiResponse> deleteTypeConfig(@PathVariable("id") UUID quizId, @PathVariable UUID typeConfigId) {
+    public ResponseEntity<ApiResponse> deleteTypeConfig(@PathVariable("id") UUID quizId,
+            @PathVariable UUID typeConfigId) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         Set<String> authorities = SecurityContextUtils.getCurrentUserAuthorities();
 
         quizManagementService.deleteTypeConfigs(quizId, typeConfigId, username, authorities);
         return ApiUtils.buildSuccessResponse("Deleted type config successfully!");
     }
-
 
     // =============================================
     // ---------------Quiz Approval-----------------
@@ -143,13 +143,13 @@ public class QuizController {
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse> getQuizzes(
             @RequestParam(name = "nextCursor", required = false) String nextCursor,
-            @RequestParam QuizStatus status
-    ) {
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam QuizStatus status) {
         if (status == QuizStatus.DRAFT) {
             throw new BadRequestException("Invalid status.");
         }
 
-        var pageResult = quizManagementService.getQuizzes(status, nextCursor);
+        var pageResult = quizManagementService.getQuizzes(status, keyword, nextCursor);
         return ApiUtils.buildSuccessResponse(pageResult);
     }
 
@@ -157,7 +157,7 @@ public class QuizController {
     @PostMapping("/{id}/review")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ApiResponse> reviewQuiz(@PathVariable("id") UUID quizId,
-                                                  @Valid @RequestBody QuizReviewRequest request) {
+            @Valid @RequestBody QuizReviewRequest request) {
         String username = SecurityContextUtils.getCurrentUsernameForController();
         var result = quizManagementService.reviewQuiz(quizId, request, username);
         return ApiUtils.buildSuccessResponse(result);

@@ -50,6 +50,7 @@ vi.mock("@/lib/api/quizzes", () => ({
   useQuizzesInfiniteQuery: vi.fn(),
   useQuizByIdQuery: vi.fn(),
   useReviewQuizMutation: vi.fn(),
+  useSubmitQuizMutation: vi.fn(),
 }));
 
 vi.mock("@/lib/toast-context", () => ({
@@ -104,6 +105,9 @@ describe("AdminQuizzesPage Component", () => {
 
     expect(
       screen.getByText("AWS Certified Developer Quiz"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Search quizzes by title..."),
     ).toBeInTheDocument();
   });
 });

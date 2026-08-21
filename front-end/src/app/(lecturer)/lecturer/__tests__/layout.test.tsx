@@ -36,7 +36,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import Layout from "../layout";
 
-vi.mock("@/components/layout/lecturer/page", () => ({
+vi.mock("@/components/layout/lecturer-layout", () => ({
   LecturerLayout: ({ children }: any) => (
     <div data-testid="lecturer-layout-wrapper">{children}</div>
   ),

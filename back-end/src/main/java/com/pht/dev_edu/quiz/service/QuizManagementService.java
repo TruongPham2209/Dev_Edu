@@ -20,7 +20,8 @@ public interface QuizManagementService {
 
     QuizResponse duplicateQuiz(UUID quizId, String username, Set<String> authorities);
 
-    QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username, Set<String> authorities);
+    QuizTypeConfigResponse configureTypeConfig(UUID quizId, QuizTypeConfigRequest request, String username,
+            Set<String> authorities);
 
     List<QuizTypeConfigResponse> getTypeConfigs(UUID quizId, String username, Set<String> authorities);
 
@@ -32,7 +33,8 @@ public interface QuizManagementService {
 
     QuizDetailResponse getQuizDetail(UUID quizId, String username, Set<String> authorities);
 
-    CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, QuizStatus status, String nextCursor, String username, Set<String> authorities);
+    CustomPaging<QuizResponse> getQuizzesByCourse(UUID courseId, String keyword, QuizStatus status, String nextCursor,
+            String username, Set<String> authorities);
 
-    CustomPaging<QuizResponse> getQuizzes(QuizStatus status, String nextCursor);
+    CustomPaging<QuizResponse> getQuizzes(QuizStatus status, String keyword, String nextCursor);
 }

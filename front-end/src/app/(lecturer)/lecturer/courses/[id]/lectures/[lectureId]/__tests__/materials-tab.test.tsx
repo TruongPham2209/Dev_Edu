@@ -154,6 +154,6 @@ describe("MaterialsTab (Lecturer)", () => {
     expect(
       screen.getByText("Clean Architecture Cheat Sheet"),
     ).toBeInTheDocument();
-    expect(screen.getByText("PDF format")).toBeInTheDocument();
+    expect(screen.getByText("PDF")).toBeInTheDocument();
   });
 });

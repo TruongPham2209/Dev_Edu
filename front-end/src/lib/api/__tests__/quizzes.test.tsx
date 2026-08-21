@@ -113,11 +113,12 @@ describe("quizzes API & React Query hooks", () => {
       const result = await getQuizzesByCourse(
         "course-101",
         "APPROVED",
+        "midterm",
         "cursor-1",
       );
 
       expect(client.apiGet).toHaveBeenCalledWith(
-        "/api/v1/quizzes/course/course-101?status=APPROVED&nextCursor=cursor-1",
+        "/api/v1/quizzes/course/course-101?status=APPROVED&keyword=midterm&nextCursor=cursor-1",
       );
       expect(result).toEqual(mockResult);
     });

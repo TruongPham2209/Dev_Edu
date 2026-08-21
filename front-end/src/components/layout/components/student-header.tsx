@@ -27,7 +27,7 @@ import { UserMenu } from "./user-menu";
 import { NotificationCenter } from "./notification-center";
 
 export function StudentHeader() {
-  const pathname = usePathname();
+  const pathname = usePathname() || "";
   const { isAuthenticated, roles } = useAuth();
   const scrollTrigger = useScrollTrigger({
     disableHysteresis: true,
@@ -44,6 +44,7 @@ export function StudentHeader() {
   return (
     <>
       <AppBar
+        data-testid="student-header"
         position="sticky"
         sx={{
           bgcolor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "#ffffff",

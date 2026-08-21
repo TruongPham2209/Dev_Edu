@@ -87,7 +87,7 @@ describe("SidebarContainer", () => {
     // Assert
     // Verify course content title and lecture items render.
     // ----------------------------------------------------------------------------
-    expect(screen.getByText("Course Content")).toBeInTheDocument();
+    expect(screen.getAllByText("Course Content")[0]).toBeInTheDocument();
     expect(screen.getByText("01. Introduction to Next.js 15")).toBeInTheDocument();
     expect(screen.getByText("02. Project Setup & Architecture")).toBeInTheDocument();
 

@@ -8,6 +8,7 @@ import { ErrorState } from "@/components/common/error-state";
 import { SearchInput } from "@/components/common/form/search-input";
 import { QuizDetailDialog } from "@/components/dialog/quiz/quiz-detail-dialog";
 import { QuizStatusChip } from "@/components/dialog/quiz/quiz-status-chip";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
   getQuizById,
   useDuplicateQuizMutation,
@@ -42,6 +43,7 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
 
   const [selectedStatusTab, setSelectedStatusTab] = useState<string>("DRAFT");
   const [searchKeyword, setSearchKeyword] = useState<string>("");
+  const debouncedKeyword = useDebounce(searchKeyword, 400);
 
   // Modals & Actions state
   const [selectedQuizForDetail, setSelectedQuizForDetail] =
@@ -57,7 +59,11 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
     isLoading,
     isError,
     refetch,
-  } = useQuizzesByCourseQuery(courseId, selectedStatusTab as QuizStatus);
+  } = useQuizzesByCourseQuery(
+    courseId,
+    selectedStatusTab as QuizStatus,
+    debouncedKeyword || undefined,
+  );
 
   const quizzes: QuizResponse[] = useMemo(() => {
     if (!quizzesData) return [];
@@ -75,16 +81,6 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
       toast.error(`Failed to submit quiz: ${err.message}`);
     },
   });
-
-  const filteredQuizzes = useMemo(() => {
-    if (!searchKeyword.trim()) return quizzes;
-    const kw = searchKeyword.toLowerCase();
-    return quizzes.filter(
-      (q) =>
-        q.title.toLowerCase().includes(kw) ||
-        (q.description && q.description.toLowerCase().includes(kw)),
-    );
-  }, [quizzes, searchKeyword]);
 
   // Handler when clicking Submit button on a quiz item -> Open Confirm Dialog FIRST
   const handleSubmitClick = (quiz: QuizResponse) => {
@@ -168,7 +164,13 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <HelpCircle className="text-blue-500" size={24} />
-            <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: "1.1rem", sm: "1.25rem" } }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: { xs: "1.1rem", sm: "1.25rem" },
+              }}
+            >
               Quizzes
             </Typography>
           </Box>
@@ -221,18 +223,26 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
           </Stack>
         ) : isError ? (
           <ErrorState title="Cannot load quiz list" onRetry={() => refetch()} />
-        ) : filteredQuizzes.length === 0 ? (
+        ) : quizzes.length === 0 ? (
           <EmptyState
             title="No quiz found"
-            subtitle="Click 'New Quiz' to start designing the quiz for this course."
-            actionLabel="New Quiz"
-            onAction={() => {
-              router.push(`/lecturer/courses/${courseId}/quizzes`);
-            }}
+            subtitle={
+              debouncedKeyword
+                ? `No quizzes match "${debouncedKeyword}". Try adjusting your search keyword.`
+                : "Click 'New Quiz' to start designing the quiz for this course."
+            }
+            actionLabel={debouncedKeyword ? undefined : "New Quiz"}
+            onAction={
+              debouncedKeyword
+                ? undefined
+                : () => {
+                    router.push(`/lecturer/courses/${courseId}/quizzes`);
+                  }
+            }
           />
         ) : (
           <DataTable
-            data={filteredQuizzes}
+            data={quizzes}
             minWidth={560}
             keyExtractor={(quiz: QuizResponse) => quiz.id}
             columns={[
@@ -241,13 +251,22 @@ export function LecturerCourseQuizzesTab({ courseId }: { courseId: string }) {
                 width: "55%",
                 render: (row: QuizResponse) => (
                   <Box sx={{ py: 0.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: { xs: "0.875rem", sm: "0.925rem" } }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "0.875rem", sm: "0.925rem" },
+                      }}
+                    >
                       {row.title}
                     </Typography>
                     <Typography
                       variant="caption"
                       color="text.secondary"
-                      sx={{ display: "block", fontSize: { xs: "0.75rem", sm: "0.8rem" } }}
+                      sx={{
+                        display: "block",
+                        fontSize: { xs: "0.75rem", sm: "0.8rem" },
+                      }}
                     >
                       {row.description || "No Description"}
                       {row.createdAt && ` • ${formatServerDate(row.createdAt)}`}

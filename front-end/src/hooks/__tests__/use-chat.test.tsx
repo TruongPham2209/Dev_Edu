@@ -49,13 +49,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useChat } from "../use-chat";
 
 const mockMutateAsync = vi.fn();
+const mockDeleteMutateAsync = vi.fn();
 
 vi.mock("@/lib/use-auth", () => ({
   useAuth: () => ({
-    isAuthenticated: false,
-    user: null,
-    role: null,
-    roles: [],
+    isAuthenticated: true,
+    user: { id: "u-1", fullName: "Test User" },
+    role: "STUDENT",
+    roles: ["STUDENT"],
   }),
 }));
 
@@ -70,6 +71,10 @@ vi.mock("@/lib/toast-context", () => ({
 vi.mock("@/lib/api/chat", () => ({
   useSendChatMessageMutation: () => ({
     mutateAsync: mockMutateAsync,
+    isPending: false,
+  }),
+  useDeleteConversationMutation: () => ({
+    mutateAsync: mockDeleteMutateAsync,
     isPending: false,
   }),
   useChatConversationsQuery: () => ({
@@ -233,7 +238,7 @@ describe("useChat Hook", () => {
     expect(mockMutateAsync).toHaveBeenCalledWith({
       conversationId: null,
       message: "Recommend backend courses",
-      history: [],
+      history: undefined,
     });
 
     expect(result.current.messages).toHaveLength(2);
@@ -270,5 +275,38 @@ describe("useChat Hook", () => {
     expect(result.current.conversationId).toBeNull();
     expect(result.current.messages).toEqual([]);
     expect(result.current.inputMessage).toBe("");
+  });
+
+  it("shouldCallDeleteConversationAndResetStateIfActiveConversationIsDeleted", async () => {
+    // ----------------------------------------------------------------------------
+    // Arrange
+    // Render hook and select active conversation.
+    // ----------------------------------------------------------------------------
+    mockDeleteMutateAsync.mockResolvedValueOnce(undefined);
+
+    const { result } = renderHook(() => useChat(), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => {
+      result.current.selectConversation("conv-123");
+    });
+    expect(result.current.conversationId).toBe("conv-123");
+
+    // ----------------------------------------------------------------------------
+    // Act
+    // Delete active conversation.
+    // ----------------------------------------------------------------------------
+    await act(async () => {
+      await result.current.deleteConversation("conv-123");
+    });
+
+    // ----------------------------------------------------------------------------
+    // Assert
+    // Verify delete mutation invocation and reset to new conversation state.
+    // ----------------------------------------------------------------------------
+    expect(mockDeleteMutateAsync).toHaveBeenCalledWith("conv-123");
+    expect(result.current.conversationId).toBeNull();
+    expect(result.current.messages).toEqual([]);
   });
 });

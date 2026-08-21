@@ -43,10 +43,12 @@ import { apiCall, apiDelete, apiGet, apiPost, apiPut } from "./client";
 export async function getQuizzesByCourse(
   courseId: string,
   status: QuizStatus,
+  keyword?: string,
   nextCursor?: string,
 ): Promise<CustomPaging<QuizResponse>> {
   const params = new URLSearchParams();
   params.append("status", status);
+  if (keyword) params.append("keyword", keyword);
   if (nextCursor) params.append("nextCursor", nextCursor);
 
   return apiGet<CustomPaging<QuizResponse>>(
@@ -83,10 +85,12 @@ export async function submitQuizForApproval(
 
 export async function getQuizzes(
   status: QuizStatus,
+  keyword?: string,
   nextCursor?: string,
 ): Promise<CustomPaging<QuizResponse>> {
   const params = new URLSearchParams();
   params.append("status", status);
+  if (keyword) params.append("keyword", keyword);
   if (nextCursor) params.append("nextCursor", nextCursor);
 
   return apiGet<CustomPaging<QuizResponse>>(
@@ -322,6 +326,7 @@ export async function gradeEssayQuestion(
 export function useQuizzesByCourseInfiniteQuery(
   courseId: string,
   status: QuizStatus,
+  keyword?: string,
   options?: Omit<
     UseInfiniteQueryOptions<
       CustomPaging<QuizResponse>,
@@ -334,8 +339,9 @@ export function useQuizzesByCourseInfiniteQuery(
   >,
 ) {
   return useInfiniteQuery({
-    queryKey: ["quizzes", "course", courseId, status],
-    queryFn: ({ pageParam }) => getQuizzesByCourse(courseId, status, pageParam),
+    queryKey: ["quizzes", "course", courseId, status, keyword],
+    queryFn: ({ pageParam }) =>
+      getQuizzesByCourse(courseId, status, keyword, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!courseId,
@@ -346,6 +352,7 @@ export function useQuizzesByCourseInfiniteQuery(
 export function useQuizzesByCourseQuery(
   courseId: string,
   status: QuizStatus,
+  keyword?: string,
   nextCursor?: string,
   options?: Omit<
     UseQueryOptions<CustomPaging<QuizResponse>, Error>,
@@ -353,8 +360,8 @@ export function useQuizzesByCourseQuery(
   >,
 ) {
   return useQuery({
-    queryKey: ["quizzes", "course", courseId, status, nextCursor],
-    queryFn: () => getQuizzesByCourse(courseId, status, nextCursor),
+    queryKey: ["quizzes", "course", courseId, status, keyword, nextCursor],
+    queryFn: () => getQuizzesByCourse(courseId, status, keyword, nextCursor),
     enabled: !!courseId,
     ...options,
   });
@@ -445,6 +452,7 @@ export function useSubmitQuizMutation(
 
 export function useQuizzesInfiniteQuery(
   status: QuizStatus,
+  keyword?: string,
   options?: Omit<
     UseInfiniteQueryOptions<
       CustomPaging<QuizResponse>,
@@ -457,8 +465,8 @@ export function useQuizzesInfiniteQuery(
   >,
 ) {
   return useInfiniteQuery({
-    queryKey: ["quizzes", "status-infinite", status],
-    queryFn: ({ pageParam }) => getQuizzes(status, pageParam),
+    queryKey: ["quizzes", "status-infinite", status, keyword],
+    queryFn: ({ pageParam }) => getQuizzes(status, keyword, pageParam),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!status,
@@ -468,6 +476,7 @@ export function useQuizzesInfiniteQuery(
 
 export function useQuizzesQuery(
   status: QuizStatus,
+  keyword?: string,
   nextCursor?: string,
   options?: Omit<
     UseQueryOptions<CustomPaging<QuizResponse>, Error>,
@@ -475,8 +484,8 @@ export function useQuizzesQuery(
   >,
 ) {
   return useQuery({
-    queryKey: ["quizzes", "status", status, nextCursor],
-    queryFn: () => getQuizzes(status, nextCursor),
+    queryKey: ["quizzes", "status", status, keyword, nextCursor],
+    queryFn: () => getQuizzes(status, keyword, nextCursor),
     enabled: !!status,
     ...options,
   });

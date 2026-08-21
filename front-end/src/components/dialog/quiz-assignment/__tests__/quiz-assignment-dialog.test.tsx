@@ -82,7 +82,9 @@ describe("QuizAssignmentDialog Component", () => {
       />,
     );
 
-    expect(screen.getByText(/Create Assignment/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Create Assignment/i }),
+    ).toBeInTheDocument();
   });
 
   it("shouldSubmitAssignmentFormSuccessfully", async () => {

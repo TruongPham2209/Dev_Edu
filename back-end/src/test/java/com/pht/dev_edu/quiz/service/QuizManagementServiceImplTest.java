@@ -534,11 +534,11 @@ class QuizManagementServiceImplTest {
     @DisplayName("getQuizzesByCourse - should return paged quiz list for specified course")
     void getQuizzesByCourse_ReturnsPagedQuizzes() {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Quiz 1").build();
-        when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), any(), any(), eq(11)))
+        when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(""), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
         when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Quiz 1").build());
 
-        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, QuizStatus.APPROVED,
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, "", QuizStatus.APPROVED,
                 null, username, authorities);
 
         assertNotNull(result);
@@ -547,17 +547,104 @@ class QuizManagementServiceImplTest {
     }
 
     @Test
-    @DisplayName("getQuizzes - should return paged quiz list by status")
-    void getQuizzes_ReturnsPagedQuizzes() {
-        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Quiz 1").build();
-        when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), any(), any(), eq(11)))
+    @DisplayName("getQuizzesByCourse - should pass keyword to repository when keyword is provided")
+    void getQuizzesByCourse_WithKeyword_ReturnsFilteredQuizzes() {
+        String keyword = "java";
+        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Java Basics").build();
+        when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Quiz 1").build());
+        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Java Basics").build());
 
-        CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, null);
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword, QuizStatus.APPROVED,
+                null, username, authorities);
 
         assertNotNull(result);
         assertEquals(1, result.getContents().size());
+        assertEquals("Java Basics", result.getContents().get(0).getTitle());
+        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11));
+    }
+
+    @Test
+    @DisplayName("getQuizzesByCourse - should support Vietnamese keyword search")
+    void getQuizzesByCourse_WithVietnameseKeyword_ReturnsFilteredQuizzes() {
+        String keyword = "Kiểm tra Java";
+        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Bài kiểm tra Java").build();
+        when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
+                .thenReturn(List.of(quiz));
+        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Bài kiểm tra Java").build());
+
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword, QuizStatus.APPROVED,
+                null, username, authorities);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContents().size());
+        assertEquals("Bài kiểm tra Java", result.getContents().get(0).getTitle());
+        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11));
+    }
+
+    @Test
+    @DisplayName("getQuizzesByCourse - should handle null status gracefully")
+    void getQuizzesByCourse_WithNullStatus_PassesNullStatusToRepo() {
+        String keyword = "test";
+        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Test Quiz").build();
+        when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), isNull(), eq(keyword), any(), any(), eq(11)))
+                .thenReturn(List.of(quiz));
+        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Test Quiz").build());
+
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword, null,
+                null, username, authorities);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContents().size());
+        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), isNull(), eq(keyword), any(), any(), eq(11));
+    }
+
+    @Test
+    @DisplayName("getQuizzes - should return paged quiz list by status")
+    void getQuizzes_ReturnsPagedQuizzes() {
+        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Quiz 1").build();
+        when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(""), any(), any(), eq(11)))
+                .thenReturn(List.of(quiz));
+        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Quiz 1").build());
+
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, "", null);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContents().size());
+    }
+
+    @Test
+    @DisplayName("getQuizzes - should pass keyword to repository when keyword is provided")
+    void getQuizzes_WithKeyword_ReturnsFilteredQuizzes() {
+        String keyword = "spring";
+        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Spring Boot Advanced").build();
+        when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
+                .thenReturn(List.of(quiz));
+        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Spring Boot Advanced").build());
+
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, keyword, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContents().size());
+        assertEquals("Spring Boot Advanced", result.getContents().get(0).getTitle());
+        verify(quizRepo).findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11));
+    }
+
+    @Test
+    @DisplayName("getQuizzes - should support Vietnamese keyword search")
+    void getQuizzes_WithVietnameseKeyword_ReturnsFilteredQuizzes() {
+        String keyword = "Lập trình";
+        QuizEntity quiz = QuizEntity.builder().id(quizId).title("Lập trình Java Web").build();
+        when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
+                .thenReturn(List.of(quiz));
+        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Lập trình Java Web").build());
+
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, keyword, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.getContents().size());
+        assertEquals("Lập trình Java Web", result.getContents().get(0).getTitle());
+        verify(quizRepo).findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11));
     }
 
     @Test

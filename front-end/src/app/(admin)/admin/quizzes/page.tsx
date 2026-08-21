@@ -8,8 +8,10 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { FormInput } from "@/components/common/form/form-input";
+import { SearchInput } from "@/components/common/form/search-input";
 import { HeroInfo } from "@/components/common/hero-section/hero-info";
 import { QuizDetailDialog } from "@/components/dialog/quiz/quiz-detail-dialog";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
   useQuizzesInfiniteQuery,
   useReviewQuizMutation,
@@ -41,6 +43,7 @@ export default function AdminQuizManagementPage() {
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<TabStatus>("PENDING");
+  const [searchInput, setSearchInput] = useState("");
   const [selectedQuiz, setSelectedQuiz] = useState<QuizResponse | null>(null);
   const [moderationTarget, setModerationTarget] = useState<{
     quiz: QuizResponse;
@@ -48,6 +51,7 @@ export default function AdminQuizManagementPage() {
   } | null>(null);
   const [rejectionReason, setRejectionReason] = useState<string>("");
 
+  const debouncedKeyword = useDebounce(searchInput, 400);
   const apiStatusFilter: QuizStatus = activeTab as QuizStatus;
 
   const {
@@ -58,7 +62,7 @@ export default function AdminQuizManagementPage() {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useQuizzesInfiniteQuery(apiStatusFilter);
+  } = useQuizzesInfiniteQuery(apiStatusFilter, debouncedKeyword || undefined);
 
   // Review mutation
   const reviewMutation = useReviewQuizMutation({
@@ -120,7 +124,10 @@ export default function AdminQuizManagementPage() {
   };
 
   return (
-    <Stack spacing={{ xs: 2.5, sm: 3 }} sx={{ width: "100%", overflowX: "hidden", pb: { xs: 3, sm: 5 } }}>
+    <Stack
+      spacing={{ xs: 2.5, sm: 3 }}
+      sx={{ width: "100%", overflowX: "hidden", pb: { xs: 3, sm: 5 } }}
+    >
       {/* 1. Hero Section */}
       <HeroInfo
         title="Quizzes Management"
@@ -129,14 +136,34 @@ export default function AdminQuizManagementPage() {
         tags={["Review Quizzes", "Approve Quizzes", "Reject Quizzes"]}
       />
 
-      {/* 2. Quiz Status Tabs (excluding DRAFT) */}
-      <Box sx={{ mb: { xs: 2.5, sm: 4 }, borderBottom: 1, borderColor: "divider" }}>
-        <AnimatedTabs
-          tabs={STATUS_TABS}
-          value={activeTab}
-          onChange={(val) => setActiveTab(val as TabStatus)}
-        />
-      </Box>
+      {/* 2. Toolbar: Quiz Status Tabs & Search Input */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{
+          alignItems: { xs: "stretch", sm: "center" },
+          justifyContent: "space-between",
+          mb: { xs: 2.5, sm: 4 },
+        }}
+      >
+        <Box sx={{ borderBottom: 1, borderColor: "divider", flex: 1 }}>
+          <AnimatedTabs
+            tabs={STATUS_TABS}
+            value={activeTab}
+            onChange={(val) => setActiveTab(val as TabStatus)}
+          />
+        </Box>
+
+        <Box sx={{ width: { xs: "100%", sm: 300, md: 360 } }}>
+          <SearchInput
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={(val) => setSearchInput(val)}
+            onClear={() => setSearchInput("")}
+            placeholder="Search quizzes by title..."
+          />
+        </Box>
+      </Stack>
 
       {/* 3. Quiz List & States */}
       {isLoading ? (
@@ -160,7 +187,11 @@ export default function AdminQuizManagementPage() {
       ) : quizzes.length === 0 ? (
         <EmptyState
           title="No quizzes found"
-          subtitle={`There are no quizzes in "${STATUS_TABS.find((t) => t.value === activeTab)?.label}" status.`}
+          subtitle={
+            debouncedKeyword
+              ? `No quizzes match "${debouncedKeyword}". Try adjusting your search keyword.`
+              : `There are no quizzes in "${STATUS_TABS.find((t) => t.value === activeTab)?.label}" status.`
+          }
           icon={<HelpCircle size={36} />}
         />
       ) : (

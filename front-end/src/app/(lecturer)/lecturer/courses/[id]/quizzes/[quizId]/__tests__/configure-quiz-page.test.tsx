@@ -38,11 +38,22 @@
  * Unit test for LecturerQuizConfigurePage component.
  */
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as coursesApi from "@/lib/api/courses";
 import * as quizzesApi from "@/lib/api/quizzes";
 import { act, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerQuizConfigurePage from "../page";
+
+function createWrapper() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -95,7 +106,11 @@ describe("LecturerQuizConfigurePage Component", () => {
     } as any);
 
     vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: mockQuiz,
+      data: {
+        quiz: mockQuiz,
+        typeConfigs: [],
+        questions: mockQuiz.questions,
+      },
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
@@ -153,7 +168,9 @@ describe("LecturerQuizConfigurePage Component", () => {
   it("shouldRenderQuizTitleAndSections", async () => {
     const params = Promise.resolve({ id: "course-123", quizId: "quiz-99" });
     await act(async () => {
-      render(<LecturerQuizConfigurePage params={params} />);
+      render(<LecturerQuizConfigurePage params={params} />, {
+        wrapper: createWrapper(),
+      });
     });
 
     await waitFor(() => {
