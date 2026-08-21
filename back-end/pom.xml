@@ -33,12 +33,20 @@
         <cloudflare-aws-sdk-version>2.31.50</cloudflare-aws-sdk-version>
         <brevo.version>1.1.0</brevo.version>
         <flying.saucer.version>9.13.3</flying.saucer.version>
+        <pdfbox.version>3.0.4</pdfbox.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <elastic.version>8.14.1</elastic.version>
         <firebase-admin.version>9.3.0</firebase-admin.version>
     </properties>
     <dependencies>
+        <!-- Apache PDFBox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
+        </dependency>
+
         <!-- Firebase Admin SDK -->
         <dependency>
             <groupId>com.google.firebase</groupId>

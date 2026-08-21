@@ -20,4 +20,7 @@ public interface QuizQuestionRepo extends JpaRepository<QuizQuestionEntity, UUID
     int countByQuizIdAndQuestionTypeAndDeletedAtIsNull(UUID quizId, QuestionType questionType);
 
     boolean existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(UUID quizId, QuestionType questionType);
+
+    @org.springframework.data.jpa.repository.Query("SELECT q FROM QuizQuestionEntity q JOIN QuizEntity qz ON q.quizId = qz.id WHERE qz.courseId = :courseId AND q.deletedAt IS NULL AND qz.deletedAt IS NULL")
+    List<QuizQuestionEntity> findByCourseId(@org.springframework.data.repository.query.Param("courseId") UUID courseId);
 }

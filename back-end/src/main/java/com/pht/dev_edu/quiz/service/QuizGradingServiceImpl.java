@@ -2,9 +2,12 @@ package com.pht.dev_edu.quiz.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,14 +43,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.Executor;
 
 @Slf4j
 @Service
@@ -76,12 +71,13 @@ public class QuizGradingServiceImpl implements QuizGradingService {
         String normalizedStatus = StringUtils.hasText(essayStatus) ? essayStatus.toUpperCase().trim() : "ALL";
         TimeStampCursor cursor = resolveCursor(nextCursor);
 
-        List<QuizEssaySubmissionProjection> projections = answerRepo.findEssaySubmissionsByQuizIdAndStatusAndCursor(
-                quizId,
-                normalizedStatus,
-                cursor.getId(),
-                cursor.getTimeStamp(),
-                DEFAULT_ESSAY_PAGE_SIZE + 1);
+        List<QuizEssaySubmissionProjection> projections = answerRepo
+                .findEssaySubmissionsByQuizIdAndStatusAndCursor(
+                        quizId,
+                        normalizedStatus,
+                        cursor.getId(),
+                        cursor.getTimeStamp(),
+                        DEFAULT_ESSAY_PAGE_SIZE + 1);
 
         return PagingUtils.getPagedWithCursor(
                 projections,
