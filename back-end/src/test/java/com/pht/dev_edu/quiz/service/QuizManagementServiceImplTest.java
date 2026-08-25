@@ -1,31 +1,5 @@
 package com.pht.dev_edu.quiz.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
@@ -37,19 +11,30 @@ import com.pht.dev_edu.quiz.dto.enums.ScoringMethod;
 import com.pht.dev_edu.quiz.dto.request.QuizRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizReviewRequest;
 import com.pht.dev_edu.quiz.dto.request.QuizTypeConfigRequest;
-import com.pht.dev_edu.quiz.dto.response.QuizDetailResponse;
-import com.pht.dev_edu.quiz.dto.response.QuizQuestionOptionResponse;
-import com.pht.dev_edu.quiz.dto.response.QuizQuestionResponse;
-import com.pht.dev_edu.quiz.dto.response.QuizResponse;
-import com.pht.dev_edu.quiz.dto.response.QuizTypeConfigResponse;
+import com.pht.dev_edu.quiz.dto.response.*;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
 import com.pht.dev_edu.quiz.mapper.QuizMapper;
-import com.pht.dev_edu.quiz.repo.QuizAssignmentRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionOptionRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
-import com.pht.dev_edu.quiz.repo.QuizQuestionTypeConfigRepo;
-import com.pht.dev_edu.quiz.repo.QuizRepo;
+import com.pht.dev_edu.quiz.repo.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /*
  * <analysis>
@@ -158,7 +143,8 @@ import com.pht.dev_edu.quiz.repo.QuizRepo;
  *
  * Purpose
  * -------
- * Verify Quiz CRUD operations, question type configuration rules, approval workflow, and review logic.
+ * Verify Quiz CRUD operations, question type configuration rules, approval
+ * workflow, and review logic.
  *
  * Test Scope
  * ----------
@@ -177,8 +163,10 @@ import com.pht.dev_edu.quiz.repo.QuizRepo;
  * ✓ Edit restrictions when PENDING or APPROVED with active assignments
  * ✓ Auto transition from REJECTED back to DRAFT upon modification
  * ✓ Scoring method constraints (ESSAY = MANUAL, choices = AUTO)
- * ✓ Submission for approval checks (ownership, valid status, required question count match)
- * ✓ Admin review approval (APPROVED) and rejection validation (rejectionReason required)
+ * ✓ Submission for approval checks (ownership, valid status, required question
+ * count match)
+ * ✓ Admin review approval (APPROVED) and rejection validation (rejectionReason
+ * required)
  * ✓ Detail retrieval and cursor pagination for course/all quizzes
  *
  * Mocked Dependencies
@@ -290,7 +278,8 @@ class QuizManagementServiceImplTest {
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> quizManagementService.updateQuiz(quizId, request, username, authorities));
 
-        assertEquals("Cannot edit quiz structure because active assignments already exist for this approved quiz.", ex.getMessage());
+        assertEquals("Cannot edit quiz structure because active assignments already exist for this approved quiz.",
+                ex.getMessage());
     }
 
     @Test
@@ -345,7 +334,8 @@ class QuizManagementServiceImplTest {
 
         QuizEntity quiz = QuizEntity.builder().id(quizId).status(QuizStatus.DRAFT).build();
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.ESSAY)).thenReturn(false);
+        when(questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.ESSAY))
+                .thenReturn(false);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> quizManagementService.configureTypeConfig(quizId, request, username, authorities));
@@ -362,12 +352,14 @@ class QuizManagementServiceImplTest {
 
         QuizEntity quiz = QuizEntity.builder().id(quizId).status(QuizStatus.DRAFT).build();
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE)).thenReturn(false);
+        when(questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE))
+                .thenReturn(false);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> quizManagementService.configureTypeConfig(quizId, request, username, authorities));
 
-        assertEquals("SINGLE_CHOICE and MULTIPLE_CHOICE question types must have scoring_method = AUTO", ex.getMessage());
+        assertEquals("SINGLE_CHOICE and MULTIPLE_CHOICE question types must have scoring_method = AUTO",
+                ex.getMessage());
     }
 
     @Test
@@ -381,15 +373,19 @@ class QuizManagementServiceImplTest {
 
         QuizEntity quiz = QuizEntity.builder().id(quizId).status(QuizStatus.DRAFT).build();
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE)).thenReturn(false);
-        when(typeConfigRepo.findByQuizIdAndQuestionType(quizId, QuestionType.SINGLE_CHOICE)).thenReturn(Optional.empty());
+        when(questionRepo.existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE))
+                .thenReturn(false);
+        when(typeConfigRepo.findByQuizIdAndQuestionType(quizId, QuestionType.SINGLE_CHOICE))
+                .thenReturn(Optional.empty());
 
         when(quizMapper.toResponse(any(QuizQuestionTypeConfigEntity.class))).thenAnswer(inv -> {
             QuizQuestionTypeConfigEntity cfg = inv.getArgument(0);
-            return QuizTypeConfigResponse.builder().questionType(cfg.getQuestionType()).requiredCount(cfg.getRequiredCount()).build();
+            return QuizTypeConfigResponse.builder().questionType(cfg.getQuestionType())
+                    .requiredCount(cfg.getRequiredCount()).build();
         });
 
-        QuizTypeConfigResponse response = quizManagementService.configureTypeConfig(quizId, request, username, authorities);
+        QuizTypeConfigResponse response = quizManagementService.configureTypeConfig(quizId, request, username,
+                authorities);
 
         assertNotNull(response);
         assertEquals(5, response.getRequiredCount());
@@ -432,7 +428,8 @@ class QuizManagementServiceImplTest {
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
         when(typeConfigRepo.findByQuizId(quizId)).thenReturn(List.of(config));
-        when(questionRepo.countByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE)).thenReturn(3);
+        when(questionRepo.countByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE))
+                .thenReturn(3);
 
         BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> quizManagementService.submitQuizForApproval(quizId, username, authorities));
@@ -452,8 +449,10 @@ class QuizManagementServiceImplTest {
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
         when(typeConfigRepo.findByQuizId(quizId)).thenReturn(List.of(config));
-        when(questionRepo.countByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE)).thenReturn(5);
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.PENDING).build());
+        when(questionRepo.countByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE))
+                .thenReturn(5);
+        when(quizMapper.toResponse(quiz))
+                .thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.PENDING).build());
 
         QuizResponse response = quizManagementService.submitQuizForApproval(quizId, username, authorities);
 
@@ -461,7 +460,8 @@ class QuizManagementServiceImplTest {
         assertEquals(QuizStatus.PENDING, quiz.getStatus());
         assertEquals(username, quiz.getSubmittedBy());
         verify(quizRepo).save(quiz);
-        verify(auditService).log(eq("QUIZ"), eq(quizId), eq(QuizAuditAction.SUBMIT_FOR_APPROVAL), eq(username), any(), any(), any());
+        verify(auditService).log(eq("QUIZ"), eq(quizId), eq(QuizAuditAction.SUBMIT_FOR_APPROVAL), eq(username), any(),
+                any(), any());
     }
 
     @Test
@@ -472,7 +472,8 @@ class QuizManagementServiceImplTest {
         request.setApproved(true);
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.APPROVED).build());
+        when(quizMapper.toResponse(quiz))
+                .thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.APPROVED).build());
 
         QuizResponse response = quizManagementService.reviewQuiz(quizId, request, "adminUser");
 
@@ -480,7 +481,8 @@ class QuizManagementServiceImplTest {
         assertEquals(QuizStatus.APPROVED, quiz.getStatus());
         assertEquals("adminUser", quiz.getApprovedBy());
         verify(quizRepo).save(quiz);
-        verify(auditService).log(eq("QUIZ"), eq(quizId), eq(QuizAuditAction.APPROVE), eq("adminUser"), any(), any(), any());
+        verify(auditService).log(eq("QUIZ"), eq(quizId), eq(QuizAuditAction.APPROVE), eq("adminUser"), any(), any(),
+                any());
     }
 
     @Test
@@ -508,14 +510,16 @@ class QuizManagementServiceImplTest {
         request.setRejectionReason("Not enough options");
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.REJECTED).build());
+        when(quizMapper.toResponse(quiz))
+                .thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.REJECTED).build());
 
         QuizResponse response = quizManagementService.reviewQuiz(quizId, request, "adminUser");
 
         assertNotNull(response);
         assertEquals(QuizStatus.REJECTED, quiz.getStatus());
         assertEquals("Not enough options", quiz.getRejectionReason());
-        verify(auditService).log(eq("QUIZ"), eq(quizId), eq(QuizAuditAction.REJECT), eq("adminUser"), any(), any(), any());
+        verify(auditService).log(eq("QUIZ"), eq(quizId), eq(QuizAuditAction.REJECT), eq("adminUser"), any(), any(),
+                any());
     }
 
     @Test
@@ -555,13 +559,15 @@ class QuizManagementServiceImplTest {
                 .thenReturn(List.of(quiz));
         when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Java Basics").build());
 
-        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword, QuizStatus.APPROVED,
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword,
+                QuizStatus.APPROVED,
                 null, username, authorities);
 
         assertNotNull(result);
         assertEquals(1, result.getContents().size());
-        assertEquals("Java Basics", result.getContents().get(0).getTitle());
-        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11));
+        assertEquals("Java Basics", result.getContents().iterator().next().getTitle());
+        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(),
+                eq(11));
     }
 
     @Test
@@ -571,15 +577,18 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Bài kiểm tra Java").build();
         when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Bài kiểm tra Java").build());
+        when(quizMapper.toResponse(quiz))
+                .thenReturn(QuizResponse.builder().id(quizId).title("Bài kiểm tra Java").build());
 
-        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword, QuizStatus.APPROVED,
+        CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword,
+                QuizStatus.APPROVED,
                 null, username, authorities);
 
         assertNotNull(result);
         assertEquals(1, result.getContents().size());
-        assertEquals("Bài kiểm tra Java", result.getContents().get(0).getTitle());
-        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11));
+        assertEquals("Bài kiểm tra Java", result.getContents().iterator().next().getTitle());
+        verify(quizRepo).findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(),
+                eq(11));
     }
 
     @Test
@@ -620,13 +629,14 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Spring Boot Advanced").build();
         when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Spring Boot Advanced").build());
+        when(quizMapper.toResponse(quiz))
+                .thenReturn(QuizResponse.builder().id(quizId).title("Spring Boot Advanced").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, keyword, null);
 
         assertNotNull(result);
         assertEquals(1, result.getContents().size());
-        assertEquals("Spring Boot Advanced", result.getContents().get(0).getTitle());
+        assertEquals("Spring Boot Advanced", result.getContents().iterator().next().getTitle());
         verify(quizRepo).findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11));
     }
 
@@ -637,13 +647,14 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Lập trình Java Web").build();
         when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Lập trình Java Web").build());
+        when(quizMapper.toResponse(quiz))
+                .thenReturn(QuizResponse.builder().id(quizId).title("Lập trình Java Web").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, keyword, null);
 
         assertNotNull(result);
         assertEquals(1, result.getContents().size());
-        assertEquals("Lập trình Java Web", result.getContents().get(0).getTitle());
+        assertEquals("Lập trình Java Web", result.getContents().iterator().next().getTitle());
         verify(quizRepo).findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11));
     }
 

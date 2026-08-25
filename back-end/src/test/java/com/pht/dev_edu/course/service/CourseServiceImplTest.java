@@ -173,6 +173,7 @@ import org.springframework.data.redis.core.ValueOperations;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pht.dev_edu.chat.service.CourseEmbeddingService;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
@@ -211,6 +212,8 @@ class CourseServiceImplTest {
     private FileService fileService;
     @Mock
     private CategoryService categoryService;
+    @Mock
+    private CourseEmbeddingService courseEmbeddingService;
     @Mock
     private org.springframework.data.redis.core.RedisTemplate<String, Object> redisTemplate;
     @Mock
