@@ -33,7 +33,10 @@ export interface FormInputProps extends Omit<
   };
 }
 
-export const FormInput = forwardRef<any, FormInputProps>(
+export const FormInput = forwardRef<
+  HTMLInputElement | HTMLTextAreaElement,
+  FormInputProps
+>(
   (
     {
       label,

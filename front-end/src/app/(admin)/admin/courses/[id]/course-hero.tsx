@@ -11,6 +11,7 @@ import {
   Grid,
   Stack,
   Typography,
+  alpha,
   useTheme,
 } from "@mui/material";
 import {
@@ -39,11 +40,6 @@ export const CourseHero = ({
   lecturersCount,
 }: CourseHeroProps) => {
   const theme = useTheme();
-
-  const hasDiscount =
-    course.discountedPrice !== null &&
-    course.originalPrice !== null &&
-    course.discountedPrice < course.originalPrice;
 
   return (
     <Stack spacing={3} sx={{ width: "100%" }}>
@@ -103,49 +99,21 @@ export const CourseHero = ({
       </Box>
 
       {/* Main Course Info Card */}
-      <Card
-        sx={{
-          position: "relative",
-          overflow: "hidden",
-          borderRadius: 1,
-          border: "1px solid rgba(255,255,255,0.7)",
-          background: `
-            linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.92) 0%,
-              rgba(248, 250, 252, 0.96) 100%
-            )
-          `,
-          backdropFilter: "blur(20px)",
-          boxShadow: `
-            0 10px 40px rgba(15,23,42,0.06),
-            0 2px 8px rgba(15,23,42,0.04)
-          `,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: -120,
-            right: -120,
-            width: { xs: 160, sm: 260 },
-            height: { xs: 160, sm: 260 },
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%)",
-          },
-        }}
-      >
-        <CourseHeroInfo course={course} />
-      </Card>
+      <CourseHeroInfo course={course} />
 
       {/* Course Description */}
       <Card
         sx={{
           borderRadius: 1,
           overflow: "hidden",
-          border: "1px solid rgba(15,23,42,0.06)",
-          background: "rgba(255,255,255,0.88)",
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
           backdropFilter: "blur(20px)",
-          boxShadow: "0 8px 30px rgba(15,23,42,0.04)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 8px 30px rgba(0,0,0,0.4)"
+              : "0 8px 30px rgba(15,23,42,0.04)",
         }}
       >
         <CardContent
@@ -159,7 +127,7 @@ export const CourseHero = ({
               display: "flex",
               mb: { xs: 2, sm: 3 },
               borderBottom: "1px solid",
-              borderColor: "rgba(15,23,42,0.06)",
+              borderColor: "divider",
             }}
           >
             <Box
@@ -177,7 +145,7 @@ export const CourseHero = ({
                   width: "100%",
                   height: 3,
                   borderRadius: "3px 3px 0 0",
-                  bgcolor: "#2563eb",
+                  bgcolor: "primary.main",
                 },
               }}
             >
@@ -189,8 +157,12 @@ export const CourseHero = ({
                   width: 36,
                   height: 36,
                   borderRadius: 1.5,
-                  bgcolor: "rgba(37,99,235,0.08)",
-                  color: "#2563eb",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.primary.main,
+                      theme.palette.mode === "dark" ? 0.2 : 0.08,
+                    ),
+                  color: "primary.main",
                 }}
               >
                 <FileText size={20} />

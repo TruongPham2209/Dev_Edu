@@ -18,6 +18,7 @@ import type {
 } from "@/lib/type/quizzes";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -277,7 +278,11 @@ export default function LecturerAssignmentsPage() {
                       width: 48,
                       height: 48,
                       borderRadius: "50%",
-                      bgcolor: "primary.50",
+                      bgcolor: (theme) =>
+                        alpha(
+                          theme.palette.primary.main,
+                          theme.palette.mode === "dark" ? 0.2 : 0.08,
+                        ),
                       color: "primary.main",
                       display: "inline-flex",
                       alignItems: "center",
@@ -341,10 +346,10 @@ export default function LecturerAssignmentsPage() {
                 component="span"
                 sx={{ fontWeight: 700, color: "error.main" }}
               >
-                "
+                &quot;
                 {deletingAssignment.assignmentName ||
                   `#${deletingAssignment.id.slice(0, 8)}`}
-                "
+                &quot;
               </Box>{" "}
               (Start Time:{" "}
               <strong>

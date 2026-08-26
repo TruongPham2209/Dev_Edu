@@ -3,6 +3,7 @@
 import type { QuizQuestionRequest } from "@/lib/type/quizzes";
 import {
   Alert,
+  alpha,
   Box,
   Button,
   Chip,
@@ -44,6 +45,8 @@ export function ImportSuccessState({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
         <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
@@ -56,13 +59,20 @@ export function ImportSuccessState({
           color="inherit"
           disabled={isSaving}
           onClick={onReset}
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: 1.5, fontSize: "0.8rem" }}
         >
           Re-upload File
         </Button>
       </Box>
 
-      <Stack spacing={1.5}>
+      <Stack
+        spacing={1.5}
+        sx={{
+          maxHeight: { xs: 320, sm: 420 },
+          overflowY: "auto",
+          pr: 0.5,
+        }}
+      >
         {parsedQuestions.map((q, idx) => {
           let typeLabel = q.questionType as string;
           if (q.questionType === "SINGLE_CHOICE") typeLabel = "Single Choice";
@@ -146,15 +156,21 @@ export function ImportSuccessState({
                           borderRadius: 1,
                           fontSize: "0.8rem",
                           bgcolor: opt.isCorrect
-                            ? "rgba(34, 197, 94, 0.1)"
+                            ? (theme) =>
+                                alpha(
+                                  theme.palette.success.main,
+                                  theme.palette.mode === "dark" ? 0.2 : 0.1,
+                                )
                             : "action.hover",
                           color: opt.isCorrect
-                            ? "success.dark"
+                            ? "success.main"
                             : "text.primary",
                           fontWeight: opt.isCorrect ? 700 : 400,
-                          border: opt.isCorrect
-                            ? "1px solid rgba(34, 197, 94, 0.3)"
-                            : "1px solid transparent",
+                          border: "1px solid",
+                          borderColor: opt.isCorrect
+                            ? (theme) =>
+                                alpha(theme.palette.success.main, 0.4)
+                            : "transparent",
                           wordBreak: "break-word",
                           whiteSpace: "pre-wrap",
                           display: "flex",

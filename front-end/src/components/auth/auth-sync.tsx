@@ -11,6 +11,7 @@ import { useMeQuery } from "@/lib/api/users";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { decodeJwt } from "@/lib/auth/jwt";
 import { getPrimaryRole } from "@/lib/auth/constants";
+import type { RoleEnum } from "@/lib/type/enum";
 import {
   requestAndRegisterPushNotification,
   listenForegroundNotifications,
@@ -42,7 +43,7 @@ export function AuthSync({ serverToken }: AuthSyncProps) {
             if (!meResult.data) throw new Error("No user data");
             const me = meResult.data;
             const decoded = decodeJwt(token);
-            const roles = decoded?.roles || [me.role as any];
+            const roles = decoded?.roles || (me.role ? [me.role as RoleEnum] : []);
             const primaryRole = getPrimaryRole(roles);
 
             setAuthSession(token, {

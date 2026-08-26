@@ -14,11 +14,13 @@ import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { getFileIcon } from "@/lib/util/file-utils";
 import {
+  alpha,
   Box,
   Card,
   CardContent,
   Collapse,
   IconButton,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
@@ -112,40 +114,29 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
             key={idx}
             variant="outlined"
             sx={{
-              borderRadius: 3,
+              borderRadius: 2,
               borderColor: "divider",
               p: 2,
             }}
           >
             <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-              <Box
-                sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 2,
-                  bgcolor: "grey.100",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+              <Skeleton
+                variant="rectangular"
+                width={48}
+                height={48}
+                sx={{ borderRadius: 2 }}
               />
               <Box sx={{ flex: 1 }}>
-                <Box
-                  sx={{
-                    width: "40%",
-                    height: 20,
-                    bgcolor: "grey.100",
-                    borderRadius: 1,
-                    mb: 1,
-                  }}
+                <Skeleton
+                  variant="text"
+                  width="40%"
+                  height={24}
+                  sx={{ mb: 0.5 }}
                 />
-                <Box
-                  sx={{
-                    width: "25%",
-                    height: 14,
-                    bgcolor: "grey.100",
-                    borderRadius: 0.5,
-                  }}
+                <Skeleton
+                  variant="text"
+                  width="25%"
+                  height={16}
                 />
               </Box>
             </Stack>
@@ -174,7 +165,7 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
           borderColor: "divider",
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2 },
-          bgcolor: "grey.50",
+          bgcolor: "action.hover",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -183,7 +174,11 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
               width: 36,
               height: 36,
               borderRadius: 2,
-              bgcolor: "primary.50",
+              bgcolor: (theme) =>
+                alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.2 : 0.08,
+                ),
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -198,7 +193,7 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
               variant="h6"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 fontSize: { xs: "1.1rem", sm: "1.25rem" },
               }}
             >
@@ -300,9 +295,9 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                               width: { xs: 40, sm: 44 },
                               height: { xs: 40, sm: 44 },
                               borderRadius: 2,
-                              bgcolor: "grey.50",
+                              bgcolor: "action.hover",
                               border: "1px solid",
-                              borderColor: "grey.200",
+                              borderColor: "divider",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -316,7 +311,7 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: 700,
-                                color: "#1e293b",
+                                color: "text.primary",
                                 fontSize: { xs: "0.875rem", sm: "0.975rem" },
                                 lineHeight: 1.35,
                                 display: "-webkit-box",
@@ -345,7 +340,13 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                                   fontWeight: 600,
                                   fontSize: { xs: "0.7rem", sm: "0.775rem" },
                                   color: "primary.main",
-                                  bgcolor: "rgba(37, 99, 235, 0.08)",
+                                  bgcolor: (theme) =>
+                                    alpha(
+                                      theme.palette.primary.main,
+                                      theme.palette.mode === "dark"
+                                        ? 0.18
+                                        : 0.08,
+                                    ),
                                   px: 0.75,
                                   py: 0.2,
                                   borderRadius: 0.75,
@@ -358,7 +359,7 @@ export function MaterialsTab({ lectureId, onCountChange }: MaterialsTabProps) {
                                   width: 3,
                                   height: 3,
                                   borderRadius: "50%",
-                                  bgcolor: "grey.400",
+                                  bgcolor: "text.disabled",
                                 }}
                               />
                               <Typography

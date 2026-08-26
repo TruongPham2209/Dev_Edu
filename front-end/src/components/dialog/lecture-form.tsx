@@ -1,5 +1,6 @@
 "use client";
 
+import { FileUpload } from "@/components/common/form/file-upload";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { RichTextEditor } from "@/components/common/form/rich-text-editor";
@@ -14,9 +15,9 @@ import {
 } from "@/lib/api/lectures";
 import type { LectureRequest, LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { Box, IconButton, Typography } from "@mui/material";
-import { AlignLeft, Lock, Type, UploadCloud, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { alpha, Box, Typography } from "@mui/material";
+import { AlignLeft, Lock, Type } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface LectureFormDialogProps {
   open: boolean;
@@ -44,8 +45,6 @@ export function LectureFormDialog({
   });
 
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Track exact S3/R2 object keys mapped to their editor URLs during the current session
   const [uploadedImages, setUploadedImages] = useState<
@@ -58,9 +57,6 @@ export function LectureFormDialog({
     summary: false,
     content: false,
   });
-
-  // Drag & drop state
-  const [dragActive, setDragActive] = useState(false);
 
   // Compute locked state for video: in update mode, video operations are locked.
   const isVideoLocked = Boolean(initialData);
@@ -90,19 +86,10 @@ export function LectureFormDialog({
     enabled: open && !!videoObjectKey,
   });
 
-  useEffect(() => {
-    if (downloadData) {
-      setVideoPreviewUrl(
-        downloadData.downloadUrl || downloadData.publicUrl || null,
-      );
-    }
-  }, [downloadData]);
-
-  // Separate effect to load form and video preview on open or data change
+  // Separate effect to load form on open or data change
   useEffect(() => {
     if (open) {
       setTouched({ title: false, summary: false, content: false });
-      setDragActive(false);
       setVideoFile(null);
       setUploadedImages([]);
 
@@ -115,78 +102,11 @@ export function LectureFormDialog({
           content: initialData.content || "",
           videoObjectKey: initialData.videoObjectKey,
         });
-
-        if (!initialData.videoObjectKey) {
-          setVideoPreviewUrl(null);
-        }
       } else {
         setForm({ courseId, title: "", summary: "", content: "" });
-        setVideoPreviewUrl(null);
       }
     }
   }, [open, initialData, courseId]);
-
-  // Separate effect to clean up blob url
-  useEffect(() => {
-    return () => {
-      if (videoPreviewUrl && videoPreviewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(videoPreviewUrl);
-      }
-    };
-  }, [videoPreviewUrl]);
-
-  const validateAndSetVideo = (file: File) => {
-    if (isVideoLocked) return;
-
-    if (file.size > 200 * 1024 * 1024) {
-      handleError(new Error("Video size must be less than 200MB"));
-      return;
-    }
-
-    if (!file.type.startsWith("video/")) {
-      handleError(new Error("Invalid video format (video format required)"));
-      return;
-    }
-
-    setVideoFile(file);
-    const url = URL.createObjectURL(file);
-    setVideoPreviewUrl(url);
-  };
-
-  const handleVideoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    validateAndSetVideo(file);
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (isVideoLocked || loading) return;
-
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (isVideoLocked || loading) return;
-
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    validateAndSetVideo(file);
-  };
-
-  const removeVideo = () => {
-    if (isVideoLocked) return;
-    setVideoFile(null);
-    setVideoPreviewUrl(null);
-  };
 
   const handleSave = async () => {
     // Mark all as touched on submit
@@ -258,13 +178,6 @@ export function LectureFormDialog({
           const xhr = new XMLHttpRequest();
           xhr.open("PUT", preSignRes.uploadUrl!, true);
           xhr.setRequestHeader("Content-Type", videoFile.type);
-
-          xhr.upload.onprogress = (e) => {
-            if (e.lengthComputable) {
-              const percentComplete =
-                Math.round((e.loaded / e.total) * 60) + 30; // 30% to 90%
-            }
-          };
 
           xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -389,145 +302,51 @@ export function LectureFormDialog({
           )}
         </Box>
 
-        <Box
-          sx={{
-            p: 3,
-            border: "1px dashed",
-            borderColor: dragActive ? "primary.main" : "divider",
-            borderRadius: 2,
-            bgcolor: dragActive ? "rgba(37, 99, 235, 0.04)" : "grey.50",
-            transition: "all 0.2s ease-in-out",
-            opacity: loading ? 0.7 : 1,
-          }}
-          onDragEnter={handleDrag}
-          onDragOver={handleDrag}
-          onDragLeave={handleDrag}
-          onDrop={handleDrop}
-        >
-          <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+        <Box>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
             Video lecture {isVideoLocked && "(Locked)"}
           </Typography>
 
-          {videoPreviewUrl ? (
-            <Box
-              sx={{
-                position: "relative",
-                borderRadius: 2,
-                overflow: "hidden",
-                bgcolor: "black",
-                aspectRatio: "16/9",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <video
-                src={videoPreviewUrl}
-                controls
-                style={{ width: "100%", maxHeight: "100%" }}
-              />
-              {!loading && !isVideoLocked && (
-                <IconButton
-                  onClick={removeVideo}
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    bgcolor: "rgba(0,0,0,0.5)",
-                    color: "white",
-                    "&:hover": { bgcolor: "rgba(0,0,0,0.8)" },
-                  }}
-                >
-                  <X size={20} />
-                </IconButton>
-              )}
-              {isVideoLocked && (
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    bgcolor: "rgba(245, 158, 11, 0.95)",
-                    color: "white",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: 1,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  }}
-                >
-                  <Lock size={14} />
-                  <Typography variant="caption" sx={{ fontWeight: 700 }}>
-                    Locked
-                  </Typography>
-                </Box>
-              )}
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                py: 4,
-                cursor: loading || isVideoLocked ? "default" : "pointer",
-              }}
-              onClick={() =>
-                !loading && !isVideoLocked && fileInputRef.current?.click()
-              }
-            >
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: "50%",
-                  bgcolor: isVideoLocked
-                    ? "rgba(245, 158, 11, 0.08)"
-                    : "rgba(37, 99, 235, 0.08)",
-                  mb: 2,
-                }}
-              >
-                {isVideoLocked ? (
-                  <Lock size={32} className="text-amber-500" />
-                ) : (
-                  <UploadCloud size={32} className="text-blue-500" />
-                )}
-              </Box>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                {isVideoLocked
-                  ? "Cannot upload video"
-                  : "Drag and drop or click to upload video"}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  mt: 1,
-                  textAlign: "center",
-                  px: 2,
-                }}
-              >
-                {isVideoLocked
-                  ? "Cannot add new video when updating a lecture. Please create a new lecture if you want to upload a video."
-                  : "Maximum file size: 200MB. Supported formats: MP4, WebM"}
-              </Typography>
-            </Box>
-          )}
+          <FileUpload
+            value={downloadData?.downloadUrl || downloadData?.publicUrl || null}
+            file={videoFile}
+            onChange={(file) => {
+              if (isVideoLocked) return;
+              setVideoFile(file);
+            }}
+            onClear={() => {
+              if (isVideoLocked) return;
+              setVideoFile(null);
+            }}
+            fileType="video"
+            maxSizeMB={200}
+            height={240}
+            disabled={loading || isVideoLocked}
+            helperText={
+              isVideoLocked
+                ? "Cannot add or change video when updating a lecture. Please create a new lecture if you want to upload a new video."
+                : "Maximum file size: 200MB. Supported formats: MP4, AVI, MKV, WEBM, MOV"
+            }
+          />
 
-          {isVideoLocked && videoPreviewUrl && (
+          {isVideoLocked && (
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                mt: 2,
+                mt: 1.5,
                 p: 1.5,
-                bgcolor: "rgba(245, 158, 11, 0.08)",
-                color: "rgba(180, 83, 9, 1)",
+                bgcolor: (theme) =>
+                  alpha(
+                    theme.palette.warning.main,
+                    theme.palette.mode === "dark" ? 0.15 : 0.08,
+                  ),
+                color: "warning.main",
                 borderRadius: 1.5,
-                border: "1px solid rgba(245, 158, 11, 0.2)",
+                border: "1px solid",
+                borderColor: (theme) =>
+                  alpha(theme.palette.warning.main, 0.2),
               }}
             >
               <Lock size={16} />
@@ -536,15 +355,6 @@ export function LectureFormDialog({
               </Typography>
             </Box>
           )}
-
-          <input
-            type="file"
-            ref={fileInputRef}
-            hidden
-            accept="video/*"
-            onChange={handleVideoSelect}
-            disabled={loading || isVideoLocked}
-          />
         </Box>
       </Box>
     </FormDialog>

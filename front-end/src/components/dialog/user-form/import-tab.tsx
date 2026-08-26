@@ -479,7 +479,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
                   borderRadius: 2,
                   textTransform: "none",
                   fontWeight: 700,
-                  bgcolor: "white",
+                  bgcolor: "background.paper",
                   fontSize: "0.8rem",
                   whiteSpace: "nowrap",
                 }}

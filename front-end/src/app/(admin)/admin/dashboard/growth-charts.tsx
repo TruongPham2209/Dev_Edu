@@ -65,7 +65,14 @@ function ChartSkeleton({
   subtitle: string;
 }) {
   return (
-    <Card sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}>
+    <Card
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        borderRadius: 3,
+      }}
+    >
       <CardContent sx={{ p: 3 }}>
         <Box
           sx={{
@@ -129,7 +136,12 @@ export function UserGrowthChart() {
   if (error) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <ErrorState
@@ -157,10 +169,14 @@ export function UserGrowthChart() {
   return (
     <Card
       sx={{
-        border: "1px solid rgba(15, 23, 42, 0.08)",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 3,
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-        background: "rgba(255, 255, 255, 0.95)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+        bgcolor: "background.paper",
         backdropFilter: "blur(8px)",
       }}
     >
@@ -330,7 +346,12 @@ export function CourseGrowthChart() {
   if (error) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <ErrorState
@@ -358,10 +379,14 @@ export function CourseGrowthChart() {
   return (
     <Card
       sx={{
-        border: "1px solid rgba(15, 23, 42, 0.08)",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 3,
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-        background: "rgba(255, 255, 255, 0.95)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+        bgcolor: "background.paper",
         backdropFilter: "blur(8px)",
       }}
     >
@@ -531,7 +556,12 @@ export function RevenueGrowthChart() {
   if (error) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <ErrorState
@@ -559,10 +589,14 @@ export function RevenueGrowthChart() {
   return (
     <Card
       sx={{
-        border: "1px solid rgba(15, 23, 42, 0.08)",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 3,
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-        background: "rgba(255, 255, 255, 0.95)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+        bgcolor: "background.paper",
         backdropFilter: "blur(8px)",
       }}
     >

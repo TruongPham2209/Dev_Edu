@@ -147,7 +147,7 @@ export default function LecturerDashboardPage() {
                   sx={{
                     fontWeight: 800,
                     letterSpacing: "-0.02em",
-                    color: "#0f172a",
+                    color: "text.primary",
                     fontSize: { xs: "1.35rem", sm: "1.65rem", md: "1.875rem" },
                   }}
                 >
@@ -157,7 +157,7 @@ export default function LecturerDashboardPage() {
               <Typography
                 variant="body2"
                 sx={{
-                  color: "#64748b",
+                  color: "text.secondary",
                   lineHeight: 1.6,
                   maxWidth: { xs: "100%", md: 600 },
                   fontSize: { xs: "0.825rem", sm: "0.875rem" },

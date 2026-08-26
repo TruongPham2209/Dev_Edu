@@ -16,8 +16,9 @@ export function AssignmentDetailSkeleton() {
         sx={{
           borderRadius: 2,
           mb: { xs: 2.5, sm: 4 },
-          border: "1px solid rgba(148, 163, 184, 0.14)",
-          bgcolor: "white",
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
         }}
       >
         <Box
@@ -56,7 +57,7 @@ export function AssignmentDetailSkeleton() {
                 minWidth: { xs: "100%", md: 250 },
                 p: { xs: 2, sm: 2.5 },
                 borderRadius: 2.5,
-                bgcolor: "grey.50",
+                bgcolor: "action.hover",
               }}
             >
               <Stack spacing={2.5}>

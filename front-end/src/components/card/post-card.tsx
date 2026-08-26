@@ -13,7 +13,9 @@ import {
   Menu,
   MenuItem,
   Stack,
+  Theme,
   Typography,
+  alpha,
 } from "@mui/material";
 import {
   AlertCircle,
@@ -73,22 +75,34 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
       case "PENDING":
         return {
           label: "Waiting for approval",
-          color: "#f59e0b",
-          bgcolor: "#fef3c7",
+          color: "warning.main",
+          bgcolor: (theme: Theme) =>
+            alpha(
+              theme.palette.warning.main,
+              theme.palette.mode === "dark" ? 0.2 : 0.12,
+            ),
           icon: <Clock size={12} />,
         };
       case "REJECTED":
         return {
           label: "Rejected",
-          color: "#ef4444",
-          bgcolor: "#fee2e2",
+          color: "error.main",
+          bgcolor: (theme: Theme) =>
+            alpha(
+              theme.palette.error.main,
+              theme.palette.mode === "dark" ? 0.2 : 0.12,
+            ),
           icon: <AlertCircle size={12} />,
         };
       case "APPROVED":
         return {
           label: "Approved",
-          color: "#10b981",
-          bgcolor: "#d1fae5",
+          color: "success.main",
+          bgcolor: (theme: Theme) =>
+            alpha(
+              theme.palette.success.main,
+              theme.palette.mode === "dark" ? 0.2 : 0.12,
+            ),
           icon: null,
         };
       default:
@@ -97,7 +111,6 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
   };
 
   // Extract variables based on the tab type
-  let id: string;
   let navId: string;
   let title: string;
   let content: string;
@@ -108,7 +121,6 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
   let status: PostStatus | undefined;
 
   if (props.tab === "saved") {
-    id = props.post.id;
     navId = props.post.postId;
     title = props.post.title;
     content = props.post.shortDescription;
@@ -118,7 +130,6 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
     thumbUrl = props.post.thumbUrl;
     status = undefined;
   } else {
-    id = props.post.id;
     navId = props.post.id;
     title = props.post.title;
     content = props.post.shortDescription || props.post.content;
@@ -136,26 +147,33 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
 
   return (
     <Card
-      component={CardComponent as any}
+      component={CardComponent as React.ElementType}
       {...cardProps}
       sx={{
         display: "block",
         textDecoration: "none",
-        borderRadius: 1,
-        border: "1px solid rgba(0,0,0,0.05)",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
+        borderRadius: 1.5,
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 2px 10px rgba(0, 0, 0, 0.02)",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         overflow: "hidden",
-        bgcolor: "#ffffff",
+        bgcolor: "background.paper",
         position: "relative",
         cursor: isApproved ? "pointer" : "default",
         "&:hover": isApproved
           ? {
               transform: "translateY(-3px)",
-              boxShadow: "0 12px 24px -8px rgba(0,0,0,0.1)",
-              borderColor: "rgba(56, 189, 248, 0.3)",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 12px 24px rgba(0, 0, 0, 0.5)"
+                  : "0 12px 24px -8px rgba(0, 0, 0, 0.1)",
+              borderColor: "primary.main",
               "& .post-title": {
-                color: "#0284c7",
+                color: "primary.main",
               },
             }
           : {},
@@ -182,8 +200,8 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                 sx={{
                   width: 32,
                   height: 32,
-                  bgcolor: "rgba(56, 189, 248, 0.1)",
-                  color: "#0284c7",
+                  bgcolor: "rgba(56, 189, 248, 0.15)",
+                  color: "primary.main",
                   fontWeight: 600,
                   fontSize: "0.875rem",
                 }}
@@ -193,14 +211,14 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
               <Box>
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: 600, color: "#1e293b", lineHeight: 1.2 }}
+                  sx={{ fontWeight: 600, color: "text.primary", lineHeight: 1.2 }}
                 >
                   {authorName}
                 </Typography>
                 <Typography
                   variant="caption"
                   sx={{
-                    color: "#64748b",
+                    color: "text.secondary",
                     display: "flex",
                     alignItems: "center",
                     gap: 0.5,
@@ -240,7 +258,7 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                   <IconButton
                     size="small"
                     onClick={handleMenuClick}
-                    sx={{ color: "#64748b" }}
+                    sx={{ color: "text.secondary" }}
                   >
                     <MoreVertical size={18} />
                   </IconButton>
@@ -250,15 +268,6 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                     onClose={handleCloseMenu}
                     transformOrigin={{ horizontal: "right", vertical: "top" }}
                     anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                    slotProps={{
-                      paper: {
-                        sx: {
-                          mt: 1,
-                          minWidth: 160,
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                        },
-                      },
-                    }}
                   >
                     {props.tab === "posted" && [
                       <MenuItem
@@ -292,7 +301,7 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                           handleCloseMenu();
                           props.onRemove?.(props.post);
                         }}
-                        sx={{ color: "#ef4444" }}
+                        sx={{ color: "error.main" }}
                       >
                         <Trash2 size={16} style={{ marginRight: 8 }} /> Delete
                       </MenuItem>,
@@ -332,7 +341,8 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                   flexShrink: 0,
                   borderRadius: 1,
                   overflow: "hidden",
-                  border: "1px solid rgba(0,0,0,0.05)",
+                  border: "1px solid",
+                  borderColor: "divider",
                 }}
               >
                 <Box
@@ -350,7 +360,7 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
                 className="post-title"
                 sx={{
                   fontWeight: 700,
-                  color: "#0f172a",
+                  color: "text.primary",
                   mb: 1,
                   transition: "color 0.2s",
                   display: "-webkit-box",
@@ -365,7 +375,7 @@ export function PostCard({ showStatus = true, ...props }: PostCardProps) {
               <Typography
                 variant="body2"
                 sx={{
-                  color: "#475569",
+                  color: "text.secondary",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   display: "-webkit-box",

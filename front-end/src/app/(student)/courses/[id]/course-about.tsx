@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, alpha } from "@mui/material";
 import { Info } from "lucide-react";
 
 interface CourseAboutProps {
@@ -14,9 +14,13 @@ export const CourseAbout = ({ description }: CourseAboutProps) => {
         <Box
           sx={{
             p: { xs: 1.25, sm: 1.5 },
-            bgcolor: "#f0fdf4",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.success.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.1,
+              ),
             borderRadius: 3,
-            color: "#16a34a",
+            color: "success.main",
             display: "flex",
             flexShrink: 0,
           }}
@@ -24,10 +28,10 @@ export const CourseAbout = ({ description }: CourseAboutProps) => {
           <Info size={24} />
         </Box>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: "#0f172a", fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: "text.primary", fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>
             About this course
           </Typography>
-          <Typography sx={{ color: "#64748b", mt: 0.5, fontSize: { xs: "0.85rem", sm: "0.95rem" } }}>
+          <Typography sx={{ color: "text.secondary", mt: 0.5, fontSize: { xs: "0.85rem", sm: "0.95rem" } }}>
             Everything you need to know about this course
           </Typography>
         </Box>
@@ -35,11 +39,11 @@ export const CourseAbout = ({ description }: CourseAboutProps) => {
 
       <Box
         sx={{
-          color: "#475569",
+          color: "text.secondary",
           lineHeight: 1.8,
           fontSize: { xs: "0.9rem", sm: "1rem" },
           "& h1, & h2, & h3": {
-            color: "#0f172a",
+            color: "text.primary",
             fontWeight: 800,
             mt: 3,
             mb: 1.5,

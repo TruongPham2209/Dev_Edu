@@ -129,11 +129,15 @@ export function AssignmentHeroSection({
       {/* 3. Instructions / HTML Description Box */}
       <Box
         sx={{
-          bgcolor: "#ffffff",
+          bgcolor: "background.paper",
           borderRadius: 1,
           p: { xs: 2, sm: 3, md: 4 },
-          border: "1px solid rgba(148, 163, 184, 0.15)",
-          boxShadow: "0 4px 12px rgba(15, 23, 42, 0.02)",
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 12px rgba(0, 0, 0, 0.4)"
+              : "0 4px 12px rgba(15, 23, 42, 0.02)",
         }}
       >
         <Box
@@ -147,12 +151,12 @@ export function AssignmentHeroSection({
             mb: { xs: 2, sm: 3 },
           }}
         >
-          <FileText size={20} color="#2563eb" />
+          <FileText size={20} className="text-blue-600" />
           <Typography
             variant="h6"
             sx={{
               fontWeight: 800,
-              color: "grey.900",
+              color: "text.primary",
               lineHeight: 1,
               fontSize: { xs: "1.05rem", sm: "1.25rem" },
             }}
@@ -163,14 +167,14 @@ export function AssignmentHeroSection({
         <Box
           className="tiptap-content prose max-w-none"
           sx={{
-            color: "grey.800",
+            color: "text.secondary",
             lineHeight: 1.7,
             fontSize: { xs: "0.875rem", sm: "1rem" },
             overflowX: "auto",
             wordBreak: "break-word",
             "& p": { mb: 2 },
             "& ul, & ol": { pl: 3, mb: 2 },
-            "& strong": { fontWeight: 600, color: "grey.900" },
+            "& strong": { fontWeight: 600, color: "text.primary" },
           }}
           dangerouslySetInnerHTML={{
             __html:

@@ -95,12 +95,18 @@ export default function LecturerQuizConfigurePage({
 
   // Normalize quizDetail
   const realQuiz = fetchedQuizDetail?.quiz;
-  const questions: QuizQuestionResponse[] = fetchedQuizDetail?.questions || [];
+  const questions: QuizQuestionResponse[] = useMemo(
+    () => fetchedQuizDetail?.questions || [],
+    [fetchedQuizDetail?.questions],
+  );
 
-  const typeConfigs: QuizTypeConfigResponse[] =
-    fetchedTypeConfigs.length > 0
-      ? fetchedTypeConfigs
-      : fetchedQuizDetail?.typeConfigs || [];
+  const typeConfigs: QuizTypeConfigResponse[] = useMemo(
+    () =>
+      fetchedTypeConfigs.length > 0
+        ? fetchedTypeConfigs
+        : fetchedQuizDetail?.typeConfigs || [],
+    [fetchedTypeConfigs, fetchedQuizDetail?.typeConfigs],
+  );
 
   const quizDetail: QuizResponse | null = realQuiz
     ? {

@@ -48,7 +48,7 @@ export function SubmissionsTable({
       variant="outlined"
       sx={{
         borderRadius: 1,
-        borderColor: "rgba(148, 163, 184, 0.14)",
+        borderColor: "divider",
         boxShadow: "0 2px 12px rgba(0, 0, 0, 0.01)",
         overflow: "hidden",
       }}
@@ -59,14 +59,14 @@ export function SubmissionsTable({
           borderColor: "divider",
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2 },
-          bgcolor: "grey.50",
+          bgcolor: "action.hover",
         }}
       >
         <Typography
           variant="subtitle1"
           sx={{
             fontWeight: 800,
-            color: "#1e293b",
+            color: "text.primary",
             fontSize: { xs: "0.95rem", sm: "1rem" },
           }}
         >
@@ -107,7 +107,7 @@ export function SubmissionsTable({
             sx={{ overflowX: "auto !important", maxWidth: "100%" }}
           >
             <Table sx={{ minWidth: 560 }}>
-              <TableHead sx={{ bgcolor: "grey.50" }}>
+              <TableHead sx={{ bgcolor: "action.hover" }}>
                 <TableRow>
                   <TableCell
                     sx={{
@@ -220,7 +220,7 @@ export function SubmissionsTable({
                           cursor: "pointer",
                           fontSize: { xs: "0.75rem", sm: "0.8125rem" },
                           "&:hover": {
-                            bgcolor: "grey.100",
+                            bgcolor: "action.selected",
                             borderColor: "success.main",
                             color: "success.main",
                           },

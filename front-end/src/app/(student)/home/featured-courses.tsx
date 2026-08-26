@@ -5,28 +5,9 @@ import { getFeaturedCourses } from "@/lib/api/courses";
 import { Box } from "@mui/material";
 
 export async function FeaturedCoursesSection() {
-  try {
-    const featuredCourses = await getFeaturedCourses();
+  const featuredCourses = await getFeaturedCourses().catch(() => null);
 
-    return (
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            sm: "repeat(2, 1fr)",
-            md: "repeat(3, 1fr)",
-            lg: "repeat(4, 1fr)",
-          },
-          gap: { xs: 2, sm: 2.5, md: 3 },
-        }}
-      >
-        {featuredCourses.map((course) => (
-          <CourseCard key={course.id} course={course} />
-        ))}
-      </Box>
-    );
-  } catch (error) {
+  if (!featuredCourses) {
     return (
       <ErrorState
         title="Failed to load featured courses"
@@ -34,6 +15,25 @@ export async function FeaturedCoursesSection() {
       />
     );
   }
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "1fr",
+          sm: "repeat(2, 1fr)",
+          md: "repeat(3, 1fr)",
+          lg: "repeat(4, 1fr)",
+        },
+        gap: { xs: 2, sm: 2.5, md: 3 },
+      }}
+    >
+      {featuredCourses.map((course) => (
+        <CourseCard key={course.id} course={course} />
+      ))}
+    </Box>
+  );
 }
 
 export function FeaturedCoursesFallback() {

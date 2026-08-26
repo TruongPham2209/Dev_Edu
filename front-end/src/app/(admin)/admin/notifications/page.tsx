@@ -148,8 +148,9 @@ export default function AdminNotificationsPage() {
         <Box
           sx={{
             p: { xs: 2, sm: 2.5 },
-            borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
-            bgcolor: "#ffffff",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -161,7 +162,7 @@ export default function AdminNotificationsPage() {
             variant="subtitle1"
             sx={{
               fontWeight: 800,
-              color: "#0f172a",
+              color: "text.primary",
               fontSize: { xs: "0.95rem", sm: "1rem" },
             }}
           >
@@ -333,7 +334,7 @@ export default function AdminNotificationsPage() {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: 700,
-                                color: "#0f172a",
+                                color: "text.primary",
                                 fontSize: { xs: "0.95rem", sm: "1.05rem" },
                                 wordBreak: "break-word",
                               }}
@@ -347,8 +348,14 @@ export default function AdminNotificationsPage() {
                                 height: 20,
                                 fontSize: "0.7rem",
                                 fontWeight: 700,
-                                bgcolor: "#fef3c7",
-                                color: "#b45309",
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === "dark"
+                                    ? "rgba(245, 158, 11, 0.18)"
+                                    : "#fef3c7",
+                                color: (theme) =>
+                                  theme.palette.mode === "dark"
+                                    ? "#fbbf24"
+                                    : "#b45309",
                               }}
                             />
                           </Box>

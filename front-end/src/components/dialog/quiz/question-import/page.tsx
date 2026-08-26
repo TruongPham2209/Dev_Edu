@@ -10,7 +10,7 @@ import type {
   QuizQuestionResponse,
   QuizTypeConfigResponse,
 } from "@/lib/type/quizzes";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { FileSpreadsheet } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
@@ -164,7 +164,7 @@ export function QuestionImportDialog({
   };
 
   // Helper to parse question type string from cell
-  const parseQuestionTypeStr = (raw: any): QuestionType | null => {
+  const parseQuestionTypeStr = (raw: unknown): QuestionType | null => {
     if (!raw) return null;
     const str = String(raw).trim().toUpperCase().replace(/[\s-]/g, "_");
     if (str === "SINGLE_CHOICE" || str === "SINGLECHOICE" || str === "SINGLE")
@@ -180,7 +180,7 @@ export function QuestionImportDialog({
   };
 
   // Helper to parse boolean from cell
-  const parseIsCorrect = (val: any): boolean => {
+  const parseIsCorrect = (val: unknown): boolean => {
     if (val === true || val === 1) return true;
     if (typeof val === "string") {
       const s = val.trim().toUpperCase();
@@ -226,7 +226,7 @@ export function QuestionImportDialog({
 
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const rows: unknown[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
         if (!rows || rows.length <= 1) {
           toast.error("The Excel file contains no data rows.");
@@ -376,10 +376,10 @@ export function QuestionImportDialog({
 
         // 3. Success! Set parsed questions (State 2)
         setParsedQuestions(validQuestions);
-      } catch (err: any) {
-        toast.error(
-          `Failed to parse Excel file: ${err.message || "Invalid file format."}`,
-        );
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Invalid file format.";
+        toast.error(`Failed to parse Excel file: ${message}`);
         setSelectedFile(null);
       } finally {
         setIsProcessingFile(false);
@@ -457,9 +457,9 @@ export function QuestionImportDialog({
           isProcessingFile ||
           isSaving
         }
-        maxWidth="lg"
+        maxWidth="md"
       >
-        <Stack spacing={3}>
+        <Box sx={{ width: "100%" }}>
           {/* STATE 1: UNIMPORTED STATE */}
           {isUnimportedState && (
             <ImportInitialState
@@ -497,7 +497,7 @@ export function QuestionImportDialog({
               onReset={handleReset}
             />
           )}
-        </Stack>
+        </Box>
       </FormDialog>
 
       {/* Confirm Dialog for Removing an Imported Question */}

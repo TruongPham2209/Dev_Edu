@@ -26,8 +26,6 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
-  const theme = useTheme();
-
   const benefits = [
     {
       icon: <BookOpen size={20} color="#16a34a" />,
@@ -52,7 +50,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         minHeight: { xs: "100dvh", lg: "100vh" },
         display: "grid",
         gridTemplateColumns: { xs: "1fr", lg: "1.15fr 0.85fr" },
-        bgcolor: "#f8fafc",
+        bgcolor: "background.default",
       }}
     >
       {/* Left Column: Platform Hero & Benefits */}
@@ -65,12 +63,20 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           py: 8,
           position: "relative",
           overflow: "hidden",
-          background: `
-            radial-gradient(circle at 10% 20%, rgba(22, 163, 74, 0.08) 0%, transparent 40%),
-            radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
-            linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 60%, #f0fdf4 100%)
-          `,
-          borderRight: "1px solid rgba(15, 23, 42, 0.06)",
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? `
+                radial-gradient(circle at 10% 20%, rgba(22, 163, 74, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.12) 0%, transparent 50%),
+                linear-gradient(135deg, #0b0f17 0%, #0f172a 60%, #0b0f17 100%)
+              `
+              : `
+                radial-gradient(circle at 10% 20%, rgba(22, 163, 74, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
+                linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 60%, #f0fdf4 100%)
+              `,
+          borderRight: "1px solid",
+          borderColor: "divider",
         }}
       >
         {/* Decorative Grid Mesh */}
@@ -78,8 +84,8 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           sx={{
             position: "absolute",
             inset: 0,
-            backgroundImage:
-              "radial-gradient(rgba(15, 23, 42, 0.08) 1.5px, transparent 1.5px)",
+            backgroundImage: (theme) =>
+              `radial-gradient(${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.08)"} 1.5px, transparent 1.5px)`,
             backgroundSize: "24px 24px",
             opacity: 0.5,
             zIndex: 0,
@@ -120,7 +126,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
             variant="h5"
             sx={{
               fontWeight: 800,
-              color: "#0f172a",
+              color: "text.primary",
               letterSpacing: "-0.03em",
             }}
           >
@@ -134,7 +140,8 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
             variant="h2"
             sx={{
               fontWeight: 900,
-              color: "#166534",
+              color: (theme) =>
+                theme.palette.mode === "dark" ? "#4ade80" : "#166534",
               lineHeight: 1.15,
               mb: 2,
               letterSpacing: "-0.04em",
@@ -145,7 +152,8 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           <Typography
             variant="body1"
             sx={{
-              color: "#15803d",
+              color: (theme) =>
+                theme.palette.mode === "dark" ? "#86efac" : "#15803d",
               fontSize: "1.1rem",
               lineHeight: 1.6,
               mb: 6,
@@ -180,9 +188,13 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                     width: 42,
                     height: 42,
                     borderRadius: "12px",
-                    bgcolor: "#ffffff",
-                    boxShadow: "0 4px 14px rgba(15, 23, 42, 0.04)",
-                    border: "1px solid rgba(15, 23, 42, 0.06)",
+                    bgcolor: "background.paper",
+                    boxShadow: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 4px 14px rgba(0, 0, 0, 0.3)"
+                        : "0 4px 14px rgba(15, 23, 42, 0.04)",
+                    border: "1px solid",
+                    borderColor: "divider",
                     flexShrink: 0,
                   }}
                 >
@@ -191,7 +203,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                 <Box>
                   <Typography
                     variant="subtitle1"
-                    sx={{ fontWeight: 750, color: "#0f172a", mb: 0.5 }}
+                    sx={{ fontWeight: 750, color: "text.primary", mb: 0.5 }}
                   >
                     {benefit.title}
                   </Typography>
@@ -356,7 +368,8 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           sx={{
             zIndex: 1,
             color: "text.secondary",
-            borderTop: "1px solid rgba(15, 23, 42, 0.06)",
+            borderTop: "1px solid",
+            borderColor: "divider",
             pt: 3,
             alignSelf: "stretch",
           }}
@@ -429,7 +442,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
               variant="h6"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 letterSpacing: "-0.03em",
               }}
             >
@@ -443,12 +456,13 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
             maxWidth: 480,
             width: "100%",
             borderRadius: { xs: "18px", sm: "24px" },
-            border: "1px solid rgba(15, 23, 42, 0.08)",
-            boxShadow: `
-              0 24px 64px rgba(15, 23, 42, 0.06),
-              0 4px 16px rgba(15, 23, 42, 0.02)
-            `,
-            backgroundColor: "rgba(255, 255, 255, 0.98)",
+            border: "1px solid",
+            borderColor: "divider",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 24px 64px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3)"
+                : "0 24px 64px rgba(15, 23, 42, 0.06), 0 4px 16px rgba(15, 23, 42, 0.02)",
+            backgroundColor: "background.paper",
             overflow: "hidden",
             position: "relative",
           }}
@@ -470,7 +484,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                   fontWeight: 850,
                   mb: 1.2,
                   letterSpacing: "-0.03em",
-                  color: "#0f172a",
+                  color: "text.primary",
                   fontSize: { xs: "1.5rem", sm: "1.875rem", md: "2.125rem" },
                   lineHeight: 1.2,
                 }}

@@ -30,10 +30,11 @@ import {
   Skeleton,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { ArrowLeft, ArrowRight, LayoutGrid, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useMemo, useState } from "react";
 
 export default function CourseStudentExamRoomPage({
   params,
@@ -41,12 +42,10 @@ export default function CourseStudentExamRoomPage({
   params: Promise<{ id: string; assignmentId: string }>;
 }) {
   const { id: courseId, assignmentId } = use(params);
+  const toast = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const attemptId = searchParams.get("attemptId") || "";
-  const toast = useToast();
-
-  const [startData, setStartData] = useState<StartAttemptResponse | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState<boolean>(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
@@ -55,22 +54,22 @@ export default function CourseStudentExamRoomPage({
   const { data: latestAttemptData, isLoading: isAttemptLoading } =
     useAttemptQuery(attemptId);
 
-  useEffect(() => {
-    if (latestAttemptData) {
-      setStartData(latestAttemptData);
-    } else if (attemptId) {
-      const raw =
-        localStorage.getItem(`quiz_start_data_${attemptId}`) ||
-        sessionStorage.getItem(`quiz_start_data_${attemptId}`);
-      if (raw) {
-        try {
-          setStartData(JSON.parse(raw));
-        } catch (e) {
-          console.error("Failed to parse start data", e);
-        }
+  const fallbackStartData = useMemo(() => {
+    if (typeof window === "undefined" || !attemptId) return null;
+    const raw =
+      localStorage.getItem(`quiz_start_data_${attemptId}`) ||
+      sessionStorage.getItem(`quiz_start_data_${attemptId}`);
+    if (raw) {
+      try {
+        return JSON.parse(raw) as StartAttemptResponse;
+      } catch (e) {
+        console.error("Failed to parse start data", e);
       }
     }
-  }, [attemptId, latestAttemptData]);
+    return null;
+  }, [attemptId]);
+
+  const startData = latestAttemptData || fallbackStartData;
 
   const submitMutation = useSubmitAttemptMutation({
     onSuccess: (data) => {
@@ -535,11 +534,23 @@ export default function CourseStudentExamRoomPage({
                                   ? "primary.main"
                                   : "divider",
                                 bgcolor: selected
-                                  ? "primary.50"
+                                  ? (theme) =>
+                                    alpha(
+                                      theme.palette.primary.main,
+                                      theme.palette.mode === "dark"
+                                        ? 0.18
+                                        : 0.08,
+                                    )
                                   : "background.paper",
                                 "&:hover": {
                                   bgcolor: selected
-                                    ? "primary.50"
+                                    ? (theme) =>
+                                      alpha(
+                                        theme.palette.primary.main,
+                                        theme.palette.mode === "dark"
+                                          ? 0.22
+                                          : 0.12,
+                                      )
                                     : "action.hover",
                                 },
                               }}
@@ -588,11 +599,23 @@ export default function CourseStudentExamRoomPage({
                                 ? "primary.main"
                                 : "divider",
                               bgcolor: selected
-                                ? "primary.50"
+                                ? (theme) =>
+                                  alpha(
+                                    theme.palette.primary.main,
+                                    theme.palette.mode === "dark"
+                                      ? 0.18
+                                      : 0.08,
+                                  )
                                 : "background.paper",
                               "&:hover": {
                                 bgcolor: selected
-                                  ? "primary.50"
+                                  ? (theme) =>
+                                    alpha(
+                                      theme.palette.primary.main,
+                                      theme.palette.mode === "dark"
+                                        ? 0.22
+                                        : 0.12,
+                                    )
                                   : "action.hover",
                               },
                             }}

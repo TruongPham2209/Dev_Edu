@@ -62,22 +62,20 @@ export function InfoDialog({
           position: "relative",
           overflow: "hidden",
           borderRadius: "24px",
-          border: "1px solid rgba(15,23,42,0.08)",
+          border: "1px solid",
+          borderColor: "divider",
 
-          background: `
-            linear-gradient(
-              180deg,
-              rgba(255,255,255,0.96),
-              rgba(248,250,252,0.98)
-            )
-          `,
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98))"
+              : "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.98))",
 
           backdropFilter: "blur(18px)",
 
-          boxShadow: `
-            0 10px 30px rgba(15,23,42,0.08),
-            0 2px 8px rgba(15,23,42,0.04)
-          `,
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 10px 30px rgba(0, 0, 0, 0.5)"
+              : "0 10px 30px rgba(15,23,42,0.08)",
           ...paperSx,
         },
       }}
@@ -146,9 +144,13 @@ export function InfoDialog({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "rgba(15,23,42,0.05)",
-                color: "#334155",
-                border: "1px solid rgba(15,23,42,0.06)",
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.08)"
+                    : "rgba(15, 23, 42, 0.05)",
+                color: "text.primary",
+                border: "1px solid",
+                borderColor: "divider",
                 boxShadow: "0 10px 24px rgba(99,102,241,0.35)",
                 flexShrink: 0,
               }}
@@ -161,7 +163,7 @@ export function InfoDialog({
                 variant="h5"
                 sx={{
                   fontWeight: 700,
-                  color: "#1e293b",
+                  color: "text.primary",
                   lineHeight: 1.2,
                   letterSpacing: "-0.02em",
                   fontSize: { xs: "1.15rem", sm: "1.5rem" },
@@ -174,7 +176,7 @@ export function InfoDialog({
                 variant="body2"
                 sx={{
                   mt: 0.25,
-                  color: "#64748b",
+                  color: "text.secondary",
                   fontWeight: 500,
                   fontSize: { xs: "0.8rem", sm: "0.875rem" },
                 }}
@@ -191,12 +193,13 @@ export function InfoDialog({
               width: { xs: 36, sm: 40 },
               height: { xs: 36, sm: 40 },
               borderRadius: "14px",
-              background: "rgba(148,163,184,0.12)",
-              border: "1px solid rgba(148,163,184,0.18)",
+              background: "action.hover",
+              border: "1px solid",
+              borderColor: "divider",
               transition: "all .2s ease",
               flexShrink: 0,
               "&:hover": {
-                background: "rgba(15,23,42,0.06)",
+                background: "action.selected",
               },
             }}
           >
@@ -230,36 +233,16 @@ export function InfoDialog({
         <Button
           onClick={handleCloseDialog}
           variant="outlined"
-          // sx={{
-          //   minWidth: 110,
-          //   borderRadius: "14px",
-          //   px: 2.5,
-          //   py: 1.2,
-          //   borderColor: "rgba(148,163,184,0.25)",
-          //   color: "#475569",
-          //   fontWeight: 700,
-          //   textTransform: "none",
-          //   transition: "all .2s ease",
-
-          //   "&:hover": {
-          //     borderColor: "rgba(148,163,184,0.45)",
-          //     background: "rgba(148,163,184,0.08)",
-          //     transform: "translateY(-1px)",
-          //   },
-          // }}
           sx={{
             borderRadius: "12px",
             textTransform: "none",
             fontWeight: 600,
-
-            borderColor: "rgba(15,23,42,0.08)",
-            color: "#334155",
-
-            background: "white",
-
+            borderColor: "divider",
+            color: "text.primary",
+            background: "background.paper",
             "&:hover": {
-              borderColor: "rgba(15,23,42,0.14)",
-              background: "rgba(15,23,42,0.03)",
+              borderColor: "divider",
+              background: "action.hover",
             },
           }}
         >

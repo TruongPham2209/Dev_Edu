@@ -135,14 +135,17 @@ export function TypeConfigsSection({
                       display: "flex",
                       flexDirection: "column",
                       gap: 1.5,
-                      borderColor: cfg.isComplete
-                        ? "rgba(34, 197, 94, 0.4)"
-                        : "rgba(148, 163, 184, 0.16)",
-                      bgcolor: "white",
+                      borderColor: cfg.isComplete ? "success.main" : "divider",
+                      bgcolor: "background.paper",
                       transition: "all 0.2s",
                       "&:hover": {
-                        borderColor: cfg.isComplete ? "success.main" : "primary.light",
-                        boxShadow: "0 4px 12px rgba(15, 23, 42, 0.04)",
+                        borderColor: cfg.isComplete
+                          ? "success.main"
+                          : "primary.main",
+                        boxShadow: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "0 4px 12px rgba(0, 0, 0, 0.4)"
+                            : "0 4px 12px rgba(15, 23, 42, 0.04)",
                       },
                     }}
                   >
@@ -212,7 +215,8 @@ export function TypeConfigsSection({
                         color="text.secondary"
                         sx={{ fontSize: { xs: "0.8rem", sm: "0.875rem" } }}
                       >
-                        Progress: <strong>{cfg.actualCount}</strong> / {cfg.requiredCount} Qs
+                        Progress: <strong>{cfg.actualCount}</strong> /{" "}
+                        {cfg.requiredCount} Qs
                       </Typography>
 
                       <Chip
@@ -223,8 +227,8 @@ export function TypeConfigsSection({
                           fontSize: "0.725rem",
                           fontWeight: 700,
                           height: 22,
-                          bgcolor: "grey.50",
-                          borderColor: "rgba(148, 163, 184, 0.2)",
+                          bgcolor: "action.hover",
+                          borderColor: "divider",
                         }}
                       />
                     </Box>

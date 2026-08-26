@@ -120,7 +120,7 @@ export function AssignmentFormDialog({
       <Box>
         <Typography
           variant="subtitle2"
-          sx={{ mb: 1, fontWeight: 700, color: "#1e293b" }}
+          sx={{ mb: 1, fontWeight: 700, color: "text.primary" }}
         >
           Instructions *
         </Typography>

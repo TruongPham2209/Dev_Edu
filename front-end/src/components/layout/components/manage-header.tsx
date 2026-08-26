@@ -1,32 +1,22 @@
 "use client";
 
+import { ThemeToggle } from "@/components/common/theme-toggle";
+import { useAuth } from "@/lib/use-auth";
 import {
   AppBar,
   Box,
   Button,
   Container,
-  IconButton,
   Toolbar,
-  Tooltip,
   Typography,
   useScrollTrigger,
 } from "@mui/material";
-import {
-  Bell,
-  Code2,
-  Home,
-  Menu,
-  Moon,
-  X,
-  UserCheck,
-  Shield,
-} from "lucide-react";
+import { Code2, Home, Menu, Shield, UserCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NotificationCenter } from "./notification-center";
 import { UserMenu } from "./user-menu";
-import { useAuth } from "@/lib/use-auth";
 
 export type ManageHeaderProps = {
   title: string;
@@ -60,9 +50,15 @@ export function ManageHeader({
     <AppBar
       position="sticky"
       sx={{
-        bgcolor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "#ffffff",
+        bgcolor: (theme) =>
+          isScrolled
+            ? theme.palette.mode === "dark"
+              ? "rgba(15, 23, 42, 0.95)"
+              : "rgba(255, 255, 255, 0.95)"
+            : "background.paper",
         color: "text.primary",
-        borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
+        borderBottom: "1px solid",
+        borderColor: "divider",
         backdropFilter: isScrolled ? "blur(12px)" : "none",
         transition: "all 0.2s ease-in-out",
       }}
@@ -110,7 +106,7 @@ export function ManageHeader({
               variant="h6"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 letterSpacing: "-0.02em",
                 textDecoration: "none",
                 display: { xs: "none", sm: "block" },
@@ -143,15 +139,15 @@ export function ManageHeader({
               size="small"
               sx={{
                 borderRadius: 999,
-                borderColor: "rgba(15, 23, 42, 0.12)",
-                color: "#0f172a",
+                borderColor: "divider",
+                color: "text.primary",
                 p: { xs: "6px", sm: "4px 16px" },
                 minWidth: { xs: "auto", sm: "unset" },
                 textTransform: "none",
                 fontWeight: 700,
                 "&:hover": {
-                  borderColor: "#0f172a",
-                  bgcolor: "rgba(15, 23, 42, 0.04)",
+                  borderColor: "text.primary",
+                  bgcolor: "action.hover",
                 },
               }}
             >
@@ -167,7 +163,7 @@ export function ManageHeader({
               </Box>
             </Button>
 
-            {/* Switch to Lecturer Portal (if on Admin site and user has LECTURER role) */}
+            {/* Switch to Lecturer Portal */}
             {pathname.startsWith("/admin") && roles.includes("LECTURER") && (
               <Button
                 component={Link}
@@ -193,7 +189,7 @@ export function ManageHeader({
               </Button>
             )}
 
-            {/* Switch to Admin Portal (if on Lecturer site and user has ADMIN role) */}
+            {/* Switch to Admin Portal */}
             {pathname.startsWith("/lecturer") && roles.includes("ADMIN") && (
               <Button
                 component={Link}
@@ -218,12 +214,9 @@ export function ManageHeader({
                 Switch to Admin Portal
               </Button>
             )}
+
             <NotificationCenter />
-            <Tooltip title="Theme" arrow>
-              <IconButton sx={{ color: "#475569" }}>
-                <Moon size={18} />
-              </IconButton>
-            </Tooltip>
+            <ThemeToggle />
             <UserMenu />
           </Box>
         </Container>

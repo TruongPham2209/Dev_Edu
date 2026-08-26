@@ -40,7 +40,7 @@ export const CourseList = ({
             variant="h4"
             sx={{
               fontWeight: 900,
-              color: "#0f172a",
+              color: "text.primary",
               display: "flex",
               alignItems: "center",
               gap: { xs: 1, sm: 1.5 },
@@ -54,7 +54,7 @@ export const CourseList = ({
           <Typography
             variant="body1"
             sx={{
-              color: "#64748b",
+              color: "text.secondary",
               mt: { xs: 0.5, sm: 1 },
               ml: { xs: 0, sm: 4.5 },
               fontSize: { xs: "0.85rem", sm: "1rem" },
@@ -88,9 +88,10 @@ export const CourseList = ({
               textAlign: "center",
               py: { xs: 6, sm: 12 },
               px: { xs: 2, sm: 4 },
-              bgcolor: "#ffffff",
+              bgcolor: "background.paper",
               borderRadius: { xs: 4, sm: 6 },
-              border: "2px dashed #cbd5e1",
+              border: "2px dashed",
+              borderColor: "divider",
               boxShadow: "inset 0 4px 20px rgba(0,0,0,0.02)",
             }}
           >
@@ -99,21 +100,21 @@ export const CourseList = ({
                 width: { xs: 60, sm: 80 },
                 height: { xs: 60, sm: 80 },
                 borderRadius: "50%",
-                bgcolor: "#f1f5f9",
+                bgcolor: "action.hover",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 auto 20px",
               }}
             >
-              <Search size={32} color="#94a3b8" />
+              <Search size={32} color="currentColor" style={{ opacity: 0.5 }} />
             </Box>
             <Typography
               variant="h5"
-              color="#0f172a"
               sx={{
                 fontWeight: 800,
                 mb: 1,
+                color: "text.primary",
                 fontSize: { xs: "1.1rem", sm: "1.5rem" },
               }}
             >
@@ -121,14 +122,14 @@ export const CourseList = ({
             </Typography>
             <Typography
               variant="body1"
-              color="#64748b"
               sx={{
                 maxWidth: 400,
                 margin: "0 auto",
+                color: "text.secondary",
                 fontSize: { xs: "0.85rem", sm: "1rem" },
               }}
             >
-              It seems we don't have any courses that match your search. Please
+              It seems we don&apos;t have any courses that match your search. Please
               try changing the keyword or category.
             </Typography>
             <Button
@@ -176,37 +177,43 @@ export const CourseList = ({
               fontSize: { xs: "0.95rem", sm: "1.05rem" },
               fontWeight: 800,
               borderWidth: 2,
-              borderColor: "#e2e8f0",
-              color: "#475569",
-              bgcolor: "#ffffff",
-              boxShadow: "0 4px 15px -5px rgba(0,0,0,0.05)",
+              borderColor: "divider",
+              color: "text.primary",
+              bgcolor: "background.paper",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 4px 15px -5px rgba(0,0,0,0.5)"
+                  : "0 4px 15px -5px rgba(0,0,0,0.05)",
               "&:hover": {
                 borderWidth: 2,
-                borderColor: "#0ea5e9",
-                bgcolor: "#f0f9ff",
-                color: "#0284c7",
+                borderColor: "primary.main",
+                bgcolor: "action.hover",
+                color: "primary.main",
                 transform: "translateY(-2px)",
-                boxShadow: "0 8px 20px -5px rgba(2, 132, 199, 0.2)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 8px 20px -5px rgba(59, 130, 246, 0.3)"
+                    : "0 8px 20px -5px rgba(2, 132, 199, 0.2)",
               },
               "&.Mui-disabled": {
                 borderWidth: 2,
-                borderColor: "#bae6fd",
-                bgcolor: "#f0f9ff",
-                color: "#0284c7",
-                opacity: 0.9,
+                borderColor: "divider",
+                bgcolor: "action.disabledBackground",
+                color: "text.disabled",
+                opacity: 0.8,
               },
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
             {loadingMore ? (
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-                <CircularProgress size={20} sx={{ color: "#0284c7" }} />
+                <CircularProgress size={20} color="primary" />
                 <Typography
                   component="span"
                   sx={{
                     fontWeight: 700,
                     fontSize: { xs: "0.9rem", sm: "1rem" },
-                    color: "#0284c7",
+                    color: "primary.main",
                   }}
                 >
                   Loading courses...

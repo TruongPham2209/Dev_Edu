@@ -1,5 +1,6 @@
 "use client";
 
+import { ThemeToggle } from "@/components/common/theme-toggle";
 import { studentNavItems } from "@/lib/navigation";
 import { useAuth } from "@/lib/use-auth";
 import {
@@ -19,12 +20,12 @@ import {
   Typography,
   useScrollTrigger,
 } from "@mui/material";
-import { Code2, Menu, ShoppingCart, UserCheck, Shield, X } from "lucide-react";
+import { Code2, Menu, Shield, ShoppingCart, UserCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { UserMenu } from "./user-menu";
 import { NotificationCenter } from "./notification-center";
+import { UserMenu } from "./user-menu";
 
 export function StudentHeader() {
   const pathname = usePathname() || "";
@@ -47,9 +48,15 @@ export function StudentHeader() {
         data-testid="student-header"
         position="sticky"
         sx={{
-          bgcolor: isScrolled ? "rgba(255, 255, 255, 0.95)" : "#ffffff",
+          bgcolor: (theme) =>
+            isScrolled
+              ? theme.palette.mode === "dark"
+                ? "rgba(15, 23, 42, 0.95)"
+                : "rgba(255, 255, 255, 0.95)"
+              : "background.paper",
           color: "text.primary",
-          borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           backdropFilter: isScrolled ? "blur(12px)" : "none",
           transition: "all 0.2s ease-in-out",
         }}
@@ -76,7 +83,7 @@ export function StudentHeader() {
                 aria-label="Toggle mobile menu"
                 sx={{
                   display: { xs: "inline-flex", md: "none" },
-                  color: "#0f172a",
+                  color: "text.primary",
                   p: 1,
                 }}
               >
@@ -112,7 +119,7 @@ export function StudentHeader() {
                   variant="h6"
                   sx={{
                     fontWeight: 800,
-                    color: "#0f172a",
+                    color: "text.primary",
                     letterSpacing: "-0.02em",
                     textDecoration: "none",
                     display: { xs: "none", sm: "block" },
@@ -160,12 +167,24 @@ export function StudentHeader() {
                         fontSize: "0.95rem",
                         px: 2.5,
                         py: 1,
-                        color: isActive ? "#16a34a" : "#64748b",
-                        bgcolor: isActive ? "#f0fdf4" : "transparent",
+                        color: isActive
+                          ? "#16a34a"
+                          : "text.secondary",
+                        bgcolor: (theme) =>
+                          isActive
+                            ? theme.palette.mode === "dark"
+                              ? "rgba(22, 163, 74, 0.15)"
+                              : "#f0fdf4"
+                            : "transparent",
                         transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                         "&:hover": {
-                          bgcolor: isActive ? "#dcfce7" : "#f1f5f9",
-                          color: isActive ? "#15803d" : "#0f172a",
+                          bgcolor: (theme) =>
+                            isActive
+                              ? theme.palette.mode === "dark"
+                                ? "rgba(22, 163, 74, 0.25)"
+                                : "#dcfce7"
+                              : "action.hover",
+                          color: isActive ? "#15803d" : "text.primary",
                           transform: "translateY(-1px)",
                         },
                         "& .MuiButton-startIcon": {
@@ -245,29 +264,32 @@ export function StudentHeader() {
                       component={Link}
                       href="/cart"
                       sx={{
-                        color: "#64748b",
-                        bgcolor: "#f8fafc",
-                        border: "1px solid #e2e8f0",
-                        "&:hover": { bgcolor: "#f1f5f9", color: "#0f172a" },
+                        color: "text.secondary",
+                        bgcolor: "background.default",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        "&:hover": { bgcolor: "action.hover", color: "text.primary" },
                       }}
                     >
                       <ShoppingCart size={20} />
                     </IconButton>
                   )}
                   <NotificationCenter />
+                  <ThemeToggle />
                   <UserMenu />
                 </>
               ) : (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <ThemeToggle />
                   <Button
                     component={Link}
                     href="/login"
                     variant="text"
                     sx={{
-                      color: "#475569",
+                      color: "text.secondary",
                       fontWeight: 600,
                       px: { xs: 1.5, sm: 2 },
-                      "&:hover": { bgcolor: "#f1f5f9", color: "#0f172a" },
+                      "&:hover": { bgcolor: "action.hover", color: "text.primary" },
                       display: { xs: "none", sm: "flex" },
                     }}
                   >
@@ -307,7 +329,7 @@ export function StudentHeader() {
           "& .MuiDrawer-paper": {
             width: 280,
             boxSizing: "border-box",
-            bgcolor: "#ffffff",
+            bgcolor: "background.paper",
             p: 2.5,
           },
         }}
@@ -328,7 +350,7 @@ export function StudentHeader() {
           >
             <Code2 size={18} />
           </Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: "#0f172a" }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: "text.primary" }}>
             DevEdu
           </Typography>
         </Box>
@@ -357,18 +379,28 @@ export function StudentHeader() {
                       borderRadius: 2.5,
                       py: 1.2,
                       px: 2,
-                      bgcolor: isActive ? "#f0fdf4" : "transparent",
-                      color: isActive ? "#16a34a" : "#475569",
+                      bgcolor: (theme) =>
+                        isActive
+                          ? theme.palette.mode === "dark"
+                            ? "rgba(22, 163, 74, 0.15)"
+                            : "#f0fdf4"
+                          : "transparent",
+                      color: isActive ? "#16a34a" : "text.secondary",
                       fontWeight: isActive ? 700 : 600,
                       "&:hover": {
-                        bgcolor: isActive ? "#dcfce7" : "#f1f5f9",
+                        bgcolor: (theme) =>
+                          isActive
+                            ? theme.palette.mode === "dark"
+                              ? "rgba(22, 163, 74, 0.25)"
+                              : "#dcfce7"
+                            : "action.hover",
                       },
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         minWidth: 36,
-                        color: isActive ? "#16a34a" : "#64748b",
+                        color: isActive ? "#16a34a" : "text.secondary",
                       }}
                     >
                       <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
@@ -452,8 +484,8 @@ export function StudentHeader() {
                 sx={{
                   borderRadius: 999,
                   fontWeight: 600,
-                  color: "#475569",
-                  borderColor: "#cbd5e1",
+                  color: "text.secondary",
+                  borderColor: "divider",
                   py: 1,
                 }}
               >

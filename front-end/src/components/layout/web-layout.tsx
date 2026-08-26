@@ -13,8 +13,9 @@ export function StudentLayout({ children }: Readonly<StudentLayoutProps>) {
         minHeight: { xs: "100dvh", md: "100vh" },
         display: "flex",
         flexDirection: "column",
-        bgcolor: "#f8fafc",
-        color: "#0f172a",
+        bgcolor: "background.default",
+        color: "text.primary",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
       <StudentHeader />

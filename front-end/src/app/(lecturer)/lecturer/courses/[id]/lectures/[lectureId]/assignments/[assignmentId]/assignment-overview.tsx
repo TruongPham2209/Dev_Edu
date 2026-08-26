@@ -13,7 +13,7 @@ export function AssignmentOverview({ assignment }: AssignmentOverviewProps) {
       variant="outlined"
       sx={{
         borderRadius: 1,
-        borderColor: "rgba(148, 163, 184, 0.14)",
+        borderColor: "divider",
         boxShadow: "0 2px 12px rgba(0, 0, 0, 0.01)",
         overflow: "hidden",
       }}
@@ -24,7 +24,7 @@ export function AssignmentOverview({ assignment }: AssignmentOverviewProps) {
           borderColor: "divider",
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2 },
-          bgcolor: "grey.50",
+          bgcolor: "action.hover",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -34,7 +34,7 @@ export function AssignmentOverview({ assignment }: AssignmentOverviewProps) {
           variant="subtitle1"
           sx={{
             fontWeight: 800,
-            color: "#1e293b",
+            color: "text.primary",
             fontSize: { xs: "0.95rem", sm: "1rem" },
           }}
         >
@@ -52,17 +52,18 @@ export function AssignmentOverview({ assignment }: AssignmentOverviewProps) {
             "& ul, & ol": { pl: { xs: 2.5, sm: 3 }, mb: 2 },
             "& li": { mb: 0.8 },
             "& pre": {
-              bgcolor: "grey.50",
+              bgcolor: "action.hover",
               p: { xs: 1.5, sm: 2 },
               borderRadius: 2,
               overflowX: "auto",
               fontFamily: "var(--font-mono, monospace)",
               fontSize: { xs: "0.8rem", sm: "0.875rem" },
-              border: "1px solid rgba(148, 163, 184, 0.12)",
+              border: "1px solid",
+              borderColor: "divider",
               mb: 2,
             },
             "& code": {
-              bgcolor: "grey.50",
+              bgcolor: "action.hover",
               px: 0.8,
               py: 0.3,
               borderRadius: 1.5,
@@ -79,12 +80,13 @@ export function AssignmentOverview({ assignment }: AssignmentOverviewProps) {
               overflowX: "auto",
             },
             "& th, & td": {
-              border: "1px solid rgba(148, 163, 184, 0.14)",
+              border: "1px solid",
+              borderColor: "divider",
               p: { xs: 1, sm: 1.5 },
               textAlign: "left",
             },
             "& th": {
-              bgcolor: "grey.50",
+              bgcolor: "action.hover",
               fontWeight: 700,
             },
           }}

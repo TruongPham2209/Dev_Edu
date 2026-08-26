@@ -14,6 +14,7 @@ import { formatServerDate } from "@/lib/util/date-utils";
 import { buildNotificationLink } from "@/lib/util/notification-link-utils";
 import { stripHtmlTags } from "@/lib/util/text-utils";
 import {
+  alpha,
   Badge,
   Box,
   Button,
@@ -44,12 +45,11 @@ import {
   MessageSquare,
   MessageSquareReply,
   MoreVertical,
-  PlayCircle,
   Reply,
   Trash2,
   User,
   Users,
-  Video,
+  Video
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -255,17 +255,13 @@ export function NotificationCenter() {
     // Category = PERSONAL (or non-group): Build link based on user roles and redirect
     handleClosePopover();
     const targetLink = buildNotificationLink(notification, roles);
-    if (targetLink.startsWith("http://") || targetLink.startsWith("https://")) {
-      window.location.href = targetLink;
-    } else {
-      router.push(targetLink);
-    }
+    router.push(targetLink);
   };
 
   return (
     <>
       <Tooltip title="Notifications" arrow>
-        <IconButton onClick={handleClickOpen} sx={{ color: "#475569" }}>
+        <IconButton onClick={handleClickOpen} sx={{ color: "text.secondary" }}>
           <Badge
             badgeContent={totalUnread}
             color="error"
@@ -299,8 +295,13 @@ export function NotificationCenter() {
               maxWidth: { xs: 360, sm: 420 },
               maxHeight: { xs: "calc(100dvh - 90px)", sm: 560 },
               borderRadius: { xs: "14px", sm: "16px" },
-              boxShadow: "0 16px 40px rgba(15, 23, 42, 0.14)",
-              border: "1px solid rgba(15, 23, 42, 0.08)",
+              bgcolor: "background.paper",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 16px 40px rgba(0, 0, 0, 0.5)"
+                  : "0 16px 40px rgba(15, 23, 42, 0.14)",
+              border: "1px solid",
+              borderColor: "divider",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
@@ -313,8 +314,9 @@ export function NotificationCenter() {
           sx={{
             px: { xs: 2, sm: 2.5 },
             py: { xs: 1.5, sm: 2 },
-            bgcolor: "#ffffff",
-            borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
+            bgcolor: "background.paper",
+            borderBottom: "1px solid",
+            borderColor: "divider",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -326,7 +328,7 @@ export function NotificationCenter() {
               variant="subtitle1"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 fontSize: { xs: "0.9375rem", sm: "1rem" },
               }}
             >
@@ -352,9 +354,12 @@ export function NotificationCenter() {
                 textTransform: "none",
                 fontWeight: 600,
                 fontSize: { xs: "0.75rem", sm: "0.8rem" },
-                color: "#2563eb",
+                color: "primary.main",
                 p: { xs: "2px 6px", sm: "4px 8px" },
-                "&:hover": { bgcolor: "rgba(37, 99, 235, 0.06)" },
+                "&:hover": {
+                  bgcolor: (theme) =>
+                    alpha(theme.palette.primary.main, 0.08),
+                },
               }}
             >
               Mark all read
@@ -412,15 +417,21 @@ export function NotificationCenter() {
                         py: { xs: 1.25, sm: 1.75 },
                         px: { xs: 1.75, sm: 2.5 },
                         bgcolor: isUnread
-                          ? "rgba(37, 99, 235, 0.04)"
+                          ? (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(59, 130, 246, 0.08)"
+                              : "rgba(37, 99, 235, 0.04)"
                           : "transparent",
                         transition: "bgcolor 0.15s ease",
                         alignItems: "flex-start",
                         gap: { xs: 1.25, sm: 1.5 },
                         "&:hover": {
                           bgcolor: isUnread
-                            ? "rgba(37, 99, 235, 0.08)"
-                            : "rgba(15, 23, 42, 0.03)",
+                            ? (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "rgba(59, 130, 246, 0.14)"
+                                : "rgba(37, 99, 235, 0.08)"
+                            : "action.hover",
                         },
                       }}
                     >
@@ -456,7 +467,7 @@ export function NotificationCenter() {
                             variant="subtitle2"
                             sx={{
                               fontWeight: isUnread ? 800 : 600,
-                              color: isUnread ? "#0f172a" : "#334155",
+                              color: isUnread ? "text.primary" : "text.secondary",
                               fontSize: { xs: "0.8125rem", sm: "0.875rem" },
                               overflow: "hidden",
                               textOverflow: "ellipsis",
@@ -471,7 +482,7 @@ export function NotificationCenter() {
                                 width: 7,
                                 height: 7,
                                 borderRadius: "50%",
-                                bgcolor: "#2563eb",
+                                bgcolor: "primary.main",
                                 flexShrink: 0,
                               }}
                             />
@@ -512,8 +523,22 @@ export function NotificationCenter() {
                               height: 18,
                               fontSize: "0.625rem",
                               fontWeight: 700,
-                              bgcolor: isGroup ? "#fef3c7" : "#dbeafe",
-                              color: isGroup ? "#b45309" : "#1e40af",
+                              bgcolor: (theme) =>
+                                isGroup
+                                  ? theme.palette.mode === "dark"
+                                    ? "rgba(245, 158, 11, 0.18)"
+                                    : "#fef3c7"
+                                  : theme.palette.mode === "dark"
+                                    ? "rgba(59, 130, 246, 0.18)"
+                                    : "#dbeafe",
+                              color: (theme) =>
+                                isGroup
+                                  ? theme.palette.mode === "dark"
+                                    ? "#fbbf24"
+                                    : "#b45309"
+                                  : theme.palette.mode === "dark"
+                                    ? "#60a5fa"
+                                    : "#1e40af",
                             }}
                           />
                           <Typography
@@ -539,12 +564,12 @@ export function NotificationCenter() {
                             handleOpenItemMenu(e, notification.id)
                           }
                           sx={{
-                            color: "#64748b",
+                            color: "text.secondary",
                             p: 0.5,
                             mt: 0.25,
                             "&:hover": {
-                              bgcolor: "rgba(15, 23, 42, 0.06)",
-                              color: "#0f172a",
+                              bgcolor: "action.hover",
+                              color: "text.primary",
                             },
                           }}
                         >
@@ -565,8 +590,9 @@ export function NotificationCenter() {
           <Box
             sx={{
               p: { xs: 1.25, sm: 1.5 },
-              bgcolor: "#f8fafc",
-              borderTop: "1px solid rgba(15, 23, 42, 0.06)",
+              bgcolor: "background.paper",
+              borderTop: "1px solid",
+              borderColor: "divider",
               textAlign: "center",
             }}
           >
@@ -578,8 +604,11 @@ export function NotificationCenter() {
                 textTransform: "none",
                 fontWeight: 700,
                 fontSize: { xs: "0.775rem", sm: "0.825rem" },
-                color: "#2563eb",
-                "&:hover": { bgcolor: "rgba(37, 99, 235, 0.06)" },
+                color: "primary.main",
+                "&:hover": {
+                  bgcolor: (theme) =>
+                    alpha(theme.palette.primary.main, 0.08),
+                },
               }}
             >
               {isFetchingNextPage ? (

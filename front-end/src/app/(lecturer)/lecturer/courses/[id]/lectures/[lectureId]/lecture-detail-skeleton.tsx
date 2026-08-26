@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Card, Container, Grid, Skeleton, Stack } from "@mui/material";
 
 export function LectureDetailSkeleton() {
@@ -16,10 +18,9 @@ export function LectureDetailSkeleton() {
         sx={{
           borderRadius: 2,
           mb: { xs: 2.5, sm: 4 },
-          border: "1px solid rgba(15, 23, 42, 0.08)",
-          background:
-            "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)",
-          boxShadow: "0 10px 30px -10px rgba(15, 23, 42, 0.08)",
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
           overflow: "hidden",
         }}
       >
@@ -33,9 +34,13 @@ export function LectureDetailSkeleton() {
                   borderRadius: 2.5,
                   overflow: "hidden",
                   aspectRatio: "16/9",
-                  boxShadow: "0 12px 24px -10px rgba(15, 23, 42, 0.25)",
-                  border: "1px solid rgba(15, 23, 42, 0.08)",
-                  bgcolor: "#0f172a",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 12px 24px -10px rgba(0, 0, 0, 0.5)"
+                      : "0 12px 24px -10px rgba(15, 23, 42, 0.25)",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  bgcolor: "background.paper",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

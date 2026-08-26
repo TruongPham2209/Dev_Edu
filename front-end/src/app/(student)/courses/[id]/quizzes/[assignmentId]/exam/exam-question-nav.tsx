@@ -9,10 +9,9 @@ import {
   Button,
   Divider,
   Grid,
-  Stack,
   Typography,
   alpha,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import { Send } from "lucide-react";
 

@@ -13,7 +13,6 @@ import type { PostRequest } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import {
-  alpha,
   Box,
   Button,
   Card,
@@ -21,7 +20,7 @@ import {
   CircularProgress,
   Skeleton,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import { MessageSquare, Sparkles, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -65,7 +64,7 @@ export default function ForumPage() {
   const handleSavePost = async (payload: PostRequest, file: File | null) => {
     setSavingPost(true);
     try {
-      let finalPayload = { ...payload };
+      const finalPayload = { ...payload };
 
       if (file) {
         const presignRes = await getPreSignedUploadUrl({
@@ -206,14 +205,14 @@ export default function ForumPage() {
               variant="h5"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 display: "flex",
                 alignItems: "center",
                 gap: 1.5,
                 fontSize: { xs: "1.25rem", sm: "1.5rem" },
               }}
             >
-              <TrendingUp size={22} color="#0284c7" />
+              <TrendingUp size={22} color="currentColor" style={{ color: "var(--mui-palette-primary-main, #0284c7)" }} />
               Latest Discussions
             </Typography>
             <Button
@@ -221,7 +220,6 @@ export default function ForumPage() {
               startIcon={<Sparkles size={16} />}
               onClick={handleCreatePost}
               sx={{
-                bgcolor: "#0f172a",
                 borderRadius: 50,
                 px: { xs: 3, sm: 3 },
                 py: { xs: 1, sm: 0.8 },
@@ -229,11 +227,6 @@ export default function ForumPage() {
                 justifyContent: "center",
                 textTransform: "none",
                 fontWeight: 600,
-                boxShadow: "none",
-                "&:hover": {
-                  bgcolor: "#1e293b",
-                  boxShadow: "0 4px 12px rgba(15,23,42,0.2)",
-                },
               }}
             >
               Create Post
@@ -247,8 +240,12 @@ export default function ForumPage() {
                   key={index}
                   sx={{
                     borderRadius: 1,
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.02)",
-                    border: "1px solid rgba(0,0,0,0.05)",
+                    boxShadow: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 2px 10px rgba(0,0,0,0.3)"
+                        : "0 2px 10px rgba(0,0,0,0.02)",
+                    border: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
                   <CardContent sx={{ p: 3 }}>
@@ -271,9 +268,10 @@ export default function ForumPage() {
               sx={{
                 textAlign: "center",
                 py: 10,
-                bgcolor: "#ffffff",
+                bgcolor: "action.hover",
                 borderRadius: 2,
-                border: "1px dashed #cbd5e1",
+                border: "1px dashed",
+                borderColor: "divider",
               }}
             >
               <EmptyState
@@ -282,7 +280,6 @@ export default function ForumPage() {
                 icon={
                   <MessageSquare
                     size={48}
-                    color="#599cfaff"
                     style={{ padding: "8px" }}
                   />
                 }
@@ -303,7 +300,7 @@ export default function ForumPage() {
                   sx={{ py: 4, display: "flex", justifyContent: "center" }}
                 >
                   {isFetchingNextPage ? (
-                    <CircularProgress size={30} sx={{ color: "#0284c7" }} />
+                    <CircularProgress size={30} color="primary" />
                   ) : (
                     <Typography variant="body2" sx={{ color: "transparent" }}>
                       Loading more...

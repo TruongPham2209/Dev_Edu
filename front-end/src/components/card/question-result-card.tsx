@@ -1,7 +1,10 @@
 "use client";
 
 import { InfoDialog } from "@/components/common/info-dialog";
-import type { AttemptQuestionResultDto } from "@/lib/type/quizzes";
+import type {
+  AttemptQuestionResultDto,
+  QuizOptionResponse,
+} from "@/lib/type/quizzes";
 import {
   Alert,
   Box,
@@ -43,8 +46,8 @@ export function QuestionResultCard({
 
   const isEssay = q.questionType === "ESSAY";
   const isCorrect = q.isCorrect;
-  const questionContent = q.questionContent || (q as any).content || "";
-  const points = q.questionPoints ?? (q as any).points ?? 0;
+  const questionContent = q.questionContent || "";
+  const points = q.questionPoints ?? 0;
   const awarded = q.awardedPoints ?? 0;
 
   let statusBorderColor = "divider";
@@ -68,16 +71,22 @@ export function QuestionResultCard({
         onClick={() => setOpenDetail(true)}
         sx={{
           borderRadius: 1,
-          border: 1,
+          border: "1px solid",
           borderColor: statusBorderColor,
           height: "100%",
           display: "flex",
           flexDirection: "column",
           cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
+          boxShadow: (t) =>
+            t.palette.mode === "dark"
+              ? "0 4px 12px rgba(0,0,0,0.3)"
+              : "0 4px 12px rgba(0,0,0,0.03)",
           transition: "all 0.2s ease-in-out",
           "&:hover": {
-            boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+            boxShadow: (t) =>
+              t.palette.mode === "dark"
+                ? "0 8px 24px rgba(0,0,0,0.5)"
+                : "0 8px 24px rgba(0,0,0,0.08)",
             transform: "translateY(-2px)",
           },
         }}
@@ -124,7 +133,7 @@ export function QuestionResultCard({
             {!isEssay ? (
               isCorrect === true ? (
                 <Chip
-                  icon={<Check size={14} color="#16a34a" />}
+                  icon={<Check size={14} color="currentColor" />}
                   label="Correct"
                   color="success"
                   size="small"
@@ -133,7 +142,7 @@ export function QuestionResultCard({
                 />
               ) : (
                 <Chip
-                  icon={<X size={14} color="#dc2626" />}
+                  icon={<X size={14} color="currentColor" />}
                   label="Wrong"
                   color="error"
                   size="small"
@@ -143,7 +152,7 @@ export function QuestionResultCard({
               )
             ) : awarded > 0 ? (
               <Chip
-                icon={<Check size={14} color="#16a34a" />}
+                icon={<Check size={14} color="currentColor" />}
                 label="Passed"
                 color="success"
                 size="small"
@@ -152,7 +161,7 @@ export function QuestionResultCard({
               />
             ) : (
               <Chip
-                icon={<Clock size={14} color="#d97706" />}
+                icon={<Clock size={14} color="currentColor" />}
                 label="Essay"
                 color="warning"
                 size="small"
@@ -197,11 +206,9 @@ export function QuestionResultCard({
           {/* Options List for Single & Multiple Choice (Truncated) */}
           {!isEssay && q.options && (
             <Stack spacing={1}>
-              {q.options.slice(0, 4).map((opt: any) => {
+              {q.options.slice(0, 4).map((opt: QuizOptionResponse) => {
                 const isUserSelected = q.selectedOptionIds?.includes(opt.id);
-                const isCorrectOption =
-                  (q as any).correctOptionIds?.includes(opt.id) ||
-                  opt.isCorrect;
+                const isCorrectOption = Boolean(opt.isCorrect);
 
                 let optionBg = "background.paper";
                 let optionBorder = "divider";
@@ -212,17 +219,26 @@ export function QuestionResultCard({
                 if (isUserSelected && isCorrectOption) {
                   optionBg = alpha(theme.palette.success.main, 0.12);
                   optionBorder = "success.main";
-                  textColor = "success.dark";
+                  textColor =
+                    theme.palette.mode === "dark"
+                      ? theme.palette.success.light
+                      : theme.palette.success.dark;
                   borderWidth = 1.5;
                 } else if (isUserSelected && !isCorrectOption) {
                   optionBg = alpha(theme.palette.error.main, 0.1);
                   optionBorder = "error.main";
-                  textColor = "error.dark";
+                  textColor =
+                    theme.palette.mode === "dark"
+                      ? theme.palette.error.light
+                      : theme.palette.error.dark;
                   borderWidth = 1.5;
                 } else if (!isUserSelected && isCorrectOption) {
                   optionBg = alpha(theme.palette.success.main, 0.04);
                   optionBorder = "success.main";
-                  textColor = "success.dark";
+                  textColor =
+                    theme.palette.mode === "dark"
+                      ? theme.palette.success.light
+                      : theme.palette.success.dark;
                   borderStyle = "dashed";
                 }
 
@@ -255,21 +271,21 @@ export function QuestionResultCard({
                       {isUserSelected && isCorrectOption && (
                         <CheckCircle2
                           size={16}
-                          color="#16a34a"
+                          color={theme.palette.success.main}
                           style={{ flexShrink: 0 }}
                         />
                       )}
                       {isUserSelected && !isCorrectOption && (
                         <XCircle
                           size={16}
-                          color="#dc2626"
+                          color={theme.palette.error.main}
                           style={{ flexShrink: 0 }}
                         />
                       )}
                       {!isUserSelected && isCorrectOption && (
                         <Check
                           size={16}
-                          color="#16a34a"
+                          color={theme.palette.success.main}
                           style={{ flexShrink: 0 }}
                         />
                       )}
@@ -444,7 +460,13 @@ export function QuestionResultCard({
         open={openDetail}
         onClose={() => setOpenDetail(false)}
         title={`Question ${idx + 1} Details`}
-        headerIcon={<HelpCircle size={20} color="#2563eb" />}
+        headerIcon={
+          <HelpCircle
+            size={20}
+            color="currentColor"
+            style={{ color: theme.palette.primary.main }}
+          />
+        }
         maxWidth="md"
       >
         <Box sx={{ p: { xs: 0, sm: 1 } }}>
@@ -480,7 +502,7 @@ export function QuestionResultCard({
               {!isEssay ? (
                 isCorrect === true ? (
                   <Chip
-                    icon={<Check size={14} color="#16a34a" />}
+                    icon={<Check size={14} color="currentColor" />}
                     label="Correct"
                     color="success"
                     variant="outlined"
@@ -488,7 +510,7 @@ export function QuestionResultCard({
                   />
                 ) : (
                   <Chip
-                    icon={<X size={14} color="#dc2626" />}
+                    icon={<X size={14} color="currentColor" />}
                     label="Wrong"
                     color="error"
                     variant="outlined"
@@ -497,7 +519,7 @@ export function QuestionResultCard({
                 )
               ) : awarded > 0 ? (
                 <Chip
-                  icon={<Check size={14} color="#16a34a" />}
+                  icon={<Check size={14} color="currentColor" />}
                   label="Passed"
                   color="success"
                   variant="outlined"
@@ -505,7 +527,7 @@ export function QuestionResultCard({
                 />
               ) : (
                 <Chip
-                  icon={<Clock size={14} color="#d97706" />}
+                  icon={<Clock size={14} color="currentColor" />}
                   label="Essay"
                   color="warning"
                   variant="outlined"
@@ -528,9 +550,10 @@ export function QuestionResultCard({
               p: 2.5,
               mb: 3,
               borderRadius: 2,
-              bgcolor: "grey.50",
+              bgcolor: "action.hover",
+              borderColor: "divider",
               borderLeft: "4px solid",
-              borderColor: "primary.main",
+              borderLeftColor: "primary.main",
             }}
           >
             <Typography
@@ -559,11 +582,9 @@ export function QuestionResultCard({
                 Options & Answers breakdown
               </Typography>
               <Stack spacing={1.5}>
-                {q.options.map((opt: any) => {
+                {q.options.map((opt: QuizOptionResponse) => {
                   const isUserSelected = q.selectedOptionIds?.includes(opt.id);
-                  const isCorrectOption =
-                    (q as any).correctOptionIds?.includes(opt.id) ||
-                    opt.isCorrect;
+                  const isCorrectOption = Boolean(opt.isCorrect);
 
                   let optionBg = "background.paper";
                   let optionBorder = "divider";
@@ -574,17 +595,26 @@ export function QuestionResultCard({
                   if (isUserSelected && isCorrectOption) {
                     optionBg = alpha(theme.palette.success.main, 0.12);
                     optionBorder = "success.main";
-                    textColor = "success.dark";
+                    textColor =
+                      theme.palette.mode === "dark"
+                        ? theme.palette.success.light
+                        : theme.palette.success.dark;
                     borderWidth = 2;
                   } else if (isUserSelected && !isCorrectOption) {
                     optionBg = alpha(theme.palette.error.main, 0.1);
                     optionBorder = "error.main";
-                    textColor = "error.dark";
+                    textColor =
+                      theme.palette.mode === "dark"
+                        ? theme.palette.error.light
+                        : theme.palette.error.dark;
                     borderWidth = 2;
                   } else if (!isUserSelected && isCorrectOption) {
                     optionBg = alpha(theme.palette.success.main, 0.04);
                     optionBorder = "success.main";
-                    textColor = "success.dark";
+                    textColor =
+                      theme.palette.mode === "dark"
+                        ? theme.palette.success.light
+                        : theme.palette.success.dark;
                     borderStyle = "dashed";
                     borderWidth = 1.5;
                   }
@@ -617,21 +647,21 @@ export function QuestionResultCard({
                         {isUserSelected && isCorrectOption && (
                           <CheckCircle2
                             size={20}
-                            color="#16a34a"
+                            color={theme.palette.success.main}
                             style={{ flexShrink: 0, marginTop: 2 }}
                           />
                         )}
                         {isUserSelected && !isCorrectOption && (
                           <XCircle
                             size={16}
-                            color="#dc2626"
+                            color={theme.palette.error.main}
                             style={{ flexShrink: 0, marginTop: 2 }}
                           />
                         )}
                         {!isUserSelected && isCorrectOption && (
                           <Check
                             size={16}
-                            color="#16a34a"
+                            color={theme.palette.success.main}
                             style={{ flexShrink: 0, marginTop: 2 }}
                           />
                         )}
@@ -722,7 +752,7 @@ export function QuestionResultCard({
                 variant="subtitle2"
                 sx={{ fontWeight: 700, mb: 0.75, fontSize: "0.85rem" }}
               >
-                Student's Essay Response
+                Student&apos;s Essay Response
               </Typography>
               <Paper
                 variant="outlined"

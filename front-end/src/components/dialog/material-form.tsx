@@ -218,7 +218,7 @@ export function MaterialFormDialog({
               sx={{
                 height: 6,
                 borderRadius: 3,
-                bgcolor: "grey.100",
+                bgcolor: "action.hover",
                 "& .MuiLinearProgress-bar": {
                   borderRadius: 3,
                 },

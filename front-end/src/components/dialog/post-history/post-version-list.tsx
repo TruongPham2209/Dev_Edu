@@ -1,14 +1,15 @@
 import ButtonAction from "@/components/common/button-action";
+import type { PostResponse } from "@/lib/type/forums";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { Eye, Trash2 } from "lucide-react";
 import { getStatusColor } from "../../../lib/util/status-utils";
 
 interface PostVersionListProps {
-  versions: any[];
+  versions: PostResponse[];
   mode: "normal" | "manage";
   isMine: boolean;
-  onViewVersion: (version: any) => void;
+  onViewVersion: (version: PostResponse) => void;
   onDeleteVersion: (versionId: string) => void;
 }
 
@@ -122,7 +123,7 @@ export function PostVersionList({
                         <Chip
                           label={version.status}
                           size="small"
-                          color={getStatusColor(version.status) as any}
+                          color={getStatusColor(version.status)}
                           sx={{
                             fontWeight: 700,
                             borderRadius: 2,

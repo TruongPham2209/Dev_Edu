@@ -4,6 +4,7 @@ import { FileUpload } from "@/components/common/form/file-upload";
 import type { QuestionType } from "@/lib/type/quizzes";
 import {
   Alert,
+  alpha,
   Box,
   Button,
   Chip,
@@ -76,7 +77,7 @@ export function ImportInitialState({
       </Box>
 
       {/* Quota Summary Grid */}
-      <Grid container spacing={1}>
+      <Grid container spacing={2}>
         {quotaBreakdown.map((q) => {
           let label = q.questionType as string;
           if (q.questionType === "SINGLE_CHOICE") label = "Single Choice";
@@ -92,23 +93,41 @@ export function ImportInitialState({
                 )
               : 0;
 
+          const colSize =
+            quotaBreakdown.length === 1
+              ? 12
+              : quotaBreakdown.length === 2
+                ? 6
+                : 4;
+
           return (
-            <Grid key={q.questionType} size={{ xs: 12, sm: 4 }}>
+            <Grid key={q.questionType} size={{ xs: 12, sm: colSize }}>
               <Paper
                 variant="outlined"
                 sx={{
-                  p: 2.25,
-                  borderRadius: 0.5,
+                  p: 2,
+                  borderRadius: 1.5,
                   bgcolor: isFull
-                    ? "rgba(34, 197, 94, 0.04)"
-                    : "rgba(37, 99, 235, 0.03)",
+                    ? (theme) =>
+                        alpha(
+                          theme.palette.success.main,
+                          theme.palette.mode === "dark" ? 0.15 : 0.04,
+                        )
+                    : (theme) =>
+                        alpha(
+                          theme.palette.primary.main,
+                          theme.palette.mode === "dark" ? 0.15 : 0.03,
+                        ),
                   borderColor: isFull
-                    ? "rgba(34, 197, 94, 0.3)"
-                    : "rgba(37, 99, 235, 0.2)",
+                    ? (theme) => alpha(theme.palette.success.main, 0.3)
+                    : (theme) => alpha(theme.palette.primary.main, 0.2),
                   transition: "all 0.2s ease-in-out",
                   "&:hover": {
                     transform: "translateY(-2px)",
-                    boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
+                    boxShadow: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 8px 24px rgba(0, 0, 0, 0.4)"
+                        : "0 8px 24px rgba(15, 23, 42, 0.06)",
                     borderColor: isFull ? "success.main" : "primary.main",
                   },
                 }}
@@ -143,14 +162,14 @@ export function ImportInitialState({
 
                 <Stack
                   direction="row"
-                  spacing={1}
+                  spacing={0.75}
                   sx={{ alignItems: "baseline", mb: 1.25 }}
                 >
                   <Typography
                     variant="h5"
                     sx={{
                       fontWeight: 800,
-                      color: isFull ? "success.dark" : "primary.main",
+                      color: isFull ? "success.main" : "primary.main",
                       lineHeight: 1,
                     }}
                   >
@@ -172,8 +191,8 @@ export function ImportInitialState({
                     height: 6,
                     borderRadius: 3,
                     bgcolor: isFull
-                      ? "rgba(34, 197, 94, 0.15)"
-                      : "rgba(37, 99, 235, 0.12)",
+                      ? (theme) => alpha(theme.palette.success.main, 0.15)
+                      : (theme) => alpha(theme.palette.primary.main, 0.12),
                   }}
                 />
               </Paper>
@@ -223,9 +242,11 @@ export function ImportInitialState({
             height={180}
             maxSizeMB={10}
             helperText={
-              isQuotaFull
-                ? "Question quotas are full."
-                : "Upload an Excel file (.xlsx or .xls) containing quiz questions."
+              isPendingStatus
+                ? "Questions cannot be imported when quiz is pending approval."
+                : isQuotaFull
+                  ? "Question quotas are full."
+                  : "Upload an Excel file (.xlsx or .xls) containing quiz questions."
             }
           />
         )}

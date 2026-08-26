@@ -16,8 +16,9 @@ export function AssignmentDetailSkeleton() {
             sx={{
               p: { xs: 3, md: 4.5 },
               borderRadius: 3,
-              bgcolor: "#f8fafc",
-              border: "1px solid rgba(148, 163, 184, 0.12)",
+              bgcolor: "action.hover",
+              border: "1px solid",
+              borderColor: "divider",
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
               gap: 4,
@@ -33,7 +34,7 @@ export function AssignmentDetailSkeleton() {
                 minWidth: { xs: "100%", md: 250 },
                 p: 2.5,
                 borderRadius: 2.5,
-                bgcolor: "white",
+                bgcolor: "background.paper",
               }}
             >
               <Skeleton
@@ -54,8 +55,9 @@ export function AssignmentDetailSkeleton() {
             sx={{
               p: { xs: 3, md: 4 },
               borderRadius: 3,
-              bgcolor: "#ffffff",
-              border: "1px solid rgba(148, 163, 184, 0.15)",
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
             <Skeleton variant="text" width="15%" height={40} sx={{ mb: 3 }} />

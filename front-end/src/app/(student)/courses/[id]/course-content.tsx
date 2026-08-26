@@ -11,6 +11,7 @@ import {
   Paper,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { BookOpen, ChevronDown, FileText, PlayCircle } from "lucide-react";
 
@@ -32,9 +33,13 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
         <Box
           sx={{
             p: { xs: 1.25, sm: 1.5 },
-            bgcolor: "#eff6ff",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.primary.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.08,
+              ),
             borderRadius: 3,
-            color: "#2563eb",
+            color: "primary.main",
             display: "flex",
             flexShrink: 0,
           }}
@@ -46,7 +51,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
             variant="h5"
             sx={{
               fontWeight: 800,
-              color: "#0f172a",
+              color: "text.primary",
               fontSize: { xs: "1.2rem", sm: "1.5rem" },
             }}
           >
@@ -54,7 +59,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
           </Typography>
           <Typography
             sx={{
-              color: "#64748b",
+              color: "text.secondary",
               mt: 0.5,
               fontSize: { xs: "0.85rem", sm: "0.95rem" },
             }}
@@ -68,18 +73,23 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
         elevation={0}
         sx={{
           borderRadius: { xs: 2, sm: 3 },
-          border: "1px solid #e2e8f0",
+          border: "1px solid",
+          borderColor: "divider",
           overflow: "hidden",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 20px rgba(0,0,0,0.4)"
+              : "0 4px 20px rgba(0,0,0,0.02)",
         }}
       >
         {lectures.length > 0 && (
           <Box
             sx={{
-              bgcolor: "#f8fafc",
+              bgcolor: "action.hover",
               px: { xs: 2, sm: 3 },
               py: { xs: 1.75, sm: 2.5 },
-              borderBottom: "1px solid #e2e8f0",
+              borderBottom: "1px solid",
+              borderColor: "divider",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
@@ -88,7 +98,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
             <Typography
               sx={{
                 fontWeight: 800,
-                color: "#1e293b",
+                color: "text.primary",
                 fontSize: { xs: "0.95rem", sm: "1.125rem" },
               }}
             >
@@ -106,7 +116,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
               flexDirection: "column",
               height: 260,
               borderRadius: 1,
-              bgcolor: "#e2e8f0",
+              bgcolor: "action.hover",
             }}
           >
             <EmptyState
@@ -126,19 +136,22 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
                   "&:before": { display: "none" },
                   bgcolor: "transparent",
                   "&.Mui-expanded": {
-                    bgcolor: "#f8fafc",
+                    bgcolor: "action.hover",
                   },
                   transition: "all 0.2s ease",
                   "&:hover": {
-                    bgcolor: "#f8fafc",
+                    bgcolor: "action.hover",
                   },
                 }}
               >
                 <AccordionSummary
-                  expandIcon={<ChevronDown size={18} color="#64748b" />}
+                  expandIcon={<ChevronDown size={18} />}
                   sx={{
                     px: { xs: 1.5, sm: 2.5, md: 3 },
                     py: { xs: 1.25, sm: 1.75 },
+                    "& .MuiAccordionSummary-expandIconWrapper": {
+                      color: "text.secondary",
+                    },
                     "& .MuiAccordionSummary-content": {
                       my: 0,
                       width: "100%",
@@ -160,8 +173,12 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
                         width: { xs: 30, sm: 34 },
                         height: { xs: 30, sm: 34 },
                         borderRadius: "10px",
-                        bgcolor: "#eff6ff",
-                        color: "#2563eb",
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.primary.main,
+                            theme.palette.mode === "dark" ? 0.18 : 0.08,
+                          ),
+                        color: "primary.main",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -178,7 +195,7 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
                       <Typography
                         sx={{
                           fontWeight: 700,
-                          color: "#0f172a",
+                          color: "text.primary",
                           fontSize: { xs: "0.875rem", sm: "0.975rem" },
                           lineHeight: 1.5,
                           wordBreak: "break-word",
@@ -193,8 +210,8 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
                         display: "flex",
                         alignItems: "center",
                         gap: 0.5,
-                        bgcolor: "#f1f5f9",
-                        color: "#64748b",
+                        bgcolor: "action.hover",
+                        color: "text.secondary",
                         px: { xs: 1, sm: 1.25 },
                         py: 0.5,
                         borderRadius: "16px",
@@ -231,15 +248,16 @@ export const CourseContent = ({ lectures }: CourseContentProps) => {
                       ml: { xs: 0, sm: 5.25 },
                       p: { xs: 1.5, sm: 2 },
                       borderRadius: "10px",
-                      bgcolor: "#ffffff",
-                      border: "1px solid #e2e8f0",
-                      borderLeft: "3px solid #6366f1",
+                      bgcolor: "background.paper",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderLeft: (theme) => `3px solid ${theme.palette.primary.main}`,
                     }}
                   >
                     <Typography
                       variant="body2"
                       sx={{
-                        color: "#475569",
+                        color: "text.secondary",
                         lineHeight: 1.7,
                         fontSize: { xs: "0.825rem", sm: "0.9rem" },
                       }}

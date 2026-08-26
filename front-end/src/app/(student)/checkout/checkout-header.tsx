@@ -1,7 +1,6 @@
 "use client";
 
 import { Box, Button, Chip, Stack } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { ChevronLeft, ShieldCheck } from "lucide-react";
 
 interface CheckoutHeaderProps {
@@ -10,8 +9,6 @@ interface CheckoutHeaderProps {
 }
 
 export function CheckoutHeader({ onBack, disabled }: CheckoutHeaderProps) {
-  const theme = useTheme();
-
   return (
     <Box sx={{ mb: { xs: 2.5, sm: 4 } }}>
       <Button

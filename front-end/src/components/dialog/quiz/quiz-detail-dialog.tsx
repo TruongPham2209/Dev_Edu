@@ -534,7 +534,7 @@ export function QuizDetailDialog({
                   >
                     <HelpCircle
                       size={20}
-                      style={{ color: "#94a3b8", flexShrink: 0 }}
+                      style={{ color: "inherit", opacity: 0.7, flexShrink: 0 }}
                     />
                     <Typography variant="body2" color="text.secondary">
                       This quiz has no direct questions created (or will be

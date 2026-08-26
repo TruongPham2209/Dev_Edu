@@ -40,12 +40,16 @@ const CourseManageCardBase = ({
         flexDirection: "column",
         borderRadius: "12px",
         border: "1px solid",
-        borderColor: "rgba(15, 23, 42, 0.08)",
+        borderColor: "divider",
+        bgcolor: "background.paper",
         overflow: "hidden",
         transition: "all 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         "&:hover": {
           transform: "translateY(-6px)",
-          boxShadow: "0 20px 40px -12px rgba(15, 23, 42, 0.12)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 20px 40px rgba(0, 0, 0, 0.5)"
+              : "0 20px 40px -12px rgba(15, 23, 42, 0.12)",
           borderColor: "primary.main",
           "& .course-thumbnail-overlay": {
             opacity: 1,
@@ -74,7 +78,7 @@ const CourseManageCardBase = ({
             position: "relative",
             height: { xs: 160, sm: 150 },
             overflow: "hidden",
-            bgcolor: "rgba(15, 23, 42, 0.02)",
+            bgcolor: "action.hover",
           }}
         >
           {thumbnailUrl ? (
@@ -111,7 +115,7 @@ const CourseManageCardBase = ({
             sx={{
               position: "absolute",
               inset: 0,
-              bgcolor: "rgba(15, 23, 42, 0.2)",
+              bgcolor: "rgba(15, 23, 42, 0.4)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -122,16 +126,16 @@ const CourseManageCardBase = ({
           >
             <Box
               sx={{
-                bgcolor: "white",
+                bgcolor: "background.paper",
                 borderRadius: "50%",
                 p: 1.5,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
                 transform: "scale(0.9)",
                 transition: "transform 0.3s ease",
                 "&:hover": { transform: "scale(1)" },
               }}
             >
-              <ChevronRight size={24} color="#0f172a" />
+              <ChevronRight size={24} color="currentColor" />
             </Box>
           </Box>
         </Box>
@@ -150,7 +154,7 @@ const CourseManageCardBase = ({
               fontSize: { xs: "0.95rem", sm: "1rem" },
               fontWeight: 700,
               lineHeight: 1.4,
-              color: "#0f172a",
+              color: "text.primary",
               mb: 1,
               display: "-webkit-box",
               WebkitLineClamp: 2,
@@ -165,7 +169,7 @@ const CourseManageCardBase = ({
           <Typography
             variant="body2"
             sx={{
-              color: "#64748b",
+              color: "text.secondary",
               mb: 2,
               display: "-webkit-box",
               WebkitLineClamp: 2,
@@ -185,7 +189,7 @@ const CourseManageCardBase = ({
               mt: "auto",
               pt: 1.5,
               borderTop: "1px solid",
-              borderColor: "rgba(15, 23, 42, 0.04)",
+              borderColor: "divider",
               alignItems: "center",
               justifyContent: "space-between",
             }}
@@ -193,7 +197,7 @@ const CourseManageCardBase = ({
             {createdAt && (
               <Typography
                 variant="caption"
-                sx={{ color: "#94a3b8", fontWeight: 500 }}
+                sx={{ color: "text.secondary", fontWeight: 500 }}
               >
                 {formatServerDate(createdAt)}
               </Typography>

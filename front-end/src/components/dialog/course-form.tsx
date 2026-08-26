@@ -367,9 +367,10 @@ export function CourseFormDialog({
                       sx={{
                         borderRadius: 2,
                         fontWeight: 600,
-                        bgcolor: "rgba(15, 23, 42, 0.05)",
+                        bgcolor: "action.hover",
                         color: "text.primary",
-                        border: "1px solid rgba(15, 23, 42, 0.08)",
+                        border: "1px solid",
+                        borderColor: "divider",
                         "& .MuiChip-deleteIcon": {
                           color: "text.secondary",
                           "&:hover": { color: "error.main" },

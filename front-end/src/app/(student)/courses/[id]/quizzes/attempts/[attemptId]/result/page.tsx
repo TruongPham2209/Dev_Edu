@@ -4,6 +4,7 @@ import { QuestionResultCard } from "@/components/card/question-result-card";
 import { ErrorState } from "@/components/common/error-state";
 import { QuizStatusChip } from "@/components/dialog/quiz/quiz-status-chip";
 import { useAttemptResultQuery } from "@/lib/api/quizzes";
+import type { AttemptQuestionResultDto } from "@/lib/type/quizzes";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Alert,
@@ -21,6 +22,7 @@ import {
   Skeleton,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { ArrowLeft, LayoutGrid, X } from "lucide-react";
 import Link from "next/link";
@@ -171,33 +173,33 @@ export default function CourseStudentAttemptResultPage({
       ? Math.round((result.totalScore / result.maxScore) * 100)
       : 0;
 
-  const questionsList = result.answers || (result as any).questions || [];
-  const quizTitle = (result as any).quizTitle || "Quiz Results";
+  const questionsList: AttemptQuestionResultDto[] = result.answers || [];
+  const quizTitle = result.quizTitle || "Quiz Results";
 
   // Statistics breakdown
   const singleChoiceQuestions = questionsList.filter(
-    (q: any) => q.questionType === "SINGLE_CHOICE",
+    (q) => q.questionType === "SINGLE_CHOICE",
   );
   const correctSingleChoice = singleChoiceQuestions.filter(
-    (q: any) => q.isCorrect === true,
+    (q) => q.isCorrect === true,
   ).length;
 
   const multipleChoiceQuestions = questionsList.filter(
-    (q: any) => q.questionType === "MULTIPLE_CHOICE",
+    (q) => q.questionType === "MULTIPLE_CHOICE",
   );
   const correctMultipleChoice = multipleChoiceQuestions.filter(
-    (q: any) => q.isCorrect === true,
+    (q) => q.isCorrect === true,
   ).length;
 
   const essayQuestions = questionsList.filter(
-    (q: any) => q.questionType === "ESSAY",
+    (q) => q.questionType === "ESSAY",
   );
   const awardedEssayPoints = essayQuestions.reduce(
-    (acc: number, q: any) => acc + (q.awardedPoints ?? 0),
+    (acc: number, q: AttemptQuestionResultDto) => acc + (q.awardedPoints ?? 0),
     0,
   );
   const maxEssayPoints = essayQuestions.reduce(
-    (acc: number, q: any) => acc + (q.questionPoints ?? q.points ?? 0),
+    (acc: number, q: AttemptQuestionResultDto) => acc + (q.questionPoints ?? 0),
     0,
   );
 
@@ -251,7 +253,11 @@ export default function CourseStudentAttemptResultPage({
             p: 2.5,
             borderRadius: 1,
             textAlign: "center",
-            bgcolor: percentage >= 50 ? "success.50" : "error.50",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette[percentage >= 50 ? "success" : "error"].main,
+                theme.palette.mode === "dark" ? 0.18 : 0.08,
+              ),
             borderColor: percentage >= 50 ? "success.main" : "error.main",
             mb: 3,
           }}
@@ -290,14 +296,18 @@ export default function CourseStudentAttemptResultPage({
             p: 2,
             borderRadius: 1,
             textAlign: "center",
-            bgcolor: "warning.50",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.warning.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.08,
+              ),
             borderColor: "warning.main",
             mb: 3,
           }}
         >
           <Typography
             variant="subtitle2"
-            sx={{ fontWeight: 700, color: "warning.dark" }}
+            sx={{ fontWeight: 700, color: "warning.main" }}
           >
             Pending Instructor Grading
           </Typography>
@@ -385,11 +395,11 @@ export default function CourseStudentAttemptResultPage({
       </Typography>
 
       <Grid container spacing={1}>
-        {questionsList.map((q: any, idx: number) => {
+        {questionsList.map((q, idx) => {
           const qId = q.questionId || idx;
           const isEssay = q.questionType === "ESSAY";
           const isCorrect = q.isCorrect;
-          let btnBg = "grey.300";
+          let btnBg = "action.hover";
           let btnColor = "text.primary";
 
           if (isEssay) {
@@ -561,7 +571,7 @@ export default function CourseStudentAttemptResultPage({
           </Box>
 
           <Grid container spacing={2.5}>
-            {questionsList.map((q: any, idx: number) => {
+            {questionsList.map((q, idx) => {
               const qId = q.questionId || idx;
               return (
                 <Grid
@@ -589,9 +599,12 @@ export default function CourseStudentAttemptResultPage({
             <Card
               sx={{
                 borderRadius: 1.5,
-                border: 1,
+                border: "1px solid",
                 borderColor: "divider",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 10px 30px rgba(0,0,0,0.5)"
+                    : "0 10px 30px rgba(0,0,0,0.06)",
               }}
             >
               {summaryPanelContent}

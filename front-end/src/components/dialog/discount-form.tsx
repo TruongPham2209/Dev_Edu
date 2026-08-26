@@ -154,8 +154,15 @@ export function DiscountFormDialog({
             sx={{
               p: 2,
               borderRadius: 2.5,
-              bgcolor: "rgba(245, 158, 11, 0.04)",
-              border: "1px solid rgba(245, 158, 11, 0.16)",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(245, 158, 11, 0.15)"
+                  : "rgba(245, 158, 11, 0.06)",
+              border: "1px solid",
+              borderColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(245, 158, 11, 0.3)"
+                  : "rgba(245, 158, 11, 0.2)",
               display: "flex",
               gap: 1.5,
               alignItems: "flex-start",
@@ -164,14 +171,15 @@ export function DiscountFormDialog({
           >
             <HelpCircle
               size={18}
-              style={{ color: "#d97706", flexShrink: 0, marginTop: 2 }}
+              style={{ flexShrink: 0, marginTop: 2 }}
             />
             <Box>
               <Typography
                 variant="subtitle2"
                 sx={{
                   fontWeight: 700,
-                  color: "#92400e",
+                  color: (theme) =>
+                    theme.palette.mode === "dark" ? "#fbbf24" : "#92400e",
                   mb: 0.25,
                   fontSize: "0.825rem",
                 }}
@@ -180,7 +188,12 @@ export function DiscountFormDialog({
               </Typography>
               <Typography
                 variant="caption"
-                sx={{ color: "#b45309", fontWeight: 550, lineHeight: 1.4 }}
+                sx={{
+                  color: (theme) =>
+                    theme.palette.mode === "dark" ? "#fcd34d" : "#b45309",
+                  fontWeight: 550,
+                  lineHeight: 1.4,
+                }}
               >
                 This discount will be automatically applied to{" "}
                 <strong>all courses</strong>. If you want to set a specific

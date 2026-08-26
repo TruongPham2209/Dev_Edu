@@ -135,14 +135,15 @@ export function CommentInput({
             sx={{
               display: "flex",
               alignItems: "center",
-              bgcolor: "#f0f2f5",
+              bgcolor: "action.hover",
               borderRadius: "20px",
               px: 2,
               py: 0.5,
-              border: "1px solid transparent",
+              border: "1px solid",
+              borderColor: "divider",
               transition: "all 0.22s ease-in-out",
               "&:focus-within": {
-                bgcolor: "white",
+                bgcolor: "background.paper",
                 borderColor: "success.main",
                 boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.15)",
               },

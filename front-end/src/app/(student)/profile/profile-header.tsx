@@ -1,3 +1,5 @@
+"use client";
+
 import { FileUpload } from "@/components/common/form/file-upload";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
@@ -73,7 +75,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
       await changePasswordMutate({ oldPassword, newPassword });
       showSuccess("Changed password successfully!");
       handleClosePassword();
-    } catch (err: any) {
+    } catch (err: unknown) {
       handleError(err, "Failed to change password.");
       throw err;
     }
@@ -105,7 +107,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
       showSuccess("Updated avatar successfully!");
       setOpenAvatar(false);
       setFile(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       handleError(err, "Upload failed. Please try again.");
       throw err;
     }
@@ -130,8 +132,9 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
       sx={{
         p: { xs: 2, sm: 3, md: 4 },
         borderRadius: { xs: 2, sm: 3 },
-        border: "1px solid rgba(0,0,0,0.05)",
-        bgcolor: "#ffffff",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
         mb: { xs: 3, sm: 4 },
         position: "relative",
         overflow: "hidden",
@@ -144,7 +147,10 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
           left: 0,
           right: 0,
           height: { xs: "90px", sm: "120px" },
-          background: "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 100%)",
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "linear-gradient(90deg, #0c4a6e 0%, #1e3a8a 100%)"
+              : "linear-gradient(90deg, #f0f9ff 0%, #e0f2fe 100%)",
           zIndex: 0,
         }}
       />
@@ -184,7 +190,8 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
               sx={{
                 width: { xs: 88, sm: 100, md: 120 },
                 height: { xs: 88, sm: 100, md: 120 },
-                border: "4px solid #fff",
+                border: "4px solid",
+                borderColor: "background.paper",
                 boxShadow: "0 4px 14px rgba(0,0,0,0.1)",
                 bgcolor: "#0ea5e9",
                 fontSize: { xs: "2.2rem", sm: "2.5rem", md: "3rem" },
@@ -204,10 +211,10 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
                 width: { xs: 32, sm: 34, md: 36 },
                 height: { xs: 32, sm: 34, md: 36 },
                 borderRadius: "50%",
-                bgcolor: "#fff",
-                color: "#475569",
+                bgcolor: "background.paper",
+                color: "text.secondary",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                "&:hover": { bgcolor: "#f8fafc", color: "#0f172a" },
+                "&:hover": { bgcolor: "action.hover", color: "text.primary" },
               }}
             >
               <Camera size={16} />
@@ -220,7 +227,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
               variant="h4"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 mb: 0.25,
                 fontSize: { xs: "1.35rem", sm: "1.5rem", md: "2rem" },
                 lineHeight: 1.2,
@@ -231,7 +238,7 @@ export function ProfileHeader({ user, onAvatarChange }: ProfileHeaderProps) {
             <Typography
               variant="subtitle1"
               sx={{
-                color: "#64748b",
+                color: "text.secondary",
                 mb: { xs: 1.5, sm: 1.5 },
                 fontSize: { xs: "0.875rem", sm: "0.925rem", md: "1rem" },
               }}

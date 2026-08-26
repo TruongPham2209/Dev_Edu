@@ -59,6 +59,7 @@ export function CartTabContent() {
 
   // Infinite Scroll Observer
   useEffect(() => {
+    const currentTarget = observerTarget.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
@@ -68,13 +69,13 @@ export function CartTabContent() {
       { threshold: 1.0 },
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
     };
   }, [hasMore, loading, loadingMore, fetchNext]);
@@ -197,9 +198,10 @@ export function CartTabContent() {
         sx={{
           py: 10,
           textAlign: "center",
-          bgcolor: "#f8fafc",
+          bgcolor: "action.hover",
           borderRadius: 4,
-          border: "1px dashed #cbd5e1",
+          border: "1px dashed",
+          borderColor: "divider",
         }}
       >
         <EmptyState
@@ -280,7 +282,7 @@ export function CartTabContent() {
             sx={{ py: 4, display: "flex", justifyContent: "center" }}
           >
             {loadingMore ? (
-              <CircularProgress size={30} sx={{ color: "#0284c7" }} />
+              <CircularProgress size={30} color="primary" />
             ) : (
               <Typography variant="body2" sx={{ color: "transparent" }}>
                 .

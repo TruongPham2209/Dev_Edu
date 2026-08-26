@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  alpha,
   Box,
   CircularProgress,
   Fade,
@@ -17,6 +16,12 @@ import {
 import { ArrowUpRight, Search, X } from "lucide-react";
 import React, { useMemo, useRef, useState } from "react";
 
+export interface SearchDropdownItem {
+  label: string;
+  value: string;
+  [key: string]: unknown;
+}
+
 export interface SearchInputProps {
   value: string;
   placeholder?: string;
@@ -25,9 +30,9 @@ export interface SearchInputProps {
   onClear?: () => void;
   onFocus?: () => void;
   showDropdown?: boolean;
-  dropdownItems?: { label: string; value: string; [key: string]: any }[];
+  dropdownItems?: SearchDropdownItem[];
   onDropdownItemSelect?: (value: string) => void;
-  renderDropdownItem?: (item: any) => React.ReactNode;
+  renderDropdownItem?: (item: SearchDropdownItem) => React.ReactNode;
   maxWidth?: number | string;
   loading?: boolean;
 }
@@ -53,7 +58,7 @@ export function SearchInput({
 
   const hasDropdown = useMemo(
     () => showDropdown && dropdownItems.length > 0,
-    [showDropdown, dropdownItems],
+    [showDropdown, dropdownItems]
   );
 
   const handleSearch = () => {
@@ -90,7 +95,8 @@ export function SearchInput({
       ref={containerRef}
       sx={{
         width: "100%",
-        maxWidth: typeof maxWidth === "number" ? { xs: "100%", sm: maxWidth } : maxWidth,
+        maxWidth:
+          typeof maxWidth === "number" ? { xs: "100%", sm: maxWidth } : maxWidth,
         mx: "auto",
         position: "relative",
       }}
@@ -121,7 +127,6 @@ export function SearchInput({
                 <Search
                   size={18}
                   strokeWidth={2.3}
-                  color={focused ? "#2563eb" : "#94a3b8"}
                   style={{
                     transition: "all .25s ease",
                   }}
@@ -150,11 +155,11 @@ export function SearchInput({
                           sx={{
                             width: 30,
                             height: 30,
-                            color: "#64748b",
+                            color: "text.secondary",
 
                             "&:hover": {
-                              bgcolor: alpha("#64748b", 0.08),
-                              color: "#0f172a",
+                              bgcolor: "action.hover",
+                              color: "text.primary",
                             },
                           }}
                         >
@@ -207,19 +212,26 @@ export function SearchInput({
 
             borderRadius: "999px",
 
-            background: alpha("#ffffff", 0.82),
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(30, 41, 59, 0.85)"
+                : "rgba(255, 255, 255, 0.85)",
 
             backdropFilter: "blur(14px)",
 
             border: "1px solid",
 
-            borderColor: focused
-              ? alpha("#2563eb", 0.32)
-              : alpha("#cbd5e1", 0.75),
+            borderColor: (theme) =>
+              focused
+                ? theme.palette.primary.main
+                : theme.palette.divider,
 
-            boxShadow: focused
-              ? "0 8px 24px rgba(37,99,235,.10)"
-              : "0 2px 12px rgba(15,23,42,.05)",
+            boxShadow: (theme) =>
+              focused
+                ? "0 8px 24px rgba(37,99,235,.10)"
+                : theme.palette.mode === "dark"
+                  ? "0 2px 12px rgba(0,0,0,.3)"
+                  : "0 2px 12px rgba(15,23,42,.05)",
 
             transition: "all .28s cubic-bezier(.4,0,.2,1)",
 
@@ -231,18 +243,17 @@ export function SearchInput({
               py: 0,
               fontSize: { xs: "0.875rem", sm: "0.98rem" },
               fontWeight: 500,
-              color: "#0f172a",
+              color: "text.primary",
             },
 
             "& input::placeholder": {
-              color: "#94a3b8",
-              opacity: 1,
+              color: "text.secondary",
+              opacity: 0.8,
               fontWeight: 500,
             },
 
             "&:hover": {
-              borderColor: alpha("#94a3b8", 0.9),
-              boxShadow: "0 8px 24px rgba(15,23,42,.08)",
+              borderColor: "text.secondary",
             },
 
             "&.Mui-focused": {
@@ -267,13 +278,19 @@ export function SearchInput({
             borderRadius: "24px",
 
             border: "1px solid",
-            borderColor: alpha("#cbd5e1", 0.7),
+            borderColor: "divider",
 
-            background: alpha("#ffffff", 0.92),
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(30, 41, 59, 0.95)"
+                : "rgba(255, 255, 255, 0.95)",
 
             backdropFilter: "blur(20px)",
 
-            boxShadow: "0 20px 60px rgba(15,23,42,.10)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 20px 60px rgba(0,0,0,.5)"
+                : "0 20px 60px rgba(15,23,42,.10)",
 
             maxHeight: 320,
             overflowY: "auto",
@@ -283,14 +300,14 @@ export function SearchInput({
             },
 
             "&::-webkit-scrollbar-thumb": {
-              background: alpha("#94a3b8", 0.45),
+              background: "divider",
               borderRadius: 999,
             },
           }}
         >
           {loading ? (
             <Box sx={{ py: 5, display: "flex", justifyContent: "center" }}>
-              <CircularProgress size={28} sx={{ color: "#2563eb" }} />
+              <CircularProgress size={28} sx={{ color: "primary.main" }} />
             </Box>
           ) : dropdownItems.length > 0 ? (
             <List sx={{ p: 1 }}>
@@ -311,12 +328,12 @@ export function SearchInput({
                     transition: "all .18s ease",
 
                     "&:hover": {
-                      bgcolor: alpha("#2563eb", 0.06),
+                      bgcolor: "action.hover",
 
                       transform: "translateX(2px)",
 
                       "& .search-item-text": {
-                        color: "#2563eb",
+                        color: "primary.main",
                       },
                     },
                   }}
@@ -329,7 +346,7 @@ export function SearchInput({
                       sx={{
                         fontSize: "0.95rem",
                         fontWeight: 600,
-                        color: "#0f172a",
+                        color: "text.primary",
 
                         transition: "all .18s ease",
                       }}
@@ -351,7 +368,7 @@ export function SearchInput({
               <Typography
                 sx={{
                   fontSize: "0.95rem",
-                  color: "#94a3b8",
+                  color: "text.secondary",
                   fontWeight: 500,
                 }}
               >

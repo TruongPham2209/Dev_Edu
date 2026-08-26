@@ -87,7 +87,7 @@ export default function AdminCoursesPage() {
   const { mutateAsync: updateCourseMutate } = useUpdateCourseMutation();
   const { mutateAsync: deleteCourseMutate, isPending: deleting } =
     useDeleteCourseMutation();
-  const { mutateAsync: getPreSignedUrlMutate, isPending: saving } =
+  const { mutateAsync: getPreSignedUrlMutate } =
     usePreSignedUploadUrlMutation();
   const { mutateAsync: confirmImageUploadMutate } =
     useConfirmImageUploadMutation();

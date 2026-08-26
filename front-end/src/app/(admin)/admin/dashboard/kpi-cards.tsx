@@ -53,8 +53,9 @@ export function KpiCards() {
           <Grid key={index} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
             <Card
               sx={{
-                border: "1px solid rgba(15, 23, 42, 0.08)",
-                background: "rgba(255, 255, 255, 0.9)",
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
                 borderRadius: 1,
               }}
             >
@@ -136,15 +137,22 @@ export function KpiCards() {
           <Grid key={kpi.title} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
             <Card
               sx={{
-                border: "1px solid rgba(15, 23, 42, 0.06)",
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: 1,
-                boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.02)",
-                background: "rgba(255, 255, 255, 0.95)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+                    : "0px 4px 20px rgba(0, 0, 0, 0.02)",
+                bgcolor: "background.paper",
                 backdropFilter: "blur(8px)",
                 transition: "transform 0.2s, box-shadow 0.2s",
                 "&:hover": {
                   transform: "translateY(-4px)",
-                  boxShadow: "0px 8px 30px rgba(0, 0, 0, 0.06)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0px 8px 30px rgba(0, 0, 0, 0.6)"
+                      : "0px 8px 30px rgba(0, 0, 0, 0.06)",
                 },
               }}
             >
@@ -163,7 +171,11 @@ export function KpiCards() {
                         width: { xs: 34, sm: 38 },
                         height: { xs: 34, sm: 38 },
                         borderRadius: 2.5,
-                        bgcolor: alpha(kpi.color, 0.12),
+                        bgcolor: (theme) =>
+                          alpha(
+                            kpi.color,
+                            theme.palette.mode === "dark" ? 0.22 : 0.12,
+                          ),
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

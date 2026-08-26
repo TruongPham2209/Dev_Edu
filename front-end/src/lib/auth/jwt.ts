@@ -4,7 +4,7 @@ export interface JwtPayload {
   sub?: string;
   roles?: RoleEnum[];
   exp?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

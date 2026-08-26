@@ -8,9 +8,10 @@ import {
   useAssignmentsQuery,
   useDeleteAssignmentMutation,
 } from "@/lib/api/assignments";
+import { AssignmentResponse } from "@/lib/type/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography, alpha } from "@mui/material";
 import {
   Calendar,
   ClipboardList,
@@ -37,7 +38,7 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
   const { data: assignments = [] } = useAssignmentsQuery(lectureId);
   const { mutateAsync: deleteAssignmentMutate } = useDeleteAssignmentMutation();
 
-  const handleDeleteClick = (assignment: any) => {
+  const handleDeleteClick = (assignment: AssignmentResponse) => {
     setDeletingId(assignment.id);
     setDeletingTitle(assignment.title);
   };
@@ -61,7 +62,11 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
       sx={{
         borderRadius: 1,
         borderColor: "divider",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px -2px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
       }}
     >
       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
@@ -79,7 +84,7 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
               variant="h6"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 fontSize: { xs: "1.05rem", sm: "1.25rem" },
               }}
             >
@@ -112,10 +117,14 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                   sx={{
                     borderRadius: 1,
                     borderColor: "divider",
+                    bgcolor: "background.paper",
                     transition: "all 0.2s ease-in-out",
                     "&:hover": {
                       borderColor: "primary.light",
-                      boxShadow: "0 4px 12px rgba(37, 99, 235, 0.03)",
+                      boxShadow: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "0 4px 12px rgba(0, 0, 0, 0.4)"
+                          : "0 4px 12px rgba(37, 99, 235, 0.03)",
                       transform: "translateY(-1px)",
                     },
                   }}
@@ -145,7 +154,11 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                             sx={{
                               p: 0.75,
                               borderRadius: 1.5,
-                              bgcolor: "rgba(37, 99, 235, 0.06)",
+                              bgcolor: (theme) =>
+                                alpha(
+                                  theme.palette.primary.main,
+                                  theme.palette.mode === "dark" ? 0.2 : 0.06,
+                                ),
                               color: "primary.main",
                               display: "flex",
                               flexShrink: 0,
@@ -157,7 +170,7 @@ export function AssignmentsList({ courseId, lectureId }: AssignmentsListProps) {
                             variant="subtitle1"
                             sx={{
                               fontWeight: 750,
-                              color: "#1e293b",
+                              color: "text.primary",
                               fontSize: { xs: "0.875rem", sm: "1rem" },
                               overflow: "hidden",
                               textOverflow: "ellipsis",

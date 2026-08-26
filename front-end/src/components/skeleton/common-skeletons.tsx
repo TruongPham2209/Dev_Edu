@@ -91,7 +91,7 @@ export function ListSkeleton({
         <React.Fragment key={index}>
           <ListItemSkeleton {...itemProps} />
           {divider && index < count - 1 && (
-            <Divider sx={{ mx: 0, borderColor: "rgba(15, 23, 42, 0.04)" }} />
+            <Divider sx={{ mx: 0, borderColor: "divider" }} />
           )}
         </React.Fragment>
       ))}
@@ -111,17 +111,20 @@ export interface TableColumnConfig {
 }
 
 export interface TableSkeletonProps {
-  columns: TableColumnConfig[];
+  columns?: TableColumnConfig[];
   rowCount?: number;
   hasHeader?: boolean;
-  padding?: number | string;
 }
 
 export function TableSkeleton({
-  columns,
+  columns = [
+    { label: "Item", width: "40%", variant: "thumbnail" },
+    { label: "Category", width: "20%", variant: "text" },
+    { label: "Status", width: "20%", variant: "rounded" },
+    { label: "Actions", width: "20%", align: "right", variant: "actions" },
+  ],
   rowCount = 5,
   hasHeader = true,
-  padding = 0,
 }: TableSkeletonProps) {
   const renderCellSkeleton = (variant: TableColumnConfig["variant"]) => {
     switch (variant) {
@@ -176,10 +179,11 @@ export function TableSkeleton({
   };
 
   return (
-    <Box sx={{ p: padding }}>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
       <TableContainer
         sx={{
-          border: "1px solid rgba(15, 23, 42, 0.05)",
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: 3,
           overflowX: "auto",
           width: "100%",

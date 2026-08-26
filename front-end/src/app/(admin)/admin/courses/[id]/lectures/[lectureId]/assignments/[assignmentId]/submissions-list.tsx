@@ -20,6 +20,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  alpha,
 } from "@mui/material";
 import { Download, Eye, Paperclip, Users } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -84,18 +85,22 @@ export function SubmissionsList({
       variant="outlined"
       sx={{
         borderRadius: 1,
-        borderColor: "rgba(148, 163, 184, 0.12)",
-        boxShadow: "0 4px 20px rgba(15, 23, 42, 0.02)",
+        borderColor: "divider",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px rgba(15, 23, 42, 0.02)",
         overflow: "hidden",
-        bgcolor: "#ffffff",
+        bgcolor: "background.paper",
       }}
     >
       <Box
         sx={{
-          borderBottom: "1px solid rgba(148, 163, 184, 0.12)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2.5 },
-          bgcolor: "grey.50",
+          bgcolor: "action.hover",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -107,7 +112,7 @@ export function SubmissionsList({
           variant="subtitle1"
           sx={{
             fontWeight: 800,
-            color: "grey.900",
+            color: "text.primary",
             fontSize: { xs: "0.95rem", sm: "1.05rem" },
           }}
         >
@@ -154,17 +159,17 @@ export function SubmissionsList({
         ) : (
           <TableContainer sx={{ overflowX: "auto" }}>
             <Table sx={{ minWidth: 600 }}>
-              <TableHead sx={{ bgcolor: "grey.50" }}>
+              <TableHead sx={{ bgcolor: "action.hover" }}>
                 <TableRow>
                   <TableCell
                     sx={{
                       width: "30%",
                       fontWeight: 700,
-                      color: "grey.800",
+                      color: "text.primary",
                       fontSize: "0.875rem",
                       borderBottom: "2px solid",
                       borderRight: "1px dashed",
-                      borderColor: "grey.200",
+                      borderColor: "divider",
                       pl: 3,
                     }}
                   >
@@ -174,11 +179,11 @@ export function SubmissionsList({
                     sx={{
                       width: "20%",
                       fontWeight: 700,
-                      color: "grey.800",
+                      color: "text.primary",
                       fontSize: "0.875rem",
                       borderBottom: "2px solid",
                       borderRight: "1px dashed",
-                      borderColor: "grey.200",
+                      borderColor: "divider",
                     }}
                   >
                     Submitted Time
@@ -187,11 +192,11 @@ export function SubmissionsList({
                     sx={{
                       width: "35%",
                       fontWeight: 700,
-                      color: "grey.800",
+                      color: "text.primary",
                       fontSize: "0.875rem",
                       borderBottom: "2px solid",
                       borderRight: "1px dashed",
-                      borderColor: "grey.200",
+                      borderColor: "divider",
                     }}
                   >
                     Attachment
@@ -200,10 +205,10 @@ export function SubmissionsList({
                     sx={{
                       width: "15%",
                       fontWeight: 700,
-                      color: "grey.800",
+                      color: "text.primary",
                       fontSize: "0.875rem",
                       borderBottom: "2px solid",
-                      borderColor: "grey.200",
+                      borderColor: "divider",
                       pr: 3,
                       textAlign: "right",
                     }}
@@ -219,6 +224,7 @@ export function SubmissionsList({
                     hover
                     sx={{
                       transition: "background-color 0.2s",
+                      "&:hover": { bgcolor: "action.hover" },
                       "&:last-child td, &:last-child th": { border: 0 },
                     }}
                   >
@@ -227,7 +233,8 @@ export function SubmissionsList({
                       sx={{
                         pl: 3,
                         borderRight: "1px dashed",
-                        borderColor: "grey.200",
+                        borderColor: "divider",
+                        borderBottom: "1px solid",
                       }}
                     >
                       <Stack
@@ -242,15 +249,19 @@ export function SubmissionsList({
                             height: 32,
                             fontSize: "0.85rem",
                             fontWeight: 800,
-                            bgcolor: "success.light",
-                            color: "success.contrastText",
+                            bgcolor: (theme) =>
+                              alpha(
+                                theme.palette.success.main,
+                                theme.palette.mode === "dark" ? 0.2 : 0.1,
+                              ),
+                            color: "success.main",
                           }}
                         >
                           {submission.studentUsername.slice(0, 2).toUpperCase()}
                         </Avatar>
                         <Typography
                           variant="body2"
-                          sx={{ fontWeight: 700, color: "grey.900" }}
+                          sx={{ fontWeight: 700, color: "text.primary" }}
                         >
                           {submission.studentUsername}
                         </Typography>
@@ -261,12 +272,13 @@ export function SubmissionsList({
                     <TableCell
                       sx={{
                         borderRight: "1px dashed",
-                        borderColor: "grey.200",
+                        borderColor: "divider",
+                        borderBottom: "1px solid",
                       }}
                     >
                       <Typography
                         variant="body2"
-                        sx={{ color: "grey.800", fontWeight: 600 }}
+                        sx={{ color: "text.secondary", fontWeight: 600 }}
                       >
                         {formatServerDate(submission.submittedAt, "datetime")}
                       </Typography>
@@ -276,7 +288,8 @@ export function SubmissionsList({
                     <TableCell
                       sx={{
                         borderRight: "1px dashed",
-                        borderColor: "grey.200",
+                        borderColor: "divider",
+                        borderBottom: "1px solid",
                       }}
                     >
                       <Chip
@@ -294,9 +307,10 @@ export function SubmissionsList({
                           borderRadius: 1.5,
                           cursor: "pointer",
                           fontWeight: 600,
+                          borderColor: "divider",
                           transition: "all 0.2s",
                           "&:hover": {
-                            bgcolor: "grey.50",
+                            bgcolor: "action.hover",
                             borderColor: "success.main",
                             color: "success.main",
                           },
@@ -305,7 +319,14 @@ export function SubmissionsList({
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell sx={{ pr: 3, textAlign: "right" }}>
+                    <TableCell
+                      sx={{
+                        pr: 3,
+                        textAlign: "right",
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
+                      }}
+                    >
                       <Stack
                         component="div"
                         direction="row"
@@ -345,7 +366,8 @@ export function SubmissionsList({
               display: "flex",
               justifyContent: "center",
               py: 4,
-              borderTop: "1px solid rgba(148, 163, 184, 0.08)",
+              borderTop: "1px solid",
+              borderColor: "divider",
             }}
           >
             {submissionsLoading && (

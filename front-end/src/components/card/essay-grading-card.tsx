@@ -5,6 +5,7 @@ import { useToast } from "@/lib/toast-context";
 import type { QuizEssaySubmissionResponse } from "@/lib/type/quizzes";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
+  alpha,
   Avatar,
   Box,
   Button,
@@ -119,7 +120,16 @@ export function EssayGradingCard({
             sx={{
               width: 44,
               height: 44,
-              bgcolor: isGraded ? "success.50" : "primary.50",
+              bgcolor: (theme) =>
+                isGraded
+                  ? alpha(
+                      theme.palette.success.main,
+                      theme.palette.mode === "dark" ? 0.2 : 0.08,
+                    )
+                  : alpha(
+                      theme.palette.primary.main,
+                      theme.palette.mode === "dark" ? 0.2 : 0.08,
+                    ),
               color: isGraded ? "success.main" : "primary.main",
               fontWeight: 700,
             }}
@@ -238,14 +248,14 @@ export function EssayGradingCard({
           }}
         >
           <FileText size={14} />
-          Student's Answer
+          Student&apos;s Answer
         </Typography>
         <Paper
           variant="outlined"
           sx={{
             p: 2,
             borderRadius: 1,
-            bgcolor: "grey.50",
+            bgcolor: "action.hover",
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
             minHeight: 80,
@@ -272,9 +282,21 @@ export function EssayGradingCard({
         sx={{
           p: 2.5,
           borderRadius: 1,
-          bgcolor: isGraded ? "success.50" : "primary.50",
+          bgcolor: (theme) =>
+            isGraded
+              ? alpha(
+                  theme.palette.success.main,
+                  theme.palette.mode === "dark" ? 0.15 : 0.04,
+                )
+              : alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.15 : 0.04,
+                ),
           border: "1px dashed",
-          borderColor: isGraded ? "success.200" : "primary.200",
+          borderColor: (theme) =>
+            isGraded
+              ? alpha(theme.palette.success.main, 0.3)
+              : alpha(theme.palette.primary.main, 0.3),
         }}
       >
         <Typography
@@ -285,7 +307,7 @@ export function EssayGradingCard({
             display: "flex",
             alignItems: "center",
             gap: 1,
-            color: isGraded ? "success.dark" : "primary.dark",
+            color: isGraded ? "success.main" : "primary.main",
           }}
         >
           <Award size={18} />

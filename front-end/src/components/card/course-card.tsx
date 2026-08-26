@@ -1,3 +1,5 @@
+"use client";
+
 import type { CourseResponse } from "@/lib/type/courses";
 import {
   Avatar,
@@ -36,14 +38,22 @@ export function CourseCard({ course }: { course: CourseResponse }) {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          border: "1px solid rgba(0,0,0,0.04)",
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: 2,
-          boxShadow: "0 4px 20px -5px rgba(0, 0, 0, 0.05)",
+          bgcolor: "background.paper",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+              : "0 4px 20px -5px rgba(0, 0, 0, 0.05)",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           overflow: "hidden",
           "&:hover": {
             transform: "translateY(-6px)",
-            boxShadow: "0 16px 32px -5px rgba(0, 0, 0, 0.1)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 16px 32px rgba(0, 0, 0, 0.6)"
+                : "0 16px 32px -5px rgba(0, 0, 0, 0.1)",
             "& .MuiCardMedia-root": {
               transform: "scale(1.05)",
             },
@@ -81,7 +91,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                bgcolor: "#f8fafc",
+                bgcolor: "action.hover",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -110,7 +120,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
               fontWeight: 700,
               lineHeight: 1.4,
               mb: 1,
-              color: "#0f172a",
+              color: "text.primary",
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
@@ -126,7 +136,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
           <Typography
             variant="body2"
             sx={{
-              color: "#64748b",
+              color: "text.secondary",
               mb: 2.5,
               display: "-webkit-box",
               WebkitLineClamp: 2,
@@ -151,15 +161,15 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                   height: 28,
                   fontSize: "0.8rem",
                   fontWeight: 600,
-                  bgcolor: "#f1f5f9",
-                  color: "#475569",
+                  bgcolor: "action.hover",
+                  color: "text.secondary",
                 }}
               >
                 {course.lecturers[0].charAt(0)}
               </Avatar>
               <Typography
                 variant="caption"
-                sx={{ color: "#475569", fontWeight: 600, fontSize: "0.8rem" }}
+                sx={{ color: "text.secondary", fontWeight: 600, fontSize: "0.8rem" }}
               >
                 {course.lecturers.join(", ")}
               </Typography>
@@ -167,7 +177,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
           )}
 
           <Box sx={{ mt: "auto" }}>
-            <Divider sx={{ my: 2, borderColor: "#f1f5f9" }} />
+            <Divider sx={{ my: 2, borderColor: "divider" }} />
             <Box
               sx={{
                 display: "flex",
@@ -182,16 +192,16 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                   <Star size={16} color="#eab308" fill="#eab308" />
                   <Typography
                     variant="caption"
-                    sx={{ color: "#64748b", fontWeight: 600 }}
+                    sx={{ color: "text.secondary", fontWeight: 600 }}
                   >
                     {course.avgReview ? course.avgReview.toFixed(1) : "0.0"}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <Users size={16} color="#94a3b8" />
+                  <Users size={16} color="currentColor" style={{ opacity: 0.7 }} />
                   <Typography
                     variant="caption"
-                    sx={{ color: "#64748b", fontWeight: 600 }}
+                    sx={{ color: "text.secondary", fontWeight: 600 }}
                   >
                     {Intl.NumberFormat("en-US", {
                       notation: "compact",
@@ -215,7 +225,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                     variant="caption"
                     sx={{
                       textDecoration: "line-through",
-                      color: "#94a3b8",
+                      color: "text.disabled",
                       fontWeight: 500,
                       wordBreak: "break-word",
                     }}
@@ -227,7 +237,7 @@ export function CourseCard({ course }: { course: CourseResponse }) {
                   variant="subtitle2"
                   sx={{
                     fontWeight: 800,
-                    color: isFree ? "#059669" : "#e11d48",
+                    color: isFree ? "success.main" : "error.main",
                     fontSize: "1rem",
                     wordBreak: "break-word",
                   }}
