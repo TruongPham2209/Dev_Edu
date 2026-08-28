@@ -3,13 +3,18 @@ import type {
   AutosaveRequest,
   AutosaveResponse,
   CreateAssignmentRequest,
+  GenerateFromDocumentRequest,
+  GenerateFromFileRequest,
   GradeEssayRequest,
   HeartbeatRequest,
   PendingGradingResponse,
+  QuestionTraceabilityResponse,
   QuizAssignmentResponse,
   QuizAttemptReviewResponse,
   QuizDetailResponse,
   QuizEssaySubmissionResponse,
+  QuizGenerationJobResponse,
+  QuizGenerationJobStatus,
   QuizQuestionRequest,
   QuizQuestionResponse,
   QuizRequest,
@@ -32,7 +37,14 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { CustomPaging } from "../type/api";
-import { apiCall, apiDelete, apiGet, apiPost, apiPut } from "./client";
+import {
+  apiCall,
+  apiDelete,
+  apiGet,
+  apiPost,
+  apiPostFormData,
+  apiPut,
+} from "./client";
 
 // ============================================================================
 // --- Pure Async API Functions ---
@@ -310,6 +322,51 @@ export async function gradeEssayQuestion(
   return apiPost<AttemptResultResponse>(
     `/api/v1/quiz-gradings/attempts/${attemptId}/questions/${questionId}`,
     data,
+  );
+}
+
+// --- AI Quiz Generation APIs ---
+
+export async function generateQuizFromFile(
+  data: GenerateFromFileRequest,
+): Promise<QuizGenerationJobResponse> {
+  const formData = new FormData();
+  formData.append("quizId", data.quizId);
+  formData.append("description", data.description);
+  if (data.saveDocument !== undefined) {
+    formData.append("saveDocument", String(data.saveDocument));
+  }
+  formData.append("file", data.file);
+
+  return apiPostFormData<QuizGenerationJobResponse>(
+    "/api/v1/quizzes/generate-from-file",
+    formData,
+  );
+}
+
+export async function generateQuizFromDocument(
+  data: GenerateFromDocumentRequest,
+): Promise<QuizGenerationJobResponse> {
+  return apiPost<QuizGenerationJobResponse>(
+    "/api/v1/quizzes/generate-from-document",
+    data,
+  );
+}
+
+export async function getQuizGenerationJob(
+  jobId: string,
+): Promise<QuizGenerationJobResponse> {
+  return apiGet<QuizGenerationJobResponse>(
+    `/api/v1/quizzes/generation-jobs/${jobId}`,
+  );
+}
+
+export async function getQuestionTraceability(
+  jobId: string,
+  questionId: string,
+): Promise<QuestionTraceabilityResponse> {
+  return apiGet<QuestionTraceabilityResponse>(
+    `/api/v1/quizzes/generation-jobs/${jobId}/traceability/${questionId}`,
   );
 }
 
@@ -941,6 +998,83 @@ export function useEssaySubmissionsInfiniteQuery(
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!quizId,
+    ...options,
+  });
+}
+
+// --- AI Quiz Generation Hooks ---
+
+export const TERMINAL_JOB_STATUSES: QuizGenerationJobStatus[] = [
+  "COMPLETED",
+  "PARTIAL",
+  "FAILED",
+  "IRRELEVANT_DOCUMENT",
+  "INSUFFICIENT_SOURCE",
+  "INVALID_REQUEST",
+  "TIMEOUT",
+  "CANCELLED",
+];
+
+export function useGenerateQuizFromFileMutation(
+  options?: UseMutationOptions<
+    QuizGenerationJobResponse,
+    Error,
+    GenerateFromFileRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: generateQuizFromFile,
+    ...options,
+  });
+}
+
+export function useGenerateQuizFromDocumentMutation(
+  options?: UseMutationOptions<
+    QuizGenerationJobResponse,
+    Error,
+    GenerateFromDocumentRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: generateQuizFromDocument,
+    ...options,
+  });
+}
+
+export function useQuizGenerationJobQuery(
+  jobId?: string | null,
+  options?: Omit<
+    UseQueryOptions<QuizGenerationJobResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["quizzes", "generation-job", jobId],
+    queryFn: () => getQuizGenerationJob(jobId!),
+    enabled: !!jobId,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (!status || TERMINAL_JOB_STATUSES.includes(status)) {
+        return false;
+      }
+      return 2500;
+    },
+    ...options,
+  });
+}
+
+export function useQuestionTraceabilityQuery(
+  jobId?: string | null,
+  questionId?: string | null,
+  options?: Omit<
+    UseQueryOptions<QuestionTraceabilityResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["quizzes", "traceability", jobId, questionId],
+    queryFn: () => getQuestionTraceability(jobId!, questionId!),
+    enabled: !!jobId && !!questionId,
     ...options,
   });
 }
