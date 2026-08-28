@@ -50,26 +50,32 @@ public class QuizRequirementValidatorImpl implements QuizRequirementValidator {
 
     private Map<QuestionType, Integer> normalizeTypeDistribution(Map<QuestionType, Integer> input, int total) {
         Map<QuestionType, Integer> map = new EnumMap<>(QuestionType.class);
-        int sum = 0;
-        for (Map.Entry<QuestionType, Integer> entry : input.entrySet()) {
-            if (entry.getKey() == null) {
-                throw new BadRequestException("Unsupported or null question type in distribution.");
+
+        if (input != null && !input.isEmpty()) {
+            int sum = 0;
+            for (Map.Entry<QuestionType, Integer> entry : input.entrySet()) {
+                if (entry.getKey() == null) {
+                    throw new BadRequestException("Unsupported or null question type in distribution.");
+                }
+                int count = entry.getValue() != null ? entry.getValue() : 0;
+                if (count < 0) {
+                    throw new BadRequestException("Question type count cannot be negative.");
+                }
+                map.put(entry.getKey(), count);
+                sum += count;
             }
-            int count = entry.getValue() != null ? entry.getValue() : 0;
-            if (count < 0) {
-                throw new BadRequestException("Question type count cannot be negative.");
+
+            if (sum != total) {
+                throw new BadRequestException(String.format(
+                        "Question type distribution total (%d) does not match total requested questions (%d).", sum,
+                        total));
             }
-            map.put(entry.getKey(), count);
-            sum += count;
+            return map;
         }
 
-        if (sum != total) {
-            throw new BadRequestException(String.format(
-                    "Question type distribution total (%d) does not match total requested questions (%d).", sum,
-                    total));
-        }
+        // Default: Assign all to SINGLE_CHOICE
+        map.put(QuestionType.SINGLE_CHOICE, total);
         return map;
-
     }
 
     private Map<QuestionDifficulty, Integer> normalizeDifficultyDistribution(Map<QuestionDifficulty, Integer> input,

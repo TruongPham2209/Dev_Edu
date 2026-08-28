@@ -278,6 +278,7 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
                         .orElseThrow(() -> new DataNotFoundException(
                                 "Global document not found: " + request.getDocumentId()));
 
+                tempDocEntity = globalDoc;
                 job.setDocumentName(globalDoc.getFileName());
                 job.setDocumentObjectKey(globalDoc.getFileObjectKey());
                 jobRepository.save(job);
