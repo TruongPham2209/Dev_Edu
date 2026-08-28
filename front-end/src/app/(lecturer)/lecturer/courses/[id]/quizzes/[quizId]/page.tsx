@@ -2,6 +2,9 @@
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { ErrorState } from "@/components/common/error-state";
+import { AiGeneratorDialog } from "@/components/dialog/quiz/ai-generation/ai-generator-dialog";
+import { AiProgressDialog } from "@/components/dialog/quiz/ai-generation/ai-progress-dialog";
+import { QuestionTraceabilityDialog } from "@/components/dialog/quiz/ai-generation/question-traceability-dialog";
 import { QuestionFormDialog } from "@/components/dialog/quiz/question-form-dialog";
 import { QuestionImportDialog } from "@/components/dialog/quiz/question-import/page";
 import { TypeConfigDialog } from "@/components/dialog/quiz/type-config-dialog";
@@ -11,6 +14,8 @@ import {
   useCreateQuizTypeConfigMutation,
   useDeleteQuizQuestionMutation,
   useDeleteQuizTypeConfigMutation,
+  useGenerateQuizFromDocumentMutation,
+  useGenerateQuizFromFileMutation,
   useQuizByIdQuery,
   useQuizTypeConfigsQuery,
   useSubmitQuizMutation,
@@ -21,6 +26,7 @@ import { useToast } from "@/lib/toast-context";
 import { useQueryClient } from "@tanstack/react-query";
 import type {
   QuestionType,
+  QuizGenerationJobResponse,
   QuizQuestionRequest,
   QuizQuestionResponse,
   QuizResponse,
@@ -66,6 +72,15 @@ export default function LecturerQuizConfigurePage({
   const [defaultQuestionType, setDefaultQuestionType] =
     useState<QuestionType>("SINGLE_CHOICE");
   const [isDuplicateQuestion, setIsDuplicateQuestion] = useState(false);
+
+  // AI Generation dialog states
+  const [openAiGeneratorModal, setOpenAiGeneratorModal] = useState(false);
+  const [openAiProgressModal, setOpenAiProgressModal] = useState(false);
+  const [activeGenerationJobId, setActiveGenerationJobId] = useState<
+    string | null
+  >(null);
+  const [selectedTraceabilityQuestion, setSelectedTraceabilityQuestion] =
+    useState<QuizQuestionResponse | null>(null);
 
   // Confirm Dialog states
   const [deletingTypeConfig, setDeletingTypeConfig] =
@@ -202,6 +217,85 @@ export default function LecturerQuizConfigurePage({
       toast.error(`Submission failed: ${err.message}`);
     },
   });
+
+  const generateFromFileMutation = useGenerateQuizFromFileMutation({
+    onSuccess: (job) => {
+      setActiveGenerationJobId(job.jobId);
+      setOpenAiGeneratorModal(false);
+      setOpenAiProgressModal(true);
+      toast.info("AI generation pipeline initiated. Tracking progress...");
+    },
+    onError: (err) => {
+      toast.error(`Failed to initiate generation from file: ${err.message}`);
+    },
+  });
+
+  const generateFromDocumentMutation = useGenerateQuizFromDocumentMutation({
+    onSuccess: (job) => {
+      setActiveGenerationJobId(job.jobId);
+      setOpenAiGeneratorModal(false);
+      setOpenAiProgressModal(true);
+      toast.info("AI generation pipeline initiated. Tracking progress...");
+    },
+    onError: (err) => {
+      toast.error(
+        `Failed to initiate generation from library document: ${err.message}`,
+      );
+    },
+  });
+
+  const handleStartAiGenerateFromFile = async (data: {
+    file: File;
+    description: string;
+    saveDocument: boolean;
+  }) => {
+    if (isPendingStatus) {
+      toast.error(
+        "Questions cannot be generated when Quiz is pending approval.",
+      );
+      return;
+    }
+    await generateFromFileMutation.mutateAsync({
+      quizId,
+      file: data.file,
+      description: data.description,
+      saveDocument: data.saveDocument,
+    });
+  };
+
+  const handleStartAiGenerateFromDocument = async (data: {
+    documentId: string;
+    description: string;
+    saveDocument: boolean;
+  }) => {
+    if (isPendingStatus) {
+      toast.error(
+        "Questions cannot be generated when Quiz is pending approval.",
+      );
+      return;
+    }
+    await generateFromDocumentMutation.mutateAsync({
+      quizId,
+      sourceType: "LIBRARY",
+      documentId: data.documentId,
+      description: data.description,
+      saveDocument: data.saveDocument,
+    });
+  };
+
+  const handleAiGenerationSuccess = (job: QuizGenerationJobResponse) => {
+    refetchQuiz();
+    refetchConfigs();
+    handleContentModified(
+      job.status === "PARTIAL"
+        ? `Partially generated ${job.acceptedCount} questions from document.`
+        : `Successfully generated all ${job.acceptedCount} questions with AI!`,
+    );
+  };
+
+  const handleOpenTraceability = (q: QuizQuestionResponse) => {
+    setSelectedTraceabilityQuestion(q);
+  };
 
   // Calculate real-time question count progress per type config
   const typeConfigProgress = useMemo(() => {
@@ -499,6 +593,9 @@ export default function LecturerQuizConfigurePage({
                   onDuplicateQuestion={handleOpenDuplicateQuestion}
                   onDeleteQuestion={setDeletingQuestion}
                   onImportQuestions={() => setOpenImportModal(true)}
+                  onOpenAiGenerator={() => setOpenAiGeneratorModal(true)}
+                  onViewTraceability={handleOpenTraceability}
+                  hasActiveJobId={!!activeGenerationJobId}
                 />
               </Stack>
             </Grid>
@@ -557,6 +654,37 @@ export default function LecturerQuizConfigurePage({
         typeConfigs={typeConfigs}
         existingQuestions={questions}
         isPendingStatus={isPendingStatus}
+      />
+
+      {/* AI Quiz Generator Dialog */}
+      <AiGeneratorDialog
+        open={openAiGeneratorModal}
+        onClose={() => setOpenAiGeneratorModal(false)}
+        onSubmitFromFile={handleStartAiGenerateFromFile}
+        onSubmitFromDocument={handleStartAiGenerateFromDocument}
+        typeConfigs={typeConfigs}
+        existingQuestions={questions}
+        loading={
+          generateFromFileMutation.isPending ||
+          generateFromDocumentMutation.isPending
+        }
+      />
+
+      {/* AI Progress & Polling Dialog */}
+      <AiProgressDialog
+        open={openAiProgressModal}
+        onClose={() => setOpenAiProgressModal(false)}
+        jobId={activeGenerationJobId}
+        onSuccess={handleAiGenerationSuccess}
+      />
+
+      {/* Question Traceability Dialog */}
+      <QuestionTraceabilityDialog
+        open={!!selectedTraceabilityQuestion}
+        onClose={() => setSelectedTraceabilityQuestion(null)}
+        jobId={activeGenerationJobId}
+        questionId={selectedTraceabilityQuestion?.id || null}
+        questionContent={selectedTraceabilityQuestion?.content}
       />
 
       {/* Delete Type Config Confirm Dialog */}
