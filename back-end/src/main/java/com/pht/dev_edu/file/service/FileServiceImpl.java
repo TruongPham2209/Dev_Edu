@@ -460,4 +460,26 @@ public class FileServiceImpl implements FileService {
             }
         }
     }
+
+    @Override
+    public byte[] downloadFileBytes(String fullObjectKey) {
+        if (fullObjectKey == null || fullObjectKey.isBlank()) {
+            throw new BadRequestException("Object key cannot be null or empty.");
+        }
+        var bucketAndKey = parseFullObjectKey(fullObjectKey);
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketAndKey.getLeft())
+                    .key(bucketAndKey.getRight())
+                    .build();
+
+            return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
+        } catch (NoSuchKeyException e) {
+            log.error("File not found in storage for objectKey: {}", fullObjectKey, e);
+            throw new DataNotFoundException("File not found in storage: " + fullObjectKey);
+        } catch (Exception e) {
+            log.error("Failed to download file bytes for objectKey: {}", fullObjectKey, e);
+            throw new ServerInternalException("Failed to download file from storage: " + e.getMessage());
+        }
+    }
 }

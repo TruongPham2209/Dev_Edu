@@ -1,15 +1,14 @@
 package com.pht.dev_edu.quiz.repo;
 
-import com.pht.dev_edu.quiz.dto.enums.QuestionType;
-import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.pht.dev_edu.quiz.dto.enums.QuestionType;
+import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
+
 public interface QuizQuestionRepo extends JpaRepository<QuizQuestionEntity, UUID> {
     List<QuizQuestionEntity> findByQuizIdAndDeletedAtIsNullOrderByOrderIndexAsc(UUID quizId);
 
@@ -18,6 +17,8 @@ public interface QuizQuestionRepo extends JpaRepository<QuizQuestionEntity, UUID
     List<QuizQuestionEntity> findByIdInAndDeletedAtIsNull(List<UUID> ids);
 
     int countByQuizIdAndQuestionTypeAndDeletedAtIsNull(UUID quizId, QuestionType questionType);
+
+    int countByQuizIdAndDeletedAtIsNull(UUID quizId);
 
     boolean existsByQuizIdAndQuestionTypeAndDeletedAtIsNull(UUID quizId, QuestionType questionType);
 

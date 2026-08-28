@@ -1,14 +1,13 @@
 package com.pht.dev_edu.notification.repo;
 
-import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
+
 public interface NotificationGroupTargetRepository extends JpaRepository<NotificationGroupTargetEntity, UUID> {
     List<NotificationGroupTargetEntity> findByNotificationGroupIdIn(Collection<UUID> notificationGroupIds);
 }

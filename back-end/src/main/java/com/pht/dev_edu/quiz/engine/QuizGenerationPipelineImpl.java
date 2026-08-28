@@ -18,10 +18,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.file.dto.FileUploadResponse;
+import com.pht.dev_edu.file.entity.FileUploadEntity;
+import com.pht.dev_edu.file.repo.FileUploadRepository;
 import com.pht.dev_edu.file.service.FileService;
 import com.pht.dev_edu.quiz.dto.engine.GeneratedQuestionContract;
 import com.pht.dev_edu.quiz.dto.engine.QuestionSlot;
@@ -32,7 +36,6 @@ import com.pht.dev_edu.quiz.dto.enums.DocumentVisibility;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import com.pht.dev_edu.quiz.dto.enums.QuizGenerationJobStatus;
 import com.pht.dev_edu.quiz.dto.enums.QuizStatus;
-import com.pht.dev_edu.quiz.dto.enums.ScoringMethod;
 import com.pht.dev_edu.quiz.dto.request.GenerateQuizFromDocumentRequest;
 import com.pht.dev_edu.quiz.dto.response.QuestionSourceTraceResponse;
 import com.pht.dev_edu.quiz.dto.response.QuizGenerationJobResponse;
@@ -58,9 +61,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
-import com.pht.dev_edu.file.entity.FileUploadEntity;
-import com.pht.dev_edu.file.repo.FileUploadRepository;
 
 @Slf4j
 @Service
@@ -95,7 +95,6 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
     private static final int MAX_SLOT_RETRIES = 3;
 
     @Override
-    @Transactional
     public QuizGenerationJobResponse startGenerationJob(
             GenerateQuizFromDocumentRequest request,
             InputStream fileStream,
@@ -108,6 +107,20 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
                 .orElseThrow(() -> new DataNotFoundException("Quiz not found: " + request.getQuizId()));
 
         request.setCourseId(quiz.getCourseId());
+
+        if (request.getDocumentId() != null && request.getSourceType() == null) {
+            request.setSourceType(DocumentSourceType.LIBRARY);
+        } else if (request.getDocumentObjectKey() != null && request.getSourceType() == null) {
+            request.setSourceType(DocumentSourceType.UPLOAD);
+        }
+
+        if (request.getDocumentId() != null && (request.getDocumentName() == null || request.getDocumentName().isBlank())) {
+            courseDocumentRepository.findByIdAndDeletedAtIsNull(request.getDocumentId())
+                    .ifPresent(doc -> {
+                        request.setDocumentName(doc.getFileName());
+                        request.setDocumentObjectKey(doc.getFileObjectKey());
+                    });
+        }
 
         List<QuizQuestionTypeConfigEntity> typeConfigs = quizQuestionTypeConfigRepo
                 .findByQuizId(request.getQuizId());
@@ -151,7 +164,7 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
                 .createdBy(username)
                 .build();
 
-        QuizGenerationJobEntity savedJob = jobRepository.save(jobEntity);
+        QuizGenerationJobEntity savedJob = jobRepository.saveAndFlush(jobEntity);
         log.info("Created QuizGenerationJob {} for course {} (sourceType={})",
                 savedJob.getId(), request.getCourseId(), request.getSourceType());
 
@@ -234,9 +247,20 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
     private void executePipelineAsync(UUID jobId, GenerateQuizFromDocumentRequest request, byte[] fileBytes,
             String username) {
         long startTime = System.currentTimeMillis();
-        QuizGenerationJobEntity job = jobRepository.findById(jobId).orElse(null);
-        if (job == null)
+        QuizGenerationJobEntity job = null;
+        for (int i = 0; i < 5; i++) {
+            job = jobRepository.findById(jobId).orElse(null);
+            if (job != null)
+                break;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
+        }
+        if (job == null) {
+            log.error("Fatal: QuizGenerationJob {} not found in database for async execution", jobId);
             return;
+        }
 
         CourseDocumentEntity tempDocEntity = null;
 
@@ -246,7 +270,8 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
             List<DocumentKnowledgeChunkEntity> chunks = null;
 
             // Option Existing Global Document from Library
-            if (request.getSourceType() == DocumentSourceType.LIBRARY && request.getDocumentId() != null) {
+            if ((request.getSourceType() == DocumentSourceType.LIBRARY || request.getDocumentId() != null)
+                    && request.getDocumentId() != null) {
                 log.info("Job {}: Using existing Global Document {}", jobId, request.getDocumentId());
                 CourseDocumentEntity globalDoc = courseDocumentRepository
                         .findByIdAndDeletedAtIsNull(request.getDocumentId())
@@ -258,6 +283,26 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
                 jobRepository.save(job);
 
                 chunks = chunkRepository.findByDocumentId(request.getDocumentId());
+
+                if (chunks == null || chunks.isEmpty()) {
+                    log.info("Job {}: Global document {} has no pre-computed chunks. Syncing embeddings from storage...",
+                            jobId, globalDoc.getId());
+                    if (globalDoc.getFileObjectKey() != null) {
+                        try {
+                            byte[] downloadedBytes = fileService.downloadFileBytes(globalDoc.getFileObjectKey());
+                            try (InputStream is = new java.io.ByteArrayInputStream(downloadedBytes)) {
+                                chunks = documentProcessingService.processAndStoreDocument(globalDoc, is);
+                            }
+                            globalDoc.setStatus(DocumentStatus.READY);
+                            courseDocumentRepository.save(globalDoc);
+                            log.info("Job {}: Successfully synced {} chunks with embeddings for document {}",
+                                    jobId, chunks.size(), globalDoc.getId());
+                        } catch (Exception syncEx) {
+                            log.error("Job {}: Failed to sync embeddings from storage for document {}: {}",
+                                    jobId, globalDoc.getId(), syncEx.getMessage());
+                        }
+                    }
+                }
             }
 
             // Option New PDF Upload
@@ -453,6 +498,9 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
 
             UUID createdQuizId = persistQuizAndQuestions(job, request, acceptedQuestions);
 
+            // Invalidate Redis cache for quiz & quiz detail
+            invalidateQuizCached(createdQuizId);
+
             long duration = System.currentTimeMillis() - startTime;
             job.setExecutionTimeMs(duration);
             job.setResultQuizId(createdQuizId);
@@ -511,17 +559,22 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
             savedQuiz = quizRepo.save(quiz);
         }
 
-        Map<QuestionType, Integer> typeCounts = new HashMap<>();
-        int orderIdx = 1;
+        int existingQuestionCount = quizQuestionRepo.countByQuizIdAndDeletedAtIsNull(savedQuiz.getId());
+        int orderIdx = existingQuestionCount + 1;
 
         for (GeneratedQuestionContract qContract : acceptedQuestions) {
-            typeCounts.put(qContract.getQuestionType(), typeCounts.getOrDefault(qContract.getQuestionType(), 0) + 1);
+            BigDecimal points = qContract.getPoints() != null ? qContract.getPoints() : BigDecimal.valueOf(1.0);
+            Optional<QuizQuestionTypeConfigEntity> existingConfigOpt = quizQuestionTypeConfigRepo
+                    .findByQuizIdAndQuestionType(savedQuiz.getId(), qContract.getQuestionType());
+            if (existingConfigOpt.isPresent() && existingConfigOpt.get().getPointsPerQuestion() != null) {
+                points = existingConfigOpt.get().getPointsPerQuestion();
+            }
 
             QuizQuestionEntity questionEntity = QuizQuestionEntity.builder()
                     .quizId(savedQuiz.getId())
                     .questionType(qContract.getQuestionType())
                     .content(qContract.getContent())
-                    .points(qContract.getPoints() != null ? qContract.getPoints() : BigDecimal.valueOf(1.0))
+                    .points(points)
                     .orderIndex(orderIdx++)
                     .build();
 
@@ -556,20 +609,6 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
                     .build();
 
             sourceTraceRepository.save(traceEntity);
-        }
-
-        for (Map.Entry<QuestionType, Integer> entry : typeCounts.entrySet()) {
-            ScoringMethod scoringMethod = entry.getKey() == QuestionType.ESSAY ? ScoringMethod.MANUAL
-                    : ScoringMethod.AUTO;
-            QuizQuestionTypeConfigEntity configEntity = QuizQuestionTypeConfigEntity.builder()
-                    .quizId(savedQuiz.getId())
-                    .questionType(entry.getKey())
-                    .requiredCount(entry.getValue())
-                    .pointsPerQuestion(BigDecimal.valueOf(1.0))
-                    .scoringMethod(scoringMethod)
-                    .build();
-
-            quizQuestionTypeConfigRepo.save(configEntity);
         }
 
         return savedQuiz.getId();
@@ -646,6 +685,13 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
             return hexString.toString();
         } catch (Exception e) {
             return String.valueOf(Arrays.hashCode(bytes));
+        }
+    }
+
+    private void invalidateQuizCached(UUID quizId) {
+        if (quizId != null) {
+            RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_PREFIX + quizId);
+            RedisUtils.invalidateCache(RedisPrefixConstant.QUIZ_DETAIL_PREFIX + quizId);
         }
     }
 }

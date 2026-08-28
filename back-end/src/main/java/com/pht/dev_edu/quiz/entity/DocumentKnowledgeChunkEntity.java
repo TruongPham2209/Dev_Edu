@@ -40,6 +40,7 @@ public class DocumentKnowledgeChunkEntity {
     @Column(name = "content_hash", nullable = false, length = 64)
     String contentHash;
 
+    @org.hibernate.annotations.ColumnTransformer(write = "CAST(? AS vector)")
     @Column(name = "embedding", nullable = false, columnDefinition = "vector(1536)")
     String embedding;
 

@@ -22,4 +22,6 @@ public interface FileService {
     void deleteFile(String fullObjectKey);
 
     int getVideoDuration(String fullObjectKey);
+
+    byte[] downloadFileBytes(String fullObjectKey);
 }

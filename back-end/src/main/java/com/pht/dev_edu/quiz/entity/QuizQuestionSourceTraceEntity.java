@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -49,6 +52,7 @@ public class QuizQuestionSourceTraceEntity {
     @Column(name = "attempt_count")
     Integer attemptCount;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "validation_metrics", columnDefinition = "jsonb")
     String validationMetrics;
 

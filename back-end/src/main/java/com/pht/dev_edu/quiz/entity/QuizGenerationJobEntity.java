@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -45,6 +48,7 @@ public class QuizGenerationJobEntity {
     @Column(name = "requested_total", nullable = false)
     Integer requestedTotal;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "requested_config", nullable = false, columnDefinition = "jsonb")
     String requestedConfig;
 
@@ -60,6 +64,7 @@ public class QuizGenerationJobEntity {
     @Column(name = "rejected_count")
     Integer rejectedCount;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "rejection_reasons", columnDefinition = "jsonb")
     String rejectionReasons;
 

@@ -38,7 +38,6 @@ public class KnowledgeRetrieverServiceImpl implements KnowledgeRetrieverService 
         StringBuilder sb = new StringBuilder();
         for (DocumentKnowledgeChunkEntity chunk : matchedChunks) {
             sb.append("=== KNOWLEDGE SOURCE START ===\n")
-                    .append("Document: ").append(chunk.getDocumentName()).append("\n")
                     .append("Section: ").append(chunk.getSectionName() != null ? chunk.getSectionName() : "N/A").append("\n")
                     .append("Page: ").append(chunk.getPageNumber() != null ? chunk.getPageNumber() : 1).append("\n")
                     .append("Chunk ID: ").append(chunk.getId()).append("\n")
