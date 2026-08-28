@@ -40,7 +40,7 @@
 
 import * as coursesApi from "@/lib/api/courses";
 import * as quizzesApi from "@/lib/api/quizzes";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerCreateQuizPage from "../page";
 import { QuizHero } from "../quiz-hero";
@@ -79,6 +79,21 @@ describe("Lecturer Quizzes Page & QuizHero", () => {
       isPending: false,
     } as any);
 
+    vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+    } as any);
+
+    vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+    } as any);
+
+    vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+    } as any);
+
     vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue({
       data: [],
       isLoading: false,
@@ -94,10 +109,14 @@ describe("Lecturer Quizzes Page & QuizHero", () => {
 
   it("shouldRenderLecturerCreateQuizPage", async () => {
     const params = Promise.resolve({ id: "course-123" });
-    render(<LecturerCreateQuizPage params={params} />);
+    await act(async () => {
+      render(<LecturerCreateQuizPage params={params} />);
+    });
 
-    expect(
-      screen.getByText("1. General Quiz Information"),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText("1. General Quiz Information"),
+      ).toBeInTheDocument();
+    });
   });
 });

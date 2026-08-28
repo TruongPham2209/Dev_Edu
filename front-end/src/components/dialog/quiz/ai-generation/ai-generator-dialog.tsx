@@ -407,7 +407,7 @@ export function AiGeneratorDialog({
               )}
             </Box>
 
-            {touched && (errors.file || fileError) && (
+            {(fileError || (touched && errors.file)) && (
               <Typography variant="caption" color="error.main" sx={{ ml: 1 }}>
                 {fileError || errors.file}
               </Typography>
