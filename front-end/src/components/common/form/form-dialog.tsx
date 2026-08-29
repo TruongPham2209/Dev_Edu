@@ -86,7 +86,7 @@ export function FormDialog({
         },
       }}
       sx={{
-        "& .MuiPaper-root": {
+        "& .MuiDialog-paper": {
           position: "relative",
           overflow: "hidden",
           borderRadius: { xs: "20px", sm: "28px" },
@@ -107,7 +107,7 @@ export function FormDialog({
           `,
         },
 
-        "& .MuiPaper-root::before": {
+        "& .MuiDialog-paper::before": {
           content: '""',
           position: "absolute",
           inset: 0,

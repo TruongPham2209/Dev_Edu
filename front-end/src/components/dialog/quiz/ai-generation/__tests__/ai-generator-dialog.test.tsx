@@ -157,7 +157,7 @@ describe("AiGeneratorDialog Component", () => {
     fireEvent.change(fileInput, { target: { files: [invalidFile] } });
 
     expect(
-      screen.getByText("Only PDF files (.pdf) are supported."),
+      screen.getByText(/Unsupported file format\. Allowed extensions: \.PDF\./i),
     ).toBeInTheDocument();
   });
 

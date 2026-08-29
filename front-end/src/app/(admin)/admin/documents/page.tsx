@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { ErrorState } from "@/components/common/error-state";
 import { SearchInput } from "@/components/common/form/search-input";
 import { HeroInfo } from "@/components/common/hero-section/hero-info";
-import { UploadGlobalDocumentDialog } from "@/components/dialog/document/upload-global-document-dialog";
+import { UploadGlobalDocumentDialog } from "@/components/dialog/global-document-dialog";
 import { useDebounce } from "@/hooks/use-debounce";
 import {
   useDeleteGlobalDocumentMutation,
@@ -148,7 +148,7 @@ export default function AdminDocumentsPage() {
       {
         header: "Document Title",
         render: (doc) => (
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
             <Box
               sx={{
                 p: 1,

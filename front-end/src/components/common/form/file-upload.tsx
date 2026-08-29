@@ -1,6 +1,11 @@
 "use client";
 
-import { getFileAcceptString, isValidFileType } from "@/lib/util/file-utils";
+import {
+  formatBytes,
+  getFileAcceptString,
+  getFileIcon,
+  isValidFileType,
+} from "@/lib/util/file-utils";
 import {
   Box,
   FormHelperText,
@@ -8,10 +13,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { FileText, UploadCloud, X } from "lucide-react";
+import { UploadCloud, X } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 
-interface FileUploadProps {
+export interface FileUploadProps {
   value?: string | null; // Existing file URL from database
   file: File | null; // Local selected file
   onChange: (file: File | null) => void;
@@ -23,6 +28,7 @@ interface FileUploadProps {
   height?: string | number;
   accept?: string;
   fileType?: "image" | "video" | "document";
+  fileExtensions?: string[]; // e.g. [".pdf", ".docx"] or ["pdf", "docx"]
 }
 
 export function FileUpload({
@@ -36,11 +42,27 @@ export function FileUpload({
   width = "100%",
   height = 200,
   accept,
-  fileType = "image",
+  fileType,
+  fileExtensions,
 }: FileUploadProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Priority: fileType > fileExtensions. Default to "image" if neither is provided.
+  const effectiveFileType =
+    fileType !== undefined
+      ? fileType
+      : !fileExtensions || fileExtensions.length === 0
+        ? "image"
+        : undefined;
+
+  const normalizedExtensions = React.useMemo(() => {
+    if (!fileExtensions || fileExtensions.length === 0) return [];
+    return fileExtensions.map((ext) =>
+      ext.trim().replace(/^\./, "").toLowerCase(),
+    );
+  }, [fileExtensions]);
 
   // Generate preview URL for local selected file
   const localPreview = React.useMemo(() => {
@@ -61,16 +83,46 @@ export function FileUpload({
 
   const activePreview = localPreview || value;
 
+  // Determine preview mode
+  const isImagePreview = React.useMemo(() => {
+    if (effectiveFileType === "image") return true;
+    if (effectiveFileType === "video" || effectiveFileType === "document")
+      return false;
+    const name = file?.name || value || "";
+    const ext = name.split(".").pop()?.toLowerCase();
+    return ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext || "");
+  }, [effectiveFileType, file, value]);
+
+  const isVideoPreview = React.useMemo(() => {
+    if (effectiveFileType === "video") return true;
+    if (effectiveFileType === "image" || effectiveFileType === "document")
+      return false;
+    const name = file?.name || value || "";
+    const ext = name.split(".").pop()?.toLowerCase();
+    return ["mp4", "webm", "mkv", "mov", "avi"].includes(ext || "");
+  }, [effectiveFileType, file, value]);
+
   const validateAndProcessFile = useCallback(
     (selectedFile: File) => {
       setLocalError(null);
 
-      // Validate file type
-      if (!isValidFileType(selectedFile.type, fileType)) {
-        setLocalError(
-          `Unsupported file format. Please upload a valid ${fileType}.`,
-        );
-        return;
+      // Validate by fileType or fileExtensions (fileType > fileExtensions)
+      if (effectiveFileType) {
+        if (!isValidFileType(selectedFile.type, effectiveFileType)) {
+          setLocalError(
+            `Unsupported file format. Please upload a valid ${effectiveFileType}.`,
+          );
+          return;
+        }
+      } else if (normalizedExtensions.length > 0) {
+        const fileExt =
+          selectedFile.name.split(".").pop()?.toLowerCase() || "";
+        if (!normalizedExtensions.includes(fileExt)) {
+          setLocalError(
+            `Unsupported file format. Allowed extensions: ${normalizedExtensions.map((e) => `.${e.toUpperCase()}`).join(", ")}.`,
+          );
+          return;
+        }
       }
 
       // Check file size
@@ -82,7 +134,7 @@ export function FileUpload({
 
       onChange(selectedFile);
     },
-    [maxSizeMB, onChange],
+    [effectiveFileType, normalizedExtensions, maxSizeMB, onChange],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -186,7 +238,7 @@ export function FileUpload({
       >
         {activePreview ? (
           <>
-            {fileType === "image" ? (
+            {isImagePreview ? (
               <Box
                 component="img"
                 src={activePreview}
@@ -197,7 +249,7 @@ export function FileUpload({
                   objectFit: "cover",
                 }}
               />
-            ) : fileType === "video" ? (
+            ) : isVideoPreview ? (
               <Box
                 component="video"
                 src={activePreview}
@@ -214,14 +266,21 @@ export function FileUpload({
                 spacing={1.5}
                 sx={{ alignItems: "center", p: 3, textAlign: "center" }}
               >
-                <FileText size={48} className="text-slate-500" />
+                <Box sx={{ color: "primary.main" }}>
+                  {getFileIcon(file?.name || value || "", 44)}
+                </Box>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {file ? file.name : "Document Selected"}
                 </Typography>
+                {file && (
+                  <Typography variant="caption" color="text.secondary">
+                    {formatBytes(file.size)}
+                  </Typography>
+                )}
               </Stack>
             )}
 
-            {/* Hover overlay to change image */}
+            {/* Hover overlay to change file */}
             <Box
               className="upload-overlay"
               sx={{
@@ -315,11 +374,13 @@ export function FileUpload({
               sx={{ color: "text.secondary", opacity: 0.8 }}
             >
               Supports{" "}
-              {fileType === "image"
+              {effectiveFileType === "image"
                 ? "JPG, PNG, GIF, WEBP"
-                : fileType === "video"
+                : effectiveFileType === "video"
                   ? "MP4, AVI, MKV, WEBM, MOV"
-                  : "PDF, DOC, XLS, PPT, ZIP, TXT"}{" "}
+                  : effectiveFileType === "document"
+                    ? "PDF, DOC, XLS, PPT, ZIP, TXT"
+                    : normalizedExtensions.map((e) => e.toUpperCase()).join(", ")}{" "}
               (Max {maxSizeMB}MB)
             </Typography>
           </Stack>
@@ -329,7 +390,14 @@ export function FileUpload({
           type="file"
           ref={fileInputRef}
           hidden
-          accept={accept || getFileAcceptString(fileType)}
+          accept={
+            accept ||
+            (effectiveFileType
+              ? getFileAcceptString(effectiveFileType)
+              : normalizedExtensions.length > 0
+                ? normalizedExtensions.map((e) => `.${e}`).join(",")
+                : "*")
+          }
           onChange={handleFileChange}
         />
       </Box>

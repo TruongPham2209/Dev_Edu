@@ -1,5 +1,6 @@
 "use client";
 
+import { FileUpload } from "@/components/common/form/file-upload";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { SearchInput } from "@/components/common/form/search-input";
@@ -26,18 +27,16 @@ import {
   Stack,
   Tab,
   Tabs,
-  Typography
+  Typography,
 } from "@mui/material";
 import {
   BookOpen,
   CheckCircle2,
-  FileText,
   Library,
   Sparkles,
   UploadCloud,
-  X,
 } from "lucide-react";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 interface AiGeneratorDialogProps {
   open: boolean;
@@ -73,7 +72,6 @@ export function AiGeneratorDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saveDocument, setSaveDocument] = useState<boolean>(false);
   const [fileError, setFileError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Tab 1 states
   const [selectedDocument, setSelectedDocument] =
@@ -141,31 +139,6 @@ export function AiGeneratorDialog({
       setTouched(false);
     }
   }, [open]);
-
-  // File drop / select handler
-  const handleFileSelected = (file: File) => {
-    setFileError(null);
-    if (!file.name.toLowerCase().endsWith(".pdf")) {
-      setFileError("Only PDF files (.pdf) are supported.");
-      setSelectedFile(null);
-      return;
-    }
-    const maxSizeBytes = 30 * 1024 * 1024; // 30MB
-    if (file.size > maxSizeBytes) {
-      setFileError("File size must not exceed 30MB.");
-      setSelectedFile(null);
-      return;
-    }
-    setSelectedFile(file);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileSelected(e.dataTransfer.files[0]);
-    }
-  };
 
   // Validation
   const errors = useMemo(() => {
@@ -243,9 +216,11 @@ export function AiGeneratorDialog({
         >
           <Stack
             direction={{ xs: "column", sm: "row" }}
-            justifyContent="space-between"
-            alignItems={{ xs: "flex-start", sm: "center" }}
             spacing={1.5}
+            sx={{
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", sm: "center" },
+            }}
           >
             <Box>
               <Typography
@@ -259,7 +234,7 @@ export function AiGeneratorDialog({
                 matrix configurations.
               </Typography>
             </Box>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 1 }}>
               {quotaBreakdown.map((q) => (
                 <Chip
                   key={q.questionType}
@@ -302,116 +277,22 @@ export function AiGeneratorDialog({
         {/* TAB 0: Direct PDF Upload */}
         {activeTab === 0 && (
           <Stack spacing={2}>
-            <Box
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              sx={{
-                border: "2px dashed",
-                borderColor:
-                  touched && (errors.file || fileError)
-                    ? "error.main"
-                    : selectedFile
-                      ? "success.main"
-                      : "rgba(15, 23, 42, 0.2)",
-                borderRadius: 2,
-                p: { xs: 3, sm: 4 },
-                textAlign: "center",
-                cursor: "pointer",
-                bgcolor: selectedFile
-                  ? "rgba(34, 197, 94, 0.03)"
-                  : "rgba(15, 23, 42, 0.01)",
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  bgcolor: "rgba(37, 99, 235, 0.02)",
-                },
+            <FileUpload
+              file={selectedFile}
+              onChange={(f) => {
+                setSelectedFile(f);
+                setFileError(null);
               }}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,application/pdf"
-                hidden
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    handleFileSelected(e.target.files[0]);
-                  }
-                }}
-              />
-
-              {selectedFile ? (
-                <Stack
-                  alignItems="center"
-                  spacing={1}
-                  sx={{ position: "relative" }}
-                >
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: "50%",
-                      bgcolor: "success.50",
-                      color: "success.main",
-                    }}
-                  >
-                    <FileText size={36} />
-                  </Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    {selectedFile.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatBytes(selectedFile.size)} • PDF Document
-                  </Typography>
-                  <Button
-                    size="small"
-                    color="error"
-                    variant="text"
-                    startIcon={<X size={14} />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFile(null);
-                    }}
-                    sx={{ mt: 1 }}
-                  >
-                    Remove & Replace File
-                  </Button>
-                </Stack>
-              ) : (
-                <Stack alignItems="center" spacing={1.5}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      borderRadius: "50%",
-                      bgcolor: "rgba(37, 99, 235, 0.06)",
-                      color: "primary.main",
-                    }}
-                  >
-                    <UploadCloud size={32} />
-                  </Box>
-                  <Box>
-                    <Typography
-                      variant="body1"
-                      sx={{ fontWeight: 600, color: "text.primary" }}
-                    >
-                      Drag and drop your PDF syllabus/textbook here
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mt: 0.5 }}
-                    >
-                      or click to browse from your computer (Max 30MB)
-                    </Typography>
-                  </Box>
-                </Stack>
-              )}
-            </Box>
-
-            {(fileError || (touched && errors.file)) && (
-              <Typography variant="caption" color="error.main" sx={{ ml: 1 }}>
-                {fileError || errors.file}
-              </Typography>
-            )}
+              fileExtensions={[".pdf"]}
+              maxSizeMB={30}
+              height={180}
+              error={touched && (Boolean(errors.file) || Boolean(fileError))}
+              helperText={
+                (fileError || (touched && errors.file))
+                  ? (fileError || errors.file)
+                  : undefined
+              }
+            />
 
             <FormControlLabel
               control={
@@ -438,6 +319,7 @@ export function AiGeneratorDialog({
               value={searchTerm}
               onChange={setSearchTerm}
               placeholder="Search processed documents in library..."
+              maxWidth="100%"
             />
 
             {isLoadingLibrary ? (
@@ -490,7 +372,7 @@ export function AiGeneratorDialog({
                               <Stack
                                 direction="row"
                                 spacing={1.5}
-                                alignItems="flex-start"
+                                sx={{ alignItems: "flex-start" }}
                               >
                                 <Box
                                   sx={{
@@ -568,7 +450,7 @@ export function AiGeneratorDialog({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="E.g., Focus on advanced questions about Concurrency, Memory Management, and practical scenario-based problem solving..."
           multiline
-          rows={3}
+          minRows={3}
           error={touched && !!errors.description}
           helperText={
             touched && errors.description

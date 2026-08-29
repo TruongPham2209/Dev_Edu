@@ -81,7 +81,7 @@ export function AiProgressDialog({
   jobId,
   onSuccess,
 }: AiProgressDialogProps) {
-  const { data: job, isLoading } = useQuizGenerationJobQuery(jobId, {
+  const { data: job } = useQuizGenerationJobQuery(jobId, {
     enabled: open && !!jobId,
   });
 
@@ -231,9 +231,11 @@ export function AiProgressDialog({
           <Box>
             <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 1 }}
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
             >
               <Typography variant="body2" sx={{ fontWeight: 700 }}>
                 {isTerminalSuccess
@@ -245,7 +247,7 @@ export function AiProgressDialog({
                       : `${progressPercent}% Progress`}
               </Typography>
               {!isDone && !isTerminalError && (
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                   <CircularProgress size={14} thickness={5} />
                   <Typography variant="caption" color="text.secondary">
                     Live Polling
@@ -393,9 +395,9 @@ export function AiProgressDialog({
                   <Stack
                     key={step.key}
                     direction="row"
-                    alignItems="center"
                     spacing={1.5}
                     sx={{
+                      alignItems: "center",
                       p: 1.25,
                       borderRadius: 1.5,
                       bgcolor: isCurrent

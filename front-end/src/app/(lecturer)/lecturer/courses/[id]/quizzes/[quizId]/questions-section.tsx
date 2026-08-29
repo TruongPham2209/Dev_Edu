@@ -86,9 +86,7 @@ export function QuestionsSection({
           <Stack
             direction="row"
             spacing={1.5}
-            alignItems="center"
-            flexWrap="wrap"
-            useFlexGap
+            sx={{ alignItems: "center", flexWrap: "wrap", gap: 1.5 }}
           >
             {onOpenAiGenerator && (
               <Tooltip

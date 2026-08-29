@@ -15,6 +15,7 @@ describe("QuestionsSection Component - AI Generation & UI Guard", () => {
       questionType: "SINGLE_CHOICE",
       requiredCount: 5,
       pointsPerQuestion: 2,
+      scoringMethod: "AUTO",
     },
     {
       id: "cfg-2",
@@ -22,6 +23,7 @@ describe("QuestionsSection Component - AI Generation & UI Guard", () => {
       questionType: "MULTIPLE_CHOICE",
       requiredCount: 3,
       pointsPerQuestion: 3,
+      scoringMethod: "AUTO",
     },
   ];
 
@@ -34,8 +36,8 @@ describe("QuestionsSection Component - AI Generation & UI Guard", () => {
       points: 2,
       orderIndex: 0,
       options: [
-        { id: "opt-1", content: "Library", isCorrect: true },
-        { id: "opt-2", content: "Database", isCorrect: false },
+        { id: "opt-1", optionText: "Library", isCorrect: true, orderIndex: 0 },
+        { id: "opt-2", optionText: "Database", isCorrect: false, orderIndex: 1 },
       ],
     },
   ];
