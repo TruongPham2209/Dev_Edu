@@ -1,4 +1,3 @@
-import { MetricPeriod } from "./enum";
 
 export type DashboardOverviewResponse = {
   totalUsers: number;

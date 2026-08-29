@@ -40,16 +40,17 @@ export default function AdminUsersPage() {
   const totalPages = usersData?.totalPages ?? 0;
   const isError = Boolean(error);
 
+  const [prevUsersData, setPrevUsersData] = useState<typeof usersData>(undefined);
+
   // Append new data when usersData is loaded
-  useEffect(() => {
-    if (usersData) {
-      if (page === 0) {
-        setUsers(usersData.contents);
-      } else {
-        setUsers((prev) => [...prev, ...usersData.contents]);
-      }
+  if (usersData && prevUsersData !== usersData) {
+    setPrevUsersData(usersData);
+    if (page === 0) {
+      setUsers(usersData.contents);
+    } else {
+      setUsers((prev) => [...prev, ...usersData.contents]);
     }
-  }, [usersData, page]);
+  }
 
   useEffect(() => {
     if (error) {

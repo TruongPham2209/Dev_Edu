@@ -13,6 +13,7 @@ import type {
   CourseRequest,
   CourseResponse,
 } from "@/lib/type/courses";
+import type { UserResponse } from "@/lib/type/users";
 import {
   Box,
   Chip,
@@ -22,7 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import { BookOpen, DollarSign, FolderPlus, Save, Type } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type CourseFormDialogProps = {
   open: boolean;
@@ -49,29 +50,10 @@ export function CourseFormDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [touched, setTouched] = useState(false);
 
-  // Lecturer search states
+  // Lecturer search & assignment state
   const [lecturerSearchQuery, setLecturerSearchQuery] = useState("");
   const [lecturerInputFocused, setLecturerInputFocused] = useState(false);
 
-  // Debounced search logic for lecturers (role: LECTURER, page: 0)
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedQuery(lecturerSearchQuery);
-    }, 450);
-    return () => clearTimeout(handler);
-  }, [lecturerSearchQuery]);
-
-  const { data: searchData, isLoading: isSearchingLecturers } =
-    useSearchUsersQuery(0, debouncedQuery, "LECTURER", {
-      enabled: lecturerInputFocused,
-    });
-
-  const lecturerSearchResults = useMemo(() => {
-    return searchData?.contents || [];
-  }, [searchData]);
-
-  // React Query Hook for Course Details
   const isUpdate = Boolean(initialValue.id);
   const { data: courseDetails, isLoading: loadingDetails } = useCourseByIdQuery(
     initialValue.id || "",
@@ -80,18 +62,37 @@ export function CourseFormDialog({
     },
   );
 
-  useEffect(() => {
-    if (courseDetails) {
-      setForm((prev) => ({
-        ...prev,
-        lecturerUsernames: courseDetails.lecturers ?? [],
-        description: courseDetails.description || prev.description,
-      }));
-    }
-  }, [courseDetails]);
+  const { data: searchData, isLoading: isSearchingLecturers } =
+    useSearchUsersQuery(0, lecturerSearchQuery, "LECTURER", {
+      enabled: lecturerInputFocused,
+    });
 
-  // Initialize and apply fallback selection logic
-  useEffect(() => {
+  const lecturerSearchResults = useMemo(() => {
+    return searchData?.contents || [];
+  }, [searchData]);
+
+  const [prevInitial, setPrevInitial] = useState({
+    open,
+    id: initialValue.id,
+    initialValue,
+  });
+  const [prevDetails, setPrevDetails] = useState<CourseResponse | null | undefined>(null);
+
+  if (courseDetails && prevDetails !== courseDetails) {
+    setPrevDetails(courseDetails);
+    setForm((prev) => ({
+      ...prev,
+      lecturerUsernames: courseDetails.lecturers ?? [],
+      description: courseDetails.description || prev.description,
+    }));
+  }
+
+  if (
+    prevInitial.open !== open ||
+    prevInitial.id !== initialValue.id ||
+    prevInitial.initialValue !== initialValue
+  ) {
+    setPrevInitial({ open, id: initialValue.id, initialValue });
     if (open) {
       let targetCategoryId = initialValue.categoryId;
 
@@ -122,7 +123,7 @@ export function CourseFormDialog({
       setSelectedFile(null);
       setTouched(false);
     }
-  }, [open, initialValue, categories, isUpdate]);
+  }
 
   // Comprehensive, strict validation
   const errors = useMemo(() => {
@@ -288,12 +289,9 @@ export function CourseFormDialog({
                 }}
               >
                 <Box sx={{ position: "relative", zIndex: 50, height: 56 }}>
-                  <SearchInput
+                  <SearchInput<UserResponse>
                     value={lecturerSearchQuery}
                     onChange={setLecturerSearchQuery}
-                    onSearch={(val) => {
-                      // Enter press or search click triggers this; typically we rely on dropdown selection.
-                    }}
                     onClear={() => setLecturerSearchQuery("")}
                     onFocus={() => setLecturerInputFocused(true)}
                     placeholder="Search & Assign Lecturers..."
@@ -304,7 +302,7 @@ export function CourseFormDialog({
                         lecturerSearchQuery.trim().length > 0)
                     }
                     loading={isSearchingLecturers}
-                    dropdownItems={lecturerSearchResults.map((u) => ({
+                    dropdownItems={lecturerSearchResults.map((u: UserResponse) => ({
                       label: u.fullName,
                       value: u.username,
                       original: u,
@@ -315,10 +313,10 @@ export function CourseFormDialog({
                           sx={{ fontWeight: 600, fontSize: "0.9rem" }}
                           className="search-item-text"
                         >
-                          {item.original.fullName}
+                          {item.original?.fullName || item.label}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          @{item.original.username} • {item.original.email}
+                          @{item.original?.username} • {item.original?.email}
                         </Typography>
                       </Stack>
                     )}
@@ -354,14 +352,14 @@ export function CourseFormDialog({
                         saving
                           ? undefined
                           : () => {
-                              setForm((prev) => ({
-                                ...prev,
-                                lecturerUsernames:
-                                  prev.lecturerUsernames.filter(
-                                    (n) => n !== username,
-                                  ),
-                              }));
-                            }
+                            setForm((prev) => ({
+                              ...prev,
+                              lecturerUsernames:
+                                prev.lecturerUsernames.filter(
+                                  (n) => n !== username,
+                                ),
+                            }));
+                          }
                       }
                       disabled={saving}
                       sx={{

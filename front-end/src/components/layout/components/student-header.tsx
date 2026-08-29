@@ -23,9 +23,11 @@ import {
 import { Code2, Menu, Shield, ShoppingCart, UserCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { NotificationCenter } from "./notification-center";
 import { UserMenu } from "./user-menu";
+
+const emptySubscribe = () => () => {};
 
 export function StudentHeader() {
   const pathname = usePathname() || "";
@@ -34,13 +36,9 @@ export function StudentHeader() {
     disableHysteresis: true,
     threshold: 12,
   });
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isScrolled = mounted ? scrollTrigger : false;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <>

@@ -15,17 +15,18 @@ import { ProfileHeader } from "./profile-header";
 import { SavedPostsTab } from "./saved-tab";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [avatarOverride, setAvatarOverride] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"posted" | "saved">("posted");
   const { handleError } = useApiWithToast();
 
   const { data: userData, isLoading, error } = useMeQuery();
 
-  useEffect(() => {
-    if (userData) {
-      setUser(userData as unknown as AuthUser);
+  const user: AuthUser | null = userData
+    ? {
+      ...(userData as unknown as AuthUser),
+      ...(avatarOverride ? { avatarUrl: avatarOverride } : {}),
     }
-  }, [userData]);
+    : null;
 
   useEffect(() => {
     if (error) {
@@ -46,7 +47,7 @@ export default function ProfilePage() {
   }
 
   const handleAvatarChange = (newAvatarUrl: string) => {
-    setUser((prev) => (prev ? { ...prev, avatarUrl: newAvatarUrl } : null));
+    setAvatarOverride(newAvatarUrl);
     updateStoredUser({ avatarUrl: newAvatarUrl });
   };
 

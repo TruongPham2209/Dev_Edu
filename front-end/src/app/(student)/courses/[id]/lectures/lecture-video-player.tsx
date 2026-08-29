@@ -144,7 +144,7 @@ export function LectureVideoPlayer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lectureId, isCompleted, onCompleted, updateProgress]);
+  }, [lectureId, isCompleted, onCompleted, updateProgress, queryClient]);
 
   const isLoadingVideo = loadingUrl || loading;
 

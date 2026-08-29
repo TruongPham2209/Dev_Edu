@@ -16,28 +16,29 @@ import {
 import { ArrowUpRight, Search, X } from "lucide-react";
 import React, { useMemo, useRef, useState } from "react";
 
-export interface SearchDropdownItem {
+export interface SearchDropdownItem<T = unknown> {
   label: string;
   value: string;
+  original?: T;
   [key: string]: unknown;
 }
 
-export interface SearchInputProps {
+export interface SearchInputProps<T = unknown> {
   value: string;
   placeholder?: string;
   onChange?: (val: string) => void;
-  onSearch: (val: string) => void;
+  onSearch?: (val: string) => void;
   onClear?: () => void;
   onFocus?: () => void;
   showDropdown?: boolean;
-  dropdownItems?: SearchDropdownItem[];
+  dropdownItems?: SearchDropdownItem<T>[];
   onDropdownItemSelect?: (value: string) => void;
-  renderDropdownItem?: (item: SearchDropdownItem) => React.ReactNode;
+  renderDropdownItem?: (item: SearchDropdownItem<T>) => React.ReactNode;
   maxWidth?: number | string;
   loading?: boolean;
 }
 
-export function SearchInput({
+export function SearchInput<T = unknown>({
   value,
   placeholder = "Search anything...",
   onChange,
@@ -50,7 +51,7 @@ export function SearchInput({
   renderDropdownItem,
   maxWidth = 760,
   loading = false,
-}: SearchInputProps) {
+}: SearchInputProps<T>) {
   const [focused, setFocused] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
 
@@ -66,7 +67,7 @@ export function SearchInput({
 
     if (!trimmed) return;
 
-    onSearch(trimmed);
+    onSearch?.(trimmed);
     setOpenDropdown(false);
   };
 

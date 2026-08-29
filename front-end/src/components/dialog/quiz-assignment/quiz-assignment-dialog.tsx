@@ -4,10 +4,10 @@ import { FilterSelect } from "@/components/common/form/filter-select";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import type { CreateAssignmentRequest, QuizResponse } from "@/lib/type/quizzes";
+import { toLocalIsoString } from "@/lib/util/date-utils";
 import { Box, FormControlLabel, Stack, Switch } from "@mui/material";
 import { Clock } from "lucide-react";
-import { toLocalIsoString } from "@/lib/util/date-utils";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface QuizAssignmentDialogProps {
   open: boolean;
@@ -30,9 +30,23 @@ export function QuizAssignmentDialog({
   defaultQuizId = "",
   quizTitle = "",
 }: QuizAssignmentDialogProps) {
-  const [quizId, setQuizId] = useState<string>("");
-  const [assignmentName, setAssignmentName] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("");
+  const [quizId, setQuizId] = useState<string>(
+    () => defaultQuizId || (approvedQuizzes[0]?.id ?? ""),
+  );
+  const [assignmentName, setAssignmentName] = useState<string>(
+    () =>
+      quizTitle ||
+      approvedQuizzes.find(
+        (q) => q.id === (defaultQuizId || (approvedQuizzes[0]?.id ?? "")),
+      )?.title ||
+      "",
+  );
+  const [startTime, setStartTime] = useState<string>(() => {
+    const now = new Date();
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+  });
   const [endTime, setEndTime] = useState<string>("");
   const [durationMinutes, setDurationMinutes] = useState<number>(45);
   const [maxAttempts, setMaxAttempts] = useState<number>(1);
@@ -42,7 +56,14 @@ export function QuizAssignmentDialog({
     {},
   );
 
-  useEffect(() => {
+  const [prevProps, setPrevProps] = useState({ open, defaultQuizId, quizTitle });
+
+  if (
+    prevProps.open !== open ||
+    prevProps.defaultQuizId !== defaultQuizId ||
+    prevProps.quizTitle !== quizTitle
+  ) {
+    setPrevProps({ open, defaultQuizId, quizTitle });
     if (open) {
       const selectedId = defaultQuizId || (approvedQuizzes[0]?.id ?? "");
       setQuizId(selectedId);
@@ -63,7 +84,7 @@ export function QuizAssignmentDialog({
       setShuffleOptions(true);
       setTouchedFields({});
     }
-  }, [open, defaultQuizId, quizTitle, approvedQuizzes]);
+  }
 
   const quizItems = useMemo(
     () =>
@@ -160,7 +181,7 @@ export function QuizAssignmentDialog({
         quizTitle ? `Create Assignment for "${quizTitle}"` : "Create Assignment"
       }
       headerIcon={<Clock size={24} />}
-      onClose={loading ? () => {} : onClose}
+      onClose={loading ? () => { } : onClose}
       onSubmit={handleSubmit}
       isSubmitDisabled={!isValid || loading}
       submitText="Create Assignment"
@@ -269,7 +290,7 @@ export function QuizAssignmentDialog({
               )}
               helperText={
                 touchedFields.durationMinutes &&
-                validationErrors.durationMinutes
+                  validationErrors.durationMinutes
                   ? validationErrors.durationMinutes
                   : undefined
               }

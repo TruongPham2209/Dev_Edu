@@ -6,7 +6,6 @@ import {
   Box,
   CircularProgress,
   IconButton,
-  Paper,
   Stack,
   Tooltip,
   useTheme,

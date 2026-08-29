@@ -15,9 +15,11 @@ import {
 import { Code2, Home, Menu, Shield, UserCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { NotificationCenter } from "./notification-center";
 import { UserMenu } from "./user-menu";
+
+const emptySubscribe = () => () => {};
 
 export type ManageHeaderProps = {
   title: string;
@@ -40,12 +42,8 @@ export function ManageHeader({
     disableHysteresis: true,
     threshold: 12,
   });
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const isScrolled = mounted ? scrollTrigger : false;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <AppBar

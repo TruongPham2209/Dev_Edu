@@ -14,7 +14,7 @@ export async function RelatedPostsSidebar({
   let relatedPosts: PostResponse[] = [];
   try {
     relatedPosts = await getRelatedPosts(postId);
-  } catch (error) {
+  } catch {
     relatedPosts = [];
   }
 

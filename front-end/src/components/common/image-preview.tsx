@@ -9,7 +9,7 @@ import {
   Modal,
 } from "@mui/material";
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface ImagePreviewProps {
   src?: string | null;
@@ -27,10 +27,12 @@ export function ImagePreview({
   open,
   onClose,
 }: ImagePreviewProps) {
-  const [imgSrc, setImgSrc] = useState<string>(FALLBACK_IMAGE);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [prevProps, setPrevProps] = useState({ src, open });
+  const [imgSrc, setImgSrc] = useState<string>(src || FALLBACK_IMAGE);
+  const [loading, setLoading] = useState<boolean>(Boolean(src));
 
-  useEffect(() => {
+  if (prevProps.src !== src || prevProps.open !== open) {
+    setPrevProps({ src, open });
     if (open) {
       if (src) {
         setImgSrc(src);
@@ -40,7 +42,7 @@ export function ImagePreview({
         setLoading(false);
       }
     }
-  }, [src, open]);
+  }
 
   const handleImageError = () => {
     setImgSrc(FALLBACK_IMAGE);

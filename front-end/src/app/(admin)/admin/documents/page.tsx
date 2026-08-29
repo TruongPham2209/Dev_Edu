@@ -84,11 +84,7 @@ export default function AdminDocumentsPage() {
 
   const documents: GlobalDocumentResponse[] = useMemo(() => {
     if (!documentsData) return [];
-    if (Array.isArray(documentsData)) return documentsData;
-    const dataAny = documentsData as any;
-    if (Array.isArray(dataAny.contents)) return dataAny.contents;
-    if (Array.isArray(dataAny.content)) return dataAny.content;
-    if (Array.isArray(dataAny.items)) return dataAny.items;
+    if (Array.isArray(documentsData.contents)) return documentsData.contents;
     return [];
   }, [documentsData]);
 

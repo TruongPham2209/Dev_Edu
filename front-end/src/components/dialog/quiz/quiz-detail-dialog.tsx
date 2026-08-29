@@ -37,7 +37,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface QuizDetailDialogProps {
   open: boolean;
@@ -66,10 +66,13 @@ export function QuizDetailDialog({
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [overrideStatus, setOverrideStatus] = useState<QuizStatus | null>(null);
 
+  const [prevProps, setPrevProps] = useState({ open, id: quiz?.id });
+
   // Reset overrideStatus when modal opens or quiz changes
-  useEffect(() => {
+  if (prevProps.open !== open || prevProps.id !== quiz?.id) {
+    setPrevProps({ open, id: quiz?.id });
     setOverrideStatus(null);
-  }, [quiz?.id, open]);
+  }
 
   // Fetch full details when open
   const {
@@ -90,13 +93,13 @@ export function QuizDetailDialog({
 
   const quizDetail: QuizResponse | null = realQuiz
     ? {
-        ...quiz,
-        ...realQuiz,
-        status: overrideStatus || realQuiz.status || quiz?.status || "DRAFT",
-        typeConfigs:
-          typeConfigs.length > 0 ? typeConfigs : realQuiz?.typeConfigs || [],
-        questions: questions.length > 0 ? questions : realQuiz?.questions || [],
-      }
+      ...quiz,
+      ...realQuiz,
+      status: overrideStatus || realQuiz.status || quiz?.status || "DRAFT",
+      typeConfigs:
+        typeConfigs.length > 0 ? typeConfigs : realQuiz?.typeConfigs || [],
+      questions: questions.length > 0 ? questions : realQuiz?.questions || [],
+    }
     : quiz;
 
   const quizTitle = quizDetail?.title || quiz?.title || "";
@@ -195,7 +198,7 @@ export function QuizDetailDialog({
     <>
       <InfoDialog
         open={open}
-        onClose={isPendingAction ? () => {} : onClose}
+        onClose={isPendingAction ? () => { } : onClose}
         title={quizTitle || "Quiz Detail"}
         headerIcon={<FileQuestion size={24} />}
         closeText="Close"

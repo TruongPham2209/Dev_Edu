@@ -96,12 +96,9 @@ export function AiGeneratorDialog({
 
   const libraryDocuments = useMemo(() => {
     if (!libraryData?.pages) return [];
-    return libraryData.pages.flatMap((page: any) => {
+    return libraryData.pages.flatMap((page) => {
       if (!page) return [];
-      if (Array.isArray(page)) return page;
       if (Array.isArray(page.contents)) return page.contents;
-      if (Array.isArray(page.content)) return page.content;
-      if (Array.isArray(page.items)) return page.items;
       return [];
     });
   }, [libraryData]);

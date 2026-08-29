@@ -106,7 +106,7 @@ export function AiProgressDialog({
     if (job && (job.status === "COMPLETED" || job.status === "PARTIAL")) {
       onSuccess(job);
     }
-  }, [job?.status]);
+  }, [job, onSuccess]);
 
   // Compute progress percentage
   const progressPercent = useMemo(() => {

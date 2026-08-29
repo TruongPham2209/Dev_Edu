@@ -16,29 +16,29 @@ import {
   Typography,
 } from "@mui/material";
 import { BellRing, Send, Users } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const AVAILABLE_ROLES: {
   role: RoleEnum;
   label: string;
   description: string;
 }[] = [
-  {
-    role: "STUDENT",
-    label: "Students",
-    description: "All registered students",
-  },
-  {
-    role: "LECTURER",
-    label: "Lecturers",
-    description: "All instructors on the platform",
-  },
-  {
-    role: "ADMIN",
-    label: "Admins",
-    description: "All administrative users",
-  },
-];
+    {
+      role: "STUDENT",
+      label: "Students",
+      description: "All registered students",
+    },
+    {
+      role: "LECTURER",
+      label: "Lecturers",
+      description: "All instructors on the platform",
+    },
+    {
+      role: "ADMIN",
+      label: "Admins",
+      description: "All administrative users",
+    },
+  ];
 
 export interface CreateGroupNotificationDialogProps {
   open: boolean;
@@ -65,7 +65,10 @@ export function CreateGroupNotificationDialog({
     targetRoles: false,
   });
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (open) {
       setForm({
         title: "",
@@ -74,7 +77,7 @@ export function CreateGroupNotificationDialog({
       });
       setTouched({ title: false, content: false, targetRoles: false });
     }
-  }, [open]);
+  }
 
   const errors = useMemo(() => {
     const titleTrimmed = form.title.trim();

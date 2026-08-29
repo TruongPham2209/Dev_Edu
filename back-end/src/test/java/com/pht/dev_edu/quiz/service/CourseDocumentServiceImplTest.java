@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,10 +81,8 @@ import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
  *
  * Purpose
  * -------
- * Verify document library retrieval, admin direct upload to private bucket with
- * immediate
- * chunk/embedding processing, and soft-delete operations in
- * CourseDocumentServiceImpl.
+ * Verify document library retrieval, admin direct upload to private bucket with immediate
+ * chunk/embedding processing, and soft-delete operations in CourseDocumentServiceImpl.
  *
  * Test Scope
  * ----------
@@ -110,165 +109,159 @@ import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 @ExtendWith(MockitoExtension.class)
 class CourseDocumentServiceImplTest {
 
-        @Mock
-        private CourseDocumentRepository documentRepository;
+    @Mock
+    private CourseDocumentRepository documentRepository;
 
-        @Mock
-        private DocumentProcessingService documentProcessingService;
+    @Mock
+    private DocumentProcessingService documentProcessingService;
 
-        @Mock
-        private FileService fileService;
+    @Mock
+    private FileService fileService;
 
-        @Mock
-        private FileUploadRepository fileUploadRepository;
+    @Mock
+    private FileUploadRepository fileUploadRepository;
 
-        @InjectMocks
-        private CourseDocumentServiceImpl courseDocumentService;
+    @InjectMocks
+    private CourseDocumentServiceImpl courseDocumentService;
 
-        private static final String ADMIN_USER = "admin_super";
-        private static final UUID DOCUMENT_ID = UUID.randomUUID();
+    private static final String ADMIN_USER = "admin_super";
+    private static final UUID DOCUMENT_ID = UUID.randomUUID();
 
-        @Test
-        @DisplayName("getGlobalDocumentLibrary - should return cursor paginated list of global documents")
-        void shouldReturnGlobalDocumentLibraryWithCursorPagination() {
-                // Arrange
-                CourseDocumentEntity doc1 = CourseDocumentEntity.builder()
-                                .id(UUID.randomUUID())
-                                .title("Operating Systems.pdf")
-                                .fileName("Operating Systems.pdf")
-                                .fileObjectKey("private-bucket/dev_edu/OS.pdf")
-                                .fileSize(1024L)
-                                .contentHash("hash1")
-                                .status(DocumentStatus.READY)
-                                .visibility(DocumentVisibility.GLOBAL)
-                                .createdBy(ADMIN_USER)
-                                .createdAt(LocalDateTime.now())
-                                .build();
+    @Test
+    @DisplayName("getGlobalDocumentLibrary - should return cursor paginated list of global documents")
+    void shouldReturnGlobalDocumentLibraryWithCursorPagination() {
+        // Arrange
+        CourseDocumentEntity doc1 = CourseDocumentEntity.builder()
+                .id(UUID.randomUUID())
+                .title("Operating Systems.pdf")
+                .fileName("Operating Systems.pdf")
+                .fileObjectKey("private-bucket/dev_edu/OS.pdf")
+                .fileSize(1024L)
+                .contentHash("hash1")
+                .status(DocumentStatus.READY)
+                .visibility(DocumentVisibility.GLOBAL)
+                .createdBy(ADMIN_USER)
+                .createdAt(LocalDateTime.now())
+                .build();
 
-                when(documentRepository.findGlobalDocumentsWithCursor(eq("Operating"), any(), any(), eq(16)))
-                                .thenReturn(List.of(doc1));
+        when(documentRepository.findGlobalDocumentsWithCursor(eq("Operating"), any(), any(), eq(16)))
+                .thenReturn(List.of(doc1));
 
-                // Act
-                CustomPaging<CourseDocumentResponse> result = courseDocumentService.getGlobalDocumentLibrary(null,
-                                "Operating");
+        // Act
+        CustomPaging<CourseDocumentResponse> result = courseDocumentService.getGlobalDocumentLibrary(null, "Operating");
 
-                // Assert
-                assertThat(result).isNotNull();
-                assertThat(result.getContents()).hasSize(1);
-                assertThat(result.getContents().iterator().next().getTitle()).isEqualTo("Operating Systems.pdf");
-        }
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getContents()).hasSize(1);
+        assertThat(result.getContents().iterator().next().getTitle()).isEqualTo("Operating Systems.pdf");
+    }
 
-        @Test
-        @DisplayName("uploadGlobalDocumentByAdmin - should throw BadRequestException when file is empty")
-        void shouldThrowBadRequestWhenAdminUploadFileIsEmpty() {
-                // Arrange
-                MockMultipartFile emptyFile = new MockMultipartFile("file", "empty.pdf", "application/pdf",
-                                new byte[0]);
+    @Test
+    @DisplayName("uploadGlobalDocumentByAdmin - should throw BadRequestException when file is empty")
+    void shouldThrowBadRequestWhenAdminUploadFileIsEmpty() {
+        // Arrange
+        MockMultipartFile emptyFile = new MockMultipartFile("file", "empty.pdf", "application/pdf", new byte[0]);
 
-                // Act & Assert
-                assertThatThrownBy(
-                                () -> courseDocumentService.uploadGlobalDocumentByAdmin(emptyFile, "Title", ADMIN_USER))
-                                .isInstanceOf(BadRequestException.class)
-                                .hasMessageContaining("File is empty");
-                verify(fileService, never()).uploadDirectFile(any(), any(Boolean.class), any());
-        }
+        // Act & Assert
+        assertThatThrownBy(() -> courseDocumentService.uploadGlobalDocumentByAdmin(emptyFile, "Title", ADMIN_USER))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("File is empty");
+        verify(fileService, never()).uploadDirectFile(any(), any(Boolean.class), any());
+    }
 
-        @Test
-        @DisplayName("uploadGlobalDocumentByAdmin - should throw BadRequestException when file is not PDF")
-        void shouldThrowBadRequestWhenAdminUploadFileIsNotPdf() {
-                // Arrange
-                MockMultipartFile txtFile = new MockMultipartFile("file", "notes.txt", "text/plain",
-                                "Hello World".getBytes());
+    @Test
+    @DisplayName("uploadGlobalDocumentByAdmin - should throw BadRequestException when file is not PDF")
+    void shouldThrowBadRequestWhenAdminUploadFileIsNotPdf() {
+        // Arrange
+        MockMultipartFile txtFile = new MockMultipartFile("file", "notes.txt", "text/plain", "Hello World".getBytes());
 
-                // Act & Assert
-                assertThatThrownBy(
-                                () -> courseDocumentService.uploadGlobalDocumentByAdmin(txtFile, "Title", ADMIN_USER))
-                                .isInstanceOf(BadRequestException.class)
-                                .hasMessageContaining("Only PDF document files are allowed");
-                verify(fileService, never()).uploadDirectFile(any(), any(Boolean.class), any());
-        }
+        // Act & Assert
+        assertThatThrownBy(() -> courseDocumentService.uploadGlobalDocumentByAdmin(txtFile, "Title", ADMIN_USER))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Only PDF document files are allowed");
+        verify(fileService, never()).uploadDirectFile(any(), any(Boolean.class), any());
+    }
 
-        @Test
-        @DisplayName("uploadGlobalDocumentByAdmin - should upload to private bucket, confirm file_upload, and process embeddings immediately")
-        void shouldUploadGlobalDocumentToPrivateBucketAndProcessEmbeddingsImmediately() {
-                // Arrange
-                byte[] pdfBytes = "%PDF-1.4 Mock PDF Content".getBytes();
-                MockMultipartFile pdfFile = new MockMultipartFile("file", "Network.pdf", "application/pdf", pdfBytes);
+    @Test
+    @DisplayName("uploadGlobalDocumentByAdmin - should upload to private bucket, confirm file_upload, and process embeddings immediately")
+    void shouldUploadGlobalDocumentToPrivateBucketAndProcessEmbeddingsImmediately() {
+        // Arrange
+        byte[] pdfBytes = "%PDF-1.4 Mock PDF Content".getBytes();
+        MockMultipartFile pdfFile = new MockMultipartFile("file", "Network.pdf", "application/pdf", pdfBytes);
 
-                String privateObjectKey = "private-bucket/dev_edu/177000-Network.pdf";
-                FileUploadResponse fileResp = FileUploadResponse.builder()
-                                .originalFileName("Network.pdf")
-                                .objectKey(privateObjectKey)
-                                .fileSize((long) pdfBytes.length)
-                                .build();
-                when(fileService.uploadDirectFile(pdfFile, false, ADMIN_USER)).thenReturn(fileResp);
+        String privateObjectKey = "private-bucket/dev_edu/177000-Network.pdf";
+        FileUploadResponse fileResp = FileUploadResponse.builder()
+                .originalFileName("Network.pdf")
+                .objectKey(privateObjectKey)
+                .fileSize((long) pdfBytes.length)
+                .build();
+        when(fileService.uploadDirectFile(pdfFile, false, ADMIN_USER)).thenReturn(fileResp);
 
-                FileUploadEntity fileUploadEntity = FileUploadEntity.builder()
-                                .objectKey(privateObjectKey)
-                                .status(UploadStatus.PENDING)
-                                .build();
-                when(fileUploadRepository.findByObjectKey(privateObjectKey)).thenReturn(Optional.of(fileUploadEntity));
+        FileUploadEntity fileUploadEntity = FileUploadEntity.builder()
+                .objectKey(privateObjectKey)
+                .status(UploadStatus.PENDING)
+                .build();
+        when(fileUploadRepository.findByObjectKey(privateObjectKey)).thenReturn(Optional.of(fileUploadEntity));
 
-                CourseDocumentEntity savedDoc = CourseDocumentEntity.builder()
-                                .id(DOCUMENT_ID)
-                                .title("Computer Networks")
-                                .fileName("Network.pdf")
-                                .fileObjectKey(privateObjectKey)
-                                .fileSize((long) pdfBytes.length)
-                                .contentHash("hash123")
-                                .status(DocumentStatus.READY)
-                                .visibility(DocumentVisibility.GLOBAL)
-                                .createdBy(ADMIN_USER)
-                                .createdAt(LocalDateTime.now())
-                                .build();
-                when(documentRepository.save(any(CourseDocumentEntity.class))).thenReturn(savedDoc);
+        CourseDocumentEntity savedDoc = CourseDocumentEntity.builder()
+                .id(DOCUMENT_ID)
+                .title("Computer Networks")
+                .fileName("Network.pdf")
+                .fileObjectKey(privateObjectKey)
+                .fileSize((long) pdfBytes.length)
+                .contentHash("hash123")
+                .status(DocumentStatus.READY)
+                .visibility(DocumentVisibility.GLOBAL)
+                .createdBy(ADMIN_USER)
+                .createdAt(LocalDateTime.now())
+                .build();
+        when(documentRepository.save(any(CourseDocumentEntity.class))).thenReturn(savedDoc);
 
-                // Act
-                CourseDocumentResponse response = courseDocumentService.uploadGlobalDocumentByAdmin(pdfFile,
-                                "Computer Networks", ADMIN_USER);
+        // Act
+        CourseDocumentResponse response = courseDocumentService.uploadGlobalDocumentByAdmin(pdfFile, "Computer Networks", ADMIN_USER);
 
-                // Assert
-                assertThat(response).isNotNull();
-                assertThat(response.getId()).isEqualTo(DOCUMENT_ID);
-                assertThat(response.getFileObjectKey()).isEqualTo(privateObjectKey);
-                assertThat(fileUploadEntity.getStatus()).isEqualTo(UploadStatus.COMPLETED);
-                assertThat(fileUploadEntity.getConfirmedAt()).isNotNull();
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(DOCUMENT_ID);
+        assertThat(response.getFileObjectKey()).isEqualTo(privateObjectKey);
+        assertThat(fileUploadEntity.getStatus()).isEqualTo(UploadStatus.COMPLETED);
+        assertThat(fileUploadEntity.getConfirmedAt()).isNotNull();
 
-                verify(fileService).uploadDirectFile(pdfFile, false, ADMIN_USER);
-                verify(fileUploadRepository).save(fileUploadEntity);
-                verify(documentRepository).save(any(CourseDocumentEntity.class));
-                verify(documentProcessingService).processAndStoreDocument(eq(savedDoc), any(InputStream.class));
-        }
+        verify(fileService).uploadDirectFile(pdfFile, false, ADMIN_USER);
+        verify(fileUploadRepository).save(fileUploadEntity);
+        verify(documentRepository).save(any(CourseDocumentEntity.class));
+        verify(documentProcessingService).processAndStoreDocument(eq(savedDoc), any(InputStream.class));
+    }
 
-        @Test
-        @DisplayName("deleteGlobalDocument - should throw DataNotFoundException when document not found")
-        void shouldThrowDataNotFoundWhenDeletingNonExistentDocument() {
-                // Arrange
-                when(documentRepository.findByIdAndDeletedAtIsNull(DOCUMENT_ID)).thenReturn(Optional.empty());
+    @Test
+    @DisplayName("deleteGlobalDocument - should throw DataNotFoundException when document not found")
+    void shouldThrowDataNotFoundWhenDeletingNonExistentDocument() {
+        // Arrange
+        when(documentRepository.findByIdAndDeletedAtIsNull(DOCUMENT_ID)).thenReturn(Optional.empty());
 
-                // Act & Assert
-                assertThatThrownBy(() -> courseDocumentService.deleteGlobalDocument(DOCUMENT_ID, ADMIN_USER))
-                                .isInstanceOf(DataNotFoundException.class)
-                                .hasMessageContaining("Global document not found");
-        }
+        // Act & Assert
+        assertThatThrownBy(() -> courseDocumentService.deleteGlobalDocument(DOCUMENT_ID, ADMIN_USER))
+                .isInstanceOf(DataNotFoundException.class)
+                .hasMessageContaining("Global document not found");
+    }
 
-        @Test
-        @DisplayName("deleteGlobalDocument - should soft delete global document successfully")
-        void shouldSoftDeleteGlobalDocumentSuccessfully() {
-                // Arrange
-                CourseDocumentEntity doc = CourseDocumentEntity.builder()
-                                .id(DOCUMENT_ID)
-                                .title("Algorithms.pdf")
-                                .status(DocumentStatus.READY)
-                                .visibility(DocumentVisibility.GLOBAL)
-                                .build();
-                when(documentRepository.findByIdAndDeletedAtIsNull(DOCUMENT_ID)).thenReturn(Optional.of(doc));
+    @Test
+    @DisplayName("deleteGlobalDocument - should soft delete global document successfully")
+    void shouldSoftDeleteGlobalDocumentSuccessfully() {
+        // Arrange
+        CourseDocumentEntity doc = CourseDocumentEntity.builder()
+                .id(DOCUMENT_ID)
+                .title("Algorithms.pdf")
+                .status(DocumentStatus.READY)
+                .visibility(DocumentVisibility.GLOBAL)
+                .build();
+        when(documentRepository.findByIdAndDeletedAtIsNull(DOCUMENT_ID)).thenReturn(Optional.of(doc));
 
-                // Act
-                courseDocumentService.deleteGlobalDocument(DOCUMENT_ID, ADMIN_USER);
+        // Act
+        courseDocumentService.deleteGlobalDocument(DOCUMENT_ID, ADMIN_USER);
 
-                // Assert
-                assertThat(doc.getDeletedAt()).isNotNull();
-                verify(documentRepository).save(doc);
-        }
+        // Assert
+        assertThat(doc.getDeletedAt()).isNotNull();
+        verify(documentRepository).save(doc);
+    }
 }

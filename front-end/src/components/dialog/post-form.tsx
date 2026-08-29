@@ -9,7 +9,7 @@ import { useConfirmImageUploadMutation } from "@/lib/api/files";
 import { PostRequest, PostResponse } from "@/lib/type/forums";
 import { Box, Button, FormHelperText, Typography } from "@mui/material";
 import { FileText, Plus, Save } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface PostFormDialogProps {
   open: boolean;
@@ -52,7 +52,10 @@ export function PostFormDialog({
     return editingPost?.thumbUrl || undefined;
   }, [selectedFile, editingPost?.thumbUrl]);
 
-  useEffect(() => {
+  const [prevProps, setPrevProps] = useState({ open, initialValue });
+
+  if (prevProps.open !== open || prevProps.initialValue !== initialValue) {
+    setPrevProps({ open, initialValue });
     if (open) {
       setForm(initialValue);
       setSelectedFile(null);
@@ -64,7 +67,7 @@ export function PostFormDialog({
       });
       setUploadedImages([]);
     }
-  }, [open, initialValue.postId]);
+  }
 
   const errors = useMemo(() => {
     const isUpdate = Boolean(initialValue.postId);

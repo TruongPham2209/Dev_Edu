@@ -5,7 +5,7 @@ import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { Stack } from "@mui/material";
 import { FolderPlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export interface UploadGlobalDocumentDialogProps {
   open: boolean;
@@ -20,16 +20,18 @@ export function UploadGlobalDocumentDialog({
   onUpload,
   loading = false,
 }: UploadGlobalDocumentDialogProps) {
+  const [prevOpen, setPrevOpen] = useState(open);
   const [uploadTitle, setUploadTitle] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
 
   // Reset state when dialog is closed/opened
-  useEffect(() => {
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (open) {
       setUploadTitle("");
       setUploadFile(null);
     }
-  }, [open]);
+  }
 
   const handleFileChange = (file: File | null) => {
     setUploadFile(file);

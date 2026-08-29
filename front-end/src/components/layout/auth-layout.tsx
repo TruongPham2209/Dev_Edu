@@ -6,7 +6,6 @@ import {
   CardContent,
   Stack,
   Typography,
-  useTheme,
 } from "@mui/material";
 import {
   Award,

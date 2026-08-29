@@ -33,7 +33,6 @@ export default function AdminLectureDetailPage() {
   const {
     data: assignments = [],
     isLoading: assignmentsLoading,
-    refetch: refetchAssignments,
   } = useAssignmentsQuery(lectureId, { enabled: !!lectureId });
 
   const loadingSecondary =

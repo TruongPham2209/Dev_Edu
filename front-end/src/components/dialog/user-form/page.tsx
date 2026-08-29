@@ -4,7 +4,7 @@ import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { Box } from "@mui/material";
 import { FileSpreadsheet, User, UserPlus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ImportTab } from "./import-tab";
 import { ManualTab } from "./manual-tab";
 
@@ -31,11 +31,14 @@ export function UserFormDialog({
     count: 0,
   });
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+
+  if (prevOpen !== open) {
+    setPrevOpen(open);
     if (open) {
       setTabValue("manual");
     }
-  }, [open]);
+  }
 
   const handleManualReady = useCallback(
     (isValid: boolean, fn: () => Promise<void>) => {

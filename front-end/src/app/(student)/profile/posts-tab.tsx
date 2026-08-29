@@ -75,21 +75,21 @@ export function PostedPostsTab() {
     () =>
       editPost
         ? {
-            postId: editPost.id,
-            thumbObjectKey: editPost.thumbUrl
-              ? editPost.thumbUrl.split("/").pop() || "existing-thumb"
-              : "existing-thumb",
-            title: editPost.title,
-            shortDescription: editPost.shortDescription,
-            content: editPost.content,
-          }
+          postId: editPost.id,
+          thumbObjectKey: editPost.thumbUrl
+            ? editPost.thumbUrl.split("/").pop() || "existing-thumb"
+            : "existing-thumb",
+          title: editPost.title,
+          shortDescription: editPost.shortDescription,
+          content: editPost.content,
+        }
         : {
-            postId: null,
-            thumbObjectKey: "",
-            title: "",
-            shortDescription: "",
-            content: "",
-          },
+          postId: null,
+          thumbObjectKey: "",
+          title: "",
+          shortDescription: "",
+          content: "",
+        },
     [editPost],
   );
 
@@ -142,7 +142,7 @@ export function PostedPostsTab() {
   const handleSavePost = async (payload: PostRequest, file: File | null) => {
     setSavingPost(true);
     try {
-      let finalPayload = { ...payload };
+      const finalPayload = { ...payload };
 
       if (file) {
         const presignRes = await getPreSignedUploadUrl({

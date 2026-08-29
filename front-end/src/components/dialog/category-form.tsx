@@ -12,7 +12,7 @@ import {
   UploadCloud,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 interface CategoryFormDialogProps {
   open: boolean;
@@ -32,15 +32,24 @@ export function CategoryFormDialog({
   onError,
 }: CategoryFormDialogProps) {
   // Form State
-  const [form, setForm] = useState<CategoryRequest>({
-    name: "",
-    description: "",
-    thumbnailObjectKey: "",
-  });
+  const [form, setForm] = useState<CategoryRequest>(() =>
+    editing
+      ? {
+          id: editing.id,
+          name: editing.name,
+          description: editing.description,
+          thumbnailObjectKey: editing.thumbnailObjectKey,
+        }
+      : {
+          name: "",
+          description: "",
+          thumbnailObjectKey: "",
+        },
+  );
 
   // Selected local image file & preview url
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>(() => editing?.thumbnailUrl || "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Drag and Drop active status
@@ -53,8 +62,11 @@ export function CategoryFormDialog({
     image: false,
   });
 
+  const [prevProps, setPrevProps] = useState({ open, editing });
+
   // Reset form when modal opens or editing changes
-  useEffect(() => {
+  if (prevProps.open !== open || prevProps.editing !== editing) {
+    setPrevProps({ open, editing });
     if (open) {
       if (editing) {
         setForm({
@@ -72,7 +84,7 @@ export function CategoryFormDialog({
       }
       setTouched({ name: false, description: false, image: false });
     }
-  }, [open, editing]);
+  }
 
   // Form field errors evaluation
   const errors = {

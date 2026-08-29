@@ -12,7 +12,7 @@ import type {
 } from "@/lib/type/quizzes";
 import { Grid, Stack } from "@mui/material";
 import { Layers } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface TypeConfigDialogProps {
   open: boolean;
@@ -42,13 +42,33 @@ export function TypeConfigDialog({
   existingTypes = [],
   loading = false,
 }: TypeConfigDialogProps) {
-  const [questionType, setQuestionType] = useState<QuestionType>("SINGLE_CHOICE");
-  const [requiredCount, setRequiredCount] = useState<string>("5");
-  const [pointsPerQuestion, setPointsPerQuestion] = useState<string>("1");
-  const [scoringMethod, setScoringMethod] = useState<ScoringMethod>("AUTO");
+  const [questionType, setQuestionType] = useState<QuestionType>(() => {
+    if (initialData) return initialData.questionType;
+    const available = QUESTION_TYPE_ITEMS.find(
+      (opt) => !existingTypes.includes(opt.id as QuestionType),
+    );
+    return (available?.id || "SINGLE_CHOICE") as QuestionType;
+  });
+  const [requiredCount, setRequiredCount] = useState<string>(() =>
+    initialData ? String(initialData.requiredCount) : "5",
+  );
+  const [pointsPerQuestion, setPointsPerQuestion] = useState<string>(() =>
+    initialData ? String(initialData.pointsPerQuestion) : "1",
+  );
+  const [scoringMethod, setScoringMethod] = useState<ScoringMethod>(() => {
+    if (initialData) return initialData.scoringMethod;
+    const available = QUESTION_TYPE_ITEMS.find(
+      (opt) => !existingTypes.includes(opt.id as QuestionType),
+    );
+    const defaultType = (available?.id || "SINGLE_CHOICE") as QuestionType;
+    return defaultType === "ESSAY" ? "MANUAL" : "AUTO";
+  });
   const [touched, setTouched] = useState(false);
 
-  useEffect(() => {
+  const [prevProps, setPrevProps] = useState({ open, initialData });
+
+  if (prevProps.open !== open || prevProps.initialData !== initialData) {
+    setPrevProps({ open, initialData });
     if (open) {
       if (initialData) {
         setQuestionType(initialData.questionType);
@@ -68,7 +88,7 @@ export function TypeConfigDialog({
       }
       setTouched(false);
     }
-  }, [open, initialData, existingTypes]);
+  }
 
   // Auto-set default scoring method when question type changes
   const handleQuestionTypeChange = (type: QuestionType) => {

@@ -97,14 +97,6 @@ const VIDEOS = [
   "video/mpeg",
 ];
 
-const AUDIOS = [
-  "audio/mpeg", // .mp3
-  "audio/wav",
-  "audio/ogg",
-  "audio/webm",
-  "audio/aac",
-  "audio/flac",
-];
 
 const ARCHIVES = [
   "application/zip",

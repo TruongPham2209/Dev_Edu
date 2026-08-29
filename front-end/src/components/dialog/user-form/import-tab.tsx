@@ -293,7 +293,7 @@ export function ImportTab({ onReady, onSaved, onClose }: ImportTabProps) {
           setImportErrors([]);
           setImportedUsers(parsedUsers);
         }
-      } catch (err) {
+      } catch {
         setImportErrors([
           {
             row: 0,

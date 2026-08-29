@@ -54,12 +54,14 @@ export async function apiCall<T>(
       ...options,
       headers,
     });
-  } catch (err: any) {
-    throw new ApiError(
-      "NETWORK_ERROR",
-      err?.message || "Network Error",
-      null,
-    );
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : typeof err === "string"
+          ? err
+          : "Network Error";
+    throw new ApiError("NETWORK_ERROR", message, null);
   }
 
   const data = await response.json();

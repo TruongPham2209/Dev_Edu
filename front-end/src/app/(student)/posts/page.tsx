@@ -72,7 +72,7 @@ export async function PostDetailContent({ postId }: { postId: string }) {
   let post;
   try {
     post = await getForumPostById(postId);
-  } catch (error) {
+  } catch {
     return <ErrorPageContent />;
   }
 

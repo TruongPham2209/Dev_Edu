@@ -43,7 +43,7 @@ export function FileUpload({
   width = "100%",
   height = 200,
   accept,
-  fileType = "image",
+  fileType,
   fileExtensions,
   disabled = false,
 }: FileUploadProps) {
@@ -51,7 +51,7 @@ export function FileUpload({
   const [localError, setLocalError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Priority: fileType > fileExtensions. Default to "image" if neither is provided.
+  // Priority: fileType > fileExtensions. Default to "image" only if neither is provided.
   const effectiveFileType =
     fileType !== undefined
       ? fileType

@@ -164,6 +164,7 @@ export default function AdminCategoriesPage() {
           />
           <ButtonAction
             tooltip="New Category"
+            aria-label="New Category"
             onClick={() => openDialog()}
             icon={<FolderPlus size={21} strokeWidth={2.3} />}
           />
