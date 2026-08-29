@@ -39,17 +39,15 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { DiscountsTable } from "../discounts-table";
+import type { CourseDiscountResponse } from "@/lib/type/courses";
+import { createMockDiscount } from "@/testing/mock-data";
 
 describe("DiscountsTable", () => {
   const mockOnDeleteClick = vi.fn();
 
   it("shouldRenderDiscountsTableRowsAndTriggerDelete", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock discounts array with future/active valid dates.
-    // ----------------------------------------------------------------------------
-    const mockDiscounts = [
-      {
+    const mockDiscounts: CourseDiscountResponse[] = [
+      createMockDiscount({
         id: "disc-1",
         discountPercentage: 25,
         discountDescription: "Summer Tech Sale",
@@ -57,25 +55,17 @@ describe("DiscountsTable", () => {
         validTo: "2026-12-31T23:59:59.000Z",
         createdBy: "admin_user",
         createdAt: "2026-01-01T00:00:00.000Z",
-      },
+      }),
     ];
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render DiscountsTable.
-    // ----------------------------------------------------------------------------
     render(
       <DiscountsTable
-        discounts={mockDiscounts as any}
+        discounts={mockDiscounts}
         loading={false}
         onDeleteClick={mockOnDeleteClick}
       />,
     );
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify discount badge, description, and delete button click.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("-25%")).toBeInTheDocument();
     expect(screen.getByText("Summer Tech Sale")).toBeInTheDocument();
 

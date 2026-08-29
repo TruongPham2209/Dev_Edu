@@ -78,7 +78,7 @@ describe("TabAssignments", () => {
     vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
       data: [],
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -110,7 +110,7 @@ describe("TabAssignments", () => {
     vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
       data: mockAssignments,
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

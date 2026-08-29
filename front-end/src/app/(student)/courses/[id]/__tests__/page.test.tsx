@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -81,7 +82,7 @@ vi.mock("@/lib/api/lectures", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("CourseDetailPage ([id])", () => {
@@ -90,21 +91,21 @@ describe("CourseDetailPage ([id])", () => {
     vi.mocked(useAuthModule.useAuth).mockReturnValue({
       isAuthenticated: true,
       roles: ["STUDENT"],
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
       data: [],
-    } as any);
+    } as never);
     vi.mocked(coursesApi.useCoursesQuery).mockReturnValue({
       data: { contents: [] },
-    } as any);
+    } as never);
     vi.mocked(coursesApi.useCourseReviewsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
       isLoading: false,
-    } as any);
+    } as never);
     vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
       data: [],
-    } as any);
+    } as never);
   });
 
   it("shouldRenderCourseDetailsWhenCourseIdIsValid", async () => {
@@ -127,7 +128,7 @@ describe("CourseDetailPage ([id])", () => {
       data: mockCourse,
       isLoading: false,
       error: null,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

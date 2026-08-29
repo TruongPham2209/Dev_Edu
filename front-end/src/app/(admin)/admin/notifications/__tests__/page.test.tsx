@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -50,6 +51,13 @@
 
 import * as notificationApi from "@/lib/api/notification";
 import * as toastContext from "@/lib/toast-context";
+import type { NotificationResponse } from "@/lib/type/notification";
+import type { CustomPaging } from "@/lib/type/api";
+import { createMockNotification, createMockToast } from "@/testing/mock-data";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminNotificationsPage from "../page";
@@ -65,13 +73,21 @@ vi.mock("@/lib/toast-context", () => ({
 }));
 
 vi.mock("@/components/dialog/notification/notification-form", () => ({
-  CreateGroupNotificationDialog: ({ open, onClose, onSave }: any) =>
+  CreateGroupNotificationDialog: ({
+    open,
+    onClose,
+    onSave,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+    onSave?: (data: { title: string; content: string; targetRoles: string[] }) => void;
+  }) =>
     open ? (
       <div data-testid="create-notification-dialog-mock">
         <button onClick={onClose}>Close Form Dialog</button>
         <button
           onClick={() =>
-            onSave({
+            onSave?.({
               title: "New Broadcast",
               content: "Broadcast message",
               targetRoles: ["STUDENT"],
@@ -85,7 +101,15 @@ vi.mock("@/components/dialog/notification/notification-form", () => ({
 }));
 
 vi.mock("@/components/dialog/notification/notification-detail", () => ({
-  NotificationDetailDialog: ({ open, notification, onClose }: any) =>
+  NotificationDetailDialog: ({
+    open,
+    notification,
+    onClose,
+  }: {
+    open?: boolean;
+    notification?: { title?: string };
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="notification-detail-dialog-mock">
         <span>Detail: {notification?.title}</span>
@@ -95,7 +119,17 @@ vi.mock("@/components/dialog/notification/notification-detail", () => ({
 }));
 
 vi.mock("@/components/common/confirm-dialog", () => ({
-  ConfirmDialog: ({ open, onConfirm, onCancel, title }: any) =>
+  ConfirmDialog: ({
+    open,
+    onConfirm,
+    onCancel,
+    title,
+  }: {
+    open?: boolean;
+    onConfirm?: () => void;
+    onCancel?: () => void;
+    title?: React.ReactNode;
+  }) =>
     open ? (
       <div data-testid="confirm-dialog-mock">
         <span>{title}</span>
@@ -106,65 +140,66 @@ vi.mock("@/components/common/confirm-dialog", () => ({
 }));
 
 describe("AdminNotificationsPage", () => {
-  const mockToastSuccess = vi.fn();
-  const mockToastError = vi.fn();
+  const mockToast = createMockToast();
   const mockRefetch = vi.fn();
   const mockCreateMutateAsync = vi.fn();
   const mockDeleteMutateAsync = vi.fn();
 
+  const mockNotif: NotificationResponse = createMockNotification({
+    id: "gn-1",
+    title: "System Maintenance Notice",
+    content: "Scheduled downtime tonight.",
+    category: "GROUP",
+    type: null,
+    createdAt: "2026-08-10T12:00:00Z",
+    createdBy: "Admin Root",
+    targetRoles: ["STUDENT", "LECTURER"],
+  });
+
+  const samplePaging: CustomPaging<NotificationResponse> = {
+    contents: [mockNotif],
+    currentPage: 0,
+    pageSize: 10,
+    totalElements: 1,
+    totalPages: 1,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(toastContext.useToast).mockReturnValue({
-      show: vi.fn(),
-      success: mockToastSuccess,
-      error: mockToastError,
-      info: vi.fn(),
-      warning: vi.fn(),
-    });
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast);
 
     vi.mocked(
       notificationApi.useAllGroupNotificationsInfiniteQuery,
-    ).mockReturnValue({
-      data: {
-        pages: [
-          {
-            contents: [
-              {
-                id: "gn-1",
-                title: "System Maintenance Notice",
-                content: "Scheduled downtime tonight.",
-                category: "GROUP",
-                type: null,
-                createdAt: "2026-08-10T12:00:00Z",
-                createdBy: "Admin Root",
-                targetRoles: ["STUDENT", "LECTURER"],
-              },
-            ],
-          },
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      isFetchingNextPage: false,
-    } as any);
+    ).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [samplePaging],
+          pageParams: [undefined],
+        },
+        {
+          refetch: mockRefetch,
+        },
+      ),
+    );
 
     vi.mocked(
       notificationApi.useCreateGroupNotificationMutation,
-    ).mockReturnValue({
-      mutateAsync: mockCreateMutateAsync,
-      isPending: false,
-    } as any);
+    ).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockCreateMutateAsync,
+        isPending: false,
+      }),
+    );
 
     vi.mocked(
       notificationApi.useDeleteGroupNotificationMutation,
-    ).mockReturnValue({
-      mutateAsync: mockDeleteMutateAsync,
-      isPending: false,
-    } as any);
+    ).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockDeleteMutateAsync,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderHeroBannerAndDispatchedAnnouncementsList", () => {
@@ -195,12 +230,15 @@ describe("AdminNotificationsPage", () => {
     // ----------------------------------------------------------------------------
     vi.mocked(
       notificationApi.useAllGroupNotificationsInfiniteQuery,
-    ).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isError: true,
-      refetch: mockRefetch,
-    } as any);
+    ).mockReturnValue(
+      createMockInfiniteQueryResult(
+        { pages: [], pageParams: [] },
+        {
+          isError: true,
+          refetch: mockRefetch,
+        },
+      ),
+    );
 
     render(<AdminNotificationsPage />);
 
@@ -222,14 +260,24 @@ describe("AdminNotificationsPage", () => {
     // Arrange
     // Mock empty announcements list.
     // ----------------------------------------------------------------------------
+    const emptyPaging: CustomPaging<NotificationResponse> = {
+      contents: [],
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 0,
+      totalPages: 0,
+    };
+
     vi.mocked(
       notificationApi.useAllGroupNotificationsInfiniteQuery,
-    ).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isError: false,
-      refetch: mockRefetch,
-    } as any);
+    ).mockReturnValue(
+      createMockInfiniteQueryResult(
+        { pages: [emptyPaging], pageParams: [undefined] },
+        {
+          refetch: mockRefetch,
+        },
+      ),
+    );
 
     render(<AdminNotificationsPage />);
 
@@ -278,7 +326,7 @@ describe("AdminNotificationsPage", () => {
         content: "Broadcast message",
         targetRoles: ["STUDENT"],
       });
-      expect(mockToastSuccess).toHaveBeenCalledWith(
+      expect(mockToast.success).toHaveBeenCalledWith(
         "Group announcement dispatched successfully!",
       );
     });
@@ -337,7 +385,7 @@ describe("AdminNotificationsPage", () => {
     // ----------------------------------------------------------------------------
     await waitFor(() => {
       expect(mockDeleteMutateAsync).toHaveBeenCalledWith("gn-1");
-      expect(mockToastSuccess).toHaveBeenCalledWith(
+      expect(mockToast.success).toHaveBeenCalledWith(
         "Group announcement deleted successfully!",
       );
     });

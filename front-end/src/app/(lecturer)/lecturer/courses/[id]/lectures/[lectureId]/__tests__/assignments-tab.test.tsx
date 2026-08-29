@@ -63,7 +63,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/components/dialog/assignment-form", () => ({
-  AssignmentFormDialog: ({ open, onClose }: any) =>
+  AssignmentFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="assignment-form-dialog">
         <button onClick={onClose}>Close Dialog</button>
@@ -77,16 +83,16 @@ describe("AssignmentsTab (Lecturer)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(assignmentsApi.useDeleteAssignmentMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as any);
+    } as never);
   });
 
   it("shouldRenderEmptyStateWhenNoAssignmentsExist", () => {
@@ -97,7 +103,7 @@ describe("AssignmentsTab (Lecturer)", () => {
     vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
       data: [],
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -129,7 +135,7 @@ describe("AssignmentsTab (Lecturer)", () => {
     vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
       data: mockAssignments,
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

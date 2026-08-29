@@ -77,6 +77,9 @@ vi.mock("@/components/common/form/file-upload", () => ({
   ),
 }));
 
+import { createMockForumPost } from "@/testing/mock-data";
+import { createMockMutationResult } from "@/testing/mock-query";
+
 describe("PostFormDialog", () => {
   const mockConfirmImageMutate = vi.fn();
 
@@ -91,7 +94,12 @@ describe("PostFormDialog", () => {
     vi.clearAllMocks();
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
       mutateAsync: mockConfirmImageMutate,
-    } as any);
+    } as never);
+    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockConfirmImageMutate,
+      }),
+    );
   });
 
   it("shouldRenderCreatePostTitleWhenEditingPostIsNull", () => {
@@ -139,7 +147,7 @@ describe("PostFormDialog", () => {
       <PostFormDialog
         open={true}
         initialValue={initialValue}
-        editingPost={{ id: "post-1" } as any}
+        editingPost={createMockForumPost({ id: "post-1" })}
         onClose={vi.fn()}
         onSave={handleSave}
       />,

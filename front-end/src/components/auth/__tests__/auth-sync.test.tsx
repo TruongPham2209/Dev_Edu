@@ -93,10 +93,10 @@ describe("AuthSync Component", () => {
     vi.clearAllMocks();
     vi.mocked(usersApi.useMeQuery).mockReturnValue({
       refetch: mockFetchMe,
-    } as any);
+    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       handleError: mockHandleError,
-    } as any);
+    } as never);
   });
 
   afterEach(() => {
@@ -181,7 +181,7 @@ describe("AuthSync Component", () => {
     vi.mocked(authStorage.getAuthToken).mockReturnValue("same-token");
     vi.mocked(authStorage.getStoredUser).mockReturnValue({
       id: "user-1",
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

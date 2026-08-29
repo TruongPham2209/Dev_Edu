@@ -43,6 +43,7 @@
  */
 
 import type { CategoryResponse } from "@/lib/type/courses";
+import { createMockCategory } from "@/testing/mock-data";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CategoryFormDialog } from "../category-form";
@@ -87,13 +88,13 @@ describe("CategoryFormDialog", () => {
     // Arrange
     // Prepare editing category data.
     // ----------------------------------------------------------------------------
-    const editingCategory: CategoryResponse = {
+    const editingCategory: CategoryResponse = createMockCategory({
       id: "cat-1",
       name: "Frontend Development",
       description: "Comprehensive guide to React and Next.js.",
       thumbnailUrl: "https://example.com/cat.jpg",
       thumbnailObjectKey: "categories/cat-1.jpg",
-    } as any;
+    });
 
     // ----------------------------------------------------------------------------
     // Act

@@ -37,10 +37,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { LectureHeroSection } from "../lecture-hero";
+import { createMockLecture } from "@/testing/mock-data";
+import { LectureResponse } from "@/lib/type/lectures";
 
 vi.mock("@/components/common/hero-section/lecture-hero-info", () => ({
-  LectureHeroInfo: ({ lecture }: any) => (
-    <div data-testid="lecture-hero-info-mock">{lecture.title}</div>
+  LectureHeroInfo: ({ lecture }: { lecture?: { title?: string } }) => (
+    <div data-testid="lecture-hero-info-mock">{lecture?.title}</div>
   ),
 }));
 
@@ -50,25 +52,21 @@ describe("LectureHeroSection", () => {
     // Arrange
     // Mock lecture object.
     // ----------------------------------------------------------------------------
-    const mockLecture = {
-      id: "lec-888",
+    const mockLecture: LectureResponse = createMockLecture({
       title: "Spring Security & OAuth2 Integration",
-      duration: 3600,
       videoObjectKey: "videos/oauth2.mp4",
-    };
+    });
 
-    // ----------------------------------------------------------------------------
     // Act
-    // Render LectureHeroSection.
     // ----------------------------------------------------------------------------
     render(
       <LectureHeroSection
-        lecture={mockLecture as any}
+        lecture={mockLecture}
         courseId="course-123"
         courseTitle="Spring Boot Masterclass"
         materialsCount={3}
         assignmentsCount={2}
-      />,
+      />
     );
 
     // ----------------------------------------------------------------------------

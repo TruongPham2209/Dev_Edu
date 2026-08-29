@@ -212,7 +212,7 @@ Asynchronous pages or data components must handle 4 states:
 ## 13. TypeScript & Zero-Any Policy
 
 1. **Strict Prohibition of `any`**:
-   - The use of `any` (e.g., `: any`, `as any`, `<any>`) is **strictly forbidden** in all source code files across the project.
+   - The use of `any` (e.g., `: any`, `as any`, `<any>`) is strictly forbidden across the entire project, including production code, unit tests, integration tests, fixtures, factories, mocks, and test utilities.
    - Every function parameter, return type, state variable, component prop, and API response must have an explicit, type-safe definition.
 
 2. **Alternatives to `any`**:
@@ -249,3 +249,359 @@ Asynchronous pages or data components must handle 4 states:
    - Never cast API results or component properties via `(obj as any).property`. Extend the interface in `src/lib/type/` if backend fields are updated.
 
 
+---
+
+## 14. Testing & Mock Data Type Safety
+
+### 14.1. Strict Type Safety for Test Data
+
+- All unit test mock data, fixtures, factories, and mocked API responses must conform to the actual TypeScript types used by the production code.
+- When a component expects a strongly typed prop, test data **MUST** use that exact type.
+- Do **NOT** weaken or bypass the production type just to make a test compile.
+- The preferred approach is to fix the mock data so that it satisfies the expected type.
+
+**Example**:
+
+```tsx
+interface Question {
+  id: string;
+  type: QuestionType;
+  content: string;
+  required: boolean;
+}
+
+// ✅ Correct: Mock data conforms strictly to the production interface
+const mockQuestion: Question = {
+  id: "question-1",
+  type: "ESSAY",
+  content: "Explain the concept.",
+  required: true,
+};
+
+render(<QuestionCard question={mockQuestion} />);
+
+// ❌ Prohibited: Using type-escape assertions
+const mockQuestion = {
+  id: "question-1",
+  type: "ESSAY",
+  content: "Explain the concept.",
+} as never;
+```
+
+### 14.2. `as never` Is Strictly Forbidden for Mock Data
+
+`as never` must **NOT** be used to bypass TypeScript errors in unit tests.
+
+In particular, **NEVER** use `mockData as never` to pass incompatible mock data into:
+- React components
+- Component props
+- Custom hooks
+- React Query mocks
+- API mocks
+- Callbacks & event handlers
+- Generic components
+- Utility functions
+
+If TypeScript reports that mock data is incompatible with the expected type, investigate and fix the mock data itself. `as never` is considered a type-safety violation unless `never` is genuinely part of the production type contract.
+
+### 14.3. No Type-Escape Assertions in Tests
+
+The following patterns are strictly prohibited for bypassing type errors in test code:
+- `as any`
+- `as never`
+- `as unknown as SomeType`
+- `@ts-ignore`
+- `@ts-expect-error` (unless testing intentional negative compiler behavior)
+
+These must **NOT** be used as shortcuts to make tests compile.
+
+If an existing test contains one of these patterns:
+1. Identify the actual type expected by the production code.
+2. Trace the type to its canonical definition (`src/lib/type/`).
+3. Fix the mock/fixture/factory to conform to that type.
+4. Only modify production types if the production type itself is proven to be incorrect.
+
+### 14.4. Explicitly Typed Mock Data
+
+Prefer explicitly typed mocks when the data represents a domain or API model:
+
+```ts
+// ✅ Correct: Explicit type definition validates structure at compile-time
+const mockQuiz: Quiz = {
+  id: "quiz-1",
+  title: "Operating Systems",
+  questions: [],
+};
+
+// For arrays:
+const mockQuizzes: Quiz[] = [
+  {
+    id: "quiz-1",
+    title: "Operating Systems",
+    questions: [],
+  },
+];
+
+// ❌ Prohibited: Type assertion disguising missing or incompatible fields
+const mockQuiz = {
+  id: "quiz-1",
+  title: "Operating Systems",
+} as Quiz;
+```
+
+### 14.5. Mock Factories
+
+When the same type of mock data is used across multiple tests, prefer typed factory functions.
+
+```ts
+// Factory Definition
+export const createMockQuiz = (
+  overrides: Partial<Quiz> = {},
+): Quiz => ({
+  id: "quiz-1",
+  title: "Test Quiz",
+  questions: [],
+  ...overrides,
+});
+
+// Usage
+const quiz = createMockQuiz({
+  title: "Custom Quiz",
+});
+```
+
+**Requirements**:
+- Factory return types must use the real production type (`Quiz`, `UserResponse`, etc.).
+- Do **NOT** return `any`, `unknown`, or `never`.
+- Do **NOT** cast the result with `as never` or `as any`.
+- Default values must satisfy the complete production type.
+
+### 14.6. Reuse Existing Fixtures
+
+Before creating new mock data, check whether existing fixtures or factories already exist:
+- Shared fixtures (`src/__tests__/fixtures/...`)
+- Mock factories (`createMockUser`, `createMockCourse`)
+- Test utilities and API response fixtures
+
+Prefer reusing or extending existing typed fixtures instead of creating duplicate mock objects. This prevents different tests from representing the same domain model inconsistently.
+
+### 14.7. React Component Props
+
+When testing a component with strongly typed props, the test must respect the component's declared prop contract.
+
+```tsx
+type UserCardProps = {
+  user: User;
+};
+
+// ✅ Correct: Mock satisfies User interface
+render(<UserCard user={mockUser} />);
+```
+
+- If `mockUser` does not satisfy `User`, fix `mockUser`.
+- Do **NOT** change `type UserCardProps = { user: User };` to a weaker type (e.g. `user?: User` or `user: Partial<User>`) merely to make the test pass.
+
+### 14.8. Generic Reusable Components
+
+Reusable components that support multiple data models must preserve their generic types in tests.
+
+```tsx
+const mockUsers: User[] = [
+  {
+    id: "user-1",
+    name: "Test User",
+  },
+];
+
+// ✅ Correct: Preserve generic parameter
+render(
+  <DataTable<User>
+    data={mockUsers}
+    getRowId={(user) => user.id}
+  />,
+);
+
+// ❌ Prohibited: Bypassing generic constraints
+render(<DataTable data={mockUsers as never} />);
+render(<DataTable data={mockUsers as any} />);
+```
+
+If a reusable component genuinely supports multiple data types, use a generic component API rather than broad types or type assertions.
+
+### 14.9. React Query Mock Data
+
+Mocked React Query data must conform to the actual query response type.
+
+**Trace the type flow**:
+```text
+API Response Type (src/lib/type/...)
+      ↓
+API Service (src/lib/api/...)
+      ↓
+React Query Hook (useQuery / useInfiniteQuery)
+      ↓
+Hook Return Type (data)
+      ↓
+Component Props
+      ↓
+Test Mock
+```
+
+**Example**:
+```ts
+// ✅ Correct: Full response contract respected
+const mockQuizResponse: QuizResponse = {
+  data: [
+    {
+      id: "quiz-1",
+      title: "Test Quiz",
+    },
+  ],
+  total: 1,
+};
+
+// ❌ Prohibited: Assertion bypasses type validation
+const mockQuizResponse = {
+  data: [],
+  total: 1,
+} as never;
+```
+
+### 14.10. API Mocking
+
+Mocked API requests and responses must use the same types as the production API layer.
+
+For every API mock, verify:
+- Request parameters and query strings
+- Request body
+- Response data and envelopes (`ApiResponse<T>`)
+- Nested objects and arrays
+- Nullable and optional fields
+- Enums and discriminated unions
+
+Reuse types from `src/lib/type/` where applicable. Do not create weaker test-only versions of production API types simply to simplify mocks.
+
+### 14.11. Partial Test Data
+
+A test may intentionally need only a subset of a large domain object.
+- Before using `Partial<T>`, determine whether the component under test actually accepts partial data.
+- If the production component requires `user: User`, provide a valid `User` object.
+- Do **NOT** convert the production prop to `user: Partial<User>` only because the test does not use every property.
+- If repeated full objects make tests unnecessarily verbose, use a typed factory:
+
+```ts
+const createMockUser = (
+  overrides: Partial<User> = {},
+): User => ({
+  id: "user-1",
+  name: "Test User",
+  email: "test@example.com",
+  role: "STUDENT",
+  status: "ACTIVE",
+  createdAt: new Date().toISOString(),
+  ...overrides,
+});
+```
+
+### 14.12. Discriminated Unions
+
+Mocks for discriminated unions must contain the correct properties for the selected discriminator.
+
+```ts
+type Question =
+  | {
+      type: "ESSAY";
+      id: string;
+      answer: string;
+    }
+  | {
+      type: "SINGLE_CHOICE";
+      id: string;
+      options: Option[];
+      answer: string;
+    };
+
+// ✅ Correct: Discriminator matches required fields
+const mockQuestion: Question = {
+  type: "ESSAY",
+  id: "question-1",
+  answer: "",
+};
+
+// ❌ Incorrect: Missing fields hidden with type-escape
+const mockQuestion = {
+  type: "ESSAY",
+  id: "question-1",
+} as never;
+```
+
+The discriminator and its associated properties must remain consistent.
+
+### 14.13. Do Not Modify Production Types to Fix Tests
+
+Test failures caused by invalid mock data must normally be fixed in the test. Do **NOT** make production types weaker just to satisfy existing mocks.
+
+For example, if production defines:
+```ts
+interface Quiz {
+  id: string;
+  title: string;
+  questions: Question[];
+}
+```
+
+And the test provides:
+```ts
+const mockQuiz = {
+  id: "quiz-1",
+  title: "Test Quiz",
+};
+```
+
+The correct fix is:
+```ts
+const mockQuiz: Quiz = {
+  id: "quiz-1",
+  title: "Test Quiz",
+  questions: [],
+};
+```
+
+Do **NOT** change the production type to:
+```ts
+interface Quiz {
+  id: string;
+  title: string;
+  questions?: Question[];
+}
+```
+unless the actual application/API contract proves that `questions` is optional.
+
+### 14.14. Type Definition Is the Source of Truth
+
+When a mock fails TypeScript validation:
+1. Inspect the component, function, or hook being tested.
+2. Identify the exact expected type.
+3. Trace the type to its canonical definition (`src/lib/type/`).
+4. Inspect existing production usage.
+5. Inspect existing fixtures and factories.
+6. Update the mock to satisfy the real contract.
+
+Do **NOT** infer the type from the test alone. Production type definitions and actual API/domain contracts are the source of truth.
+
+### 14.15. Testing Type-Safety Verification
+
+Before completing a testing-related change:
+1. Run TypeScript type checking (`npm run type-check` or `npx tsc --noEmit`).
+2. Run ESLint (`npm run lint`).
+3. Run the affected unit tests (`npm test` or `npx vitest run ...`).
+4. Run the full test suite when practical.
+
+The test suite must pass without:
+- `as never`
+- `as any`
+- Unsafe double assertions (`as unknown as T`)
+- `@ts-ignore`
+- Unnecessary `@ts-expect-error`
+
+The objective is not merely to make tests compile, but to ensure that test data accurately represents the real application data contract.

@@ -63,22 +63,22 @@ vi.mock("@/lib/auth/constants", () => ({
   getRedirectPathForRoles: vi.fn(),
 }));
 
+function createMockRequest(
+  pathname: string,
+  cookieToken?: string,
+): NextRequest {
+  const url = `https://dev-edu.com${pathname}`;
+  const req = new NextRequest(url);
+  if (cookieToken) {
+    req.cookies.set("access_token", cookieToken);
+  }
+  return req;
+}
+
 describe("proxy middleware", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-
-  function createMockRequest(
-    pathname: string,
-    cookieToken?: string,
-  ): NextRequest {
-    const url = `https://dev-edu.com${pathname}`;
-    const req = new NextRequest(url);
-    if (cookieToken) {
-      req.cookies.set("access_token", cookieToken);
-    }
-    return req;
-  }
 
   it("shouldSkipMiddlewareForStaticAssetsAndApiRoutes", () => {
     // ----------------------------------------------------------------------------

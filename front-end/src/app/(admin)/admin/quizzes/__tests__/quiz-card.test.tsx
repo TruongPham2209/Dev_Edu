@@ -47,11 +47,19 @@ describe("Admin QuizCard Component", () => {
     courseTitle: "Database Design 101",
     title: "SQL Indexing Quiz",
     description: "Test index knowledge",
-    passPercentage: 80,
     status: "PENDING",
-    typeConfigs: [{ id: "cfg-1" }],
+    typeConfigs: [
+      {
+        id: "cfg-1",
+        quizId: "q-1",
+        questionType: "SINGLE_CHOICE",
+        requiredCount: 5,
+        pointsPerQuestion: 2,
+        scoringMethod: "AUTO",
+      },
+    ],
     createdAt: "2026-08-06T10:00:00Z",
-  } as any;
+  };
 
   it("shouldRenderQuizCardMetadataAndPendingStatus", () => {
     const onViewDetails = vi.fn();

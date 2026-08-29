@@ -57,6 +57,11 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("DiscountFormDialog", () => {
   const mockMutateAsync = vi.fn();
   const mockShowSuccess = vi.fn();
@@ -66,11 +71,19 @@ describe("DiscountFormDialog", () => {
     vi.clearAllMocks();
     vi.mocked(enrollmentsApi.useCreateCourseDiscountMutation).mockReturnValue({
       mutateAsync: mockMutateAsync,
-    } as any);
+    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
+    vi.mocked(enrollmentsApi.useCreateCourseDiscountMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockMutateAsync,
+      }),
+    );
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({ showSuccess: mockShowSuccess }),
+    );
   });
 
   it("shouldRenderGlobalDiscountTitleAndWarningNoticeWhenCourseIdIsNull", () => {

@@ -74,6 +74,11 @@ vi.mock("@/components/common/form/rich-text-editor", () => ({
   ),
 }));
 
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("AssignmentFormDialog", () => {
   const mockMutateAsync = vi.fn();
   const mockShowSuccess = vi.fn();
@@ -83,11 +88,22 @@ describe("AssignmentFormDialog", () => {
     vi.clearAllMocks();
     vi.mocked(assignmentsApi.useCreateAssignmentMutation).mockReturnValue({
       mutateAsync: mockMutateAsync,
-    } as any);
+    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
+    vi.mocked(assignmentsApi.useCreateAssignmentMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockMutateAsync,
+      }),
+    );
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: mockShowSuccess,
+        handleError: mockHandleError,
+      }),
+    );
   });
 
   it("shouldNotRenderModalWhenOpenIsFalse", () => {

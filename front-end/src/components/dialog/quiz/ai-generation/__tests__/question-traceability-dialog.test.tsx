@@ -4,6 +4,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { QuestionTraceabilityDialog } from "../question-traceability-dialog";
 import * as quizApi from "@/lib/api/quizzes";
+import type { QuestionTraceabilityResponse } from "@/lib/type/quizzes";
+import { createMockQueryResult } from "@/testing/mock-query";
 
 vi.mock("@/lib/api/quizzes", () => ({
   useQuestionTraceabilityQuery: vi.fn(),
@@ -47,7 +49,23 @@ describe("QuestionTraceabilityDialog Component", () => {
       },
       isLoading: false,
       isError: false,
-    } as any);
+    } as never);
+    const mockTraceability: QuestionTraceabilityResponse = {
+      id: "tr-1",
+      questionId: "q-1",
+      generationJobId: "job-1",
+      sectionName: "Chapter 4: Concurrency & Multithreading",
+      pageNumber: 42,
+      modelName: "gpt-4o",
+      promptVersion: "v2.1",
+      attemptCount: 1,
+      validationMetrics: "Passed factuality check (0.95 score)",
+      createdAt: "2026-08-01T00:00:00Z",
+    };
+
+    vi.mocked(quizApi.useQuestionTraceabilityQuery).mockReturnValue(
+      createMockQueryResult(mockTraceability),
+    );
 
     renderComponent({ onClose });
 
@@ -78,7 +96,10 @@ describe("QuestionTraceabilityDialog Component", () => {
       data: null,
       isLoading: false,
       isError: false,
-    } as any);
+    } as never);
+    vi.mocked(quizApi.useQuestionTraceabilityQuery).mockReturnValue(
+      createMockQueryResult<QuestionTraceabilityResponse>(),
+    );
 
     renderComponent();
 

@@ -54,21 +54,22 @@ vi.mock("@/lib/toast-context", () => ({
   useToast: vi.fn(),
 }));
 
-describe("QuizAssignmentDialog Component", () => {
-  const mockToast = {
-    success: vi.fn(),
-    error: vi.fn(),
-  };
+import { createMockToast } from "@/testing/mock-data";
+import { createMockMutationResult } from "@/testing/mock-query";
 
+describe("QuizAssignmentDialog Component", () => {
+  const mockToast = createMockToast();
   const mockCreateMutateAsync = vi.fn().mockResolvedValue({});
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as any);
-    vi.mocked(quizzesApi.useCreateQuizAssignmentMutation).mockReturnValue({
-      mutateAsync: mockCreateMutateAsync,
-      isPending: false,
-    } as any);
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast);
+    vi.mocked(quizzesApi.useCreateQuizAssignmentMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockCreateMutateAsync,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderTitleAndInputFieldsWhenOpen", () => {

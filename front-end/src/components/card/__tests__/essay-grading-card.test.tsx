@@ -85,11 +85,11 @@ describe("EssayGradingCard Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as any);
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as never);
     vi.mocked(quizzesApi.useGradeEssayMutation).mockReturnValue({
       mutateAsync: mockMutateAsync,
       isPending: false,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderSubmissionDetailsAndUngradedStatus", () => {

@@ -108,7 +108,7 @@ describe("Enrollments API", () => {
 
     const result = await checkout({
       entityIds: ["c-1"],
-      entityType: "COURSE" as any,
+      entityType: "COURSE",
     });
 
     expect(client.apiPost).toHaveBeenCalledWith("/api/v1/orders/checkout", {

@@ -130,7 +130,7 @@ describe("Users API", () => {
     vi.mocked(client.apiGet).mockResolvedValue(mockUsersPaging);
 
     const { result } = renderHook(
-      () => useSearchUsersQuery(0, "john", "STUDENT" as any),
+      () => useSearchUsersQuery(0, "john", "STUDENT"),
       { wrapper },
     );
 

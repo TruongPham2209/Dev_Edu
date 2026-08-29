@@ -46,6 +46,9 @@
  */
 
 import * as coursesApi from "@/lib/api/courses";
+import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse } from "@/testing/mock-data";
+import { createMockQueryResult } from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { useParams } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -60,8 +63,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../course-hero", () => ({
-  CourseHero: ({ course }: any) => (
-    <div data-testid="course-hero-mock">{course.title}</div>
+  CourseHero: ({ course }: { course?: CourseResponse }) => (
+    <div data-testid="course-hero-mock">{course?.title}</div>
   ),
 }));
 
@@ -100,12 +103,13 @@ describe("AdminCourseDetailPage", () => {
     // Arrange
     // Return error state.
     // ----------------------------------------------------------------------------
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error("Failed to fetch"),
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult<CourseResponse>(undefined, {
+        error: new Error("Failed to fetch"),
+        isError: true,
+        isSuccess: false,
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -127,18 +131,15 @@ describe("AdminCourseDetailPage", () => {
     // Arrange
     // Mock course response.
     // ----------------------------------------------------------------------------
-    const mockCourse = {
+    const mockCourse: CourseResponse = createMockCourse({
       id: "course-999",
       title: "Kubernetes & Microservices Architecture",
       lecturers: ["Admin Lecturer"],
-    };
+    });
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: mockCourse,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(mockCourse),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

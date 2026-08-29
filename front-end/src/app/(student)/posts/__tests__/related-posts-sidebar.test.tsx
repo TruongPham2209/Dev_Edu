@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -47,7 +48,7 @@ vi.mock("@/lib/api/forum", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("RelatedPostsSidebar", () => {
@@ -69,7 +70,7 @@ describe("RelatedPostsSidebar", () => {
       },
     ];
 
-    vi.mocked(forumApi.getRelatedPosts).mockResolvedValue(mockRelated as any);
+    vi.mocked(forumApi.getRelatedPosts).mockResolvedValue(mockRelated as never);
 
     // ----------------------------------------------------------------------------
     // Act

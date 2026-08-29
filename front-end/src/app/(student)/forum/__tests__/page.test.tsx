@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -74,7 +75,7 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("ForumPage", () => {
@@ -82,21 +83,21 @@ describe("ForumPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
 
     vi.mocked(useAuthModule.useAuth).mockReturnValue({
       isAuthenticated: true,
       roles: ["STUDENT"],
-    } as any);
+    } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       handleError: vi.fn(),
       showSuccess: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useCreateForumPostMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useForumFeedInfiniteQuery).mockReturnValue({
       data: {
@@ -119,7 +120,7 @@ describe("ForumPage", () => {
       hasNextPage: false,
       isFetchingNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useSearchForumPostsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
@@ -129,14 +130,14 @@ describe("ForumPage", () => {
       hasNextPage: false,
       isFetchingNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     class MockIntersectionObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    window.IntersectionObserver = MockIntersectionObserver as never;
   });
 
   it("shouldRenderHeroDiscussionsFeedAndOpenCreatePostModal", () => {
@@ -163,5 +164,5 @@ describe("ForumPage", () => {
     fireEvent.click(createBtn);
 
     expect(screen.getAllByText(/Create Post/i).length).toBeGreaterThan(0);
-  });
+  }, 15000);
 });

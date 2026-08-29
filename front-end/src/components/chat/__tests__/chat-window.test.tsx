@@ -59,8 +59,12 @@ vi.mock("@/lib/use-auth", () => ({
   }),
 }));
 
+import type { useChat } from "@/hooks/use-chat";
+
 describe("ChatWindow", () => {
-  const createMockChat = (overrides = {}) => ({
+  const createMockChat = (
+    overrides: Partial<ReturnType<typeof useChat>> = {},
+  ): ReturnType<typeof useChat> => ({
     isOpen: true,
     setIsOpen: vi.fn(),
     toggleOpen: vi.fn(),
@@ -96,7 +100,7 @@ describe("ChatWindow", () => {
     // ----------------------------------------------------------------------------
     const mockChat = createMockChat({ isOpen: false });
     const onCloseMock = vi.fn();
-    render(<ChatWindow chat={mockChat as any} onClose={onCloseMock} />);
+    render(<ChatWindow chat={mockChat} onClose={onCloseMock} />);
 
     // ----------------------------------------------------------------------------
     // Assert
@@ -112,7 +116,7 @@ describe("ChatWindow", () => {
     // ----------------------------------------------------------------------------
     const mockChat = createMockChat({ isOpen: true });
     const onCloseMock = vi.fn();
-    render(<ChatWindow chat={mockChat as any} onClose={onCloseMock} />);
+    render(<ChatWindow chat={mockChat} onClose={onCloseMock} />);
 
     // ----------------------------------------------------------------------------
     // Assert
@@ -139,7 +143,7 @@ describe("ChatWindow", () => {
       isLoading: true,
     });
     const onCloseMock = vi.fn();
-    render(<ChatWindow chat={mockChat as any} onClose={onCloseMock} />);
+    render(<ChatWindow chat={mockChat} onClose={onCloseMock} />);
 
     // ----------------------------------------------------------------------------
     // Assert

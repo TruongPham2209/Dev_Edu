@@ -18,7 +18,7 @@ type ToastMessage = {
   type: ToastType;
 };
 
-type ToastContextType = {
+export type ToastContextType = {
   show: (message: string, type?: ToastType) => void;
   success: (message: string) => void;
   error: (message: string) => void;

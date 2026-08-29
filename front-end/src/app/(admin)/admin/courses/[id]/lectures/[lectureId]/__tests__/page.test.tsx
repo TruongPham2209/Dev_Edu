@@ -48,6 +48,14 @@
 import * as assignmentsApi from "@/lib/api/assignments";
 import * as coursesApi from "@/lib/api/courses";
 import * as lecturesApi from "@/lib/api/lectures";
+import type { LectureResponse } from "@/lib/type/lectures";
+import {
+  createMockAssignment,
+  createMockCourse,
+  createMockLecture,
+  createMockMaterial,
+} from "@/testing/mock-data";
+import { createMockQueryResult } from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -72,8 +80,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../lecture-hero", () => ({
-  LectureHeroSection: ({ lecture }: any) => (
-    <div data-testid="lecture-hero-mock">{lecture.title}</div>
+  LectureHeroSection: ({ lecture }: { lecture?: LectureResponse }) => (
+    <div data-testid="lecture-hero-mock">{lecture?.title}</div>
   ),
 }));
 
@@ -99,7 +107,14 @@ describe("AdminLectureDetailPage", () => {
       id: "course-123",
       lectureId: "lec-888",
     });
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({
+      push: mockPush,
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+    });
   });
 
   it("shouldRenderErrorStateWhenLectureIsNotFound", () => {
@@ -107,25 +122,23 @@ describe("AdminLectureDetailPage", () => {
     // Arrange
     // Return null lecture.
     // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult(null as unknown as LectureResponse),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-123", title: "Test Course" },
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({ id: "course-123", title: "Test Course" }),
+      ),
+    );
 
-    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue(
+      createMockQueryResult([]),
+    );
 
-    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as any);
+    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue(
+      createMockQueryResult([]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -145,30 +158,32 @@ describe("AdminLectureDetailPage", () => {
     // Arrange
     // Mock lecture object.
     // ----------------------------------------------------------------------------
-    const mockLecture = {
+    const mockLecture = createMockLecture({
       id: "lec-888",
       title: "Spring Security & JWT Authentication",
-    };
+    });
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: mockLecture,
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult(mockLecture),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-123", title: "Enterprise Backend" },
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({ id: "course-123", title: "Enterprise Backend" }),
+      ),
+    );
 
-    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
-      data: [{ id: "mat-1", title: "PDF Guide" }],
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue(
+      createMockQueryResult([
+        createMockMaterial({ id: "mat-1", title: "PDF Guide" }),
+      ]),
+    );
 
-    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
-      data: [{ id: "asgn-1", title: "Auth Lab" }],
-      isLoading: false,
-    } as any);
+    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue(
+      createMockQueryResult([
+        createMockAssignment({ id: "asgn-1", title: "Auth Lab" }),
+      ]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

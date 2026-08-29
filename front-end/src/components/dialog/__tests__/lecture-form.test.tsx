@@ -45,6 +45,7 @@
 
 import * as filesApi from "@/lib/api/files";
 import * as lecturesApi from "@/lib/api/lectures";
+import type { FileUploadResponse } from "@/lib/type/files";
 import type { LectureResponse } from "@/lib/type/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
@@ -82,6 +83,13 @@ vi.mock("@/components/common/form/rich-text-editor", () => ({
   ),
 }));
 
+import { createMockLecture } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
+
 describe("LectureFormDialog", () => {
   const mockCreateMutate = vi.fn();
   const mockUpdateMutate = vi.fn();
@@ -92,25 +100,47 @@ describe("LectureFormDialog", () => {
     vi.clearAllMocks();
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
     vi.mocked(filesApi.useDownloadUrlQuery).mockReturnValue({
       data: null,
-    } as any);
+    } as never);
     vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
+    vi.mocked(filesApi.useDownloadUrlQuery).mockReturnValue(
+      createMockQueryResult<FileUploadResponse>(),
+    );
+    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(lecturesApi.useCreateLectureMutation).mockReturnValue({
       mutateAsync: mockCreateMutate,
-    } as any);
+    } as never);
     vi.mocked(lecturesApi.useUpdateLectureMutation).mockReturnValue({
       mutateAsync: mockUpdateMutate,
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useCreateLectureMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockCreateMutate,
+      }),
+    );
+    vi.mocked(lecturesApi.useUpdateLectureMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockUpdateMutate,
+      }),
+    );
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({ showSuccess: mockShowSuccess }),
+    );
   });
 
   it("shouldRenderCreateNewLectureTitleWhenInitialDataIsUndefined", () => {
@@ -143,14 +173,13 @@ describe("LectureFormDialog", () => {
     // Arrange
     // Prepare existing lecture data.
     // ----------------------------------------------------------------------------
-    const existingLecture: LectureResponse = {
+    const existingLecture: LectureResponse = createMockLecture({
       id: "lec-99",
-      courseId: "c-10",
       title: "Introduction to Hooks",
       summary: "Overview of useState and useEffect.",
       content: "<p>Hooks simplify stateful logic.</p>",
       videoObjectKey: "videos/lec-99.mp4",
-    } as any;
+    });
 
     const handleSaved = vi.fn();
     const handleClose = vi.fn();

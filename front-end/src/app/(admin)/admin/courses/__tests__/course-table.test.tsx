@@ -41,6 +41,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CourseTable } from "../course-table";
+import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse, createMockRouter } from "@/testing/mock-data";
 
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
@@ -54,32 +56,26 @@ describe("CourseTable", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue(
+      createMockRouter({ push: mockPush }),
+    );
   });
 
   it("shouldRenderCourseTableDataAndTriggerActions", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock course array.
-    // ----------------------------------------------------------------------------
-    const mockCourses = [
-      {
+    const mockCourses: CourseResponse[] = [
+      createMockCourse({
         id: "course-1",
         title: "Spring Boot Microservices",
         description: "<p>Build cloud native apps with Eureka and Gateway.</p>",
         originalPrice: 799000,
         createdAt: "2026-05-15T00:00:00.000Z",
         thumbnailUrl: "https://example.com/spring.png",
-      },
+      }),
     ];
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render CourseTable.
-    // ----------------------------------------------------------------------------
     render(
       <CourseTable
-        courses={mockCourses as any}
+        courses={mockCourses}
         loading={false}
         onPreviewImage={mockOnPreviewImage}
         onEditCourse={mockOnEditCourse}
@@ -87,10 +83,6 @@ describe("CourseTable", () => {
       />,
     );
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify title, price, and action triggers.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Spring Boot Microservices")).toBeInTheDocument();
     expect(screen.getByText(/799[.,]000\s*VND/)).toBeInTheDocument();
 

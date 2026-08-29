@@ -53,6 +53,19 @@ import * as assignmentsApi from "@/lib/api/assignments";
 import * as coursesApi from "@/lib/api/courses";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { AssignmentResponse } from "@/lib/type/assignments";
+import type { CustomPaging } from "@/lib/type/api";
+import {
+  createMockAssignment,
+  createMockCourse,
+  createMockLecture,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";
@@ -91,9 +104,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../assignment-hero", () => ({
-  AssignmentHeroSection: ({ assignment }: any) => (
-    <div data-testid="assignment-hero-mock">{assignment.title}</div>
-  ),
+  AssignmentHeroSection: ({
+    assignment,
+  }: {
+    assignment?: AssignmentResponse;
+  }) => <div data-testid="assignment-hero-mock">{assignment?.title}</div>,
 }));
 
 vi.mock("../submissions-list", () => ({
@@ -121,39 +136,49 @@ describe("AdminAssignmentDetailPage", () => {
       lectureId: "lec-10",
       assignmentId: "asgn-500",
     });
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({
+      push: mockPush,
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+    });
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(assignmentsApi.useSubmissionsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as any);
+    const emptyPaging: CustomPaging<any> = {
+      contents: [],
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 0,
+      totalPages: 0,
+    };
 
-    vi.mocked(assignmentsApi.useFeedbacksQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(assignmentsApi.useSubmissionsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pageParams: [0],
+        pages: [emptyPaging],
+      }),
+    );
 
-    vi.mocked(assignmentsApi.useSubmissionTrackingQuery).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-    } as any);
+    vi.mocked(assignmentsApi.useFeedbacksQuery).mockReturnValue(
+      createMockQueryResult([]),
+    );
 
-    vi.mocked(assignmentsApi.useCreateFeedbackMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(assignmentsApi.useSubmissionTrackingQuery).mockReturnValue(
+      createMockQueryResult(),
+    );
 
-    vi.mocked(assignmentsApi.useDeleteFeedbackMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(assignmentsApi.useCreateFeedbackMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
+
+    vi.mocked(assignmentsApi.useDeleteFeedbackMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -165,20 +190,21 @@ describe("AdminAssignmentDetailPage", () => {
     // Arrange
     // Return null assignment.
     // ----------------------------------------------------------------------------
-    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as any);
+    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue(
+      createMockQueryResult(null as unknown as AssignmentResponse),
+    );
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: { id: "lec-10", title: "REST APIs" },
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockLecture({ id: "lec-10", title: "REST APIs" }),
+      ),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-1", title: "Java Backend" },
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({ id: "course-1", title: "Java Backend" }),
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -200,25 +226,26 @@ describe("AdminAssignmentDetailPage", () => {
     // Arrange
     // Mock assignment object.
     // ----------------------------------------------------------------------------
-    const mockAssignment = {
+    const mockAssignment: AssignmentResponse = createMockAssignment({
       id: "asgn-500",
       title: "Build RESTful APIs with Spring Boot",
-    };
+    });
 
-    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue({
-      data: mockAssignment,
-      isLoading: false,
-    } as any);
+    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue(
+      createMockQueryResult(mockAssignment),
+    );
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: { id: "lec-10", title: "REST APIs" },
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockLecture({ id: "lec-10", title: "REST APIs" }),
+      ),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-1", title: "Java Backend" },
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({ id: "course-1", title: "Java Backend" }),
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

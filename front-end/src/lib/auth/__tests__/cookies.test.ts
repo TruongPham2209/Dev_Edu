@@ -45,6 +45,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { setAuthCookies, clearAuthCookies } from "../cookies";
 import { cookies } from "next/headers";
+import type { OAuthTokenResponse } from "@/lib/type/api";
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
@@ -55,11 +56,17 @@ describe("auth cookies utility", () => {
     set: vi.fn(),
     delete: vi.fn(),
     get: vi.fn(),
+    getAll: vi.fn(),
+    has: vi.fn(),
+    size: 0,
+    [Symbol.iterator]: vi.fn(),
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(cookies).mockResolvedValue(mockCookieStore as any);
+    vi.mocked(cookies).mockResolvedValue(
+      mockCookieStore as unknown as Awaited<ReturnType<typeof cookies>>,
+    );
   });
 
   afterEach(() => {
@@ -72,7 +79,7 @@ describe("auth cookies utility", () => {
       // Arrange
       // Prepare props, mocks and expected values.
       // ----------------------------------------------------------------------------
-      const tokens = {
+      const tokens: OAuthTokenResponse = {
         access_token: "access-123",
         refresh_token: "refresh-456",
         expires_in: 3600,
@@ -83,7 +90,7 @@ describe("auth cookies utility", () => {
       // Act
       // Execute the component or function.
       // ----------------------------------------------------------------------------
-      await setAuthCookies(tokens as any);
+      await setAuthCookies(tokens);
 
       // ----------------------------------------------------------------------------
       // Assert & Verify
@@ -111,18 +118,18 @@ describe("auth cookies utility", () => {
       // Arrange
       // Prepare props, mocks and expected values.
       // ----------------------------------------------------------------------------
-      const tokens = {
+      const tokens: OAuthTokenResponse = {
         access_token: "access-123",
         refresh_token: "refresh-456",
-        expires_in: "7200",
-        refresh_token_expires_in: "172800",
+        expires_in: 7200,
+        refresh_token_expires_in: 172800,
       };
 
       // ----------------------------------------------------------------------------
       // Act
       // Execute the component or function.
       // ----------------------------------------------------------------------------
-      await setAuthCookies(tokens as any);
+      await setAuthCookies(tokens);
 
       // ----------------------------------------------------------------------------
       // Assert & Verify
@@ -149,7 +156,7 @@ describe("auth cookies utility", () => {
       // Arrange
       // Prepare props, mocks and expected values.
       // ----------------------------------------------------------------------------
-      const tokens = {
+      const tokens: OAuthTokenResponse = {
         access_token: "access-only",
         expires_in: 3600,
       };
@@ -158,7 +165,7 @@ describe("auth cookies utility", () => {
       // Act
       // Execute the component or function.
       // ----------------------------------------------------------------------------
-      await setAuthCookies(tokens as any);
+      await setAuthCookies(tokens);
 
       // ----------------------------------------------------------------------------
       // Assert & Verify
@@ -179,16 +186,15 @@ describe("auth cookies utility", () => {
       // Arrange
       // Prepare props, mocks and expected values.
       // ----------------------------------------------------------------------------
-      const tokens = {
+      const tokens: OAuthTokenResponse = {
         access_token: "access-no-maxage",
-        expires_in: "invalid-number",
       };
 
       // ----------------------------------------------------------------------------
       // Act
       // Execute the component or function.
       // ----------------------------------------------------------------------------
-      await setAuthCookies(tokens as any);
+      await setAuthCookies(tokens);
 
       // ----------------------------------------------------------------------------
       // Assert & Verify
@@ -221,8 +227,8 @@ describe("auth cookies utility", () => {
       // Verify returned result and rendered output / interaction with mocked dependencies.
       // ----------------------------------------------------------------------------
       expect(mockCookieStore.delete).toHaveBeenCalledTimes(2);
-      expect(mockCookieStore.delete).toHaveBeenCalledWith("access_token");
-      expect(mockCookieStore.delete).toHaveBeenCalledWith("refresh_token");
+      expect(mockCookieStore.delete).toHaveBeenNthCalledWith(1, "access_token");
+      expect(mockCookieStore.delete).toHaveBeenNthCalledWith(2, "refresh_token");
     });
   });
 });

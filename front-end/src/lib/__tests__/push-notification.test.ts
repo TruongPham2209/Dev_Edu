@@ -85,7 +85,7 @@ describe("push-notification helper service", () => {
     const { getFirebaseMessaging } = await import("../firebase");
     const { getToken } = await import("firebase/messaging");
 
-    const mockMessaging = {} as any;
+    const mockMessaging = { app: {} } as unknown as Awaited<ReturnType<typeof getFirebaseMessaging>>;
     vi.mocked(getFirebaseMessaging).mockResolvedValue(mockMessaging);
     vi.mocked(getToken).mockResolvedValue("sample-fcm-token");
     vi.mocked(notificationsApi.registerDeviceTokenApi).mockResolvedValue();
@@ -103,7 +103,7 @@ describe("push-notification helper service", () => {
     const { getFirebaseMessaging } = await import("../firebase");
     const { onMessage } = await import("firebase/messaging");
 
-    const mockMessaging = {} as any;
+    const mockMessaging = { app: {} } as unknown as Awaited<ReturnType<typeof getFirebaseMessaging>>;
     vi.mocked(getFirebaseMessaging).mockResolvedValue(mockMessaging);
 
     const mockUnsub = vi.fn();
@@ -125,7 +125,7 @@ describe("push-notification helper service", () => {
     const { getFirebaseMessaging } = await import("../firebase");
     const { getToken } = await import("firebase/messaging");
 
-    const mockMessaging = {} as any;
+    const mockMessaging = { app: {} } as unknown as Awaited<ReturnType<typeof getFirebaseMessaging>>;
     vi.mocked(getFirebaseMessaging).mockResolvedValue(mockMessaging);
     vi.mocked(getToken).mockResolvedValue("token-to-unregister");
     vi.mocked(notificationsApi.unregisterDeviceTokenApi).mockResolvedValue();

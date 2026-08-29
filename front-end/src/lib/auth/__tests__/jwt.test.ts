@@ -122,8 +122,8 @@ describe("decodeJwt", () => {
     // Execute the component or function and verify output.
     // ----------------------------------------------------------------------------
     expect(decodeJwt("")).toBeNull();
-    expect(decodeJwt(null as any)).toBeNull();
-    expect(decodeJwt(undefined as any)).toBeNull();
+    expect(decodeJwt(null as never)).toBeNull();
+    expect(decodeJwt(undefined as never)).toBeNull();
   });
 
   it("shouldReturnNullWhenTokenDoesNotHaveThreeParts", () => {

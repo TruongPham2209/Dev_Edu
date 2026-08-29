@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -66,7 +67,7 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("CoursePurchaseSection", () => {
@@ -85,25 +86,25 @@ describe("CoursePurchaseSection", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
 
     vi.mocked(useAuthModule.useAuth).mockReturnValue({
       isAuthenticated: true,
       roles: ["STUDENT"],
-    } as any);
+    } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue({
       mutateAsync: mockCheckoutMutate,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useAddToCartMutation).mockReturnValue({
       mutateAsync: mockAddToCartMutate,
-    } as any);
+    } as never);
   });
 
   it("shouldInitiateCheckoutOnBuyNowClick", async () => {
@@ -119,7 +120,7 @@ describe("CoursePurchaseSection", () => {
     // ----------------------------------------------------------------------------
     render(
       <CoursePurchaseSection
-        course={mockCourse as any}
+        course={mockCourse as never}
         isEnrolled={false}
         lectures={[]}
       />,
@@ -149,7 +150,7 @@ describe("CoursePurchaseSection", () => {
     // ----------------------------------------------------------------------------
     render(
       <CoursePurchaseSection
-        course={mockCourse as any}
+        course={mockCourse as never}
         isEnrolled={false}
         lectures={[]}
       />,

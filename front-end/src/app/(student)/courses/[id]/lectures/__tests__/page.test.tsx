@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -47,6 +48,16 @@ import { render, screen } from "@testing-library/react";
 import * as navigation from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import StudentLecturePage from "../page";
+import type { LectureResponse } from "@/lib/type/lectures";
+import {
+  createMockLecture,
+  createMockRouter,
+  createMockSearchParams,
+} from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
@@ -83,7 +94,8 @@ vi.mock("@tanstack/react-query", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) =>
+    React.createElement("img", { alt, ...props }),
 }));
 
 describe("StudentLecturePage", () => {
@@ -92,72 +104,56 @@ describe("StudentLecturePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(navigation.useRouter).mockReturnValue({
-      push: mockPush,
-    } as any);
+    vi.mocked(navigation.useRouter).mockReturnValue(
+      createMockRouter({ push: mockPush }),
+    );
 
     vi.mocked(navigation.useParams).mockReturnValue({
       id: "course-100",
-    } as any);
+    });
 
-    vi.mocked(navigation.useSearchParams).mockReturnValue({
-      get: (key: string) => (key === "lectureId" ? "lec-1" : null),
-    } as any);
+    vi.mocked(navigation.useSearchParams).mockReturnValue(
+      createMockSearchParams("lectureId=lec-1"),
+    );
 
-    vi.mocked(lecturesApi.useUpdateLectureProgressMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(lecturesApi.useUpdateLectureProgressMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderErrorStateWhenActiveLectureIsNotFound", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Return lectures list but null activeLecture.
-    // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
-      data: [{ id: "lec-1", title: "Intro", isCompleted: false }],
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
+      createMockQueryResult([
+        createMockLecture({ id: "lec-1", title: "Intro", isCompleted: false }),
+      ]),
+    );
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult<LectureResponse>(),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render StudentLecturePage.
-    // ----------------------------------------------------------------------------
     render(<StudentLecturePage />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify error state text.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Lecture not found")).toBeInTheDocument();
   });
 
   it("shouldRenderActiveLectureContentAndSidebar", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock lectures and active lecture.
-    // ----------------------------------------------------------------------------
-    const mockLectures = [
-      {
+    const mockLectures: LectureResponse[] = [
+      createMockLecture({
         id: "lec-1",
         title: "Introduction to Next.js 15",
         isCompleted: true,
         duration: 300,
-      },
-      {
+      }),
+      createMockLecture({
         id: "lec-2",
         title: "Routing & Layouts",
         isCompleted: false,
         duration: 400,
-      },
+      }),
     ];
 
-    const mockActiveLecture = {
+    const mockActiveLecture: LectureResponse = createMockLecture({
       id: "lec-1",
       title: "Introduction to Next.js 15",
       summary: "First lesson in Next.js 15",
@@ -166,28 +162,18 @@ describe("StudentLecturePage", () => {
       isCompleted: true,
       content: "<p>Welcome to Next.js 15!</p>",
       videoObjectKey: null,
-    };
+    });
 
-    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
-      data: mockLectures,
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
+      createMockQueryResult(mockLectures),
+    );
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: mockActiveLecture,
-      isLoading: false,
-    } as any);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult(mockActiveLecture),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render StudentLecturePage.
-    // ----------------------------------------------------------------------------
     render(<StudentLecturePage />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify lecture title, summary, HTML content, and tab headers render.
-    // ----------------------------------------------------------------------------
     expect(
       screen.getAllByRole("heading", { name: "Introduction to Next.js 15" })[0],
     ).toBeInTheDocument();

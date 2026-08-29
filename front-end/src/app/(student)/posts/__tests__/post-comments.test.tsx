@@ -71,20 +71,20 @@ describe("PostComments", () => {
       isAuthenticated: true,
       user: { avatarUrl: "https://example.com/avatar.jpg" },
       roles: ["STUDENT"],
-    } as any);
+    } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useCreateForumCommentMutation).mockReturnValue({
       mutateAsync: mockCreateCommentMutate,
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useDeleteForumCommentMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
   });
 
   it("shouldRenderEmptyCommentsStateWhenNoCommentsExist", async () => {
@@ -95,7 +95,7 @@ describe("PostComments", () => {
     vi.mocked(forumApi.getForumComments).mockResolvedValue({
       contents: [],
       nextCursor: null,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -120,7 +120,7 @@ describe("PostComments", () => {
     vi.mocked(forumApi.getForumComments).mockResolvedValue({
       contents: [],
       nextCursor: null,
-    } as any);
+    } as never);
 
     mockCreateCommentMutate.mockResolvedValue({
       id: "comm-1",

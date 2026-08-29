@@ -82,7 +82,7 @@ describe("Metrics API", () => {
     vi.mocked(client.apiGet).mockResolvedValue(mockGrowth);
 
     const { result } = renderHook(
-      () => useUserGrowth("MONTHLY" as any),
+      () => useUserGrowth("MONTHLY"),
       { wrapper },
     );
 

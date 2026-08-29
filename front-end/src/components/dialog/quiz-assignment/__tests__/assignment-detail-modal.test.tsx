@@ -57,6 +57,11 @@ vi.mock("@/lib/api/quizzes", () => ({
   useStartAttemptMutation: vi.fn(),
 }));
 
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
+
 describe("QuizAssignmentDetailModal Component", () => {
   const mockAssignment: QuizAssignmentResponse = {
     id: "assign-100",
@@ -77,11 +82,20 @@ describe("QuizAssignmentDetailModal Component", () => {
     vi.mocked(quizzesApi.useStudentAttemptHistoryQuery).mockReturnValue({
       data: [],
       isLoading: false,
-    } as any);
+    } as never);
     vi.mocked(quizzesApi.useStartAttemptMutation).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as never);
+    vi.mocked(quizzesApi.useStudentAttemptHistoryQuery).mockReturnValue(
+      createMockQueryResult([]),
+    );
+    vi.mocked(quizzesApi.useStartAttemptMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: vi.fn(),
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderAssignmentTitleAndConfigurationSummaryWhenOpen", () => {

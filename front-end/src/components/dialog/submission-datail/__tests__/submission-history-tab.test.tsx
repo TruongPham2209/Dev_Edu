@@ -48,7 +48,17 @@ describe("SubmissionHistoryTab", () => {
       observe: vi.fn(),
       unobserve: vi.fn(),
       disconnect: vi.fn(),
-    })) as any;
+    })) as never;
+    class MockIntersectionObserver {
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+    }
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderNoActivityHistoryRecordedWhenHistoryIsEmpty", () => {
@@ -85,7 +95,7 @@ describe("SubmissionHistoryTab", () => {
         details: "Student uploaded solution zip archive",
         status: "SUBMITTED",
         updatedAt: "2026-06-18T10:00:00.000Z",
-      } as any,
+      },
     ];
 
     // ----------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -53,20 +54,35 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
+
+import { createMockCategory, createMockCourse } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 
 describe("CourseDetailPage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       handleError: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
     vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
       data: [{ id: "cat-1", name: "Frontend" }],
       error: null,
-    } as any);
+    } as never);
+    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue(
+      createMockQueryResult([
+        createMockCategory({ id: "cat-1", name: "Frontend" }),
+      ]),
+    );
 
     vi.mocked(coursesApi.useCoursesInfiniteQuery).mockReturnValue({
       data: {
@@ -88,7 +104,30 @@ describe("CourseDetailPage Component", () => {
       hasNextPage: false,
       fetchNextPage: vi.fn(),
       error: null,
-    } as any);
+    } as never);
+    vi.mocked(coursesApi.useCoursesInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [
+            {
+              contents: [
+                createMockCourse({
+                  id: "c-1",
+                  title: "React 19 Complete Guide",
+                  discountedPrice: 900000,
+                  originalPrice: 1200000,
+                }),
+              ],
+              currentPage: 0,
+              pageSize: 10,
+              totalElements: 1,
+              totalPages: 1,
+            },
+          ],
+          pageParams: [null],
+        },
+      ),
+    );
   });
 
   it("shouldRenderSearchCategoriesAndCourseList", () => {

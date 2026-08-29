@@ -45,6 +45,13 @@
 
 import * as lecturesApi from "@/lib/api/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { LectureResponse } from "@/lib/type/lectures";
+import { createMockLecture } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -64,7 +71,13 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/components/dialog/lecture-form", () => ({
-  LectureFormDialog: ({ open, onClose }: any) =>
+  LectureFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="lecture-form-dialog">
         <button onClick={onClose}>Close Dialog</button>
@@ -79,16 +92,32 @@ describe("LecturesTab", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue({
+      push: mockPush,
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+    });
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
     vi.mocked(lecturesApi.useDeleteLectureMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useDeleteLectureMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+      }),
+    );
   });
 
   it("shouldRenderEmptyStateWhenNoLecturesExist", () => {
@@ -100,7 +129,10 @@ describe("LecturesTab", () => {
       data: [],
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
+      createMockQueryResult([], { refetch: mockRefetch }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -129,12 +161,21 @@ describe("LecturesTab", () => {
         videoObjectKey: "videos/intro.mp4",
       },
     ];
+    const mockLecture: LectureResponse = createMockLecture({
+      id: "lec-1",
+      title: "Introduction to Clean Architecture",
+      summary: "Understand domain-driven boundaries",
+      videoObjectKey: "videos/intro.mp4",
+    });
 
     vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
       data: mockLectures,
       isLoading: false,
       refetch: mockRefetch,
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
+      createMockQueryResult([mockLecture], { refetch: mockRefetch }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

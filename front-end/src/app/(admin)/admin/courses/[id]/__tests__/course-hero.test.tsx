@@ -37,11 +37,13 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse } from "@/testing/mock-data";
 import { CourseHero } from "../course-hero";
 
 vi.mock("@/components/common/hero-section/course-hero-info", () => ({
-  CourseHeroInfo: ({ course }: any) => (
-    <div data-testid="course-hero-info-mock">{course.title}</div>
+  CourseHeroInfo: ({ course }: { course?: { title?: string } }) => (
+    <div data-testid="course-hero-info-mock">{course?.title}</div>
   ),
 }));
 
@@ -51,12 +53,12 @@ describe("CourseHero", () => {
     // Arrange
     // Mock course object.
     // ----------------------------------------------------------------------------
-    const mockCourse = {
+    const mockCourse: CourseResponse = createMockCourse({
       id: "course-123",
       title: "Full-Stack Web Development",
       description: "<p>Learn React, Next.js, and Spring Boot.</p>",
       lecturers: ["John Doe", "Jane Smith"],
-    };
+    });
 
     // ----------------------------------------------------------------------------
     // Act
@@ -64,7 +66,7 @@ describe("CourseHero", () => {
     // ----------------------------------------------------------------------------
     render(
       <CourseHero
-        course={mockCourse as any}
+        course={mockCourse}
         lecturesCount={15}
         studentsCount={120}
         discountsCount={2}

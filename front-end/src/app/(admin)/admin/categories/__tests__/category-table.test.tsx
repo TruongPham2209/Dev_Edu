@@ -39,6 +39,8 @@
  * Unit test for CategoryTable component.
  */
 
+import type { CategoryResponse } from "@/lib/type/courses";
+import { createMockCategory } from "@/testing/mock-data";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CategoryTable } from "../category-table";
@@ -53,21 +55,21 @@ describe("CategoryTable", () => {
     // Arrange
     // Mock category items.
     // ----------------------------------------------------------------------------
-    const mockCategories = [
-      {
+    const mockCategories: CategoryResponse[] = [
+      createMockCategory({
         id: "cat-1",
         name: "Backend Development",
         description: "Spring Boot, Node.js, microservices",
         thumbnailUrl: "https://example.com/backend.jpg",
         totalCourses: 0,
-      },
-      {
+      }),
+      createMockCategory({
         id: "cat-2",
         name: "Frontend Development",
         description: "React, Next.js, TypeScript",
         thumbnailUrl: "https://example.com/frontend.jpg",
         totalCourses: 5,
-      },
+      }),
     ];
 
     // ----------------------------------------------------------------------------
@@ -76,7 +78,7 @@ describe("CategoryTable", () => {
     // ----------------------------------------------------------------------------
     render(
       <CategoryTable
-        categories={mockCategories as any}
+        categories={mockCategories}
         loading={false}
         onEdit={mockOnEdit}
         onDelete={mockOnDelete}

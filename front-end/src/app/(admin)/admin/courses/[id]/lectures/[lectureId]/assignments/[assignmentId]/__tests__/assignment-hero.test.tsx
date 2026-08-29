@@ -36,11 +36,17 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { AssignmentResponse } from "@/lib/type/assignments";
+import { createMockAssignment } from "@/testing/mock-data";
 import { AssignmentHeroSection } from "../assignment-hero";
 
 vi.mock("@/components/common/hero-section/assignment-hero-info", () => ({
-  AssignmentHeroInfo: ({ assignment }: any) => (
-    <div data-testid="assignment-hero-info-mock">{assignment.title}</div>
+  AssignmentHeroInfo: ({
+    assignment,
+  }: {
+    assignment?: { title?: string };
+  }) => (
+    <div data-testid="assignment-hero-info-mock">{assignment?.title}</div>
   ),
 }));
 
@@ -50,11 +56,11 @@ describe("AssignmentHeroSection", () => {
     // Arrange
     // Mock assignment object.
     // ----------------------------------------------------------------------------
-    const mockAssignment = {
+    const mockAssignment: AssignmentResponse = createMockAssignment({
       id: "asgn-500",
       title: "Build RESTful APIs with Spring Boot",
       description: "<p>Implement GET, POST, PUT, DELETE endpoints.</p>",
-    };
+    });
 
     // ----------------------------------------------------------------------------
     // Act
@@ -62,7 +68,7 @@ describe("AssignmentHeroSection", () => {
     // ----------------------------------------------------------------------------
     render(
       <AssignmentHeroSection
-        assignment={mockAssignment as any}
+        assignment={mockAssignment}
         courseId="course-1"
         courseTitle="Java Backend Engineering"
         lectureId="lec-10"

@@ -97,9 +97,11 @@ function createWrapper() {
       },
     },
   });
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = "TestQueryWrapper";
+  return Wrapper;
 }
 
 describe("quizzes API & React Query hooks", () => {
@@ -148,22 +150,22 @@ describe("quizzes API & React Query hooks", () => {
         title: "New Quiz",
         description: "Desc",
         passPercentage: 70,
-      } as any;
+      };
       const mockRes = { id: "q-100", ...quizReq };
       vi.mocked(client.apiPost).mockResolvedValue(mockRes);
 
-      const result = await createQuiz(quizReq);
+      const result = await createQuiz(quizReq as never);
 
       expect(client.apiPost).toHaveBeenCalledWith("/api/v1/quizzes", quizReq);
       expect(result).toEqual(mockRes);
     });
 
     it("shouldUpdateQuiz", async () => {
-      const quizReq = { courseId: "c-1", title: "Updated Quiz" } as any;
+      const quizReq = { courseId: "c-1", title: "Updated Quiz" };
       const mockRes = { id: "q-1", ...quizReq };
       vi.mocked(client.apiPut).mockResolvedValue(mockRes);
 
-      const result = await updateQuiz("q-1", quizReq);
+      const result = await updateQuiz("q-1", quizReq as never);
 
       expect(client.apiPut).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1",
@@ -197,7 +199,7 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldReviewQuiz", async () => {
-      const reviewReq = { approved: true, comment: "Approved" } as any;
+      const reviewReq = { approved: true, comment: "Approved" } as never;
       vi.mocked(client.apiPost).mockResolvedValue({
         id: "q-1",
         status: "APPROVED",
@@ -216,13 +218,13 @@ describe("quizzes API & React Query hooks", () => {
       const configReq = {
         questionType: "SINGLE_CHOICE",
         numberOfQuestions: 10,
-      } as any;
+      };
       vi.mocked(client.apiPost).mockResolvedValue({
         id: "cfg-1",
         ...configReq,
       });
 
-      const result = await createQuizTypeConfig("q-1", configReq);
+      const result = await createQuizTypeConfig("q-1", configReq as never);
 
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1/type-configs",
@@ -257,7 +259,7 @@ describe("quizzes API & React Query hooks", () => {
       const qReq = {
         content: "Question text?",
         questionType: "SINGLE_CHOICE",
-      } as any;
+      };
       vi.mocked(client.apiPost).mockResolvedValue({ id: "quest-1", ...qReq });
       vi.mocked(client.apiPut).mockResolvedValue({
         id: "quest-1",
@@ -265,14 +267,14 @@ describe("quizzes API & React Query hooks", () => {
       });
       vi.mocked(client.apiDelete).mockResolvedValue(undefined);
 
-      const created = await createQuizQuestion("q-1", qReq);
+      const created = await createQuizQuestion("q-1", qReq as never);
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1/questions",
         qReq,
       );
       expect(created).toEqual({ id: "quest-1", ...qReq });
 
-      const updated = await updateQuizQuestion("q-1", "quest-1", qReq);
+      const updated = await updateQuizQuestion("q-1", "quest-1", qReq as never);
       expect(client.apiPut).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1/questions/quest-1",
         qReq,
@@ -286,12 +288,12 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldHandleQuizAssignments", async () => {
-      const assignReq = { quizId: "q-1", title: "Assignment 1" } as any;
+      const assignReq = { quizId: "q-1", title: "Assignment 1" };
       vi.mocked(client.apiPost).mockResolvedValue({ id: "a-1", ...assignReq });
       vi.mocked(client.apiGet).mockResolvedValue([{ id: "a-1" }]);
       vi.mocked(client.apiDelete).mockResolvedValue(undefined);
 
-      await createQuizAssignment(assignReq);
+      await createQuizAssignment(assignReq as never);
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quiz-assignments",
         assignReq,
@@ -320,7 +322,7 @@ describe("quizzes API & React Query hooks", () => {
 
     it("shouldStartAttemptWithSessionTokenHeader", async () => {
       const mockAttempt = { attemptId: "att-1" };
-      vi.mocked(client.apiCall).mockResolvedValue({ data: mockAttempt } as any);
+      vi.mocked(client.apiCall).mockResolvedValue({ data: mockAttempt } as never);
 
       const result = await startAttempt("assign-1", "token-xyz");
 
@@ -335,7 +337,7 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldAutosaveHeartbeatSubmitAttempt", async () => {
-      const autoSaveReq = { answers: [] } as any;
+      const autoSaveReq = { answers: [] } as never;
       vi.mocked(client.apiPost).mockResolvedValue({ status: "SAVED" });
 
       await autosaveAttempt("att-1", autoSaveReq);
@@ -344,7 +346,7 @@ describe("quizzes API & React Query hooks", () => {
         autoSaveReq,
       );
 
-      await heartbeatAttempt("att-1", { sessionToken: "st-1" } as any);
+      await heartbeatAttempt("att-1", { sessionToken: "st-1" } as never);
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quiz-attempts/att-1/heartbeat",
         { sessionToken: "st-1" },
@@ -364,7 +366,7 @@ describe("quizzes API & React Query hooks", () => {
       vi.mocked(client.apiPost).mockResolvedValue({
         attemptId: "att-1",
         score: 95,
-      } as any);
+      } as never);
 
       await getAttemptResult("att-1");
       expect(client.apiGet).toHaveBeenCalledWith(
@@ -420,7 +422,7 @@ describe("quizzes API & React Query hooks", () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ courseId: "c-1", title: "New" } as any);
+      result.current.mutate({ courseId: "c-1", title: "New" } as never);
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(client.apiPost).toHaveBeenCalled();

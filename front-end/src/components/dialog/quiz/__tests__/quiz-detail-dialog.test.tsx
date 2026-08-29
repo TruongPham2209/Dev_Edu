@@ -40,12 +40,20 @@
 
 import * as quizzesApi from "@/lib/api/quizzes";
 import * as toastContext from "@/lib/toast-context";
+import type { QuizDetailResponse, QuizResponse } from "@/lib/type/quizzes";
+import { createMockToast } from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QuizDetailDialog } from "../quiz-detail-dialog";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: vi.fn().mockReturnValue({
+    push: vi.fn(),
+  }),
 }));
 
 vi.mock("@/lib/api/quizzes", () => ({
@@ -59,18 +67,19 @@ vi.mock("@/lib/toast-context", () => ({
 }));
 
 describe("QuizDetailDialog Component", () => {
-  const mockToast = {
-    success: vi.fn(),
-    error: vi.fn(),
-  };
+  const mockToast = createMockToast();
 
-  const mockQuiz = {
+  const mockQuiz: QuizResponse = {
     id: "q-100",
+    courseId: "c-1",
     title: "Java Fundamentals Quiz",
     description: "Test basic Java syntax",
-    passPercentage: 70,
     status: "DRAFT",
     createdAt: "2026-08-06T10:00:00Z",
+  };
+
+  const mockDetail: QuizDetailResponse = {
+    quiz: mockQuiz,
     typeConfigs: [],
     questions: [],
   };
@@ -80,29 +89,27 @@ describe("QuizDetailDialog Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as any);
-    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: {
-        quiz: mockQuiz,
-        typeConfigs: [],
-        questions: [],
-      },
-      isLoading: false,
-      isError: false,
-    } as any);
-    vi.mocked(quizzesApi.useSubmitQuizMutation).mockReturnValue({
-      mutateAsync: mockSubmitMutateAsync,
-      isPending: false,
-    } as any);
-    vi.mocked(quizzesApi.useReviewQuizMutation).mockReturnValue({
-      mutateAsync: mockReviewMutateAsync,
-      isPending: false,
-    } as any);
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast);
+    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue(
+      createMockQueryResult(mockDetail),
+    );
+    vi.mocked(quizzesApi.useSubmitQuizMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockSubmitMutateAsync,
+        isPending: false,
+      }),
+    );
+    vi.mocked(quizzesApi.useReviewQuizMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockReviewMutateAsync,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderQuizTitleAndPassPercentageWhenOpen", () => {
     render(
-      <QuizDetailDialog open={true} quiz={mockQuiz as any} onClose={vi.fn()} />,
+      <QuizDetailDialog open={true} quiz={mockQuiz} onClose={vi.fn()} />,
     );
 
     expect(screen.getByText("Java Fundamentals Quiz")).toBeInTheDocument();

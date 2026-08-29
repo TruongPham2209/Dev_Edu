@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -38,23 +39,24 @@
  */
 
 import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse } from "@/testing/mock-data";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CourseHeroInfo } from "../course-hero-info";
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("CourseHeroInfo", () => {
-  const courseWithDiscount: CourseResponse = {
+  const courseWithDiscount: CourseResponse = createMockCourse({
     id: "course-1",
     title: "Fullstack Next.js 16 Masterclass",
     originalPrice: 1000000,
     discountedPrice: 750000,
     thumbnailUrl: "https://example.com/cover.png",
     createdAt: "2026-04-10T12:00:00.000Z",
-  } as any;
+  });
 
   it("shouldRenderCourseTitleAndDiscountedPricing", () => {
     // ----------------------------------------------------------------------------

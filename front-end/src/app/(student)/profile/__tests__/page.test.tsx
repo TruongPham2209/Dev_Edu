@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -75,8 +76,17 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
+
+import type { UserResponse } from "@/lib/type/users";
+import { createMockAuthUser, createMockUser } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 
 describe("ProfilePage", () => {
   beforeEach(() => {
@@ -84,40 +94,91 @@ describe("ProfilePage", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
     vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(forumApi.usePostedPostsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
       isLoading: false,
-    } as any);
+    } as never);
+    vi.mocked(forumApi.usePostedPostsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [
+            {
+              contents: [],
+              currentPage: 0,
+              pageSize: 10,
+              totalElements: 0,
+              totalPages: 0,
+            },
+          ],
+          pageParams: [null],
+        },
+      ),
+    );
 
     vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
       isLoading: false,
-    } as any);
+    } as never);
+    vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [
+            {
+              contents: [],
+              currentPage: 0,
+              pageSize: 10,
+              totalElements: 0,
+              totalPages: 0,
+            },
+          ],
+          pageParams: [null],
+        },
+      ),
+    );
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderUserProfileAndSwitchTabs", () => {
@@ -125,19 +186,17 @@ describe("ProfilePage", () => {
     // Arrange
     // Return logged-in user profile.
     // ----------------------------------------------------------------------------
-    const mockUser = {
+    const mockUser: UserResponse = createMockUser({
       id: "u-999",
       fullName: "Le Van C",
       username: "levanc",
       email: "levanc@example.com",
       role: "STUDENT",
-    };
+    });
 
-    vi.mocked(usersApi.useMeQuery).mockReturnValue({
-      data: mockUser,
-      isLoading: false,
-      error: null,
-    } as any);
+    vi.mocked(usersApi.useMeQuery).mockReturnValue(
+      createMockQueryResult(mockUser),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

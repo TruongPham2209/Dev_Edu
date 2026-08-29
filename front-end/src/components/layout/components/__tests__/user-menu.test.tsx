@@ -44,6 +44,11 @@
 import * as logoutActions from "@/app/logout/actions";
 import * as authStorage from "@/lib/auth-storage";
 import * as authHook from "@/lib/use-auth";
+import {
+  createMockAuthStatus,
+  createMockAuthUser,
+  createMockRouter,
+} from "@/testing/mock-data";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -66,14 +71,17 @@ vi.mock("@/app/logout/actions", () => ({
 }));
 
 describe("UserMenu Component", () => {
-  const mockRouter = {
-    replace: vi.fn(),
-    refresh: vi.fn(),
-  };
+  const mockReplace = vi.fn();
+  const mockRefresh = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue(mockRouter as any);
+    vi.mocked(useRouter).mockReturnValue(
+      createMockRouter({
+        replace: mockReplace,
+        refresh: mockRefresh,
+      }),
+    );
   });
 
   it("shouldReturnNullWhenUserIsUnauthenticated", () => {
@@ -81,12 +89,14 @@ describe("UserMenu Component", () => {
     // Arrange
     // Mock useAuth returning null user.
     // ----------------------------------------------------------------------------
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      user: null,
-      isAuthenticated: false,
-      role: null,
-      roles: [],
-    });
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        user: null,
+        isAuthenticated: false,
+        role: null,
+        roles: [],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -106,21 +116,23 @@ describe("UserMenu Component", () => {
     // Arrange
     // Mock user profile.
     // ----------------------------------------------------------------------------
-    const mockUser = {
+    const mockUser = createMockAuthUser({
       id: "u-1",
       username: "john_doe",
       fullName: "John Doe",
       role: "STUDENT",
       roles: ["STUDENT"],
       avatarUrl: "https://example.com/avatar.jpg",
-    };
-
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      user: mockUser as any,
-      isAuthenticated: true,
-      role: "STUDENT",
-      roles: ["STUDENT"],
     });
+
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        user: mockUser,
+        isAuthenticated: true,
+        role: "STUDENT",
+        roles: ["STUDENT"],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -147,19 +159,23 @@ describe("UserMenu Component", () => {
     // Arrange
     // Mock user and resolved logoutAction.
     // ----------------------------------------------------------------------------
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      user: {
-        id: "u-1",
-        username: "john_doe",
-        fullName: "John Doe",
-        role: "STUDENT",
-        roles: ["STUDENT"],
-      } as any,
-      isAuthenticated: true,
+    const mockUser = createMockAuthUser({
+      id: "u-1",
+      username: "john_doe",
+      fullName: "John Doe",
       role: "STUDENT",
       roles: ["STUDENT"],
     });
-    vi.mocked(logoutActions.logoutAction).mockResolvedValue(undefined as any);
+
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        user: mockUser,
+        isAuthenticated: true,
+        role: "STUDENT",
+        roles: ["STUDENT"],
+      }),
+    );
+    vi.mocked(logoutActions.logoutAction).mockResolvedValue({ success: true });
 
     render(<UserMenu />);
 
@@ -180,8 +196,8 @@ describe("UserMenu Component", () => {
     await waitFor(() => {
       expect(authStorage.clearAuthSession).toHaveBeenCalledTimes(1);
       expect(logoutActions.logoutAction).toHaveBeenCalledTimes(1);
-      expect(mockRouter.replace).toHaveBeenCalledWith("/home");
-      expect(mockRouter.refresh).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledWith("/home");
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -60,14 +60,14 @@ describe("EnrollmentTabContent", () => {
     vi.clearAllMocks();
     vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
-    } as any);
+    } as never);
 
     class MockIntersectionObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    window.IntersectionObserver = MockIntersectionObserver as never;
   });
 
   it("shouldRenderEmptyStateAndNavigateToCoursesWhenEnrolledItemsListIsEmpty", () => {
@@ -81,7 +81,7 @@ describe("EnrollmentTabContent", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

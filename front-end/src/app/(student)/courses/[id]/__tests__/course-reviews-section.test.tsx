@@ -69,7 +69,7 @@ describe("CourseReviewsSection", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

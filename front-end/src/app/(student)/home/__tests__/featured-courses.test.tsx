@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -51,7 +52,7 @@ vi.mock("@/lib/api/courses", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("FeaturedCoursesSection & Fallback", () => {
@@ -75,7 +76,7 @@ describe("FeaturedCoursesSection & Fallback", () => {
     ];
 
     vi.mocked(coursesApi.getFeaturedCourses).mockResolvedValue(
-      mockCourses as any,
+      mockCourses as never,
     );
 
     // ----------------------------------------------------------------------------

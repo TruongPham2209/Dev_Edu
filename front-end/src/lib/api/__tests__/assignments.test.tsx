@@ -57,8 +57,6 @@ import {
   useCreateAssignmentMutation,
   useDeleteAssignmentMutation,
   useSubmissionsInfiniteQuery,
-  useCreateSubmissionMutation,
-  useDeleteSubmissionMutation,
 } from "../assignments";
 import * as client from "../client";
 
@@ -76,9 +74,11 @@ function createWrapper() {
       },
     },
   });
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = "TestQueryWrapper";
+  return Wrapper;
 }
 
 describe("assignments API & hooks", () => {
@@ -172,7 +172,7 @@ describe("assignments API & hooks", () => {
       // Arrange
       // Prepare props, mocks and expected values.
       // ----------------------------------------------------------------------------
-      const newAssignment = { lectureId: "lec-1", title: "Quiz 1", description: "Test" } as any;
+      const newAssignment = { lectureId: "lec-1", title: "Quiz 1", description: "Test" };
       const createdAssignment = { id: "assign-99", ...newAssignment };
       vi.mocked(client.apiPost).mockResolvedValue(createdAssignment);
 

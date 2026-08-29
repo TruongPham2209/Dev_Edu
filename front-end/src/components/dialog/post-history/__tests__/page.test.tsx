@@ -55,6 +55,13 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import { createMockForumPost } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
+
 describe("PostHistoryModal", () => {
   const mockDeleteMutate = vi.fn();
   const mockRefetch = vi.fn();
@@ -66,11 +73,19 @@ describe("PostHistoryModal", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
     vi.mocked(forumApi.useDeletePostVersionMutation).mockReturnValue({
       mutateAsync: mockDeleteMutate,
-    } as any);
+    } as never);
+    vi.mocked(forumApi.useDeletePostVersionMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockDeleteMutate,
+      }),
+    );
   });
 
   it("shouldRenderEmptyStateWhenNoPostVersionsExist", () => {
@@ -78,12 +93,11 @@ describe("PostHistoryModal", () => {
     // Arrange
     // Return empty array.
     // ----------------------------------------------------------------------------
-    vi.mocked(forumApi.usePostVersionsByPostIdQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-      error: null,
-      refetch: mockRefetch,
-    } as any);
+    vi.mocked(forumApi.usePostVersionsByPostIdQuery).mockReturnValue(
+      createMockQueryResult([], {
+        refetch: mockRefetch,
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -107,21 +121,20 @@ describe("PostHistoryModal", () => {
     // Return version list.
     // ----------------------------------------------------------------------------
     const mockVersions = [
-      {
+      createMockForumPost({
         id: "v-1",
         title: "Initial Post Draft",
         content: "<p>Hello World</p>",
         status: "APPROVED",
         createdAt: "2026-06-01T10:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(forumApi.usePostVersionsByPostIdQuery).mockReturnValue({
-      data: mockVersions,
-      isLoading: false,
-      error: null,
-      refetch: mockRefetch,
-    } as any);
+    vi.mocked(forumApi.usePostVersionsByPostIdQuery).mockReturnValue(
+      createMockQueryResult(mockVersions, {
+        refetch: mockRefetch,
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

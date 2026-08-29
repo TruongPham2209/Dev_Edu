@@ -62,6 +62,11 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("MaterialFormDialog", () => {
   const mockPreSignMutate = vi.fn();
   const mockCreateMaterialMutate = vi.fn();
@@ -72,14 +77,27 @@ describe("MaterialFormDialog", () => {
     vi.clearAllMocks();
     vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
       mutateAsync: mockPreSignMutate,
-    } as any);
+    } as never);
     vi.mocked(lecturesApi.useCreateMaterialMutation).mockReturnValue({
       mutateAsync: mockCreateMaterialMutate,
-    } as any);
+    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
+    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockPreSignMutate,
+      }),
+    );
+    vi.mocked(lecturesApi.useCreateMaterialMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockCreateMaterialMutate,
+      }),
+    );
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
   });
 
   it("shouldRenderTitleAndDisabledUploadButtonWhenNoFileIsSelected", () => {

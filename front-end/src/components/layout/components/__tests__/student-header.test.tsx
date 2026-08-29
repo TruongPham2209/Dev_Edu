@@ -41,6 +41,7 @@
  */
 
 import * as authHook from "@/lib/use-auth";
+import { createMockAuthStatus, createMockAuthUser } from "@/testing/mock-data";
 import { render, screen } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -75,10 +76,6 @@ describe("StudentHeader Component", () => {
   });
 
   it("shouldRenderNavItemsAndLoginSignupButtonsWhenUnauthenticated", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock unauthenticated state and pathname "/home".
-    // ----------------------------------------------------------------------------
     vi.mocked(usePathname).mockReturnValue("/home");
     vi.mocked(authHook.useAuth).mockReturnValue({
       isAuthenticated: false,
@@ -87,16 +84,8 @@ describe("StudentHeader Component", () => {
       roles: [],
     });
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render StudentHeader.
-    // ----------------------------------------------------------------------------
     render(<StudentHeader />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify nav links and login/signup buttons render, and My Courses does not.
-    // ----------------------------------------------------------------------------
     expect(screen.getByRole("link", { name: /Home/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Explore/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Forum/i })).toBeInTheDocument();
@@ -109,32 +98,24 @@ describe("StudentHeader Component", () => {
   });
 
   it("shouldRenderCartButtonUserMenuAndMyCoursesWhenAuthenticatedAsStudent", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock authenticated student.
-    // ----------------------------------------------------------------------------
     vi.mocked(usePathname).mockReturnValue("/courses");
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      user: {
-        id: "u-1",
-        username: "student",
-        fullName: "Student One",
-      } as any,
-      role: "STUDENT",
-      roles: ["STUDENT"],
-    });
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        user: createMockAuthUser({
+          id: "u-1",
+          username: "student",
+          fullName: "Student One",
+          role: "STUDENT",
+          roles: ["STUDENT"],
+        }),
+        role: "STUDENT",
+        roles: ["STUDENT"],
+      }),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render header.
-    // ----------------------------------------------------------------------------
     render(<StudentHeader />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify UserMenu, My Courses, and cart link exist, and Login/Signup do not.
-    // ----------------------------------------------------------------------------
     expect(screen.getByTestId("user-menu")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /My Courses/i }),
@@ -145,32 +126,24 @@ describe("StudentHeader Component", () => {
   });
 
   it("shouldNotRenderMyCoursesWhenAuthenticatedAsLecturerOnly", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock authenticated lecturer without STUDENT role.
-    // ----------------------------------------------------------------------------
     vi.mocked(usePathname).mockReturnValue("/home");
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      user: {
-        id: "u-2",
-        username: "lecturer",
-        fullName: "Lecturer One",
-      } as any,
-      role: "LECTURER",
-      roles: ["LECTURER"],
-    });
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        user: createMockAuthUser({
+          id: "u-2",
+          username: "lecturer",
+          fullName: "Lecturer One",
+          role: "LECTURER",
+          roles: ["LECTURER"],
+        }),
+        role: "LECTURER",
+        roles: ["LECTURER"],
+      }),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render header.
-    // ----------------------------------------------------------------------------
     render(<StudentHeader />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify My Courses is not rendered.
-    // ----------------------------------------------------------------------------
     expect(
       screen.queryByRole("link", { name: /My Courses/i }),
     ).not.toBeInTheDocument();

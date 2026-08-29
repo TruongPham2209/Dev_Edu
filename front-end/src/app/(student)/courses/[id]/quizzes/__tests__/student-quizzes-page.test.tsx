@@ -40,6 +40,12 @@
 
 import * as coursesApi from "@/lib/api/courses";
 import * as quizzesApi from "@/lib/api/quizzes";
+import type { QuizAssignmentResponse } from "@/lib/type/quizzes";
+import { createMockCourse } from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import StudentCourseQuizzesPage from "../page";
@@ -62,46 +68,41 @@ vi.mock("@/lib/toast-context", () => ({
   useToast: vi.fn(() => ({ success: vi.fn(), error: vi.fn() })),
 }));
 
-describe("StudentCourseQuizzesPage Component", () => {
-  const mockAssignments = [
+describe("StudentCourseQuizzesPage", () => {
+  const mockAssignments: QuizAssignmentResponse[] = [
     {
-      id: "assign-1",
-      quizId: "q-1",
-      courseId: "course-123",
+      id: "asg-1",
+      quizId: "quiz-1",
       assignmentName: "Module 1 Practice Quiz",
-      title: "Module 1 Practice Quiz",
-      durationMinutes: 30,
-      passScore: 6.0,
-      maxAttempts: 3,
-      isActive: true,
       startTime: "2026-08-01T00:00:00Z",
-      startDate: "2026-08-01T00:00:00Z",
-      endDate: "2026-08-30T23:59:59Z",
+      durationMinutes: 30,
+      shuffleQuestions: false,
+      shuffleOptions: false,
+      maxAttempts: 3,
+      status: "ACTIVE",
     },
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-123", title: "React Fundamentals" },
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({ id: "course-123", title: "React Fundamentals" }),
+      ),
+    );
 
-    vi.mocked(quizzesApi.useQuizAssignmentsByCourseQuery).mockReturnValue({
-      data: mockAssignments,
-      isLoading: false,
-    } as any);
+    vi.mocked(quizzesApi.useQuizAssignmentsByCourseQuery).mockReturnValue(
+      createMockQueryResult(mockAssignments),
+    );
 
-    vi.mocked(quizzesApi.useStudentAttemptHistoryQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as any);
+    vi.mocked(quizzesApi.useStudentAttemptHistoryQuery).mockReturnValue(
+      createMockQueryResult([]),
+    );
 
-    vi.mocked(quizzesApi.useStartAttemptMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useStartAttemptMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderStudentQuizListAndAttemptStatus", async () => {

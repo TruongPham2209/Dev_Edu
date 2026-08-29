@@ -40,25 +40,31 @@
  */
 
 import type { SubmissionResponse } from "@/lib/type/assignments";
+import { createMockSubmission } from "@/testing/mock-data";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SubmissionDetailsDialog } from "../page";
 
 describe("SubmissionDetailsDialog", () => {
-  const mockSubmission: SubmissionResponse = {
+  const mockSubmission: SubmissionResponse = createMockSubmission({
     id: "sub-100",
     fileName: "Final_Project_Code.zip",
     fileObjectKey: "submissions/final.zip",
     fileSize: 5242880,
     contentType: "application/zip",
-  } as any;
+  });
 
   beforeEach(() => {
-    window.IntersectionObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    })) as any;
+    class MockIntersectionObserver {
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+    }
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderTitleTabsAndHandleFeedbackSubmit", async () => {

@@ -76,16 +76,23 @@ vi.mock("@/lib/api/notification", () => ({
   }),
 }));
 
+import { createMockAuthStatus, createMockAuthUser } from "@/testing/mock-data";
+
 describe("AdminLayout Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(usePathname).mockReturnValue("/admin");
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      user: { id: "admin-1", username: "admin", fullName: "Admin User" } as any,
-      isAuthenticated: true,
-      role: "ADMIN",
-      roles: ["ADMIN"],
-    });
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        user: createMockAuthUser({
+          id: "admin-1",
+          username: "admin",
+          fullName: "Admin User",
+          role: "ADMIN",
+          roles: ["ADMIN"],
+        }),
+      }),
+    );
   });
 
   it("shouldRenderSidebarNavigationItemsAndChildrenContent", () => {

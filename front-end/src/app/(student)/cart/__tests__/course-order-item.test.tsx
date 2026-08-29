@@ -76,25 +76,26 @@ describe("CourseOrderItem", () => {
     originalPrice: 1000000,
     discountedPrice: 800000,
     thumbnailUrl: "https://example.com/thumb.jpg",
+    timestamp: "2026-01-01T00:00:00.000Z",
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useQueryClient).mockReturnValue({
       invalidateQueries: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue({
       data: null,
       isLoading: false,
       isError: false,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCreateReviewMutation).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderCartContextWithCheckboxAndRemoveButton", () => {

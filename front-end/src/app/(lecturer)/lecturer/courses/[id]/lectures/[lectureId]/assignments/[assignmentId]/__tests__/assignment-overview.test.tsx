@@ -55,7 +55,7 @@ describe("AssignmentOverview", () => {
     // Act
     // Render AssignmentOverview.
     // ----------------------------------------------------------------------------
-    render(<AssignmentOverview assignment={mockAssignment as any} />);
+    render(<AssignmentOverview assignment={mockAssignment as never} />);
 
     // ----------------------------------------------------------------------------
     // Assert

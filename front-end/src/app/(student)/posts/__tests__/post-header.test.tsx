@@ -81,20 +81,20 @@ describe("PostHeader", () => {
     vi.clearAllMocks();
     vi.mocked(useAuthModule.useAuth).mockReturnValue({
       isAuthenticated: true,
-    } as any);
+    } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useSavePostMutation).mockReturnValue({
       mutateAsync: mockSaveMutate,
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useUnsavePostMutation).mockReturnValue({
       mutateAsync: mockUnsaveMutate,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderTitleAuthorAndToggleSavePost", async () => {
@@ -102,7 +102,7 @@ describe("PostHeader", () => {
     // Arrange & Act
     // Render PostHeader.
     // ----------------------------------------------------------------------------
-    render(<PostHeader post={mockPost as any} />);
+    render(<PostHeader post={mockPost as never} />);
 
     // ----------------------------------------------------------------------------
     // Assert

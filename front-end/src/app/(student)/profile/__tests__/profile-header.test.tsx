@@ -74,23 +74,23 @@ describe("ProfileHeader", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
   });
 
   it("shouldRenderUserProfileAndOpenChangePasswordDialog", () => {
@@ -98,7 +98,7 @@ describe("ProfileHeader", () => {
     // Arrange & Act
     // Render ProfileHeader.
     // ----------------------------------------------------------------------------
-    render(<ProfileHeader user={mockUser as any} onAvatarChange={vi.fn()} />);
+    render(<ProfileHeader user={mockUser as never} onAvatarChange={vi.fn()} />);
 
     // ----------------------------------------------------------------------------
     // Assert

@@ -95,7 +95,7 @@ describe("SubmissionsTable", () => {
     // ----------------------------------------------------------------------------
     render(
       <SubmissionsTable
-        submissions={mockSubmissions as any}
+        submissions={mockSubmissions as never}
         submissionsLoading={false}
         submissionsHasMore={false}
         loadSubmissions={mockLoadSubmissions}

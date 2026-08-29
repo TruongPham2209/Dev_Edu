@@ -39,6 +39,15 @@
  */
 
 import * as quizzesApi from "@/lib/api/quizzes";
+import type {
+  QuizAssignmentResponse,
+  QuizDetailResponse,
+  QuizResponse,
+} from "@/lib/type/quizzes";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerAssignmentsPage from "../page";
@@ -66,21 +75,34 @@ vi.mock("@/lib/toast-context", () => ({
   useToast: vi.fn(() => ({ success: vi.fn(), error: vi.fn() })),
 }));
 
-describe("LecturerAssignmentsPage Component", () => {
-  const mockQuiz = {
+describe("Lecturer Quiz Assignments Page", () => {
+  const mockQuiz: QuizResponse = {
     id: "quiz-99",
+    courseId: "course-1",
+    courseTitle: "Course 1",
     title: "Midterm Exam",
+    description: "Midterm Exam description",
+    status: "APPROVED",
+    createdAt: "2026-08-06T10:00:00Z",
   };
 
-  const mockAssignments = [
+  const mockQuizDetail: QuizDetailResponse = {
+    quiz: mockQuiz,
+    typeConfigs: [],
+    questions: [],
+  };
+
+  const mockAssignments: QuizAssignmentResponse[] = [
     {
       id: "assign-1",
+      quizId: "quiz-99",
       assignmentName: "Class A Midterm Assignment",
-      title: "Class A Midterm Assignment",
+      startTime: "2026-08-06T10:00:00Z",
       durationMinutes: 60,
-      passScore: 7,
+      shuffleQuestions: false,
+      shuffleOptions: false,
       maxAttempts: 1,
-      isActive: true,
+      status: "ACTIVE",
       createdAt: "2026-08-06T10:00:00Z",
     },
   ];
@@ -88,26 +110,21 @@ describe("LecturerAssignmentsPage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: mockQuiz,
-      isLoading: false,
-    } as any);
+    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue(
+      createMockQueryResult(mockQuizDetail),
+    );
 
-    vi.mocked(quizzesApi.useQuizAssignmentsByQuizQuery).mockReturnValue({
-      data: mockAssignments,
-      isLoading: false,
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(quizzesApi.useQuizAssignmentsByQuizQuery).mockReturnValue(
+      createMockQueryResult(mockAssignments),
+    );
 
-    vi.mocked(quizzesApi.useCreateQuizAssignmentMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useCreateQuizAssignmentMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useDeleteQuizAssignmentMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useDeleteQuizAssignmentMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderQuizTitleAndAssignmentTable", () => {

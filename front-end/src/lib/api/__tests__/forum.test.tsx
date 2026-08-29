@@ -47,6 +47,7 @@ import {
   unsavePost,
   useForumFeedQuery,
 } from "../forum";
+import type { PostRequest } from "@/lib/type/forums";
 import * as client from "../client";
 vi.mock("../client", () => ({
   apiGet: vi.fn(),
@@ -68,10 +69,15 @@ describe("Forum API", () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   it("shouldCallApiPostForCreateForumPost", async () => {
-    const mockPayload = { title: "New Discussion", content: "Post body" };
+    const mockPayload: PostRequest = {
+      title: "New Discussion",
+      content: "Post body",
+      shortDescription: "Short desc",
+      thumbObjectKey: "thumb.jpg",
+    };
     const mockResponse = { id: "p-100", title: "New Discussion" };
     vi.mocked(client.apiPost).mockResolvedValue(mockResponse);
-    const result = await createForumPost(mockPayload as any);
+    const result = await createForumPost(mockPayload);
     expect(client.apiPost).toHaveBeenCalledWith(
       "/api/v1/forum/posts",
       mockPayload,

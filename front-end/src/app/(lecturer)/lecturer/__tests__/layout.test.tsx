@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -37,7 +38,7 @@ import { describe, expect, it, vi } from "vitest";
 import Layout from "../layout";
 
 vi.mock("@/components/layout/lecturer-layout", () => ({
-  LecturerLayout: ({ children }: any) => (
+  LecturerLayout: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="lecturer-layout-wrapper">{children}</div>
   ),
 }));

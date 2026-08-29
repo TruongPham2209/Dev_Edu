@@ -36,16 +36,17 @@
  */
 
 import type { AssignmentResponse } from "@/lib/type/assignments";
+import { createMockAssignment } from "@/testing/mock-data";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AssignmentHeroInfo } from "../assignment-hero-info";
 
 describe("AssignmentHeroInfo", () => {
-  const mockAssignment: AssignmentResponse = {
+  const mockAssignment: AssignmentResponse = createMockAssignment({
     id: "assign-1",
     title: "Build REST API with Spring Security",
     createdAt: "2026-05-20T10:00:00.000Z",
-  } as any;
+  });
 
   it("shouldRenderAssignmentTitleLectureTitleAndSubmissionsTotal", () => {
     // ----------------------------------------------------------------------------

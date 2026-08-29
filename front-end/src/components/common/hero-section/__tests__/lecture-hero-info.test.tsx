@@ -39,9 +39,12 @@
  */
 
 import * as filesApi from "@/lib/api/files";
-import type { LectureResponse } from "@/lib/type/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { LectureResponse } from "@/lib/type/lectures";
+import { createMockLecture } from "@/testing/mock-data";
+import { createMockApiWithToast } from "@/testing/mock-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LectureHeroInfo } from "../lecture-hero-info";
 
@@ -54,13 +57,11 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 describe("LectureHeroInfo", () => {
-  const mockHandleError = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      handleError: mockHandleError,
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
   });
 
   it("shouldRenderNoVideoUploadedMessageWhenVideoObjectKeyIsMissing", () => {
@@ -68,12 +69,13 @@ describe("LectureHeroInfo", () => {
     // Arrange
     // Prepare lecture without video.
     // ----------------------------------------------------------------------------
-    const lectureWithoutVideo: LectureResponse = {
+    const lectureWithoutVideo: LectureResponse = createMockLecture({
       id: "lec-1",
       title: "Introduction to React 19",
       summary: "Basic overview of React 19 fundamentals.",
+      videoObjectKey: null,
       uploadedAt: "2026-06-01T10:00:00.000Z",
-    } as any;
+    });
 
     // ----------------------------------------------------------------------------
     // Act
@@ -97,17 +99,20 @@ describe("LectureHeroInfo", () => {
     // Arrange
     // Mock getDownloadUrl resolution.
     // ----------------------------------------------------------------------------
-    const lectureWithVideo: LectureResponse = {
+    const lectureWithVideo: LectureResponse = createMockLecture({
       id: "lec-2",
       title: "Advanced Server Actions",
       summary: "Deep dive into Next.js Server Actions.",
       videoObjectKey: "videos/lec-2.mp4",
       uploadedAt: "2026-06-05T10:00:00.000Z",
-    } as any;
+    });
 
     vi.mocked(filesApi.getDownloadUrl).mockResolvedValue({
+      originalFileName: "lec-2.mp4",
+      contentType: "video/mp4",
+      objectKey: "videos/lec-2.mp4",
       downloadUrl: "https://example.com/video-stream.mp4",
-    } as any);
+    });
 
     // ----------------------------------------------------------------------------
     // Act

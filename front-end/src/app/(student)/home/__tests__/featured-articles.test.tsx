@@ -71,7 +71,7 @@ describe("FeaturedArticlesSection & Fallback", () => {
 
     vi.mocked(forumApi.getForumFeed).mockResolvedValue({
       contents: mockArticles,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

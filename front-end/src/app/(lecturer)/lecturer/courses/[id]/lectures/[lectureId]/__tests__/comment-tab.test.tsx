@@ -58,6 +58,12 @@ vi.mock("@/lib/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 
+import { createMockAuthStatus, createMockAuthUser } from "@/testing/mock-data";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("TabComments (Lecturer)", () => {
   let queryClient: QueryClient;
 
@@ -70,18 +76,41 @@ describe("TabComments (Lecturer)", () => {
 
     vi.mocked(useAuthHook.useAuth).mockReturnValue({
       user: { id: "lecturer-1", username: "prof_smith", avatarUrl: "" },
-    } as any);
+    } as never);
+    vi.mocked(useAuthHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        user: createMockAuthUser({
+          id: "lecturer-1",
+          username: "prof_smith",
+          avatarUrl: "",
+        }),
+      }),
+    );
 
     vi.mocked(lecturesApi.useCreateLectureCommentMutation).mockReturnValue({
       mutateAsync: vi
         .fn()
         .mockResolvedValue({ id: "c-new", content: "Thanks!" }),
       isPending: false,
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useCreateLectureCommentMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: vi
+          .fn()
+          .mockResolvedValue({ id: "c-new", content: "Thanks!" }),
+        isPending: false,
+      }),
+    );
 
     vi.mocked(lecturesApi.useDeleteLectureCommentMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useDeleteLectureCommentMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: vi.fn().mockResolvedValue(undefined),
+        isPending: false,
+      }),
+    );
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -99,7 +128,15 @@ describe("TabComments (Lecturer)", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(lecturesApi.useInfiniteLectureCommentsQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [{ contents: [], currentPage: 0, pageSize: 10, totalElements: 0, totalPages: 0 }],
+          pageParams: [0],
+        },
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

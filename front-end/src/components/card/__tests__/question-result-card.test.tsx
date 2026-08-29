@@ -52,10 +52,10 @@ describe("QuestionResultCard Component", () => {
     isCorrect: true,
     selectedOptionIds: ["opt-1"],
     options: [
-      { id: "opt-1", optionText: "A UI Library", isCorrect: true },
-      { id: "opt-2", optionText: "A Database", isCorrect: false },
+      { id: "opt-1", optionText: "A UI Library", isCorrect: true, orderIndex: 0 },
+      { id: "opt-2", optionText: "A Database", isCorrect: false, orderIndex: 1 },
     ],
-  } as any;
+  };
 
   const essayQuestion: AttemptQuestionResultDto = {
     questionId: "q-2",
@@ -66,7 +66,7 @@ describe("QuestionResultCard Component", () => {
     isCorrect: undefined,
     answerText: "Hooks let you use state in functional components.",
     feedback: "Great explanation!",
-  } as any;
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();

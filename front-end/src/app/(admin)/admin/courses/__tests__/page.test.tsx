@@ -46,6 +46,15 @@
 import * as coursesApi from "@/lib/api/courses";
 import * as filesApi from "@/lib/api/files";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { CourseResponse } from "@/lib/type/courses";
+import type { CustomPaging } from "@/lib/type/api";
+import { createMockCategory, createMockCourse } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminCoursesPage from "../page";
@@ -68,17 +77,32 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(() => ({ push: vi.fn() })),
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  })),
 }));
 
 vi.mock("./course-table", () => ({
-  CourseTable: ({ courses, onEditCourse, onDeleteCourse }: any) => (
+  CourseTable: ({
+    courses = [],
+    onEditCourse,
+    onDeleteCourse,
+  }: {
+    courses?: CourseResponse[];
+    onEditCourse?: (c: CourseResponse) => void;
+    onDeleteCourse?: (id: string) => void;
+  }) => (
     <div data-testid="course-table-mock">
-      {courses.map((c: any) => (
+      {courses.map((c) => (
         <div key={c.id}>
           <span>{c.title}</span>
-          <button onClick={() => onEditCourse(c)}>Edit {c.title}</button>
-          <button onClick={() => onDeleteCourse(c.id)}>Delete {c.title}</button>
+          <button onClick={() => onEditCourse?.(c)}>Edit {c.title}</button>
+          <button onClick={() => onDeleteCourse?.(c.id)}>Delete {c.title}</button>
         </div>
       ))}
     </div>
@@ -86,7 +110,13 @@ vi.mock("./course-table", () => ({
 }));
 
 vi.mock("@/components/dialog/course-form", () => ({
-  CourseFormDialog: ({ open, onClose }: any) =>
+  CourseFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="course-form-dialog">
         <button onClick={onClose}>Close Course Dialog</button>
@@ -111,68 +141,63 @@ describe("AdminCoursesPage", () => {
       value: MockIntersectionObserver,
     });
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
-      data: [{ id: "cat-1", name: "Web Development" }],
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue(
+      createMockQueryResult([
+        createMockCategory({ id: "cat-1", name: "Web Development" }),
+      ]),
+    );
 
-    vi.mocked(coursesApi.useCoursesInfiniteQuery).mockReturnValue({
-      data: {
-        pages: [
-          {
-            contents: [
-              { id: "c-100", title: "TypeScript & Next.js Masterclass" },
-            ],
-          },
-        ],
-      },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      error: null,
-      refetch: mockRefetch,
-    } as any);
+    const mockCourse = createMockCourse({
+      id: "c-100",
+      title: "TypeScript & Next.js Masterclass",
+    });
 
-    vi.mocked(coursesApi.useCreateCourseMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    const pageData: CustomPaging<CourseResponse> = {
+      contents: [mockCourse],
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 1,
+      totalPages: 1,
+    };
 
-    vi.mocked(coursesApi.useUpdateCourseMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useCoursesInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pageParams: [null],
+          pages: [pageData],
+        },
+        { refetch: mockRefetch },
+      ),
+    );
 
-    vi.mocked(coursesApi.useDeleteCourseMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(coursesApi.useCreateCourseMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(coursesApi.useUpdateCourseMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useDeleteCourseMutation).mockReturnValue(
+      createMockMutationResult({ isPending: false }),
+    );
+
+    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
+      createMockMutationResult({ isPending: false }),
+    );
+
+    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderCoursesManagementTitleAndTable", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange & Act
-    // Render AdminCoursesPage.
-    // ----------------------------------------------------------------------------
     render(<AdminCoursesPage />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify title and mock course table render.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Courses Management")).toBeInTheDocument();
     expect(
       screen.getByText("TypeScript & Next.js Masterclass"),
@@ -180,25 +205,13 @@ describe("AdminCoursesPage", () => {
   });
 
   it("shouldOpenCourseFormDialogOnCreateCourseClick", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Render AdminCoursesPage.
-    // ----------------------------------------------------------------------------
     render(<AdminCoursesPage />);
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Click Create Course button.
-    // ----------------------------------------------------------------------------
     const createCourseBtn = screen.getByRole("button", {
       name: "Create Course",
     });
     fireEvent.click(createCourseBtn);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify CourseFormDialog renders.
-    // ----------------------------------------------------------------------------
     expect(screen.getByTestId("course-form-dialog")).toBeInTheDocument();
   });
 });

@@ -45,6 +45,13 @@
 import * as coursesApi from "@/lib/api/courses";
 import * as filesApi from "@/lib/api/files";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { CategoryResponse } from "@/lib/type/courses";
+import { createMockCategory } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminCategoriesPage from "../page";
@@ -65,13 +72,21 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("./category-table", () => ({
-  CategoryTable: ({ categories, onEdit, onDelete }: any) => (
+  CategoryTable: ({
+    categories = [],
+    onEdit,
+    onDelete,
+  }: {
+    categories?: CategoryResponse[];
+    onEdit?: (c: CategoryResponse) => void;
+    onDelete?: (id: string, name: string) => void;
+  }) => (
     <div data-testid="category-table-mock">
-      {categories.map((c: any) => (
+      {categories.map((c) => (
         <div key={c.id}>
           <span>{c.name}</span>
-          <button onClick={() => onEdit(c)}>Edit {c.name}</button>
-          <button onClick={() => onDelete(c.id, c.name)}>
+          <button onClick={() => onEdit?.(c)}>Edit {c.name}</button>
+          <button onClick={() => onDelete?.(c.id, c.name)}>
             Delete {c.name}
           </button>
         </div>
@@ -81,7 +96,13 @@ vi.mock("./category-table", () => ({
 }));
 
 vi.mock("@/components/dialog/category-form", () => ({
-  CategoryFormDialog: ({ open, onClose }: any) =>
+  CategoryFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="category-form-dialog">
         <button onClick={onClose}>Close Form Dialog</button>
@@ -96,73 +117,54 @@ describe("AdminCategoriesPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
-      data: [
-        { id: "cat-1", name: "DevOps & Cloud", description: "AWS, Kubernetes" },
-      ],
-      isLoading: false,
-      error: null,
-      refetch: mockRefetch,
-    } as any);
+    const mockCategory = createMockCategory({
+      id: "cat-1",
+      name: "DevOps & Cloud",
+      description: "AWS, Kubernetes",
+    });
 
-    vi.mocked(coursesApi.useCreateCategoryMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue(
+      createMockQueryResult([mockCategory], { refetch: mockRefetch }),
+    );
 
-    vi.mocked(coursesApi.useUpdateCategoryMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useCreateCategoryMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(coursesApi.useDeleteCategoryMutation).mockReturnValue({
-      mutateAsync: mockDeleteMutate,
-      isPending: false,
-    } as any);
+    vi.mocked(coursesApi.useUpdateCategoryMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(coursesApi.useDeleteCategoryMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockDeleteMutate,
+        isPending: false,
+      }),
+    );
+
+    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
-  it("shouldRenderCategoryManagementTitleAndCategoriesList", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange & Act
-    // Render AdminCategoriesPage.
-    // ----------------------------------------------------------------------------
+  it("shouldRenderCategoriesManagementHeaderAndTable", () => {
     render(<AdminCategoriesPage />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify title, total category counter, and mock table render.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Category Management")).toBeInTheDocument();
     expect(screen.getByText("Total categories: 1")).toBeInTheDocument();
     expect(screen.getByText("DevOps & Cloud")).toBeInTheDocument();
   });
 
   it("shouldOpenCategoryFormDialogOnNewCategoryClick", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Render AdminCategoriesPage.
-    // ----------------------------------------------------------------------------
     render(<AdminCategoriesPage />);
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Click New Category button.
-    // ----------------------------------------------------------------------------
-    const newCategoryBtn = screen.getByRole("button", { name: "New Category" });
-    fireEvent.click(newCategoryBtn);
+    const newBtn = screen.getByRole("button", { name: "New Category" });
+    fireEvent.click(newBtn);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify CategoryFormDialog renders.
-    // ----------------------------------------------------------------------------
     expect(screen.getByTestId("category-form-dialog")).toBeInTheDocument();
   });
 });

@@ -63,7 +63,7 @@ describe("CourseCard", () => {
     categoryId: "cat-1",
     status: "PUBLISHED",
     createdDate: "2026-01-01",
-  } as any;
+  } as never;
 
   it("shouldRenderCourseDetailsThumbnailAndDiscountedPrice", () => {
     // ----------------------------------------------------------------------------

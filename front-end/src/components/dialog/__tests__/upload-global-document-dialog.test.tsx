@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { UploadGlobalDocumentDialog } from "../../global-document-dialog";
+import { UploadGlobalDocumentDialog } from "../global-document-dialog";
 
 describe("UploadGlobalDocumentDialog", () => {
   it("should render dialog title and drag & drop zone when open", () => {

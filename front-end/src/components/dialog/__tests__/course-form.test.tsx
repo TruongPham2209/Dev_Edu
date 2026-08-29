@@ -46,7 +46,9 @@
 
 import * as coursesApi from "@/lib/api/courses";
 import * as usersApi from "@/lib/api/users";
-import type { CategoryResponse, CourseRequest } from "@/lib/type/courses";
+import type { CategoryResponse, CourseRequest, CourseResponse } from "@/lib/type/courses";
+import type { CustomPaging } from "@/lib/type/api";
+import type { UserResponse } from "@/lib/type/users";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CourseFormDialog } from "../course-form";
@@ -86,13 +88,21 @@ vi.mock("@/components/common/form/file-upload", () => ({
 }));
 
 vi.mock("@/components/common/form/filter-select", () => ({
-  FilterSelect: ({ value, onChange, items }: any) => (
+  FilterSelect: ({
+    value,
+    onChange,
+    items = [],
+  }: {
+    value?: string;
+    onChange?: (val: string) => void;
+    items?: Array<{ id: string; title: string }>;
+  }) => (
     <select
       data-testid="category-select"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange?.(e.target.value)}
     >
-      {items.map((item: any) => (
+      {items.map((item) => (
         <option key={item.id} value={item.id}>
           {item.title}
         </option>
@@ -102,19 +112,30 @@ vi.mock("@/components/common/form/filter-select", () => ({
 }));
 
 vi.mock("@/components/common/form/search-input", () => ({
-  SearchInput: ({ value, onChange }: any) => (
+  SearchInput: ({
+    value,
+    onChange,
+  }: {
+    value?: string;
+    onChange?: (val: string) => void;
+  }) => (
     <input
       data-testid="lecturer-search"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange?.(e.target.value)}
     />
   ),
 }));
 
+import { createMockCategory, createMockCourse } from "@/testing/mock-data";
+import { createMockQueryResult } from "@/testing/mock-query";
+
 describe("CourseFormDialog", () => {
   const mockCategories: CategoryResponse[] = [
-    { id: "cat-1", name: "Web Development" } as any,
-    { id: "cat-2", name: "Mobile Development" } as any,
+    { id: "cat-1", name: "Web Development" } as never,
+    { id: "cat-2", name: "Mobile Development" } as never,
+    createMockCategory({ id: "cat-1", name: "Web Development" }),
+    createMockCategory({ id: "cat-2", name: "Mobile Development" }),
   ];
 
   const defaultInitialValue: CourseRequest = {
@@ -131,11 +152,17 @@ describe("CourseFormDialog", () => {
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
       data: null,
       isLoading: false,
-    } as any);
+    } as never);
     vi.mocked(usersApi.useSearchUsersQuery).mockReturnValue({
       data: null,
       isLoading: false,
-    } as any);
+    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult<CourseResponse>(),
+    );
+    vi.mocked(usersApi.useSearchUsersQuery).mockReturnValue(
+      createMockQueryResult<CustomPaging<UserResponse>>(),
+    );
   });
 
   it("shouldRenderTitleAndDisabledSubmitWhenFormIsInvalid", () => {
@@ -189,7 +216,7 @@ describe("CourseFormDialog", () => {
         title="Edit Course"
         categories={mockCategories}
         initialValue={validInitialValue}
-        editingCourse={{ id: "course-100" } as any}
+        editingCourse={createMockCourse({ id: "course-100" })}
         onClose={vi.fn()}
         onSave={handleSave}
       />,

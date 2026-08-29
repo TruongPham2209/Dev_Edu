@@ -90,7 +90,7 @@ describe("ReviewList", () => {
     // ----------------------------------------------------------------------------
     render(
       <ReviewList
-        reviews={mockReviews as any}
+        reviews={mockReviews as never}
         rating={4.8}
         reviewCount={15}
         loadingReviews={false}

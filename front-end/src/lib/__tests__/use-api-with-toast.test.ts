@@ -116,7 +116,7 @@ describe("useApiWithToast", () => {
       // Prepare props, mocks and expected values.
       // ----------------------------------------------------------------------------
       const { result } = renderHook(() => useApiWithToast());
-      const apiError = new ApiError("CUSTOM_STATUS" as any, "", null);
+      const apiError = new ApiError("CUSTOM_STATUS", "", null);
 
       // ----------------------------------------------------------------------------
       // Act

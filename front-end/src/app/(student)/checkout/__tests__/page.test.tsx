@@ -70,22 +70,22 @@ describe("CheckoutPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useCancelOrderMutation).mockReturnValue({
       mutate: mockCancelMutate,
       isPending: false,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useCreatePaymentMutation).mockReturnValue({
       mutate: mockCreatePaymentMutate,
       isPending: false,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderErrorStateWhenOrderIdIsMissingInURL", () => {
@@ -95,13 +95,13 @@ describe("CheckoutPage", () => {
     // ----------------------------------------------------------------------------
     vi.mocked(useSearchParams).mockReturnValue({
       get: () => null,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useOrderDetailQuery).mockReturnValue({
       data: null,
       isLoading: false,
       error: null,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -125,7 +125,7 @@ describe("CheckoutPage", () => {
     // ----------------------------------------------------------------------------
     vi.mocked(useSearchParams).mockReturnValue({
       get: (key: string) => (key === "orderId" ? "order-123" : null),
-    } as any);
+    } as never);
 
     const mockOrderData = {
       id: "order-123",
@@ -144,7 +144,7 @@ describe("CheckoutPage", () => {
       data: mockOrderData,
       isLoading: false,
       error: null,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

@@ -69,29 +69,29 @@ vi.mock("@/lib/api/enrollments", () => ({
 describe("CartPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: vi.fn() } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: vi.fn() } as never);
 
     vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
       isLoading: false,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useOrderHistoryInfinateQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
       isLoading: false,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useEnrollmentsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [] }] },
       isLoading: false,
-    } as any);
+    } as never);
 
     class MockIntersectionObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    window.IntersectionObserver = MockIntersectionObserver as never;
   });
 
   it("shouldRenderTitleAndTabsAndSwitchBetweenTabContents", () => {

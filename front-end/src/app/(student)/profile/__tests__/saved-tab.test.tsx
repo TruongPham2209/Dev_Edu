@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -50,22 +51,34 @@ vi.mock("@/lib/api/forum", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
+
+import type { SavedPostResponse } from "@/lib/type/forums";
+import type { CustomPaging } from "@/lib/type/api";
+import { createMockSavedPost } from "@/testing/mock-data";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 
 describe("SavedPostsTab", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(forumApi.useUnsavePostMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as any);
+    vi.mocked(forumApi.useUnsavePostMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderEmptyStateWhenNoSavedPostsExist", () => {
@@ -79,7 +92,20 @@ describe("SavedPostsTab", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
+    const emptyPaging: CustomPaging<SavedPostResponse> = {
+      contents: [],
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 0,
+      totalPages: 0,
+    };
+
+    vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        { pages: [emptyPaging], pageParams: [null] },
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -99,25 +125,31 @@ describe("SavedPostsTab", () => {
     // Arrange
     // Mock saved post data.
     // ----------------------------------------------------------------------------
-    const mockSavedPosts = [
-      {
+    const mockSavedPosts: SavedPostResponse[] = [
+      createMockSavedPost({
         id: "saved-1",
         postId: "p-100",
         title: "Mastering Next.js App Router Caching",
         shortDescription: "Detailed guide on fetch caching",
         authorFullName: "Student Author",
         authorUsername: "student_author",
-        createdAt: "2026-06-20T10:00:00.000Z",
-      },
+        postedDate: "2026-06-20T10:00:00.000Z",
+      }),
     ];
 
-    vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: mockSavedPosts }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as any);
+    const pagingWithSaved: CustomPaging<SavedPostResponse> = {
+      contents: mockSavedPosts,
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 1,
+      totalPages: 1,
+    };
+
+    vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        { pages: [pagingWithSaved], pageParams: [null] },
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

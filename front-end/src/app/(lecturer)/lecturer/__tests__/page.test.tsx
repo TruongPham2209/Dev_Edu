@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -59,7 +60,7 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("LecturerDashboardPage", () => {
@@ -69,7 +70,7 @@ describe("LecturerDashboardPage", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
       data: [
@@ -78,14 +79,14 @@ describe("LecturerDashboardPage", () => {
       ],
       isLoading: false,
       error: null,
-    } as any);
+    } as never);
 
     class MockIntersectionObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    window.IntersectionObserver = MockIntersectionObserver as never;
   });
 
   it("shouldRenderEmptyStateWhenNoCoursesAssigned", () => {
@@ -101,7 +102,7 @@ describe("LecturerDashboardPage", () => {
       fetchNextPage: vi.fn(),
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -139,7 +140,7 @@ describe("LecturerDashboardPage", () => {
       fetchNextPage: vi.fn(),
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

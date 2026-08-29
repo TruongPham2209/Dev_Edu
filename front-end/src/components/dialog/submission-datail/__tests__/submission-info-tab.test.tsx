@@ -43,29 +43,31 @@ import type {
   FeedbackResponse,
   SubmissionResponse,
 } from "@/lib/type/assignments";
+import { createMockSubmission } from "@/testing/mock-data";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SubmissionInfoTab } from "../submission-info-tab";
 
 describe("SubmissionInfoTab", () => {
-  const mockSubmission: SubmissionResponse = {
+  const mockSubmission: SubmissionResponse = createMockSubmission({
     id: "sub-10",
     fileName: "Assignment_Solution.pdf",
     fileObjectKey: "submissions/sub-10.pdf",
     fileSize: 2048576,
     contentType: "application/pdf",
-  } as any;
+  });
 
   const mockFeedbacks: FeedbackResponse[] = [
     {
       id: "fb-1",
       lecturer: "prof_john",
       lecturerFullName: "Prof. John Doe",
+      lecturerAvatar: "https://example.com/avatar.jpg",
       feedback:
         "Great implementation! Please format code blocks properly next time.",
       createdAt: "2026-06-20T10:00:00.000Z",
       isMine: true,
-    } as any,
+    },
   ];
 
   it("shouldRenderSubmissionFileDetailsAndFeedbackThread", () => {

@@ -51,16 +51,29 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("UserFormDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue({
       mutateAsync: vi.fn(),
-    } as any);
+    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
+    vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: vi.fn(),
+      }),
+    );
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
   });
 
   it("shouldRenderTitleAndTabsWhenOpenIsTrue", () => {

@@ -60,7 +60,7 @@ describe("KpiCards", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
   });
 
   it("shouldRenderErrorStateWhenQueryFails", () => {
@@ -73,7 +73,7 @@ describe("KpiCards", () => {
       isLoading: false,
       error: new Error("Network error"),
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -110,7 +110,7 @@ describe("KpiCards", () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

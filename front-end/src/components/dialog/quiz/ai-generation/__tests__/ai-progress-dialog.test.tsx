@@ -1,4 +1,6 @@
 import * as quizApi from "@/lib/api/quizzes";
+import type { QuizGenerationJobResponse } from "@/lib/type/quizzes";
+import { createMockQueryResult } from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -31,19 +33,20 @@ describe("AiProgressDialog Component", () => {
   };
 
   it("should render processing state with live progress bar and counters", () => {
-    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue({
-      data: {
-        jobId: "job-1",
-        courseId: "c-1",
-        status: "DOCUMENT_PROCESSING",
-        currentStep: "DOCUMENT_PROCESSING",
-        requestedTotal: 10,
-        processedCount: 2,
-        acceptedCount: 2,
-        rejectedCount: 0,
-      },
-      isLoading: false,
-    } as any);
+    const mockJob: QuizGenerationJobResponse = {
+      jobId: "job-1",
+      courseId: "c-1",
+      status: "GENERATING",
+      currentStep: "DOCUMENT_PROCESSING",
+      requestedTotal: 10,
+      processedCount: 2,
+      acceptedCount: 2,
+      rejectedCount: 0,
+    };
+
+    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue(
+      createMockQueryResult(mockJob),
+    );
 
     renderComponent();
 
@@ -59,7 +62,7 @@ describe("AiProgressDialog Component", () => {
   it("should render completed state and trigger onSuccess when Done button is clicked", () => {
     const onSuccess = vi.fn();
     const onClose = vi.fn();
-    const mockCompletedJob = {
+    const mockCompletedJob: QuizGenerationJobResponse = {
       jobId: "job-1",
       courseId: "c-1",
       status: "COMPLETED",
@@ -70,10 +73,9 @@ describe("AiProgressDialog Component", () => {
       rejectedCount: 0,
     };
 
-    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue({
-      data: mockCompletedJob,
-      isLoading: false,
-    } as any);
+    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue(
+      createMockQueryResult(mockCompletedJob),
+    );
 
     renderComponent({ onSuccess, onClose });
 
@@ -93,19 +95,20 @@ describe("AiProgressDialog Component", () => {
   });
 
   it("should render partial completion warning with partial question count", () => {
-    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue({
-      data: {
-        jobId: "job-1",
-        courseId: "c-1",
-        status: "PARTIAL",
-        currentStep: "FINISHED",
-        requestedTotal: 10,
-        processedCount: 7,
-        acceptedCount: 7,
-        rejectedCount: 3,
-      },
-      isLoading: false,
-    } as any);
+    const mockPartialJob: QuizGenerationJobResponse = {
+      jobId: "job-1",
+      courseId: "c-1",
+      status: "PARTIAL",
+      currentStep: "FINISHED",
+      requestedTotal: 10,
+      processedCount: 7,
+      acceptedCount: 7,
+      rejectedCount: 3,
+    };
+
+    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue(
+      createMockQueryResult(mockPartialJob),
+    );
 
     renderComponent();
 
@@ -118,21 +121,22 @@ describe("AiProgressDialog Component", () => {
   });
 
   it("should render irrelevant document business error", () => {
-    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue({
-      data: {
-        jobId: "job-1",
-        courseId: "c-1",
-        status: "IRRELEVANT_DOCUMENT",
-        currentStep: "RELEVANCE_CHECKING",
-        requestedTotal: 10,
-        processedCount: 0,
-        acceptedCount: 0,
-        rejectedCount: 0,
-        errorMessage:
-          "Uploaded PDF does not match the course syllabus topics.",
-      },
-      isLoading: false,
-    } as any);
+    const mockJob: QuizGenerationJobResponse = {
+      jobId: "job-1",
+      courseId: "c-1",
+      status: "IRRELEVANT_DOCUMENT",
+      currentStep: "RELEVANCE_CHECKING",
+      requestedTotal: 10,
+      processedCount: 0,
+      acceptedCount: 0,
+      rejectedCount: 0,
+      errorMessage:
+        "Uploaded PDF does not match the course syllabus topics.",
+    };
+
+    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue(
+      createMockQueryResult(mockJob),
+    );
 
     renderComponent();
 
@@ -145,20 +149,21 @@ describe("AiProgressDialog Component", () => {
   });
 
   it("should render insufficient source business error", () => {
-    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue({
-      data: {
-        jobId: "job-1",
-        courseId: "c-1",
-        status: "INSUFFICIENT_SOURCE",
-        currentStep: "KNOWLEDGE_EVALUATING",
-        requestedTotal: 10,
-        processedCount: 0,
-        acceptedCount: 0,
-        rejectedCount: 0,
-        errorMessage: "Document content is too brief to extract questions.",
-      },
-      isLoading: false,
-    } as any);
+    const mockJob: QuizGenerationJobResponse = {
+      jobId: "job-1",
+      courseId: "c-1",
+      status: "INSUFFICIENT_SOURCE",
+      currentStep: "KNOWLEDGE_EVALUATING",
+      requestedTotal: 10,
+      processedCount: 0,
+      acceptedCount: 0,
+      rejectedCount: 0,
+      errorMessage: "Document content is too brief to extract questions.",
+    };
+
+    vi.mocked(quizApi.useQuizGenerationJobQuery).mockReturnValue(
+      createMockQueryResult(mockJob),
+    );
 
     renderComponent();
 

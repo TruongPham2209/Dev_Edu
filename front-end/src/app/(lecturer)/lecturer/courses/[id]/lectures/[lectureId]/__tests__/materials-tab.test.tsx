@@ -64,7 +64,13 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("@/components/dialog/material-form", () => ({
-  MaterialFormDialog: ({ open, onClose }: any) =>
+  MaterialFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="material-form-dialog">
         <button onClick={onClose}>Close Material Dialog</button>
@@ -85,11 +91,11 @@ describe("MaterialsTab (Lecturer)", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(lecturesApi.useDeleteMaterialMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as any);
+    } as never);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -105,7 +111,7 @@ describe("MaterialsTab (Lecturer)", () => {
       data: [],
       isLoading: false,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -139,7 +145,7 @@ describe("MaterialsTab (Lecturer)", () => {
       data: mockMaterials,
       isLoading: false,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

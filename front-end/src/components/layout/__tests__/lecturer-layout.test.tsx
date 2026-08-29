@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -39,7 +40,7 @@ import { describe, expect, it, vi } from "vitest";
 import { LecturerLayout } from "../lecturer-layout";
 
 vi.mock("@/components/layout/components/manage-header", () => ({
-  ManageHeader: ({ title }: any) => (
+  ManageHeader: ({ title }: { title?: React.ReactNode }) => (
     <header data-testid="manage-header">{title}</header>
   ),
 }));

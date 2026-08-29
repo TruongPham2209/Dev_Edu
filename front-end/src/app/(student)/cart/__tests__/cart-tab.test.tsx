@@ -76,26 +76,26 @@ describe("CartTabContent", () => {
     vi.clearAllMocks();
     vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
-    } as any);
+    } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       handleError: mockHandleError,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue({
       mutateAsync: mockCheckoutMutate,
-    } as any);
+    } as never);
 
     vi.mocked(enrollmentsApi.useRemoveFromCartMutation).mockReturnValue({
       mutateAsync: mockRemoveMutate,
-    } as any);
+    } as never);
 
     class MockIntersectionObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
     }
-    window.IntersectionObserver = MockIntersectionObserver as any;
+    window.IntersectionObserver = MockIntersectionObserver as never;
   });
 
   it("shouldRenderEmptyCartStateWhenCartIsEmpty", () => {
@@ -110,7 +110,7 @@ describe("CartTabContent", () => {
       hasNextPage: false,
       fetchNextPage: vi.fn(),
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -147,7 +147,7 @@ describe("CartTabContent", () => {
       hasNextPage: false,
       fetchNextPage: vi.fn(),
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     mockCheckoutMutate.mockResolvedValue({ orderId: "order-999" });
 

@@ -100,7 +100,7 @@ describe("file-utils", () => {
       // Execute the function and verify output.
       // ----------------------------------------------------------------------------
       expect(getFileNameFromKey("")).toBe("Attached File");
-      expect(getFileNameFromKey(null as any)).toBe("Attached File");
+      expect(getFileNameFromKey(null as never)).toBe("Attached File");
     });
   });
 
@@ -111,7 +111,7 @@ describe("file-utils", () => {
       // Execute the function and verify output.
       // ----------------------------------------------------------------------------
       expect(formatBytes(undefined)).toBe("0 B");
-      expect(formatBytes(null as any)).toBe("0 B");
+      expect(formatBytes(null as never)).toBe("0 B");
       expect(formatBytes(0)).toBe("0 B");
       expect(formatBytes(500)).toBe("500 B");
       expect(formatBytes(1024)).toBe("1 KB");
@@ -156,7 +156,7 @@ describe("file-utils", () => {
       // Act & Assert
       // Execute the function and verify output.
       // ----------------------------------------------------------------------------
-      expect(isValidFileType("image/png", "invalid" as any)).toBe(false);
+      expect(isValidFileType("image/png", "invalid" as never)).toBe(false);
     });
   });
 
@@ -173,8 +173,10 @@ describe("file-utils", () => {
       const videoAccept = getFileAcceptString("video");
       expect(videoAccept).toContain("video/mp4");
 
-      const fallbackAccept = getFileAcceptString("other" as any);
+      const fallbackAccept = getFileAcceptString("other" as never);
       expect(fallbackAccept).toBe("*");
+      const docAccept = getFileAcceptString("document");
+      expect(docAccept).toContain("application/pdf");
     });
   });
 });

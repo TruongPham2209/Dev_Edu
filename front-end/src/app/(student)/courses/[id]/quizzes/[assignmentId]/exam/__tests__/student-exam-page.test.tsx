@@ -123,17 +123,17 @@ describe("Student Exam Room Components & Page", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as any);
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as never);
     vi.mocked(quizzesApi.useAttemptQuery).mockReturnValue({
       data: mockStartData,
       isLoading: false,
-    } as any);
+    } as never);
     vi.mocked(quizzesApi.useSubmitAttemptMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue({ score: 10 }),
       isPending: false,
-    } as any);
+    } as never);
     vi.mocked(useQuizExamSessionModule.useQuizExamSession).mockReturnValue(
-      mockSession as any,
+      mockSession as never,
     );
   });
 
@@ -150,7 +150,7 @@ describe("Student Exam Room Components & Page", () => {
   it("shouldRenderExamQuestionNav", () => {
     render(
       <ExamQuestionNav
-        questions={mockStartData.questions as any}
+        questions={mockStartData.questions as never}
         currentIndex={0}
         answersMap={mockSession.answersMap}
         onSelectQuestion={vi.fn()}

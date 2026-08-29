@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -37,7 +38,7 @@ import { describe, expect, it, vi } from "vitest";
 import Layout from "../layout";
 
 vi.mock("@/components/layout/admin-layout", () => ({
-  AdminLayout: ({ children }: any) => (
+  AdminLayout: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="admin-layout-wrapper">{children}</div>
   ),
 }));

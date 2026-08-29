@@ -38,23 +38,24 @@
  * Unit test for LecturerQuizConfigurePage component.
  */
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as coursesApi from "@/lib/api/courses";
 import * as quizzesApi from "@/lib/api/quizzes";
+import type {
+  QuizDetailResponse,
+  QuizQuestionResponse,
+  QuizResponse,
+  QuizTypeConfigResponse,
+} from "@/lib/type/quizzes";
+import { createMockCourse } from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerQuizConfigurePage from "../page";
-
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-}
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -97,21 +98,42 @@ vi.mock("@/lib/toast-context", () => ({
 describe("LecturerQuizConfigurePage Component", () => {
   let queryClient: QueryClient;
 
-  const mockQuiz = {
+  const mockQuiz: QuizResponse = {
     id: "quiz-99",
     courseId: "course-123",
     title: "Midterm Exam Configuration",
     description: "Detailed quiz setup",
-    passPercentage: 70,
     status: "DRAFT",
-    questions: [
-      {
-        id: "q-1",
-        content: "What is JSX?",
-        questionType: "SINGLE_CHOICE",
-        points: 2,
-      },
-    ],
+    createdAt: "2026-08-06T10:00:00Z",
+  };
+
+  const mockQuestions: QuizQuestionResponse[] = [
+    {
+      id: "q-1",
+      quizId: "quiz-99",
+      content: "What is JSX?",
+      questionType: "SINGLE_CHOICE",
+      points: 2,
+      orderIndex: 0,
+      options: [],
+    },
+  ];
+
+  const mockTypeConfigs: QuizTypeConfigResponse[] = [
+    {
+      id: "cfg-1",
+      quizId: "quiz-99",
+      questionType: "SINGLE_CHOICE",
+      requiredCount: 5,
+      pointsPerQuestion: 2,
+      scoringMethod: "AUTO",
+    },
+  ];
+
+  const mockDetail: QuizDetailResponse = {
+    quiz: mockQuiz,
+    questions: mockQuestions,
+    typeConfigs: mockTypeConfigs,
   };
 
   beforeEach(() => {
@@ -120,86 +142,55 @@ describe("LecturerQuizConfigurePage Component", () => {
     });
     vi.clearAllMocks();
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-123", title: "React Fundamentals" },
-      isLoading: false,
-    } as any);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({ id: "course-123", title: "React Fundamentals" }),
+      ),
+    );
 
-    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: {
-        quiz: mockQuiz,
-        questions: mockQuiz.questions,
-        typeConfigs: [
-          {
-            id: "cfg-1",
-            questionType: "SINGLE_CHOICE",
-            requiredCount: 5,
-            pointsPerQuestion: 2,
-          },
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue(
+      createMockQueryResult(mockDetail),
+    );
 
-    vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue({
-      data: [
-        {
-          id: "cfg-1",
-          questionType: "SINGLE_CHOICE",
-          requiredCount: 5,
-          pointsPerQuestion: 2,
-        },
-      ],
-      isLoading: false,
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue(
+      createMockQueryResult(mockTypeConfigs),
+    );
 
-    vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useCreateQuizQuestionMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useCreateQuizQuestionMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useUpdateQuizQuestionMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useUpdateQuizQuestionMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useDeleteQuizQuestionMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useDeleteQuizQuestionMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useSubmitQuizMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useSubmitQuizMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useGenerateQuizFromFileMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useGenerateQuizFromFileMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(quizzesApi.useGenerateQuizFromDocumentMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useGenerateQuizFromDocumentMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderQuizTitleAndSections", async () => {
@@ -220,4 +211,3 @@ describe("LecturerQuizConfigurePage Component", () => {
     });
   });
 });
-

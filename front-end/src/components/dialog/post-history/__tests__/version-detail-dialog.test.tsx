@@ -35,18 +35,28 @@
  * Unit test for VersionDetailDialog component.
  */
 
+import type { PostResponse } from "@/lib/type/forums";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { VersionDetailDialog } from "../version-detail-dialog";
 
 describe("VersionDetailDialog", () => {
-  const mockVersion = {
+  const mockVersion: PostResponse = {
     id: "ver-10",
     title: "Version 10 Title",
     shortDescription: "Short summary of changes.",
     content: "<p>Detailed HTML content body.</p>",
+    isMine: true,
+    isSaved: false,
+    authorUsername: "alice",
+    authorFullName: "Alice Smith",
+    authorAvatarUrl: null,
+    thumbUrl: null,
+    views: 10,
+    comments: 2,
     status: "APPROVED",
     createdAt: "2026-07-01T10:00:00.000Z",
+    updatedAt: "2026-07-01T10:00:00.000Z",
   };
 
   it("shouldRenderVersionDetailsWhenOpenAndVersionIsProvided", () => {

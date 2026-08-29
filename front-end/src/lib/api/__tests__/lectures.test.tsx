@@ -45,6 +45,7 @@ import {
   deleteLectureComment,
   useLecturesByCourseQuery,
 } from "../lectures";
+import type { CommentPageRequest } from "@/lib/type/lectures";
 import * as client from "../client";
 
 vi.mock("../client", () => ({
@@ -71,11 +72,11 @@ describe("Lectures API", () => {
   );
 
   it("shouldCallApiPostForGetLectureComments", async () => {
-    const mockRequest = { lectureId: "lec-10", size: 10 };
+    const mockRequest: CommentPageRequest = { lectureId: "lec-10", size: 10 };
     const mockResponse = { contents: [{ id: "comm-1" }], nextCursor: null };
     vi.mocked(client.apiPost).mockResolvedValue(mockResponse);
 
-    const result = await getLectureComments(mockRequest as any);
+    const result = await getLectureComments(mockRequest);
 
     expect(client.apiPost).toHaveBeenCalledWith(
       "/api/v1/lectures/comments/filter",

@@ -64,6 +64,7 @@ vi.mock("@/lib/api/assignments", () => ({
   useSubmissionsInfiniteQuery: vi.fn(),
   useFeedbacksQuery: vi.fn(),
   useSubmissionTrackingQuery: vi.fn(),
+  useSubmissionTrackingInfiniteQuery: vi.fn(),
   useCreateFeedbackMutation: vi.fn(),
   useDeleteFeedbackMutation: vi.fn(),
 }));
@@ -86,8 +87,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../assignment-overview", () => ({
-  AssignmentOverview: ({ assignment }: any) => (
-    <div data-testid="assignment-overview">{assignment.title}</div>
+  AssignmentOverview: ({ assignment }: { assignment?: { title?: string } }) => (
+    <div data-testid="assignment-overview">{assignment?.title}</div>
   ),
 }));
 
@@ -98,8 +99,8 @@ vi.mock("../submissions-table", () => ({
 }));
 
 vi.mock("@/components/common/hero-section/assignment-hero-info", () => ({
-  AssignmentHeroInfo: ({ assignment }: any) => (
-    <div data-testid="assignment-hero-info">{assignment.title}</div>
+  AssignmentHeroInfo: ({ assignment }: { assignment?: { title?: string } }) => (
+    <div data-testid="assignment-hero-info">{assignment?.title}</div>
   ),
 }));
 
@@ -124,12 +125,12 @@ describe("LecturerAssignmentDetailPage", () => {
       assignmentId: "assign-50",
     });
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(assignmentsApi.useSubmissionsInfiniteQuery).mockReturnValue({
       data: { pages: [{ contents: [], totalElements: 0 }] },
@@ -137,26 +138,34 @@ describe("LecturerAssignmentDetailPage", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(assignmentsApi.useFeedbacksQuery).mockReturnValue({
       data: [],
       isLoading: false,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(assignmentsApi.useSubmissionTrackingQuery).mockReturnValue({
       data: { contents: [], currentPage: 0, totalPages: 1 },
       isLoading: false,
-    } as any);
+    } as never);
+
+    vi.mocked(assignmentsApi.useSubmissionTrackingInfiniteQuery).mockReturnValue({
+      data: { pages: [{ contents: [], nextCursor: undefined }] },
+      isLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: vi.fn(),
+    } as never);
 
     vi.mocked(assignmentsApi.useCreateFeedbackMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as any);
+    } as never);
 
     vi.mocked(assignmentsApi.useDeleteFeedbackMutation).mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as any);
+    } as never);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -171,17 +180,17 @@ describe("LecturerAssignmentDetailPage", () => {
     vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue({
       data: null,
       isLoading: false,
-    } as any);
+    } as never);
 
     vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
       data: { id: "lec-1", title: "Clean Code" },
       isLoading: false,
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
       data: { id: "course-1", title: "Fullstack Dev" },
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -213,17 +222,17 @@ describe("LecturerAssignmentDetailPage", () => {
     vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue({
       data: mockAssignment,
       isLoading: false,
-    } as any);
+    } as never);
 
     vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
       data: { id: "lec-1", title: "State Management in React" },
       isLoading: false,
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
       data: { id: "course-1", title: "Advanced React Mastery" },
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

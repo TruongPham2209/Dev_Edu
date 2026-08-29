@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -49,7 +50,7 @@ vi.mock("../lecture-video-player", () => ({
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children?: React.ReactNode; href?: string }) => <a href={href}>{children}</a>,
 }));
 
 describe("LectureContent", () => {
@@ -78,10 +79,10 @@ describe("LectureContent", () => {
     // ----------------------------------------------------------------------------
     render(
       <LectureContent
-        lecture={mockLecture as any}
+        lecture={mockLecture as never}
         courseId="c-55"
-        prevLecture={{ id: "lec-9", title: "Prev Lecture" } as any}
-        nextLecture={{ id: "lec-11", title: "Next Lecture" } as any}
+        prevLecture={{ id: "lec-9", title: "Prev Lecture" } as never}
+        nextLecture={{ id: "lec-11", title: "Next Lecture" } as never}
         onSelectLecture={mockOnSelect}
         onNext={mockOnNext}
         navigating={false}

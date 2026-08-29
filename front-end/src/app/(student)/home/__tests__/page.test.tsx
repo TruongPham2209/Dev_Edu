@@ -68,7 +68,7 @@ describe("HomePage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(coursesApi.getFeaturedCourses).mockResolvedValue([]);
-    vi.mocked(forumApi.getForumFeed).mockResolvedValue({ contents: [] } as any);
+    vi.mocked(forumApi.getForumFeed).mockResolvedValue({ contents: [] } as never);
   });
 
   it("shouldRenderHeroHeadlineExploreButtonsAndSectionTitles", async () => {

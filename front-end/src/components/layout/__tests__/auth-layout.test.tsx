@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -40,7 +41,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AuthLayout } from "../auth-layout";
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children?: React.ReactNode; href?: string }) => <a href={href}>{children}</a>,
 }));
 
 describe("AuthLayout", () => {

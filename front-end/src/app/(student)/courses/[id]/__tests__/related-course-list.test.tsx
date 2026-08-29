@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -42,7 +43,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RelatedCourseList } from "../related-course-list";
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("RelatedCourseList", () => {
@@ -82,7 +83,7 @@ describe("RelatedCourseList", () => {
     // ----------------------------------------------------------------------------
     render(
       <RelatedCourseList
-        relatedCourses={mockRelated as any}
+        relatedCourses={mockRelated as never}
         loadingRelated={false}
       />,
     );

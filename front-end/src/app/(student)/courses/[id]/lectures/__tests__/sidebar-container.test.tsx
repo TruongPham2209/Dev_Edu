@@ -77,7 +77,7 @@ describe("SidebarContainer", () => {
     // ----------------------------------------------------------------------------
     render(
       <SidebarContainer
-        lectures={mockLectures as any}
+        lectures={mockLectures as never}
         activeLectureId="lec-2"
         onSelectLecture={mockOnSelectLecture}
       />,

@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -74,7 +75,7 @@ vi.mock("../related-posts-sidebar", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("PostDetailPage (Forum Post)", () => {
@@ -84,17 +85,17 @@ describe("PostDetailPage (Forum Post)", () => {
       isAuthenticated: true,
       user: {},
       roles: ["STUDENT"],
-    } as any);
+    } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.getForumComments).mockResolvedValue({
       contents: [],
       nextCursor: null,
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.getRelatedPosts).mockResolvedValue([]);
   });
@@ -138,7 +139,7 @@ describe("PostDetailPage (Forum Post)", () => {
       isSaved: false,
     };
 
-    vi.mocked(forumApi.getForumPostById).mockResolvedValue(mockPost as any);
+    vi.mocked(forumApi.getForumPostById).mockResolvedValue(mockPost as never);
 
     // ----------------------------------------------------------------------------
     // Act

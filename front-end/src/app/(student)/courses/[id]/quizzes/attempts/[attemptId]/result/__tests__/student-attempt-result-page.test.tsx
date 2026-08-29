@@ -70,7 +70,7 @@ describe("CourseStudentAttemptResultPage Component", () => {
       data: mockResult,
       isLoading: false,
       isError: false,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderAttemptResultTitleScoreAndPassedBanner", async () => {

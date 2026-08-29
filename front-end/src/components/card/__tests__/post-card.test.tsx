@@ -42,12 +42,13 @@
  */
 
 import type { PostResponse, SavedPostResponse } from "@/lib/type/forums";
+import { createMockForumPost, createMockSavedPost } from "@/testing/mock-data";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { PostCard } from "../post-card";
 
 describe("PostCard", () => {
-  const basePost: PostResponse = {
+  const basePost: PostResponse = createMockForumPost({
     id: "post-1",
     title: "How to master Next.js 16 App Router",
     content: "Detailed guide on server components.",
@@ -56,7 +57,7 @@ describe("PostCard", () => {
     authorFullName: "Alice Johnson",
     status: "APPROVED",
     thumbUrl: "https://example.com/thumb.jpg",
-  } as any;
+  });
 
   it("shouldRenderDefaultPostCardWithApprovedLink", () => {
     // ----------------------------------------------------------------------------
@@ -153,7 +154,7 @@ describe("PostCard", () => {
     // Arrange
     // Prepare saved post object and unsave handler.
     // ----------------------------------------------------------------------------
-    const savedPost: SavedPostResponse = {
+    const savedPost: SavedPostResponse = createMockSavedPost({
       id: "saved-1",
       postId: "post-99",
       title: "Saved React Guide",
@@ -161,7 +162,7 @@ describe("PostCard", () => {
       postedDate: "2026-04-10T00:00:00.000Z",
       authorFullName: "Bob Smith",
       thumbUrl: null,
-    } as any;
+    });
 
     const handleUnsave = vi.fn();
 

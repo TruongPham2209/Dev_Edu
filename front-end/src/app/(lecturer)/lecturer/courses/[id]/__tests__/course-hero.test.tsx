@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -39,13 +40,13 @@ import { describe, expect, it, vi } from "vitest";
 import { CourseHero } from "../course-hero";
 
 vi.mock("@/components/common/hero-section/course-hero-info", () => ({
-  CourseHeroInfo: ({ course }: any) => (
-    <div data-testid="course-hero-info">{course.title}</div>
+  CourseHeroInfo: ({ course }: { course?: { title?: string } }) => (
+    <div data-testid="course-hero-info">{course?.title}</div>
   ),
 }));
 
 vi.mock("next/link", () => ({
-  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+  default: ({ children, href }: { children?: React.ReactNode; href?: string }) => <a href={href}>{children}</a>,
 }));
 
 describe("CourseHero", () => {
@@ -66,7 +67,7 @@ describe("CourseHero", () => {
     // Act
     // Render CourseHero.
     // ----------------------------------------------------------------------------
-    render(<CourseHero course={mockCourse as any} />);
+    render(<CourseHero course={mockCourse as never} />);
 
     // ----------------------------------------------------------------------------
     // Assert

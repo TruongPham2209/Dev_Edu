@@ -42,6 +42,13 @@
 
 import * as usersApi from "@/lib/api/users";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { UserResponse } from "@/lib/type/users";
+import type { CustomPaging } from "@/lib/type/api";
+import { createMockUser } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminUsersPage from "../page";
@@ -55,17 +62,25 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("./user-search-section", () => ({
-  UserSearchSection: ({ onSearch }: any) => (
+  UserSearchSection: ({
+    onSearch,
+  }: {
+    onSearch?: (k: string, r: string) => void;
+  }) => (
     <div data-testid="user-search-section-mock">
-      <button onClick={() => onSearch("alex", "STUDENT")}>Search Alex</button>
+      <button onClick={() => onSearch?.("alex", "STUDENT")}>Search Alex</button>
     </div>
   ),
 }));
 
 vi.mock("./user-table", () => ({
-  UserTable: ({ users }: any) => (
+  UserTable: ({
+    users = [],
+  }: {
+    users?: Array<{ id: string; fullName: string }>;
+  }) => (
     <div data-testid="user-table-mock">
-      {users.map((u: any) => (
+      {users.map((u) => (
         <div key={u.id}>{u.fullName}</div>
       ))}
     </div>
@@ -73,7 +88,13 @@ vi.mock("./user-table", () => ({
 }));
 
 vi.mock("@/components/dialog/user-form/page", () => ({
-  UserFormDialog: ({ open, onClose }: any) =>
+  UserFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="user-form-dialog">
         <button onClick={onClose}>Close User Dialog</button>
@@ -83,67 +104,48 @@ vi.mock("@/components/dialog/user-form/page", () => ({
 
 describe("AdminUsersPage", () => {
   const mockRefetch = vi.fn();
+  const mockUser: UserResponse = createMockUser({
+    id: "u-1",
+    fullName: "Alice Vance",
+    username: "alice_v",
+    role: "STUDENT",
+  });
+
+  const samplePaging: CustomPaging<UserResponse> = {
+    contents: [mockUser],
+    currentPage: 0,
+    pageSize: 10,
+    totalElements: 1,
+    totalPages: 1,
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(usersApi.useSearchUsersQuery).mockReturnValue({
-      data: {
-        contents: [
-          {
-            id: "u-1",
-            fullName: "Alice Vance",
-            username: "alice_v",
-            role: "STUDENT",
-          },
-        ],
-        totalPages: 1,
-      },
-      isLoading: false,
-      isFetching: false,
-      error: null,
-      refetch: mockRefetch,
-    } as any);
+    vi.mocked(usersApi.useSearchUsersQuery).mockReturnValue(
+      createMockQueryResult(samplePaging, {
+        refetch: mockRefetch,
+      }),
+    );
   });
 
   it("shouldRenderUserManagementTitleAndTable", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange & Act
-    // Render AdminUsersPage.
-    // ----------------------------------------------------------------------------
     render(<AdminUsersPage />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify title and mock table render.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("User Management")).toBeInTheDocument();
     expect(screen.getByText("Alice Vance")).toBeInTheDocument();
   });
 
   it("shouldOpenUserFormDialogOnAddUserClick", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Render AdminUsersPage.
-    // ----------------------------------------------------------------------------
     render(<AdminUsersPage />);
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Click Add user button.
-    // ----------------------------------------------------------------------------
     const addUserBtn = screen.getByRole("button", { name: "Add user" });
     fireEvent.click(addUserBtn);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify UserFormDialog renders.
-    // ----------------------------------------------------------------------------
     expect(screen.getByTestId("user-form-dialog")).toBeInTheDocument();
   });
 });

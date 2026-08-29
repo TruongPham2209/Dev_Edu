@@ -38,6 +38,13 @@
  */
 
 import * as quizzesApi from "@/lib/api/quizzes";
+import type { QuizDetailResponse, QuizResponse } from "@/lib/type/quizzes";
+import type { CustomPaging } from "@/lib/type/api";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminQuizzesPage from "../page";
@@ -58,46 +65,46 @@ vi.mock("@/lib/toast-context", () => ({
 }));
 
 describe("AdminQuizzesPage Component", () => {
-  const mockQuizzes = {
-    pages: [
-      {
-        contents: [
-          {
-            id: "q-10",
-            courseTitle: "Cloud Architecture",
-            title: "AWS Certified Developer Quiz",
-            passPercentage: 75,
-            status: "PENDING",
-            typeConfigs: [],
-            createdAt: "2026-08-06T10:00:00Z",
-          },
-        ],
-        nextCursor: undefined,
-      },
-    ],
+  const mockQuiz: QuizResponse = {
+    id: "q-1",
+    courseId: "c-1",
+    courseTitle: "Cloud Architecture",
+    title: "AWS Certified Developer Quiz",
+    description: "Test AWS knowledge",
+    status: "PENDING",
+    createdAt: "2026-08-06T10:00:00Z",
+  };
+
+  const samplePaging: CustomPaging<QuizResponse> = {
+    contents: [mockQuiz],
+    currentPage: 0,
+    pageSize: 10,
+    totalElements: 1,
+    totalPages: 1,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(quizzesApi.useQuizzesInfiniteQuery).mockReturnValue({
-      data: mockQuizzes,
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(quizzesApi.useQuizzesInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [samplePaging],
+          pageParams: [undefined],
+        },
+      ),
+    );
 
-    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as any);
+    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue(
+      createMockQueryResult<QuizDetailResponse>(),
+    );
 
-    vi.mocked(quizzesApi.useReviewQuizMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useReviewQuizMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: vi.fn(),
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderAdminQuizzesPageTitleAndPendingQuizCard", () => {

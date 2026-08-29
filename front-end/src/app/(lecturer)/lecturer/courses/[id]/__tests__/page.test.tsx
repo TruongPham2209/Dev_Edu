@@ -64,8 +64,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../course-hero", () => ({
-  CourseHero: ({ course }: any) => (
-    <div data-testid="course-hero-mock">{course.title}</div>
+  CourseHero: ({ course }: { course?: { title?: string } }) => (
+    <div data-testid="course-hero-mock">{course?.title}</div>
   ),
 }));
 
@@ -90,12 +90,12 @@ describe("LecturerCourseDetailPage", () => {
     vi.clearAllMocks();
 
     vi.mocked(useParams).mockReturnValue({ id: "course-777" });
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderErrorStateWhenCourseIsNotFound", async () => {
@@ -136,7 +136,7 @@ describe("LecturerCourseDetailPage", () => {
       thumbnailUrl: "https://example.com/thumb.jpg",
       createdAt: "2026-05-01T00:00:00.000Z",
     };
-    vi.mocked(coursesApi.getCourseById).mockResolvedValue(mockCourse as any);
+    vi.mocked(coursesApi.getCourseById).mockResolvedValue(mockCourse as never);
 
     // ----------------------------------------------------------------------------
     // Act

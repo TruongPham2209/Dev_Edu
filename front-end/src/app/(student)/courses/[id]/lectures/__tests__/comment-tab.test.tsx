@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -64,7 +65,7 @@ vi.mock("@/lib/use-auth", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} alt={props.alt || "image"} />,
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
 describe("TabComments", () => {
@@ -77,11 +78,11 @@ describe("TabComments", () => {
     vi.mocked(lecturesApi.useCreateLectureCommentMutation).mockReturnValue({
       mutateAsync: mockCreateCommentMutate,
       isPending: false,
-    } as any);
+    } as never);
 
     vi.mocked(lecturesApi.useDeleteLectureCommentMutation).mockReturnValue({
       mutateAsync: mockDeleteCommentMutate,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderEmptyStateWhenNoCommentsExist", () => {
@@ -95,7 +96,7 @@ describe("TabComments", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -126,7 +127,7 @@ describe("TabComments", () => {
       isFetchingNextPage: false,
       hasNextPage: false,
       fetchNextPage: vi.fn(),
-    } as any);
+    } as never);
 
     mockCreateCommentMutate.mockResolvedValue({ id: "c-100" });
 

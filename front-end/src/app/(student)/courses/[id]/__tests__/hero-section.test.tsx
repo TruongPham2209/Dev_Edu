@@ -61,7 +61,7 @@ describe("HeroSection", () => {
     vi.clearAllMocks();
     vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
       data: [{ id: "cat-backend", name: "Backend" }],
-    } as any);
+    } as never);
   });
 
   it("shouldRenderBreadcrumbsTitleCategoryAndLecturers", () => {
@@ -69,7 +69,7 @@ describe("HeroSection", () => {
     // Arrange & Act
     // Render HeroSection.
     // ----------------------------------------------------------------------------
-    render(<HeroSection course={mockCourse as any} />);
+    render(<HeroSection course={mockCourse as never} />);
 
     // ----------------------------------------------------------------------------
     // Assert

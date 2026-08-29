@@ -69,7 +69,7 @@ describe("TabMaterials", () => {
     vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
       data: [],
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -102,14 +102,12 @@ describe("TabMaterials", () => {
     vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
       data: mockMaterials,
       isLoading: false,
-    } as any);
+    } as never);
 
     mockFetchQuery.mockResolvedValue({
       downloadUrl: "https://example.com/download.pdf",
     });
-    const windowOpenSpy = vi
-      .spyOn(window, "open")
-      .mockImplementation(() => null);
+    vi.spyOn(window, "open").mockImplementation(() => null);
 
     // ----------------------------------------------------------------------------
     // Act

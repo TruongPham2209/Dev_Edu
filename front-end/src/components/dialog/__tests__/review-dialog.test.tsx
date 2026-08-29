@@ -5,7 +5,7 @@
  *
  * File Under Test
  * ----------------
- * src/app/(student)/cart/review-dialog.tsx
+ * src/components/dialog/review-dialog.tsx
  *
  * Purpose
  * -------
@@ -40,10 +40,16 @@
 
 import * as coursesApi from "@/lib/api/courses";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { ReviewResponse } from "@/lib/type/courses";
 import { useQueryClient } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ReviewDialog } from "../review-dialog";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 
 vi.mock("@/lib/api/courses", () => ({
   useCreateReviewMutation: vi.fn(),
@@ -68,45 +74,40 @@ describe("ReviewDialog", () => {
     vi.clearAllMocks();
     vi.mocked(useQueryClient).mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
-    } as any);
+    } as ReturnType<typeof useQueryClient>);
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: mockShowSuccess,
+        handleError: mockHandleError,
+      }),
+    );
 
-    vi.mocked(coursesApi.useCreateReviewMutation).mockReturnValue({
-      mutate: mockCreateMutate,
-      isPending: false,
-    } as any);
+    vi.mocked(coursesApi.useCreateReviewMutation).mockReturnValue(
+      createMockMutationResult({
+        mutate: mockCreateMutate,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderExistingUserReviewWhenDataExists", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Return existing review.
-    // ----------------------------------------------------------------------------
-    vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue({
-      data: {
-        id: "rev-1",
-        rating: 5,
-        comment: "Excellent course! Clear explanations.",
-      },
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    } as any);
+    const mockReview: ReviewResponse = {
+      id: "rev-1",
+      rating: 5,
+      comment: "Excellent course! Clear explanations.",
+      username: "student_1",
+      fullName: "Student One",
+      avatarUrl: "https://example.com/avatar.jpg",
+      createdAt: "2026-06-01T10:00:00.000Z",
+    };
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render ReviewDialog.
-    // ----------------------------------------------------------------------------
+    vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue(
+      createMockQueryResult(mockReview),
+    );
+
     render(<ReviewDialog open={true} onClose={vi.fn()} courseId="c-100" />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify title and review comment.
-    // ----------------------------------------------------------------------------
     expect(
       screen.getByRole("heading", { name: "Course Review" }),
     ).toBeInTheDocument();
@@ -117,27 +118,12 @@ describe("ReviewDialog", () => {
   });
 
   it("shouldRenderWriteReviewFormWhenNoReviewExists", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Return null review data.
-    // ----------------------------------------------------------------------------
-    vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue(
+      createMockQueryResult<ReviewResponse>(),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render ReviewDialog.
-    // ----------------------------------------------------------------------------
     render(<ReviewDialog open={true} onClose={vi.fn()} courseId="c-100" />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify "Write a review" form renders.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Write a review")).toBeInTheDocument();
     expect(
       screen.getByPlaceholderText("Share your thoughts about this course..."),

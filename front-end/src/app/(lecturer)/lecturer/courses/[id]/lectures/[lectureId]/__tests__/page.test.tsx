@@ -84,8 +84,8 @@ vi.mock("../materials-tab", () => ({
 }));
 
 vi.mock("@/components/common/hero-section/lecture-hero-info", () => ({
-  LectureHeroInfo: ({ lecture }: any) => (
-    <div data-testid="lecture-hero-info">{lecture.title}</div>
+  LectureHeroInfo: ({ lecture }: { lecture?: { title?: string } }) => (
+    <div data-testid="lecture-hero-info">{lecture?.title}</div>
   ),
 }));
 
@@ -100,11 +100,11 @@ describe("LecturerLectureDetailPage", () => {
       id: "course-1",
       lectureId: "lec-99",
     });
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: mockHandleError,
-    } as any);
+    } as never);
   });
 
   it("shouldRenderErrorStateWhenLectureIsNotFound", () => {
@@ -116,12 +116,12 @@ describe("LecturerLectureDetailPage", () => {
       data: null,
       isLoading: false,
       error: new Error("Not found"),
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
       data: { id: "course-1", title: "Test Course" },
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -155,12 +155,12 @@ describe("LecturerLectureDetailPage", () => {
       data: mockLecture,
       isLoading: false,
       error: null,
-    } as any);
+    } as never);
 
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
       data: { id: "course-1", title: "Clean Code & Architecture" },
       isLoading: false,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

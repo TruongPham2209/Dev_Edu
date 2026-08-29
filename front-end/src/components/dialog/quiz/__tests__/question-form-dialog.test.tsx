@@ -36,20 +36,30 @@
  * Unit test for QuestionFormDialog component.
  */
 
+import type { QuizTypeConfigResponse } from "@/lib/type/quizzes";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QuestionFormDialog } from "../question-form-dialog";
 
 describe("QuestionFormDialog Component", () => {
-  const mockConfigs = [
+  const mockConfigs: QuizTypeConfigResponse[] = [
     {
       id: "cfg-1",
+      quizId: "q-1",
       questionType: "SINGLE_CHOICE",
-      numberOfQuestions: 5,
+      requiredCount: 5,
       pointsPerQuestion: 2,
-      passPercentage: 70,
+      scoringMethod: "AUTO",
     },
-  ] as any;
+    {
+      id: "cfg-2",
+      quizId: "q-1",
+      questionType: "ESSAY",
+      requiredCount: 2,
+      pointsPerQuestion: 5,
+      scoringMethod: "MANUAL",
+    },
+  ];
 
   beforeEach(() => {
     vi.clearAllMocks();

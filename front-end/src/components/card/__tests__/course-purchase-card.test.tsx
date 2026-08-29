@@ -57,11 +57,11 @@ describe("CoursePurchaseCard", () => {
     originalPrice: 400000,
     discountedPercentage: 25, // displayPrice = 300000
     thumbnailUrl: "https://example.com/thumb.jpg",
-  } as any;
+  } as never;
 
   const mockLectures: LectureResponse[] = [
-    { id: "lec-1", title: "Lesson 1" } as any,
-    { id: "lec-2", title: "Lesson 2" } as any,
+    { id: "lec-1", title: "Lesson 1" } as never,
+    { id: "lec-2", title: "Lesson 2" } as never,
   ];
 
   it("shouldRenderStartLearningButtonWhenUserIsEnrolled", () => {

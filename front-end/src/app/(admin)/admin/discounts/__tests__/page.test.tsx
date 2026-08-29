@@ -42,6 +42,14 @@
 
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import * as apiToast from "@/lib/use-api-with-toast";
+import type { CourseDiscountResponse } from "@/lib/type/courses";
+import type { CustomPaging } from "@/lib/type/api";
+import { createMockDiscount } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminDiscountsPage from "../page";
@@ -56,12 +64,18 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("./discounts-table", () => ({
-  DiscountsTable: ({ discounts, onDeleteClick }: any) => (
+  DiscountsTable: ({
+    discounts = [],
+    onDeleteClick,
+  }: {
+    discounts?: Array<{ id: string; discountDescription?: string }>;
+    onDeleteClick?: (id: string) => void;
+  }) => (
     <div data-testid="discounts-table-mock">
-      {discounts.map((d: any) => (
+      {discounts.map((d) => (
         <div key={d.id}>
           <span>{d.discountDescription}</span>
-          <button onClick={() => onDeleteClick(d.id)}>
+          <button onClick={() => onDeleteClick?.(d.id)}>
             Delete {d.discountDescription}
           </button>
         </div>
@@ -71,7 +85,13 @@ vi.mock("./discounts-table", () => ({
 }));
 
 vi.mock("@/components/dialog/discount-form", () => ({
-  DiscountFormDialog: ({ open, onClose }: any) =>
+  DiscountFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="discount-form-dialog">
         <button onClick={onClose}>Close Discount Dialog</button>
@@ -96,76 +116,56 @@ describe("AdminDiscountsPage", () => {
       value: MockIntersectionObserver,
     });
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as any);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
+
+    const mockDiscount: CourseDiscountResponse = createMockDiscount({
+      id: "disc-1",
+      discountPercentage: 20,
+      discountDescription: "New Year Sale 2026",
+    });
+
+    const pageData: CustomPaging<CourseDiscountResponse> = {
+      contents: [mockDiscount],
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 1,
+      totalPages: 1,
+    };
 
     vi.mocked(
       enrollmentsApi.useGlobalCourseDiscountsInfiniteQuery,
-    ).mockReturnValue({
-      data: {
-        pages: [
-          {
-            contents: [
-              {
-                id: "disc-1",
-                discountPercentage: 20,
-                discountDescription: "New Year Sale 2026",
-              },
-            ],
-          },
-        ],
-      },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      refetch: mockRefetch,
-      error: null,
-    } as any);
+    ).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pageParams: [null],
+          pages: [pageData],
+        },
+        { refetch: mockRefetch },
+      ),
+    );
 
-    vi.mocked(enrollmentsApi.useDeleteCourseDiscountMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(enrollmentsApi.useDeleteCourseDiscountMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderDiscountsManagementTitleAndTable", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange & Act
-    // Render AdminDiscountsPage.
-    // ----------------------------------------------------------------------------
     render(<AdminDiscountsPage />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify title and mock table render.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Discounts Management")).toBeInTheDocument();
     expect(screen.getByText("New Year Sale 2026")).toBeInTheDocument();
   });
 
   it("shouldOpenDiscountFormDialogOnCreateClick", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Render AdminDiscountsPage.
-    // ----------------------------------------------------------------------------
     render(<AdminDiscountsPage />);
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Click Create global discount button.
-    // ----------------------------------------------------------------------------
     const createBtn = screen.getByRole("button", {
       name: "Create global discount",
     });
     fireEvent.click(createBtn);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify DiscountFormDialog renders.
-    // ----------------------------------------------------------------------------
     expect(screen.getByTestId("discount-form-dialog")).toBeInTheDocument();
   });
 });

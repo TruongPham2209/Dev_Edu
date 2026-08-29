@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -48,7 +49,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationDetailDialog } from "../notification-detail";
 
 vi.mock("@/components/common/info-dialog", () => ({
-  InfoDialog: ({ open, onClose, title, children }: any) =>
+  InfoDialog: ({
+    open,
+    onClose,
+    title,
+    children,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+    title?: React.ReactNode;
+    children?: React.ReactNode;
+  }) =>
     open ? (
       <div data-testid="info-dialog-mock">
         <h2>{title}</h2>

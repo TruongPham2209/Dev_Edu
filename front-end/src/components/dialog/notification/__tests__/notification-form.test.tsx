@@ -1,3 +1,4 @@
+import React from "react";
 /**
  * =============================================================================
  * Unit Test
@@ -43,7 +44,6 @@
  * Unit test for CreateGroupNotificationDialog component.
  */
 
-import type { RoleEnum } from "@/lib/type/enum";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateGroupNotificationDialog } from "../notification-form";
@@ -55,7 +55,13 @@ vi.mock("@/components/common/form/form-dialog", () => ({
     onSubmit,
     isSubmitDisabled,
     children,
-  }: any) =>
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+    onSubmit?: () => void;
+    isSubmitDisabled?: boolean;
+    children?: React.ReactNode;
+  }) =>
     open ? (
       <div data-testid="form-dialog-mock">
         <h2>Create Group Notification</h2>
@@ -69,11 +75,17 @@ vi.mock("@/components/common/form/form-dialog", () => ({
 }));
 
 vi.mock("@/components/common/form/rich-text-editor", () => ({
-  RichTextEditor: ({ value, onChange }: any) => (
+  RichTextEditor: ({
+    value,
+    onChange,
+  }: {
+    value?: string;
+    onChange?: (val: string) => void;
+  }) => (
     <textarea
       data-testid="rich-text-editor"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange?.(e.target.value)}
     />
   ),
 }));

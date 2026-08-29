@@ -44,6 +44,7 @@ import {
   useQuizExamSession,
 } from "../use-quiz-exam-session";
 import * as quizzesApi from "@/lib/api/quizzes";
+import { createMockMutationResult } from "@/testing/mock-query";
 
 vi.mock("@/lib/api/quizzes", () => ({
   useAutosaveAttemptMutation: vi.fn(),
@@ -78,12 +79,26 @@ describe("useQuizExamSession hook", () => {
       mutateAsync: mockAutosaveMutateAsync,
       isPending: false,
     } as unknown as ReturnType<typeof quizzesApi.useAutosaveAttemptMutation>);
+    vi.mocked(quizzesApi.useAutosaveAttemptMutation).mockReturnValue(
+      createMockMutationResult({
+        mutate: vi.fn(),
+        mutateAsync: mockAutosaveMutateAsync,
+        isPending: false,
+      }),
+    );
 
     vi.mocked(quizzesApi.useHeartbeatAttemptMutation).mockReturnValue({
       mutate: mockHeartbeatMutate,
       mutateAsync: mockHeartbeatMutateAsync,
       isPending: false,
     } as unknown as ReturnType<typeof quizzesApi.useHeartbeatAttemptMutation>);
+    vi.mocked(quizzesApi.useHeartbeatAttemptMutation).mockReturnValue(
+      createMockMutationResult({
+        mutate: mockHeartbeatMutate,
+        mutateAsync: mockHeartbeatMutateAsync,
+        isPending: false,
+      }),
+    );
 
     // Mock sessionStorage
     const storage: Record<string, string> = {};

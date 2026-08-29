@@ -53,14 +53,27 @@
 
 import * as notificationApi from "@/lib/api/notification";
 import * as authHook from "@/lib/use-auth";
+import type { NotificationResponse } from "@/lib/type/notification";
+import type { CustomPaging } from "@/lib/type/api";
+import {
+  createMockAuthStatus,
+  createMockAuthUser,
+  createMockNotification,
+  createMockRouter,
+} from "@/testing/mock-data";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationCenter } from "../notification-center";
 
 vi.mock("@/lib/api/notification", () => ({
-  useUnreadNotificationCountQuery: vi.fn(),
   useNotificationsInfiniteQuery: vi.fn(),
+  useUnreadNotificationCountQuery: vi.fn(),
   useMarkNotificationAsReadMutation: vi.fn(),
   useDeletePersonalNotificationMutation: vi.fn(),
 }));
@@ -70,11 +83,19 @@ vi.mock("@/lib/use-auth", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: vi.fn(() => ({ push: vi.fn() })),
+  useRouter: vi.fn(),
 }));
 
 vi.mock("@/components/dialog/notification/notification-detail", () => ({
-  NotificationDetailDialog: ({ open, notification, onClose }: any) =>
+  NotificationDetailDialog: ({
+    open,
+    notification,
+    onClose,
+  }: {
+    open?: boolean;
+    notification?: { title?: string };
+    onClose?: () => void;
+  }) =>
     open ? (
       <div data-testid="notification-detail-dialog-mock">
         <span>Detail: {notification?.title}</span>
@@ -89,91 +110,106 @@ describe("NotificationCenter Component", () => {
   const mockFetchNextPage = vi.fn();
   const mockPush = vi.fn();
 
+  const notif1: NotificationResponse = createMockNotification({
+    id: "n-1",
+    title: "Personal Announcement",
+    content: "Assignment 1 graded",
+    category: "PERSONAL",
+    type: "SUBMISSION_FEEDBACK",
+    isRead: false,
+    createdAt: "2026-08-10T10:00:00Z",
+  });
+
+  const notif2: NotificationResponse = createMockNotification({
+    id: "n-2",
+    title: "System Wide Announcement",
+    content: "Platform maintenance",
+    category: "GROUP",
+    type: "COURSE_NEW_LECTURE",
+    isRead: false,
+    createdAt: "2026-08-10T09:00:00Z",
+  });
+
+  const samplePaging: CustomPaging<NotificationResponse> = {
+    contents: [notif1, notif2],
+    currentPage: 0,
+    pageSize: 10,
+    totalElements: 2,
+    totalPages: 1,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as any);
+    vi.mocked(useRouter).mockReturnValue(
+      createMockRouter({ push: mockPush }),
+    );
 
-    vi.mocked(authHook.useAuth).mockReturnValue({
-      roles: ["STUDENT"],
-      isAuthenticated: true,
-      role: "STUDENT",
-      user: { id: "u-1" } as any,
-    });
+    vi.mocked(authHook.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        roles: ["STUDENT"],
+        role: "STUDENT",
+        user: createMockAuthUser({ id: "u-1" }),
+      }),
+    );
 
-    vi.mocked(notificationApi.useUnreadNotificationCountQuery).mockReturnValue({
-      data: {
+    vi.mocked(notificationApi.useUnreadNotificationCountQuery).mockReturnValue(
+      createMockQueryResult({
         personalUnreadCount: 2,
         groupUnreadCount: 1,
         totalUnreadCount: 3,
-      },
-    } as any);
+      }),
+    );
 
-    vi.mocked(notificationApi.useNotificationsInfiniteQuery).mockReturnValue({
-      data: {
-        pages: [
-          {
-            contents: [
-              {
-                id: "n-1",
-                title: "Personal Announcement",
-                content: "Assignment 1 graded",
-                category: "PERSONAL",
-                type: "SUBMISSION_FEEDBACK",
-                isRead: false,
-                createdAt: "2026-08-10T10:00:00Z",
-              },
-              {
-                id: "n-2",
-                title: "System Wide Announcement",
-                content: "Platform maintenance",
-                category: "GROUP",
-                type: "ANNOUNCEMENT",
-                isRead: false,
-                createdAt: "2026-08-10T09:00:00Z",
-              },
-            ],
-          },
-        ],
-      },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: true,
-      fetchNextPage: mockFetchNextPage,
-    } as any);
+    vi.mocked(notificationApi.useNotificationsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [samplePaging],
+          pageParams: [undefined],
+        },
+        {
+          hasNextPage: true,
+          fetchNextPage: mockFetchNextPage,
+        },
+      ),
+    );
 
     vi.mocked(notificationApi.useMarkNotificationAsReadMutation).mockReturnValue(
-      {
+      createMockMutationResult({
         mutate: mockMarkAsRead,
         isPending: false,
-      } as any,
+      }),
     );
 
     vi.mocked(
       notificationApi.useDeletePersonalNotificationMutation,
-    ).mockReturnValue({
-      mutate: mockDeletePersonal,
-      isPending: false,
-    } as any);
+    ).mockReturnValue(
+      createMockMutationResult({
+        mutate: mockDeletePersonal,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderBellIconWithTotalUnreadBadgeCount", () => {
     // ----------------------------------------------------------------------------
     // Arrange & Act
     // Render NotificationCenter.
+    // Render NotificationCenter with badge count 3.
     // ----------------------------------------------------------------------------
     render(<NotificationCenter />);
 
     // ----------------------------------------------------------------------------
     // Assert
     // Verify bell icon button and unread badge count (3).
+    // Verify badge text 3 is visible.
     // ----------------------------------------------------------------------------
     const bellBtn = screen.getByRole("button", { name: "Notifications" });
     expect(bellBtn).toBeInTheDocument();
     expect(screen.getByText("3")).toBeInTheDocument();
   });
 
-  it("shouldOpenNotificationPopoverOnClickingBellIcon", () => {
+  it("shouldOpenPopoverDropdownAndRenderNotificationListWhenBellIconIsClicked", () => {
     // ----------------------------------------------------------------------------
     // Arrange
     // Render NotificationCenter.
@@ -182,7 +218,7 @@ describe("NotificationCenter Component", () => {
 
     // ----------------------------------------------------------------------------
     // Act
-    // Click bell icon.
+    // Click bell icon button to open popover.
     // ----------------------------------------------------------------------------
     const bellBtn = screen.getByRole("button", { name: "Notifications" });
     fireEvent.click(bellBtn);
@@ -202,13 +238,15 @@ describe("NotificationCenter Component", () => {
     // Arrange
     // Mock loading state.
     // ----------------------------------------------------------------------------
-    vi.mocked(notificationApi.useNotificationsInfiniteQuery).mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: mockFetchNextPage,
-    } as any);
+    vi.mocked(notificationApi.useNotificationsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        { pages: [], pageParams: [] },
+        {
+          isLoading: true,
+          fetchNextPage: mockFetchNextPage,
+        },
+      ),
+    );
 
     render(<NotificationCenter />);
 
@@ -230,17 +268,30 @@ describe("NotificationCenter Component", () => {
     // Arrange
     // Mock empty notifications list and 0 unread count.
     // ----------------------------------------------------------------------------
-    vi.mocked(notificationApi.useUnreadNotificationCountQuery).mockReturnValue({
-      data: { totalUnreadCount: 0 },
-    } as any);
+    vi.mocked(notificationApi.useUnreadNotificationCountQuery).mockReturnValue(
+      createMockQueryResult({
+        personalUnreadCount: 0,
+        groupUnreadCount: 0,
+        totalUnreadCount: 0,
+      }),
+    );
 
-    vi.mocked(notificationApi.useNotificationsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: mockFetchNextPage,
-    } as any);
+    const emptyPaging: CustomPaging<NotificationResponse> = {
+      contents: [],
+      currentPage: 0,
+      pageSize: 10,
+      totalElements: 0,
+      totalPages: 0,
+    };
+
+    vi.mocked(notificationApi.useNotificationsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        { pages: [emptyPaging], pageParams: [undefined] },
+        {
+          fetchNextPage: mockFetchNextPage,
+        },
+      ),
+    );
 
     render(<NotificationCenter />);
 

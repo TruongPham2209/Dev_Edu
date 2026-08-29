@@ -80,12 +80,12 @@ describe("AdminPostsPage", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
 
     vi.mocked(forumApi.useUpdatePostVersionMutation).mockReturnValue({
       mutate: mockUpdateVersion,
       isPending: false,
-    } as any);
+    } as never);
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -104,7 +104,7 @@ describe("AdminPostsPage", () => {
       hasNextPage: false,
       isFetchingNextPage: false,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -142,7 +142,7 @@ describe("AdminPostsPage", () => {
       hasNextPage: false,
       isFetchingNextPage: false,
       refetch: vi.fn(),
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act

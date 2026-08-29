@@ -37,25 +37,46 @@
  * Unit test for PostVersionList component.
  */
 
+import type { PostResponse } from "@/lib/type/forums";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { PostVersionList } from "../post-version-list";
 
 describe("PostVersionList", () => {
-  const mockVersions = [
+  const mockVersions: PostResponse[] = [
     {
       id: "ver-2",
       title: "Updated Post Title",
+      shortDescription: "Updated short description",
       content: "<p>Updated content</p>",
+      isMine: true,
+      isSaved: false,
+      authorUsername: "alice",
+      authorFullName: "Alice Smith",
+      authorAvatarUrl: null,
+      thumbUrl: null,
+      views: 10,
+      comments: 2,
       status: "PENDING",
       createdAt: "2026-06-15T10:00:00.000Z",
+      updatedAt: "2026-06-15T10:00:00.000Z",
     },
     {
       id: "ver-1",
       title: "Original Post Title",
+      shortDescription: "Original short description",
       content: "<p>Original content</p>",
+      isMine: true,
+      isSaved: false,
+      authorUsername: "alice",
+      authorFullName: "Alice Smith",
+      authorAvatarUrl: null,
+      thumbUrl: null,
+      views: 5,
+      comments: 1,
       status: "APPROVED",
       createdAt: "2026-06-01T10:00:00.000Z",
+      updatedAt: "2026-06-01T10:00:00.000Z",
     },
   ];
 

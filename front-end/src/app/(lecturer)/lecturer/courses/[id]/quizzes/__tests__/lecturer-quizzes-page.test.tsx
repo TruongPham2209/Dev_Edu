@@ -65,6 +65,12 @@ vi.mock("@/lib/toast-context", () => ({
   useToast: vi.fn(() => ({ success: vi.fn(), error: vi.fn() })),
 }));
 
+import { createMockCourse } from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
+
 describe("Lecturer Quizzes Page & QuizHero", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -72,32 +78,55 @@ describe("Lecturer Quizzes Page & QuizHero", () => {
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
       data: { id: "course-123", title: "Advanced React & Next.js" },
       isLoading: false,
-    } as any);
+    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCourse({
+          id: "course-123",
+          title: "Advanced React & Next.js",
+        }),
+      ),
+    );
 
     vi.mocked(quizzesApi.useCreateQuizMutation).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as never);
+    vi.mocked(quizzesApi.useCreateQuizMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as never);
+    vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as never);
+    vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
-    } as any);
+    } as never);
+    vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
     vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue({
       data: [],
       isLoading: false,
-    } as any);
+    } as never);
+    vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue(
+      createMockQueryResult([]),
+    );
   });
 
   it("shouldRenderQuizHeroTitleAndDescription", () => {

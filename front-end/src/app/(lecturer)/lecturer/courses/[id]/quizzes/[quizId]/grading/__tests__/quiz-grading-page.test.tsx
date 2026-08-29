@@ -31,7 +31,7 @@
  *
  * Not Covered
  * -----------
- * - Infinite scroll pagination triggers
+ * - Infinite scroll load more button triggers
  *
  * Notes
  * -----
@@ -39,6 +39,17 @@
  */
 
 import * as quizzesApi from "@/lib/api/quizzes";
+import type {
+  QuizDetailResponse,
+  QuizEssaySubmissionResponse,
+  QuizResponse,
+} from "@/lib/type/quizzes";
+import type { CustomPaging } from "@/lib/type/api";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import QuizGradingPage from "../page";
@@ -66,58 +77,67 @@ vi.mock("@/lib/toast-context", () => ({
 }));
 
 describe("QuizGradingPage Component", () => {
-  const mockQuizDetail = {
-    quiz: {
-      id: "quiz-99",
-      title: "Essay Exam",
-    },
+  const mockQuiz: QuizResponse = {
+    id: "quiz-99",
+    courseId: "course-123",
+    courseTitle: "Course 101",
+    title: "Essay Exam",
+    description: "Essay Exam description",
+    status: "APPROVED",
+    createdAt: "2026-08-06T10:00:00Z",
   };
 
-  const mockSubmissions = {
-    pages: [
-      {
-        contents: [
-          {
-            attemptId: "att-1",
-            questionId: "q-1",
-            studentUsername: "john_doe",
-            studentFullName: "John Doe",
-            assignmentName: "Essay Assignment",
-            submittedAt: "2026-08-06T10:00:00Z",
-            essayStatus: "SUBMITTED",
-            questionContent: "Describe Clean Architecture.",
-            answerText: "Clean Architecture separates concerns into layers.",
-            maxPoints: 10,
-            awardedPoints: null,
-            feedback: null,
-          },
-        ],
-        nextCursor: undefined,
-      },
-    ],
+  const mockQuizDetail: QuizDetailResponse = {
+    quiz: mockQuiz,
+    questions: [],
+    typeConfigs: [],
+  };
+
+  const mockSubmission: QuizEssaySubmissionResponse = {
+    attemptAnswerId: "ans-1",
+    attemptId: "att-1",
+    questionId: "q-1",
+    assignmentId: "asg-1",
+    studentUsername: "john_doe",
+    studentFullName: "John Doe",
+    assignmentName: "Essay Assignment",
+    submittedAt: "2026-08-06T10:00:00Z",
+    lastSavedAt: "2026-08-06T10:00:00Z",
+    essayStatus: "PENDING",
+    questionContent: "Describe Clean Architecture.",
+    answerText: "Clean Architecture separates concerns into layers.",
+    maxPoints: 10,
+    awardedPoints: null,
+    feedback: null,
+  };
+
+  const samplePaging: CustomPaging<QuizEssaySubmissionResponse> = {
+    contents: [mockSubmission],
+    currentPage: 0,
+    pageSize: 10,
+    totalElements: 1,
+    totalPages: 1,
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
-      data: mockQuizDetail,
-      isLoading: false,
-    } as any);
+    vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue(
+      createMockQueryResult(mockQuizDetail),
+    );
 
-    vi.mocked(quizzesApi.useEssaySubmissionsInfiniteQuery).mockReturnValue({
-      data: mockSubmissions,
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      refetch: vi.fn(),
-    } as any);
+    vi.mocked(quizzesApi.useEssaySubmissionsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [samplePaging],
+          pageParams: [undefined],
+        },
+      ),
+    );
 
-    vi.mocked(quizzesApi.useGradeEssayMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as any);
+    vi.mocked(quizzesApi.useGradeEssayMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderEssayGradingPageWithStudentSubmissionCard", () => {

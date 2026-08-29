@@ -84,7 +84,7 @@ describe("CourseContent", () => {
     // Act
     // Render CourseContent.
     // ----------------------------------------------------------------------------
-    render(<CourseContent lectures={mockLectures as any} />);
+    render(<CourseContent lectures={mockLectures as never} />);
 
     // ----------------------------------------------------------------------------
     // Assert

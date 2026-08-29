@@ -53,6 +53,11 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("ManualTab", () => {
   const mockBatchMutate = vi.fn();
   const mockShowSuccess = vi.fn();
@@ -62,11 +67,19 @@ describe("ManualTab", () => {
     vi.clearAllMocks();
     vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue({
       mutateAsync: mockBatchMutate,
-    } as any);
+    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: mockShowSuccess,
       handleError: mockHandleError,
-    } as any);
+    } as never);
+    vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockBatchMutate,
+      }),
+    );
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({ showSuccess: mockShowSuccess }),
+    );
   });
 
   it("shouldNotifyOnReadyWithInvalidStatusInitially", () => {

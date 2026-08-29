@@ -60,7 +60,7 @@ describe("StudentsTab", () => {
     vi.mocked(apiToast.useApiWithToast).mockReturnValue({
       showSuccess: vi.fn(),
       handleError: vi.fn(),
-    } as any);
+    } as never);
   });
 
   it("shouldRenderEmptyStateWhenNoStudentsEnrolled", () => {
@@ -75,7 +75,7 @@ describe("StudentsTab", () => {
       hasNextPage: false,
       fetchNextPage: vi.fn(),
       error: null,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
@@ -113,7 +113,7 @@ describe("StudentsTab", () => {
       hasNextPage: true,
       fetchNextPage: mockFetchNext,
       error: null,
-    } as any);
+    } as never);
 
     // ----------------------------------------------------------------------------
     // Act
