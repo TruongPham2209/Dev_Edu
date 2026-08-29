@@ -1,8 +1,8 @@
 "use client";
 
 import { adminNavItems } from "@/lib/navigation";
-import { roleThemes } from "@/lib/role-theme";
 import {
+  alpha,
   Box,
   Drawer,
   IconButton,
@@ -27,7 +27,6 @@ type AdminLayoutProps = {
 };
 
 export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
-  const theme = roleThemes.admin;
   const muiTheme = useTheme();
   const mediaQueryMatch = useMediaQuery(muiTheme.breakpoints.down("md"), {
     noSsr: true,
@@ -58,7 +57,10 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
       >
         {!effectiveCollapsed && (
           <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "text.primary" }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ fontWeight: 800, color: "text.primary" }}
+            >
               DevEdu
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -102,25 +104,45 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
                     sx={{
                       py: 1.4,
                       px: effectiveCollapsed ? 2.25 : 2.5,
-                      color: "text.primary",
+                      color: isActive ? "primary.main" : "text.primary",
                       borderRadius: 2,
                       mx: 1,
-                      bgcolor: isActive
-                        ? (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(22, 163, 74, 0.2)"
-                              : "rgba(22, 163, 74, 0.12)"
-                        : "transparent",
-                      border: isActive
-                        ? "1px solid rgba(22, 163, 74, 0.28)"
-                        : "1px solid transparent",
+                      bgcolor: (theme) =>
+                        isActive
+                          ? alpha(
+                              theme.palette.primary.main,
+                              theme.palette.mode === "dark" ? 0.18 : 0.08,
+                            )
+                          : "transparent",
+                      border: (theme) =>
+                        isActive
+                          ? `1px solid ${alpha(
+                              theme.palette.primary.main,
+                              theme.palette.mode === "dark" ? 0.35 : 0.2,
+                            )}`
+                          : "1px solid transparent",
                       "&:hover": {
-                        bgcolor: "action.hover",
+                        bgcolor: (theme) =>
+                          isActive
+                            ? alpha(
+                                theme.palette.primary.main,
+                                theme.palette.mode === "dark" ? 0.26 : 0.14,
+                              )
+                            : "action.hover",
                       },
                       transition: "all 0.2s ease-in-out",
                     }}
                   >
-                    <ListItemIcon sx={{ minWidth: 32, color: isActive ? "#16a34a" : "text.secondary" }}>
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 32,
+                        color: isActive ? "primary.main" : "text.secondary",
+                        "& svg": {
+                          color: "inherit",
+                          transition: "color 0.2s ease",
+                        },
+                      }}
+                    >
                       <Icon size={18} />
                     </ListItemIcon>
                     {!effectiveCollapsed && (
@@ -130,7 +152,8 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
                           "& .MuiListItemText-primary": {
                             fontSize: "0.875rem",
                             fontWeight: isActive ? 700 : 600,
-                            color: isActive ? "#16a34a" : "text.primary",
+                            color: isActive ? "primary.main" : "text.primary",
+                            transition: "color 0.2s ease",
                           },
                         }}
                       />
@@ -153,19 +176,11 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
         flexDirection: "column",
         position: "relative",
         overflow: "hidden",
-        background: theme.background,
+        bgcolor: "background.default",
         color: "text.primary",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          background: theme.glow,
-          pointerEvents: "none",
-        }}
-      />
-
       <ManageHeader
         title="Admin Workspace"
         logoHref="/admin"
@@ -192,7 +207,8 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
               borderColor: "divider",
               overflowY: "auto",
               height: "100%",
-              transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              transition:
+                "width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease, border-color 0.2s ease",
             }}
           >
             {drawerContent}
@@ -232,12 +248,14 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
               borderRadius: { xs: 2, sm: 3 },
               border: "1px solid",
               borderColor: "divider",
-              backgroundColor: "background.paper",
+              bgcolor: "background.paper",
               backdropFilter: "blur(14px)",
               boxShadow: (theme) =>
                 theme.palette.mode === "dark"
                   ? "0 24px 60px rgba(0, 0, 0, 0.4)"
                   : "0 24px 60px rgba(15, 23, 42, 0.08)",
+              transition:
+                "background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
             }}
           >
             {children}
@@ -247,3 +265,4 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
     </Box>
   );
 }
+

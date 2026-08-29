@@ -2,7 +2,6 @@
 
 import { Box, Container } from "@mui/material";
 import type { ReactNode } from "react";
-import { roleThemes } from "@/lib/role-theme";
 import { ManageHeader } from "@/components/layout/components/manage-header";
 
 type LecturerLayoutProps = {
@@ -10,32 +9,33 @@ type LecturerLayoutProps = {
 };
 
 export function LecturerLayout({ children }: Readonly<LecturerLayoutProps>) {
-  const theme = roleThemes.lecturer;
-
   return (
     <Box
       sx={{
         minHeight: { xs: "100dvh", lg: "100vh" },
-        position: "relative",
-        overflow: "clip",
-        background: theme.background,
+        display: "flex",
+        flexDirection: "column",
+        bgcolor: "background.default",
         color: "text.primary",
+        transition: "background-color 0.2s ease, color 0.2s ease",
       }}
     >
+      <ManageHeader title="Lecturer workspace" />
       <Box
+        component="main"
         sx={{
-          position: "absolute",
-          inset: 0,
-          background: theme.glow,
-          pointerEvents: "none",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          py: { xs: 2, sm: 3, md: 4 },
         }}
-      />
-      <Box sx={{ position: "relative" }}>
-        <ManageHeader title="Lecturer workspace" />
+      >
         <Container
           maxWidth="xl"
           sx={{
-            py: { xs: 2, sm: 3, md: 4 },
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
             px: { xs: 1.5, sm: 3, md: 4 },
           }}
         >
@@ -45,12 +45,14 @@ export function LecturerLayout({ children }: Readonly<LecturerLayoutProps>) {
               borderRadius: { xs: 2, sm: 3 },
               border: "1px solid",
               borderColor: "divider",
-              backgroundColor: "background.paper",
+              bgcolor: "background.paper",
               backdropFilter: "blur(14px)",
               boxShadow: (theme) =>
                 theme.palette.mode === "dark"
                   ? "0 24px 60px rgba(0, 0, 0, 0.4)"
                   : "0 24px 60px rgba(15, 23, 42, 0.08)",
+              transition:
+                "background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
             }}
           >
             {children}
@@ -60,3 +62,4 @@ export function LecturerLayout({ children }: Readonly<LecturerLayoutProps>) {
     </Box>
   );
 }
+

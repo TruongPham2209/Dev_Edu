@@ -3,6 +3,7 @@
 import { ThemeToggle } from "@/components/common/theme-toggle";
 import { useAuth } from "@/lib/use-auth";
 import {
+  alpha,
   AppBar,
   Box,
   Button,
@@ -52,9 +53,7 @@ export function ManageHeader({
       sx={{
         bgcolor: (theme) =>
           isScrolled
-            ? theme.palette.mode === "dark"
-              ? "rgba(15, 23, 42, 0.95)"
-              : "rgba(255, 255, 255, 0.95)"
+            ? alpha(theme.palette.background.paper, 0.95)
             : "background.paper",
         color: "text.primary",
         borderBottom: "1px solid",
