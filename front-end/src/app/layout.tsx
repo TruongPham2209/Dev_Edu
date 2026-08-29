@@ -32,13 +32,40 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value ?? null;
+  const themeCookie = cookieStore.get("dev_edu_theme_mode")?.value as
+    | "light"
+    | "dark"
+    | undefined;
+  const initialTheme = themeCookie === "dark" ? "dark" : "light";
 
   return (
     <html
       lang="vi"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-screen" suppressHydrationWarning>
+        <script
+          id="theme-init-script"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var mode = localStorage.getItem("dev_edu_theme_mode") || ${JSON.stringify(initialTheme)};
+                  document.documentElement.setAttribute("data-theme", mode);
+                  if (mode === "dark") {
+                    document.documentElement.classList.add("dark");
+                  } else {
+                    document.documentElement.classList.remove("dark");
+                  }
+                  document.cookie = "dev_edu_theme_mode=" + mode + "; path=/; max-age=31536000; SameSite=Lax";
+                } catch (e) {
+                  console.error("Theme init script error:", e);
+                }
+              })();
+            `
+          }}
+        />
         <script
           id="auth-init-script"
           dangerouslySetInnerHTML={{
@@ -64,7 +91,7 @@ export default async function RootLayout({
           }}
         />
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <AppProviders>
+          <AppProviders initialTheme={initialTheme}>
             {children}
             <AuthSync serverToken={token} />
             <ChatWidget />

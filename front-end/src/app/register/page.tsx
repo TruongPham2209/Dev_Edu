@@ -14,7 +14,7 @@ import {
   Typography,
   alpha,
 } from "@mui/material";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { Eye, EyeOff, Mail, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -137,12 +137,14 @@ export default function RegisterPage() {
           <Typography
             variant="subtitle2"
             sx={{
-              color: "#166534",
+              color: (theme) =>
+                theme.palette.mode === "dark" ? "#4ade80" : "#166534",
               fontWeight: 800,
               fontSize: "0.8rem",
               textTransform: "uppercase",
               letterSpacing: "0.05em",
-              borderBottom: "1px solid rgba(15, 23, 42, 0.05)",
+              borderBottom: "1px solid",
+              borderColor: "divider",
               pb: 1,
             }}
           >
@@ -179,12 +181,14 @@ export default function RegisterPage() {
           <Typography
             variant="subtitle2"
             sx={{
-              color: "#166534",
+              color: (theme) =>
+                theme.palette.mode === "dark" ? "#4ade80" : "#166534",
               fontWeight: 800,
               fontSize: "0.8rem",
               textTransform: "uppercase",
               letterSpacing: "0.05em",
-              borderBottom: "1px solid rgba(15, 23, 42, 0.05)",
+              borderBottom: "1px solid",
+              borderColor: "divider",
               pb: 1,
             }}
           >

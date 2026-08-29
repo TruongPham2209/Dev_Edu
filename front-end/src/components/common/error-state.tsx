@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { alpha, Box, Button, Typography } from "@mui/material";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
 
 export function ErrorState({
@@ -21,8 +21,12 @@ export function ErrorState({
           sx={{
             p: 1.5,
             borderRadius: "50%",
-            bgcolor: "rgba(248, 113, 113, 0.14)",
-            color: "#ef4444",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.error.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.1,
+              ),
+            color: "error.main",
           }}
         >
           <AlertTriangle size={24} />

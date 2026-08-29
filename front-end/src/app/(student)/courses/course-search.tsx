@@ -23,7 +23,7 @@ export const CourseSearch = ({
           variant="h5"
           sx={{
             fontWeight: 800,
-            color: "#0f172a",
+            color: "text.primary",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -48,7 +48,10 @@ export const CourseSearch = ({
           bgcolor: (theme) => alpha(theme.palette.background.default, 0.9),
           backdropFilter: "blur(12px)",
           borderRadius: 4,
-          boxShadow: "0 4px 20px -5px rgba(15, 23, 42, 0.05)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 20px -5px rgba(0, 0, 0, 0.4)"
+              : "0 4px 20px -5px rgba(15, 23, 42, 0.05)",
           transition: "all 0.3s ease",
           mb: { xs: 2, sm: 2.5 },
         }}
@@ -77,7 +80,7 @@ export const CourseSearch = ({
         <Typography
           variant="body2"
           sx={{
-            color: "#64748b",
+            color: "text.secondary",
             display: "flex",
             alignItems: "center",
             fontWeight: 600,
@@ -102,15 +105,20 @@ export const CourseSearch = ({
             size="small"
             icon={<TrendingUp size={12} />}
             sx={{
-              bgcolor: "#f1f5f9",
-              color: "#475569",
+              bgcolor: "action.hover",
+              color: "text.primary",
               fontWeight: 600,
               fontSize: { xs: "0.75rem", sm: "0.8125rem" },
-              border: "1px solid transparent",
+              border: "1px solid",
+              borderColor: "divider",
               "&:hover": {
-                bgcolor: "#e0f2fe",
-                color: "#0369a1",
-                borderColor: "#bae6fd",
+                bgcolor: (theme) =>
+                  alpha(
+                    theme.palette.primary.main,
+                    theme.palette.mode === "dark" ? 0.2 : 0.1,
+                  ),
+                color: "primary.main",
+                borderColor: "primary.main",
                 transform: "translateY(-1px)",
               },
               transition: "all 0.2s",

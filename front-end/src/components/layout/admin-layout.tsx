@@ -21,6 +21,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { ManageHeader } from "./components/manage-header";
+
 type AdminLayoutProps = {
   children: ReactNode;
 };
@@ -57,7 +58,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
       >
         {!effectiveCollapsed && (
           <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "text.primary" }}>
               DevEdu
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -76,7 +77,7 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
         )}
       </Box>
 
-      <Box sx={{ borderTop: "1px solid rgba(15, 23, 42, 0.08)", py: 1 }}>
+      <Box sx={{ borderTop: "1px solid", borderColor: "divider", py: 1 }}>
         <List>
           {adminNavItems.map((item) => {
             const isActive =
@@ -105,18 +106,21 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
                       borderRadius: 2,
                       mx: 1,
                       bgcolor: isActive
-                        ? "rgba(22, 163, 74, 0.12)"
+                        ? (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(22, 163, 74, 0.2)"
+                              : "rgba(22, 163, 74, 0.12)"
                         : "transparent",
                       border: isActive
                         ? "1px solid rgba(22, 163, 74, 0.28)"
                         : "1px solid transparent",
                       "&:hover": {
-                        bgcolor: "rgba(22, 163, 74, 0.08)",
+                        bgcolor: "action.hover",
                       },
                       transition: "all 0.2s ease-in-out",
                     }}
                   >
-                    <ListItemIcon sx={{ minWidth: 32, color: "inherit" }}>
+                    <ListItemIcon sx={{ minWidth: 32, color: isActive ? "#16a34a" : "text.secondary" }}>
                       <Icon size={18} />
                     </ListItemIcon>
                     {!effectiveCollapsed && (
@@ -125,7 +129,8 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
                         sx={{
                           "& .MuiListItemText-primary": {
                             fontSize: "0.875rem",
-                            fontWeight: 600,
+                            fontWeight: isActive ? 700 : 600,
+                            color: isActive ? "#16a34a" : "text.primary",
                           },
                         }}
                       />
@@ -182,8 +187,9 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
             sx={{
               width: drawerWidth,
               flexShrink: 0,
-              bgcolor: "rgba(255, 255, 255, 0.92)",
-              borderRight: "1px solid rgba(15, 23, 42, 0.08)",
+              bgcolor: "background.paper",
+              borderRight: "1px solid",
+              borderColor: "divider",
               overflowY: "auto",
               height: "100%",
               transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -201,8 +207,9 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
             sx={{
               "& .MuiDrawer-paper": {
                 width: 280,
-                bgcolor: "rgba(255, 255, 255, 0.98)",
-                borderRight: "1px solid rgba(15, 23, 42, 0.08)",
+                bgcolor: "background.paper",
+                borderRight: "1px solid",
+                borderColor: "divider",
               },
             }}
           >
@@ -223,10 +230,14 @@ export function AdminLayout({ children }: Readonly<AdminLayoutProps>) {
             sx={{
               p: { xs: 1.5, sm: 2.5, md: 3 },
               borderRadius: { xs: 2, sm: 3 },
-              border: "1px solid rgba(15, 23, 42, 0.08)",
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              border: "1px solid",
+              borderColor: "divider",
+              backgroundColor: "background.paper",
               backdropFilter: "blur(14px)",
-              boxShadow: "0 24px 60px rgba(15, 23, 42, 0.08)",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 24px 60px rgba(0, 0, 0, 0.4)"
+                  : "0 24px 60px rgba(15, 23, 42, 0.08)",
             }}
           >
             {children}

@@ -1,5 +1,10 @@
 "use client";
 
+import { logoutAction } from "@/app/logout/actions";
+import { clearAuthSession } from "@/lib/auth-storage";
+import { unregisterPushNotificationOnLogout } from "@/lib/push-notification";
+import { useThemeMode } from "@/lib/theme";
+import { useAuth } from "@/lib/use-auth";
 import {
   Avatar,
   Box,
@@ -9,19 +14,19 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { LogOut, User } from "lucide-react";
-import { useState } from "react";
+import { LogOut, Moon, Sun, User } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/lib/use-auth";
-import { clearAuthSession } from "@/lib/auth-storage";
 import { useRouter } from "next/navigation";
-import { logoutAction } from "@/app/logout/actions";
-import { unregisterPushNotificationOnLogout } from "@/lib/push-notification";
+import { useState, useSyncExternalStore } from "react";
+
+const emptySubscribe = () => () => {};
 
 export function UserMenu() {
   const router = useRouter();
   const { user } = useAuth();
+  const { mode, toggleTheme } = useThemeMode();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const open = Boolean(anchorEl);
 
   const handleLogout = async () => {
@@ -70,9 +75,13 @@ export function UserMenu() {
         slotProps={{
           paper: {
             sx: {
-              bgcolor: "#ffffff",
-              border: "1px solid rgba(15, 23, 42, 0.08)",
-              boxShadow: "0 12px 28px rgba(15, 23, 42, 0.08)",
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 12px 28px rgba(0, 0, 0, 0.5)"
+                  : "0 12px 28px rgba(15, 23, 42, 0.08)",
             },
           },
         }}
@@ -93,6 +102,18 @@ export function UserMenu() {
         >
           <User size={16} style={{ marginRight: 8 }} />
           Profile
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            toggleTheme();
+          }}
+        >
+          {mounted && mode === "dark" ? (
+            <Sun size={16} style={{ marginRight: 8 }} />
+          ) : (
+            <Moon size={16} style={{ marginRight: 8 }} />
+          )}
+          {mounted && mode === "dark" ? "Light Mode" : "Dark Mode"}
         </MenuItem>
         <MenuItem onClick={handleLogout}>
           <LogOut size={16} style={{ marginRight: 8 }} />

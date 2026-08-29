@@ -6,6 +6,7 @@ import type {
   QuizTypeConfigResponse,
 } from "@/lib/type/quizzes";
 import {
+  alpha,
   Box,
   Button,
   Card,
@@ -303,9 +304,16 @@ export function QuestionsSection({
                                   height: 20,
                                   fontSize: "0.7rem",
                                   fontWeight: 700,
-                                  bgcolor: "primary.50",
-                                  borderColor: "rgba(59, 130, 246, 0.25)",
-                                  color: "primary.dark",
+                                  bgcolor: (theme) =>
+                                    alpha(
+                                      theme.palette.primary.main,
+                                      theme.palette.mode === "dark"
+                                        ? 0.2
+                                        : 0.08,
+                                    ),
+                                  borderColor: (theme) =>
+                                    alpha(theme.palette.primary.main, 0.25),
+                                  color: "primary.main",
                                 }}
                               />
                             </Box>
@@ -322,9 +330,10 @@ export function QuestionsSection({
                                 },
                                 pt: { xs: 0.5, sm: 0 },
                                 borderTop: {
-                                  xs: "1px dashed rgba(148, 163, 184, 0.2)",
+                                  xs: "1px dashed",
                                   sm: "none",
                                 },
+                                borderColor: "divider",
                               }}
                             >
                               {onViewTraceability && hasActiveJobId && (
@@ -475,15 +484,26 @@ export function QuestionsSection({
                                       },
                                       wordBreak: "break-word",
                                       bgcolor: opt.isCorrect
-                                        ? "rgba(34, 197, 94, 0.1)"
+                                        ? (theme) =>
+                                            alpha(
+                                              theme.palette.success.main,
+                                              theme.palette.mode === "dark"
+                                                ? 0.2
+                                                : 0.1,
+                                            )
                                         : "action.hover",
                                       color: opt.isCorrect
-                                        ? "success.dark"
+                                        ? "success.main"
                                         : "text.primary",
                                       fontWeight: opt.isCorrect ? 700 : 400,
-                                      border: opt.isCorrect
-                                        ? "1px solid rgba(34, 197, 94, 0.3)"
-                                        : "1px solid transparent",
+                                      border: "1px solid",
+                                      borderColor: opt.isCorrect
+                                        ? (theme) =>
+                                            alpha(
+                                              theme.palette.success.main,
+                                              0.4,
+                                            )
+                                        : "transparent",
                                     }}
                                   >
                                     {opt.isCorrect ? "✓ " : "• "}{" "}

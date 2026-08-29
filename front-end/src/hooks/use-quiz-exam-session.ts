@@ -25,15 +25,56 @@ export function parseTargetExpiryTime(expiresAt: unknown): number {
   return isNaN(t) ? 0 : t;
 }
 
+function getInitialSessionToken(
+  attemptId: string,
+  activeSessionToken?: string,
+): string {
+  if (typeof window === "undefined" || !attemptId) return "";
+  const storageKey = `quiz_session_token_${attemptId}`;
+  if (activeSessionToken) {
+    localStorage.setItem(storageKey, activeSessionToken);
+    sessionStorage.setItem(storageKey, activeSessionToken);
+    return activeSessionToken;
+  }
+  let token =
+    localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
+  if (!token) {
+    token =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `token_${Date.now()}_${Math.random()}`;
+    localStorage.setItem(storageKey, token);
+    sessionStorage.setItem(storageKey, token);
+  }
+  return token;
+}
+
+const EMPTY_INITIAL_ANSWERS: StudentAnswerDto[] = [];
+
 export function useQuizExamSession({
   attemptId,
   expiresAt,
-  initialAnswers = [],
+  initialAnswers = EMPTY_INITIAL_ANSWERS,
   activeSessionToken,
   onSubmit,
 }: UseQuizExamSessionProps) {
   // Session Token (UUID v4 stored per attempt in sessionStorage)
-  const [sessionToken, setSessionToken] = useState<string>("");
+  const [sessionToken, setSessionToken] = useState<string>(() =>
+    getInitialSessionToken(attemptId, activeSessionToken),
+  );
+  const [prevTokenProps, setPrevTokenProps] = useState({
+    attemptId,
+    activeSessionToken,
+  });
+  if (
+    prevTokenProps.attemptId !== attemptId ||
+    prevTokenProps.activeSessionToken !== activeSessionToken
+  ) {
+    setPrevTokenProps({ attemptId, activeSessionToken });
+    const nextToken = getInitialSessionToken(attemptId, activeSessionToken);
+    setSessionToken(nextToken);
+  }
+
   const [isSessionLocked, setIsSessionLocked] = useState<boolean>(false);
   const [sessionLockMessage, setSessionLockMessage] = useState<string>("");
 
@@ -65,64 +106,39 @@ export function useQuizExamSession({
   });
 
   // Sync initialAnswers into answersMap when loaded asynchronously
-  useEffect(() => {
-    if (!initialAnswers || initialAnswers.length === 0) return;
+  const [prevInitialAnswers, setPrevInitialAnswers] = useState(initialAnswers);
+  if (prevInitialAnswers !== initialAnswers) {
+    setPrevInitialAnswers(initialAnswers);
+    if (initialAnswers && initialAnswers.length > 0) {
+      setAnswersMap((prevMap) => {
+        const nextMap = { ...prevMap };
+        let hasChanges = false;
 
-    setAnswersMap((prevMap) => {
-      const nextMap = { ...prevMap };
-      let hasChanges = false;
+        initialAnswers.forEach((ans) => {
+          if (!ans || !ans.questionId) return;
+          const current = nextMap[ans.questionId];
 
-      initialAnswers.forEach((ans) => {
-        if (!ans || !ans.questionId) return;
-        const current = nextMap[ans.questionId];
+          if (
+            !current ||
+            (!current.selectedOptionIds?.length && !current.answerText)
+          ) {
+            nextMap[ans.questionId] = {
+              selectedOptionIds: ans.selectedOptionIds || [],
+              answerText: ans.answerText || undefined,
+            };
+            hasChanges = true;
+          }
+        });
 
-        if (
-          !current ||
-          (!current.selectedOptionIds?.length && !current.answerText)
-        ) {
-          nextMap[ans.questionId] = {
-            selectedOptionIds: ans.selectedOptionIds || [],
-            answerText: ans.answerText || undefined,
-          };
-          hasChanges = true;
-        }
+        return hasChanges ? nextMap : prevMap;
       });
-
-      return hasChanges ? nextMap : prevMap;
-    });
-  }, [initialAnswers]);
+    }
+  }
 
   // Sequence counter for Autosave
   const clientSeqRef = useRef<number>(1);
   const [autosaveState, setAutosaveState] = useState<AutosaveState>("SAVED");
   const debouncedTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
-
-  // Initialize & Sync Session Token
-  useEffect(() => {
-    if (!attemptId) return;
-
-    const storageKey = `quiz_session_token_${attemptId}`;
-
-    // 1. If backend returned an explicit activeSessionToken, use it as source of truth
-    if (activeSessionToken) {
-      localStorage.setItem(storageKey, activeSessionToken);
-      sessionStorage.setItem(storageKey, activeSessionToken);
-      setSessionToken(activeSessionToken);
-      return;
-    }
-
-    // 2. Fallback to localStorage / sessionStorage if available
-    let token =
-      localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
-    if (!token) {
-      token = crypto.randomUUID
-        ? crypto.randomUUID()
-        : `token_${Date.now()}_${Math.random()}`;
-      localStorage.setItem(storageKey, token);
-      sessionStorage.setItem(storageKey, token);
-    }
-    setSessionToken(token);
-  }, [attemptId, activeSessionToken]);
 
   // Countdown Timer Effect
   useEffect(() => {
@@ -157,14 +173,18 @@ export function useQuizExamSession({
   }, [isExpired, onSubmit]);
 
   // Session Lock error handler
-  const handleSessionError = useCallback((error: any) => {
-    const message = error?.message || error?.toString() || "";
+  const handleSessionError = useCallback((error: unknown) => {
+    const errObj =
+      typeof error === "object" && error !== null
+        ? (error as { message?: string; status?: string; statusCode?: number })
+        : null;
+    const message = errObj?.message || (typeof error === "string" ? error : "");
     if (
       message.includes("You are taking the test on another device/tab.") ||
       message.includes("You are attempting this test in another session") ||
       message.includes("another session") ||
-      error?.status === "FORBIDDEN" ||
-      error?.statusCode === 403
+      errObj?.status === "FORBIDDEN" ||
+      errObj?.statusCode === 403
     ) {
       setIsSessionLocked(true);
       setSessionLockMessage(

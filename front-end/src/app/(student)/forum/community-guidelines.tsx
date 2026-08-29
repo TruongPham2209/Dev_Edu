@@ -10,19 +10,20 @@ export function CommunityGuidelines() {
         borderRadius: 2,
         bgcolor: "transparent",
         boxShadow: "none",
-        border: "1px dashed #cbd5e1",
+        border: "1px dashed",
+        borderColor: "divider",
       }}
     >
       <CardContent sx={{ p: 3 }}>
         <Typography
           variant="subtitle2"
-          sx={{ fontWeight: 700, color: "#334155", mb: 1.5 }}
+          sx={{ fontWeight: 700, color: "text.primary", mb: 1.5 }}
         >
           Community Guidelines
         </Typography>
         <Typography
           variant="body2"
-          sx={{ color: "#64748b", lineHeight: 1.6, mb: 2 }}
+          sx={{ color: "text.secondary", lineHeight: 1.6, mb: 2 }}
         >
           Professional programming discussion environment. Respect colleagues,
           share quality knowledge and do not post spam content.
@@ -31,7 +32,7 @@ export function CommunityGuidelines() {
           variant="text"
           size="small"
           endIcon={<ChevronRight size={16} />}
-          sx={{ color: "#0284c7", fontWeight: 700, px: 1.5 }}
+          sx={{ color: "primary.main", fontWeight: 700, px: 1.5 }}
         >
           Read Guidelines
         </Button>

@@ -1,6 +1,8 @@
+"use client";
+
 import type { CourseResponse } from "@/lib/type/courses";
 import type { LectureResponse } from "@/lib/type/lectures";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, alpha } from "@mui/material";
 import {
   Award,
   BookOpen,
@@ -43,11 +45,14 @@ export function CoursePurchaseCard({
       sx={{
         borderRadius: 4,
         overflow: "hidden",
-        bgcolor: "rgba(15, 23, 42, 0.6)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-        backdropFilter: "blur(16px)",
-        color: "white",
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+            : "0 10px 30px -5px rgba(15, 23, 42, 0.08)",
+        color: "text.primary",
         mb: 4,
       }}
     >
@@ -55,8 +60,9 @@ export function CoursePurchaseCard({
         sx={{
           position: "relative",
           paddingTop: "56.25%",
-          bgcolor: "rgba(0,0,0,0.3)",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          bgcolor: "action.hover",
+          borderBottom: "1px solid",
+          borderColor: "divider",
         }}
       >
         {course.thumbnailUrl ? (
@@ -91,17 +97,17 @@ export function CoursePurchaseCard({
               alignItems: "center",
               justifyContent: "center",
               gap: 2,
-              background:
-                "linear-gradient(135deg, rgba(51,65,85,0.5) 0%, rgba(15,23,42,0.8) 100%)",
+              bgcolor: "action.hover",
             }}
           >
             <PlayCircle
               size={64}
-              color="rgba(255,255,255,0.8)"
+              color="currentColor"
+              style={{ opacity: 0.6 }}
               strokeWidth={1.5}
             />
             <Typography
-              sx={{ color: "rgba(255,255,255,0.8)", fontWeight: 600 }}
+              sx={{ color: "text.secondary", fontWeight: 600 }}
             >
               Preview course
             </Typography>
@@ -115,7 +121,7 @@ export function CoursePurchaseCard({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "rgba(0,0,0,0.4)",
+            bgcolor: "rgba(0,0,0,0.3)",
             opacity: 0,
             transition: "opacity 0.2s",
             "&:hover": { opacity: 1 },
@@ -127,12 +133,12 @@ export function CoursePurchaseCard({
               width: 64,
               height: 64,
               borderRadius: "50%",
-              bgcolor: "rgba(255,255,255,0.1)",
+              bgcolor: "rgba(255,255,255,0.2)",
               backdropFilter: "blur(4px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              border: "1px solid rgba(255,255,255,0.2)",
+              border: "1px solid rgba(255,255,255,0.3)",
               boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
             }}
           >
@@ -147,7 +153,7 @@ export function CoursePurchaseCard({
             variant="h4"
             sx={{
               fontWeight: 900,
-              color: isFree ? "#34d399" : "white",
+              color: isFree ? "success.main" : "text.primary",
               letterSpacing: "-0.02em",
             }}
           >
@@ -162,7 +168,7 @@ export function CoursePurchaseCard({
                 variant="h6"
                 sx={{
                   textDecoration: "line-through",
-                  color: "#94a3b8",
+                  color: "text.secondary",
                   fontWeight: 500,
                 }}
               >
@@ -218,8 +224,8 @@ export function CoursePurchaseCard({
                     transform: "translateY(-1px)",
                   },
                   "&.Mui-disabled": {
-                    background: "rgba(255,255,255,0.1)",
-                    color: "rgba(255,255,255,0.5)",
+                    bgcolor: "action.disabledBackground",
+                    color: "text.disabled",
                     boxShadow: "none",
                   },
                   transition: "all 0.2s ease",
@@ -239,16 +245,17 @@ export function CoursePurchaseCard({
                   fontWeight: 700,
                   fontSize: "1rem",
                   borderWidth: 2,
-                  borderColor: "rgba(255,255,255,0.2)",
-                  color: "white",
+                  borderColor: "divider",
+                  color: "text.primary",
                   "&:hover": {
                     borderWidth: 2,
-                    borderColor: "rgba(255,255,255,0.4)",
-                    bgcolor: "rgba(255,255,255,0.05)",
+                    borderColor: "primary.main",
+                    bgcolor: "action.hover",
+                    color: "primary.main",
                   },
                   "&.Mui-disabled": {
-                    borderColor: "rgba(255,255,255,0.1)",
-                    color: "rgba(255,255,255,0.5)",
+                    borderColor: "divider",
+                    color: "text.disabled",
                   },
                 }}
                 startIcon={
@@ -265,7 +272,7 @@ export function CoursePurchaseCard({
                 <Typography
                   sx={{
                     textAlign: "center",
-                    color: "#f87171",
+                    color: "error.main",
                     fontSize: "0.875rem",
                     fontWeight: 500,
                     mt: 2,
@@ -279,9 +286,9 @@ export function CoursePurchaseCard({
         </Stack>
 
         {/* Additional information */}
-        <Box sx={{ pt: 3, borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <Box sx={{ pt: 3, borderTop: "1px solid", borderColor: "divider" }}>
           <Typography
-            sx={{ fontWeight: 800, mb: 2.5, fontSize: "1rem", color: "white" }}
+            sx={{ fontWeight: 800, mb: 2.5, fontSize: "1rem", color: "text.primary" }}
           >
             Includes:
           </Typography>
@@ -292,15 +299,20 @@ export function CoursePurchaseCard({
                   width: 32,
                   height: 32,
                   borderRadius: "50%",
-                  bgcolor: "rgba(255,255,255,0.05)",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.primary.main,
+                      theme.palette.mode === "dark" ? 0.18 : 0.08,
+                    ),
+                  color: "primary.main",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <PlayCircle size={16} color="#94a3b8" />
+                <PlayCircle size={16} color="currentColor" />
               </Box>
-              <Typography sx={{ color: "#e2e8f0", fontWeight: 500 }}>
+              <Typography sx={{ color: "text.primary", fontWeight: 500 }}>
                 {lectures.length} lessons
               </Typography>
             </Box>
@@ -310,15 +322,20 @@ export function CoursePurchaseCard({
                   width: 32,
                   height: 32,
                   borderRadius: "50%",
-                  bgcolor: "rgba(255,255,255,0.05)",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.primary.main,
+                      theme.palette.mode === "dark" ? 0.18 : 0.08,
+                    ),
+                  color: "primary.main",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <BookOpen size={16} color="#94a3b8" />
+                <BookOpen size={16} color="currentColor" />
               </Box>
-              <Typography sx={{ color: "#e2e8f0", fontWeight: 500 }}>
+              <Typography sx={{ color: "text.primary", fontWeight: 500 }}>
                 Lifetime learning materials
               </Typography>
             </Box>
@@ -328,15 +345,20 @@ export function CoursePurchaseCard({
                   width: 32,
                   height: 32,
                   borderRadius: "50%",
-                  bgcolor: "rgba(255,255,255,0.05)",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.primary.main,
+                      theme.palette.mode === "dark" ? 0.18 : 0.08,
+                    ),
+                  color: "primary.main",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Award size={16} color="#94a3b8" />
+                <Award size={16} color="currentColor" />
               </Box>
-              <Typography sx={{ color: "#e2e8f0", fontWeight: 500 }}>
+              <Typography sx={{ color: "text.primary", fontWeight: 500 }}>
                 Certificate of completion
               </Typography>
             </Box>

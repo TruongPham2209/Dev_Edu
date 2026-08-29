@@ -219,10 +219,14 @@ export function CategoryFormDialog({
               position: "relative",
               borderRadius: 3,
               overflow: "hidden",
-              border: "1px solid rgba(15, 23, 42, 0.08)",
-              boxShadow: "0 4px 12px rgba(15, 23, 42, 0.04)",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 4px 12px rgba(0, 0, 0, 0.4)"
+                  : "0 4px 12px rgba(15, 23, 42, 0.04)",
               aspectRatio: "16/9",
-              bgcolor: "#f8fafc",
+              bgcolor: "background.paper",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -241,7 +245,7 @@ export function CategoryFormDialog({
                 sx={{
                   position: "absolute",
                   inset: 0,
-                  bgcolor: "rgba(15, 23, 42, 0.4)",
+                  bgcolor: "rgba(15, 23, 42, 0.6)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -257,9 +261,9 @@ export function CategoryFormDialog({
                   startIcon={<UploadCloud size={16} />}
                   size="small"
                   sx={{
-                    bgcolor: "white",
+                    bgcolor: "background.paper",
                     color: "text.primary",
-                    "&:hover": { bgcolor: "#f1f5f9" },
+                    "&:hover": { bgcolor: "action.hover" },
                   }}
                 >
                   Change Image
@@ -290,11 +294,11 @@ export function CategoryFormDialog({
                 ? "primary.main"
                 : touched.image && errors.image
                   ? "error.main"
-                  : "rgba(15, 23, 42, 0.12)",
+                  : "divider",
               borderRadius: 3,
               bgcolor: dragActive
-                ? "rgba(37, 99, 235, 0.03)"
-                : "rgba(15, 23, 42, 0.01)",
+                ? "rgba(37, 99, 235, 0.08)"
+                : "action.hover",
               p: 4,
               display: "flex",
               flexDirection: "column",
@@ -303,10 +307,8 @@ export function CategoryFormDialog({
               cursor: saving ? "default" : "pointer",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
-                borderColor: saving ? "rgba(15, 23, 42, 0.12)" : "primary.main",
-                bgcolor: saving
-                  ? "rgba(15, 23, 42, 0.01)"
-                  : "rgba(37, 99, 235, 0.02)",
+                borderColor: saving ? "divider" : "primary.main",
+                bgcolor: "action.hover",
               },
             }}
           >

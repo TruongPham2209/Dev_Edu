@@ -37,6 +37,7 @@ export function PurchaseHistoryTabContent() {
   const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const currentTarget = observerTarget.current;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -46,11 +47,15 @@ export function PurchaseHistoryTabContent() {
       { threshold: 1.0 },
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
@@ -82,9 +87,10 @@ export function PurchaseHistoryTabContent() {
           sx={{
             py: 10,
             textAlign: "center",
-            bgcolor: "#f8fafc",
+            bgcolor: "action.hover",
             borderRadius: 4,
-            border: "1px dashed #cbd5e1",
+            border: "1px dashed",
+            borderColor: "divider",
           }}
         >
           <EmptyState
@@ -120,7 +126,7 @@ export function PurchaseHistoryTabContent() {
           variant="h6"
           sx={{
             fontWeight: 800,
-            color: "#0f172a",
+            color: "text.primary",
             fontSize: { xs: "1.1rem", sm: "1.25rem" },
           }}
         >
@@ -141,8 +147,12 @@ export function PurchaseHistoryTabContent() {
               key={order.id}
               sx={{
                 borderRadius: { xs: 2, sm: 3 },
-                boxShadow: "0 4px 20px -5px rgba(0,0,0,0.08)",
-                border: "1px solid #e2e8f0",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 4px 20px -5px rgba(0,0,0,0.5)"
+                    : "0 4px 20px -5px rgba(0,0,0,0.08)",
+                border: "1px solid",
+                borderColor: "divider",
                 overflow: "hidden",
               }}
             >
@@ -150,8 +160,9 @@ export function PurchaseHistoryTabContent() {
               <Box
                 sx={{
                   p: { xs: 1.5, sm: 2.5 },
-                  bgcolor: "#f8fafc",
-                  borderBottom: "1px solid #e2e8f0",
+                  bgcolor: "action.hover",
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
                   display: "flex",
                   flexDirection: { xs: "row", sm: "row" },
                   justifyContent: "space-between",
@@ -163,35 +174,41 @@ export function PurchaseHistoryTabContent() {
                   <Typography
                     variant="subtitle2"
                     sx={{
-                      color: "#64748b",
+                      color: "text.secondary",
                       mb: 0.25,
                       fontWeight: 600,
                       fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     }}
                   >
                     Order ID:{" "}
-                    <span style={{ color: "#0f172a", fontWeight: 800 }}>
+                    <Box
+                      component="span"
+                      sx={{ color: "text.primary", fontWeight: 800 }}
+                    >
                       #{order.id.split("-")[0].toUpperCase()}
-                    </span>
+                    </Box>
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "#64748b",
+                      color: "text.secondary",
                       fontSize: { xs: "0.75rem", sm: "0.85rem" },
                     }}
                   >
                     Placed on:{" "}
-                    <span style={{ color: "#0f172a", fontWeight: 600 }}>
+                    <Box
+                      component="span"
+                      sx={{ color: "text.primary", fontWeight: 600 }}
+                    >
                       {formatServerDate(order.createdAt)}
-                    </span>
+                    </Box>
                   </Typography>
                 </Box>
                 <Box sx={{ textAlign: "right" }}>
                   <Typography
                     variant="subtitle2"
                     sx={{
-                      color: "#64748b",
+                      color: "text.secondary",
                       mb: 0.25,
                       fontWeight: 600,
                       fontSize: { xs: "0.75rem", sm: "0.875rem" },
@@ -202,7 +219,7 @@ export function PurchaseHistoryTabContent() {
                   <Typography
                     variant="h6"
                     sx={{
-                      color: "#0ea5e9",
+                      color: "primary.main",
                       fontWeight: 800,
                       lineHeight: 1,
                       fontSize: { xs: "1.05rem", sm: "1.25rem" },
@@ -220,7 +237,7 @@ export function PurchaseHistoryTabContent() {
                   display: "flex",
                   flexDirection: "column",
                   gap: { xs: 1.5, sm: 2.5 },
-                  bgcolor: "#ffffff",
+                  bgcolor: "background.paper",
                 }}
               >
                 {order.items.map((item) => (
@@ -242,7 +259,7 @@ export function PurchaseHistoryTabContent() {
             sx={{ py: 4, display: "flex", justifyContent: "center" }}
           >
             {isFetchingNextPage ? (
-              <CircularProgress size={30} sx={{ color: "#0284c7" }} />
+              <CircularProgress size={30} color="primary" />
             ) : (
               <Typography variant="body2" sx={{ color: "transparent" }}>
                 .

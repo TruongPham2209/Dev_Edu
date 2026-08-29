@@ -36,29 +36,35 @@ export function FilterSelect({
 
           borderRadius: "999px",
 
-          background: "rgba(255,255,255,0.82)",
+          bgcolor: "background.paper",
 
           backdropFilter: "blur(14px)",
 
-          boxShadow: "0 4px 20px rgba(15,23,42,.05)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+              : "0 4px 20px rgba(15,23,42,.05)",
 
           transition: "all .25s cubic-bezier(.4,0,.2,1)",
 
           "& fieldset": {
-            borderColor: "rgba(203,213,225,.7)",
+            borderColor: "divider",
             transition: "all .25s cubic-bezier(.4,0,.2,1)",
           },
 
           "&:hover fieldset": {
-            borderColor: "rgba(148,163,184,.9)",
+            borderColor: "text.secondary",
           },
 
           "&:hover": {
-            boxShadow: "0 8px 24px rgba(15,23,42,.08)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 8px 24px rgba(0, 0, 0, 0.5)"
+                : "0 8px 24px rgba(15,23,42,.08)",
           },
 
           "&.Mui-focused fieldset": {
-            borderColor: "rgba(37,99,235,.35)",
+            borderColor: "primary.main",
             borderWidth: "1px",
           },
 
@@ -75,10 +81,10 @@ export function FilterSelect({
 
           fontWeight: 600,
 
-          color: "#64748b",
+          color: "text.secondary",
 
           "&.Mui-focused": {
-            color: "#2563eb",
+            color: "primary.main",
           },
         }}
       >
@@ -96,7 +102,7 @@ export function FilterSelect({
               <Box
                 component="span"
                 sx={{
-                  color: "#94a3b8",
+                  color: "text.secondary",
                   fontWeight: 500,
                 }}
               >
@@ -114,7 +120,7 @@ export function FilterSelect({
             <Box
               component="span"
               sx={{
-                color: "#94a3b8",
+                color: "text.secondary",
                 fontWeight: 500,
               }}
             >
@@ -132,7 +138,7 @@ export function FilterSelect({
               right: "18px !important",
               top: "50%",
               transform: "translateY(-50%)",
-              color: "#64748b",
+              color: "text.secondary",
               fontSize: 18,
             }}
           >
@@ -152,7 +158,7 @@ export function FilterSelect({
 
             fontWeight: 600,
 
-            color: "#0f172a",
+            color: "text.primary",
           },
         }}
         MenuProps={{
@@ -164,13 +170,17 @@ export function FilterSelect({
 
                 borderRadius: "20px",
 
-                border: "1px solid rgba(203,213,225,.7)",
+                border: "1px solid",
+                borderColor: "divider",
 
-                background: "rgba(255,255,255,.92)",
+                bgcolor: "background.paper",
 
                 backdropFilter: "blur(20px)",
 
-                boxShadow: "0 20px 60px rgba(15,23,42,.10)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 20px 60px rgba(0,0,0,.6)"
+                    : "0 20px 60px rgba(15,23,42,.10)",
 
                 overflow: "hidden",
 
@@ -186,18 +196,26 @@ export function FilterSelect({
 
                   fontWeight: 600,
 
+                  color: "text.primary",
+
                   transition: "all .18s ease",
 
                   "&:hover": {
-                    background: "rgba(37,99,235,.06)",
+                    bgcolor: "action.hover",
                   },
 
                   "&.Mui-selected": {
-                    background: "rgba(37,99,235,.10)",
-                    color: "#2563eb",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(37,99,235,.2)"
+                        : "rgba(37,99,235,.10)",
+                    color: "primary.main",
 
                     "&:hover": {
-                      background: "rgba(37,99,235,.14)",
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(37,99,235,.3)"
+                          : "rgba(37,99,235,.14)",
                     },
                   },
                 },
@@ -210,15 +228,15 @@ export function FilterSelect({
           <MenuItem
             value={defaultValue}
             sx={{
-              color: "#94a3b8",
+              color: "text.secondary",
 
               "&.Mui-selected": {
-                color: "#64748b",
-                background: "rgba(148,163,184,.08)",
+                color: "primary.main",
+                bgcolor: "action.selected",
               },
 
               "&.Mui-selected:hover": {
-                background: "rgba(148,163,184,.12)",
+                bgcolor: "action.hover",
               },
             }}
           >

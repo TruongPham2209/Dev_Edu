@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from "@mui/material";
+import { alpha, Box, Button, Typography } from "@mui/material";
 import { Inbox, PlusCircle } from "lucide-react";
 
 export function EmptyState({
@@ -27,8 +27,12 @@ export function EmptyState({
           sx={{
             p: 1.5,
             borderRadius: "50%",
-            bgcolor: "rgba(37, 99, 235, 0.08)",
-            color: "#2563eb",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.primary.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.08,
+              ),
+            color: "primary.main",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -41,7 +45,7 @@ export function EmptyState({
         {title}
       </Typography>
       {subtitle && (
-        <Typography variant="body2" sx={{ mt: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           {subtitle}
         </Typography>
       )}

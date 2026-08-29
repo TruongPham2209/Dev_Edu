@@ -3,6 +3,7 @@
 import type { SubmissionLogResponse } from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
+  alpha,
   Box,
   Card,
   Chip,
@@ -81,7 +82,7 @@ export function SubmissionHistoryTab({
               sx={{
                 p: { xs: 1.25, sm: 1.8 },
                 borderRadius: 1,
-                borderColor: "rgba(148,163,184,0.1)",
+                borderColor: "divider",
               }}
             >
               <Skeleton variant="text" width="60%" height={16} sx={{ mb: 1 }} />
@@ -109,7 +110,7 @@ export function SubmissionHistoryTab({
               sx={{
                 p: { xs: 1.25, sm: 1.8 },
                 borderRadius: 1,
-                borderColor: "rgba(148,163,184,0.1)",
+                borderColor: "divider",
               }}
             >
               <Skeleton variant="text" width="50%" height={16} sx={{ mb: 1 }} />
@@ -130,12 +131,13 @@ export function SubmissionHistoryTab({
           sx={{
             p: { xs: 2, sm: 4 },
             textAlign: "center",
-            bgcolor: "grey.25",
+            bgcolor: "action.hover",
             borderRadius: 1,
-            border: "1px dashed rgba(148, 163, 184, 0.18)",
+            border: "1px dashed",
+            borderColor: "divider",
           }}
         >
-          <Activity size={26} style={{ color: "#cbd5e1", marginBottom: 8 }} />
+          <Activity size={26} style={{ color: "inherit", opacity: 0.6, marginBottom: 8 }} />
           <Typography
             variant="body2"
             sx={{
@@ -180,11 +182,18 @@ export function SubmissionHistoryTab({
                   width: 16,
                   height: 16,
                   borderRadius: "50%",
-                  bgcolor:
-                    item.status === "SUBMITTED" ? "success.50" : "grey.50",
+                  bgcolor: (theme) =>
+                    item.status === "SUBMITTED"
+                      ? alpha(
+                          theme.palette.success.main,
+                          theme.palette.mode === "dark" ? 0.25 : 0.1,
+                        )
+                      : theme.palette.action.hover,
                   border: "2px solid",
                   borderColor:
-                    item.status === "SUBMITTED" ? "success.main" : "grey.400",
+                    item.status === "SUBMITTED"
+                      ? "success.main"
+                      : "text.disabled",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -194,10 +203,11 @@ export function SubmissionHistoryTab({
               {/* Details Content Card */}
               <Box
                 sx={{
-                  bgcolor: "white",
+                  bgcolor: "background.paper",
                   p: { xs: 1.25, sm: 1.5 },
                   borderRadius: 1,
-                  border: "1px solid rgba(148, 163, 184, 0.12)",
+                  border: "1px solid",
+                  borderColor: "divider",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.01)",
                 }}
               >

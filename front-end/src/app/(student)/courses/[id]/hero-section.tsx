@@ -9,6 +9,7 @@ import {
   Box,
   Breadcrumbs,
   Typography,
+  alpha,
 } from "@mui/material";
 import { ChevronRight, Clock, Home, Star, User } from "lucide-react";
 import Link from "next/link";
@@ -54,9 +55,9 @@ export const HeroSection = ({
             sx={{
               display: "flex",
               alignItems: "center",
-              color: "#64748b",
+              color: "text.secondary",
               textDecoration: "none",
-              "&:hover": { color: "#0ea5e9" },
+              "&:hover": { color: "primary.main" },
             }}
           >
             <Home size={16} />
@@ -65,11 +66,11 @@ export const HeroSection = ({
             component={Link}
             href="/courses"
             sx={{
-              color: "#64748b",
+              color: "text.secondary",
               textDecoration: "none",
               fontSize: "0.875rem",
               fontWeight: 500,
-              "&:hover": { color: "#0ea5e9" },
+              "&:hover": { color: "primary.main" },
             }}
           >
             Courses
@@ -91,12 +92,21 @@ export const HeroSection = ({
               sx={{
                 px: 1.5,
                 py: 0.5,
-                bgcolor: "#e0f2fe",
-                color: "#0284c7",
+                bgcolor: (theme) =>
+                  alpha(
+                    theme.palette.primary.main,
+                    theme.palette.mode === "dark" ? 0.18 : 0.1,
+                  ),
+                color: "primary.main",
                 fontWeight: 700,
                 fontSize: "0.875rem",
                 borderRadius: "full",
-                border: "1px solid #bae6fd",
+                border: "1px solid",
+                borderColor: (theme) =>
+                  alpha(
+                    theme.palette.primary.main,
+                    theme.palette.mode === "dark" ? 0.3 : 0.2,
+                  ),
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
@@ -107,7 +117,7 @@ export const HeroSection = ({
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  bgcolor: "#0ea5e9",
+                  bgcolor: "primary.main",
                 }}
               />
               {/* Category Name */}
@@ -120,12 +130,21 @@ export const HeroSection = ({
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                color: "#d97706",
-                bgcolor: "#fef3c7",
+                color: "warning.main",
+                bgcolor: (theme) =>
+                  alpha(
+                    theme.palette.warning.main,
+                    theme.palette.mode === "dark" ? 0.18 : 0.1,
+                  ),
                 px: 1.5,
                 py: 0.5,
                 borderRadius: "full",
-                border: "1px solid #fde68a",
+                border: "1px solid",
+                borderColor: (theme) =>
+                  alpha(
+                    theme.palette.warning.main,
+                    theme.palette.mode === "dark" ? 0.3 : 0.2,
+                  ),
               }}
             >
               <Star size={14} fill="currentColor" />
@@ -149,7 +168,7 @@ export const HeroSection = ({
             },
             lineHeight: 1.2,
             letterSpacing: "-0.03em",
-            color: "#0f172a",
+            color: "text.primary",
           }}
         >
           {course.title}
@@ -170,7 +189,7 @@ export const HeroSection = ({
         <Typography
           variant="h6"
           sx={{
-            color: "#475569",
+            color: "text.secondary",
             mb: { xs: 3, sm: 4 },
             fontWeight: 400,
             lineHeight: 1.6,
@@ -200,20 +219,28 @@ export const HeroSection = ({
               display: "flex",
               alignItems: "center",
               gap: 1,
-              bgcolor: "#ffffff",
+              bgcolor: "background.paper",
               px: 2,
               py: 1,
               borderRadius: 1.5,
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 4px 15px -10px rgba(0,0,0,0.05)",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 4px 15px -10px rgba(0,0,0,0.5)"
+                  : "0 4px 15px -10px rgba(0,0,0,0.05)",
             }}
           >
             <Box
               sx={{
                 p: 1.25,
-                bgcolor: "#f0f9ff",
+                bgcolor: (theme) =>
+                  alpha(
+                    theme.palette.primary.main,
+                    theme.palette.mode === "dark" ? 0.18 : 0.1,
+                  ),
                 borderRadius: 2,
-                color: "#0284c7",
+                color: "primary.main",
               }}
             >
               <User size={18} />
@@ -222,7 +249,7 @@ export const HeroSection = ({
               <Typography
                 sx={{
                   fontSize: "0.75rem",
-                  color: "#64748b",
+                  color: "text.secondary",
                   fontWeight: 600,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
@@ -235,7 +262,7 @@ export const HeroSection = ({
                 sx={{
                   fontWeight: 800,
                   fontSize: { xs: "0.9rem", sm: "1rem" },
-                  color: "#0f172a",
+                  color: "text.primary",
                 }}
               >
                 {course.totalEnrollment}
@@ -247,20 +274,28 @@ export const HeroSection = ({
               display: "flex",
               alignItems: "center",
               gap: 1.5,
-              bgcolor: "#ffffff",
+              bgcolor: "background.paper",
               px: 2,
               py: 1,
               borderRadius: 1.5,
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 4px 15px -10px rgba(0,0,0,0.05)",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 4px 15px -10px rgba(0,0,0,0.5)"
+                  : "0 4px 15px -10px rgba(0,0,0,0.05)",
             }}
           >
             <Box
               sx={{
                 p: 1.25,
-                bgcolor: "#f5f3ff",
+                bgcolor: (theme) =>
+                  alpha(
+                    theme.palette.secondary.main,
+                    theme.palette.mode === "dark" ? 0.18 : 0.1,
+                  ),
                 borderRadius: 2,
-                color: "#7c3aed",
+                color: "secondary.main",
               }}
             >
               <Clock size={18} />
@@ -269,7 +304,7 @@ export const HeroSection = ({
               <Typography
                 sx={{
                   fontSize: "0.75rem",
-                  color: "#64748b",
+                  color: "text.secondary",
                   fontWeight: 600,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
@@ -282,7 +317,7 @@ export const HeroSection = ({
                 sx={{
                   fontWeight: 800,
                   fontSize: { xs: "0.9rem", sm: "1rem" },
-                  color: "#0f172a",
+                  color: "text.primary",
                 }}
               >
                 {formatServerDate(course.createdAt)}
@@ -297,13 +332,17 @@ export const HeroSection = ({
             display: "flex",
             alignItems: "center",
             gap: 2,
-            bgcolor: "#ffffff",
+            bgcolor: "background.paper",
             px: { xs: 1.5, sm: 2 },
             py: 1,
             borderRadius: 1.5,
-            border: "1px solid #e2e8f0",
+            border: "1px solid",
+            borderColor: "divider",
             width: { xs: "100%", sm: "fit-content" },
-            boxShadow: "0 10px 30px -10px rgba(0,0,0,0.05)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 10px 30px -10px rgba(0,0,0,0.5)"
+                : "0 10px 30px -10px rgba(0,0,0,0.05)",
           }}
         >
           <AvatarGroup
@@ -315,7 +354,8 @@ export const HeroSection = ({
                 background: "linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)",
                 fontWeight: 800,
                 fontSize: { xs: "0.95rem", sm: "1.125rem" },
-                border: "2px solid #ffffff",
+                border: "2px solid",
+                borderColor: "background.paper",
                 color: "white",
               },
             }}
@@ -334,7 +374,7 @@ export const HeroSection = ({
             <Typography
               sx={{
                 fontSize: "0.875rem",
-                color: "#64748b",
+                color: "text.secondary",
                 mb: 0.25,
                 fontWeight: 500,
               }}
@@ -345,7 +385,7 @@ export const HeroSection = ({
               sx={{
                 fontWeight: 800,
                 fontSize: { xs: "0.95rem", sm: "1.125rem" },
-                color: "#0f172a",
+                color: "text.primary",
                 letterSpacing: "-0.01em",
               }}
             >

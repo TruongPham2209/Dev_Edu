@@ -9,6 +9,30 @@
   --brand-strong: #1d4ed8;
   --accent: #7c3aed;
   --border: rgba(15, 23, 42, 0.08);
+  --grid-line-color: rgba(15, 23, 42, 0.04);
+  --bg-radial-1: rgba(37, 99, 235, 0.08);
+  --bg-radial-2: rgba(124, 58, 237, 0.08);
+  --bg-linear-1: #f8fafc;
+  --bg-linear-2: #f1f5f9;
+  --bg-linear-3: #f8fafc;
+}
+
+html[data-theme="dark"],
+html.dark {
+  --background: #0b0f17;
+  --foreground: #f8fafc;
+  --surface: #1e293b;
+  --surface-strong: #334155;
+  --brand: #3b82f6;
+  --brand-strong: #2563eb;
+  --accent: #8b5cf6;
+  --border: rgba(255, 255, 255, 0.12);
+  --grid-line-color: rgba(255, 255, 255, 0.04);
+  --bg-radial-1: rgba(59, 130, 246, 0.15);
+  --bg-radial-2: rgba(139, 92, 246, 0.15);
+  --bg-linear-1: #0b0f17;
+  --bg-linear-2: #0f172a;
+  --bg-linear-3: #0b0f17;
 }
 
 @theme inline {
@@ -18,13 +42,6 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-  }
-}
-
 html {
   min-height: 100%;
 }
@@ -32,12 +49,14 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 45%),
-    radial-gradient(circle at 80% 10%, rgba(124, 58, 237, 0.08), transparent 50%),
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 45%, #f8fafc 100%);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(circle at top left, var(--bg-radial-1), transparent 45%),
+    radial-gradient(circle at 80% 10%, var(--bg-radial-2), transparent 50%),
+    linear-gradient(180deg, var(--bg-linear-1) 0%, var(--bg-linear-2) 45%, var(--bg-linear-3) 100%);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 body::before {
@@ -45,8 +64,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+    linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px);
   background-size: 48px 48px;
   opacity: 0.25;
   pointer-events: none;

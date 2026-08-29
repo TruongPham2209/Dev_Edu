@@ -12,6 +12,7 @@ import {
   getFileNameFromKey,
 } from "@/lib/util/file-utils";
 import {
+  alpha,
   Avatar,
   Box,
   Card,
@@ -54,8 +55,9 @@ export function SubmissionInfoTab({
         sx={{
           p: { xs: 1.5, sm: 2 },
           borderRadius: 1,
-          bgcolor: "grey.50",
-          border: "1px solid rgba(148, 163, 184, 0.12)",
+          bgcolor: "action.hover",
+          border: "1px solid",
+          borderColor: "divider",
           mb: { xs: 2.5, sm: 4 },
         }}
       >
@@ -82,8 +84,9 @@ export function SubmissionInfoTab({
                 width: { xs: 38, sm: 44 },
                 height: { xs: 38, sm: 44 },
                 borderRadius: 1,
-                bgcolor: "white",
-                border: "1px solid rgba(148,163,184,0.12)",
+                bgcolor: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -146,7 +149,7 @@ export function SubmissionInfoTab({
         }}
       >
         <MessageSquare size={16} />
-        <span>Lecturer's Feedback and Comments</span>
+        <span>Lecturer&apos;s Feedback and Comments</span>
       </Typography>
 
       {feedbacksLoading ? (
@@ -157,7 +160,7 @@ export function SubmissionInfoTab({
             sx={{
               p: { xs: 1.5, sm: 2 },
               borderRadius: 1,
-              borderColor: "rgba(148, 163, 184, 0.1)",
+              borderColor: "divider",
             }}
           >
             <Stack component="div" direction="row" spacing={2}>
@@ -187,7 +190,7 @@ export function SubmissionInfoTab({
             sx={{
               p: { xs: 1.5, sm: 2 },
               borderRadius: 1,
-              borderColor: "rgba(148, 163, 184, 0.1)",
+              borderColor: "divider",
             }}
           >
             <Stack component="div" direction="row" spacing={2}>
@@ -211,15 +214,16 @@ export function SubmissionInfoTab({
           sx={{
             p: { xs: 2, sm: 3 },
             textAlign: "center",
-            bgcolor: "grey.25",
+            bgcolor: "action.hover",
             borderRadius: 1,
-            border: "1px dashed rgba(148, 163, 184, 0.18)",
+            border: "1px dashed",
+            borderColor: "divider",
             mb: 3,
           }}
         >
           <MessageSquare
             size={26}
-            style={{ color: "#cbd5e1", marginBottom: 8 }}
+            style={{ color: "inherit", opacity: 0.6, marginBottom: 8 }}
           />
           <Typography
             variant="body2"
@@ -259,8 +263,9 @@ export function SubmissionInfoTab({
               sx={{
                 p: { xs: 1.5, sm: 2 },
                 borderRadius: 1,
-                bgcolor: "white",
-                border: "1px solid rgba(148, 163, 184, 0.12)",
+                bgcolor: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
                 display: "flex",
                 gap: { xs: 1.25, sm: 2 },
                 position: "relative",
@@ -278,7 +283,11 @@ export function SubmissionInfoTab({
                 sx={{
                   width: { xs: 28, sm: 32 },
                   height: { xs: 28, sm: 32 },
-                  bgcolor: "success.50",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.success.main,
+                      theme.palette.mode === "dark" ? 0.2 : 0.1,
+                    ),
                   color: "success.main",
                   fontWeight: 800,
                   fontSize: "0.8rem",
@@ -341,9 +350,20 @@ export function SubmissionInfoTab({
                     bottom: 6,
                     opacity: { xs: 0.85, sm: 0 },
                     transition: "opacity 0.2s",
-                    bgcolor: "error.50",
+                    bgcolor: (theme) =>
+                      alpha(
+                        theme.palette.error.main,
+                        theme.palette.mode === "dark" ? 0.2 : 0.1,
+                      ),
                     p: 0.5,
-                    "&:hover": { bgcolor: "error.100", opacity: 1 },
+                    "&:hover": {
+                      bgcolor: (theme) =>
+                        alpha(
+                          theme.palette.error.main,
+                          theme.palette.mode === "dark" ? 0.3 : 0.2,
+                        ),
+                      opacity: 1,
+                    },
                   }}
                 >
                   <Trash2 size={13} />

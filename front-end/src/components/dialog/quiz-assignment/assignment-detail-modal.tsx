@@ -8,7 +8,10 @@ import {
   useStudentAttemptHistoryQuery,
 } from "@/lib/api/quizzes";
 import { useToast } from "@/lib/toast-context";
-import type { QuizAssignmentResponse } from "@/lib/type/quizzes";
+import type {
+  QuizAssignmentResponse,
+  SubmitAttemptResponse,
+} from "@/lib/type/quizzes";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Alert,
@@ -496,11 +499,11 @@ export function QuizAssignmentDetailModal({
                 </Typography>
               ) : (
                 (() => {
-                  const attemptColumns: ColumnDef<any>[] = [
+                  const attemptColumns: ColumnDef<SubmitAttemptResponse>[] = [
                     {
                       header: "Attempt",
                       width: "70px",
-                      render: (attempt: any) => (
+                      render: (attempt) => (
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           #{attempt.attemptNumber ?? "-"}
                         </Typography>
@@ -509,7 +512,7 @@ export function QuizAssignmentDetailModal({
                     {
                       header: "Submitted At",
                       width: "140px",
-                      render: (attempt: any) => (
+                      render: (attempt) => (
                         <Typography
                           variant="body2"
                           sx={{ fontSize: "0.825rem" }}
@@ -523,7 +526,7 @@ export function QuizAssignmentDetailModal({
                     {
                       header: "Status",
                       width: "120px",
-                      render: (attempt: any) => (
+                      render: (attempt) => (
                         <QuizStatusChip status={attempt.status} />
                       ),
                     },
@@ -531,7 +534,7 @@ export function QuizAssignmentDetailModal({
                       header: "Score",
                       width: "100px",
                       align: "center",
-                      render: (attempt: any) =>
+                      render: (attempt) =>
                         attempt.totalScore != null ? (
                           <Chip
                             label={`${attempt.totalScore} / ${attempt.maxScore}`}
@@ -554,7 +557,7 @@ export function QuizAssignmentDetailModal({
                       header: "Action",
                       width: "120px",
                       align: "right",
-                      render: (attempt: any) => (
+                      render: (attempt) => (
                         <Link
                           href={`/courses/${courseId}/quizzes/attempts/${attempt.attemptId}/result`}
                           passHref
@@ -582,7 +585,7 @@ export function QuizAssignmentDetailModal({
                     <DataTable
                       columns={attemptColumns}
                       data={submittedAttempts}
-                      keyExtractor={(item: any) => item.attemptId}
+                      keyExtractor={(item) => item.attemptId}
                       minWidth={550}
                     />
                   );
@@ -654,7 +657,7 @@ export function QuizAssignmentDetailModal({
             sx={{ fontSize: { xs: "0.875rem", sm: "0.95rem" } }}
           >
             Are you sure you want to start the quiz{" "}
-            <b>"{assignment?.assignmentName || "Quiz Assignment"}"</b>?
+            <b>&quot;{assignment?.assignmentName || "Quiz Assignment"}&quot;</b>?
           </Typography>
           <Alert
             severity="info"

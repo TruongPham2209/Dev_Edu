@@ -169,3 +169,83 @@ Asynchronous pages or data components must handle 4 states:
 
 - Prefer reusing components in `src/components/common` and `src/components/shared`.
 - Create new component definitions only if no suitable shared component exists.
+
+---
+
+## 12. Theme & Dark/Light Mode Conventions
+
+1. **Centralized Subsystem**:
+   - All theme configuration, tokens, component overrides, and providers reside inside `src/lib/theme/` (`types.ts`, `tokens.ts`, `components.ts`, `create-app-theme.ts`, `theme-provider.tsx`).
+   - Do NOT create ad-hoc theme providers or inline mode state logic in individual components. Always use `useThemeMode()` hook.
+
+2. **Persistence & Flash Prevention**:
+   - The theme mode is persisted in `localStorage` under key `dev_edu_theme_mode` (`"light" | "dark"`).
+   - Default theme is `"light"`.
+   - An inline script `#theme-init-script` in `src/app/layout.tsx` executes before React hydration to inject `data-theme="dark"` attribute and `dark` CSS class on `<html>` to prevent FOUC (Flash of Unstyled Content).
+
+3. **No Hardcoded Hex/RGBA Colors in Components**:
+   - Do NOT hardcode static color values (`#ffffff`, `#0f172a`, `#1e293b`, `#f8fafc`, `rgba(0,0,0,...)`, `white`, `black`) in `sx` or inline styles.
+   - Use MUI semantic tokens:
+     - Backgrounds: `background.default`, `background.paper`, `action.hover`, `action.selected`.
+     - Text: `text.primary`, `text.secondary`, `text.disabled`.
+     - Borders: `divider`.
+     - Statuses: `primary.main`, `error.main`, `success.main`, `warning.main`.
+
+4. **Dynamic Theme Palette Colors**:
+   - When referencing palette primary/secondary/error colors in dark mode, resolve colors dynamically:
+     ```tsx
+     color: (theme) => theme.palette.mode === "dark" ? theme.palette.primary.light : theme.palette.primary.main
+     ```
+   - Use `alpha(theme.palette.primary.main, theme.palette.mode === "dark" ? 0.18 : 0.08)` for translucent background tints.
+
+5. **Icon & SVG Color Inheritance**:
+   - Icons inside buttons, tabs, or badges must inherit the parent text contrast:
+     ```tsx
+     "& svg, & .MuiSvgIcon-root": { color: "inherit", transition: "color 0.2s ease" }
+     ```
+
+6. **RSC Serialization Guard (`"use client"`)**:
+   - Components rendered inside Next.js App Router Server Pages that contain inline theme callbacks (`sx={{ boxShadow: (theme) => ... }}`) or hooks MUST have `"use client";` at the very top line to prevent React Server Component serialization crashes.
+
+---
+
+## 13. TypeScript & Zero-Any Policy
+
+1. **Strict Prohibition of `any`**:
+   - The use of `any` (e.g., `: any`, `as any`, `<any>`) is **strictly forbidden** in all source code files across the project.
+   - Every function parameter, return type, state variable, component prop, and API response must have an explicit, type-safe definition.
+
+2. **Alternatives to `any`**:
+   - **Unknown Data / External Input**: Use `unknown` with runtime type narrowing / type guards:
+     ```ts
+     function parsePayload(input: unknown): UserResponse {
+       if (typeof input === "object" && input !== null && "id" in input) {
+         return input as UserResponse;
+       }
+       throw new Error("Invalid payload");
+     }
+     ```
+   - **Generic Data Structures**: Use TypeScript Generics (`<T>`, `<TData, TError>`):
+     ```ts
+     interface ApiResponse<T> {
+       data: T;
+       status: number;
+     }
+     ```
+   - **Dynamic Record Objects**: Use `Record<string, unknown>` instead of `Record<string, any>` or `any`.
+   - **Event Handlers**: Use React event types (`React.ChangeEvent<HTMLInputElement>`, `React.MouseEvent<HTMLButtonElement>`, `React.KeyboardEvent`).
+   - **Error Handling**: Type catch blocks with `error: unknown` or `error: Error | ApiError`:
+     ```ts
+     try {
+       await execute();
+     } catch (err: unknown) {
+       const message = err instanceof Error ? err.message : "Unknown error";
+       toast.error(message);
+     }
+     ```
+
+3. **API & Data Models**:
+   - All backend DTOs and API responses must be declared inside `src/lib/type/`.
+   - Never cast API results or component properties via `(obj as any).property`. Extend the interface in `src/lib/type/` if backend fields are updated.
+
+

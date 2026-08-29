@@ -2,7 +2,7 @@
 
 import { useCourseByIdQuery, useCoursesQuery } from "@/lib/api/courses";
 import { useLecturesByCourseQuery } from "@/lib/api/lectures";
-import { Box, CircularProgress, Container, Grid, Stack } from "@mui/material";
+import { Box, Container, Grid, Stack } from "@mui/material";
 import { notFound } from "next/navigation";
 import { use } from "react";
 import { CourseAbout } from "./course-about";
@@ -49,11 +49,13 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   return (
     <Box
       sx={{
-        bgcolor: "#f1f5f9",
+        bgcolor: "background.default",
         minHeight: "100vh",
         pb: { xs: 6, sm: 10, md: 12 },
-        backgroundImage:
-          "radial-gradient(circle at top center, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)",
+        backgroundImage: (theme) =>
+          theme.palette.mode === "dark"
+            ? "radial-gradient(circle at top center, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 1) 100%)"
+            : "radial-gradient(circle at top center, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)",
         overflowX: "clip",
       }}
     >

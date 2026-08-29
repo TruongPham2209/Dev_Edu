@@ -10,7 +10,12 @@ export function AdminCourseDetailSkeleton() {
 
       {/* Hero Card Skeleton */}
       <Card
-        sx={{ borderRadius: 1, border: "1px solid rgba(15, 23, 42, 0.08)" }}
+        sx={{
+          borderRadius: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+        }}
       >
         <CardContent sx={{ p: { xs: 3, md: 4 } }}>
           <Grid container spacing={4} sx={{ alignItems: "center" }}>
@@ -36,14 +41,20 @@ export function AdminCourseDetailSkeleton() {
 
       {/* Course Description Skeleton */}
       <Card
-        sx={{ borderRadius: 1, border: "1px solid rgba(15, 23, 42, 0.08)" }}
+        sx={{
+          borderRadius: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+        }}
       >
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
           <Box
             sx={{
               mb: 3,
               pb: 1.5,
-              borderBottom: "1px solid rgba(15,23,42,0.06)",
+              borderBottom: "1px solid",
+              borderColor: "divider",
             }}
           >
             <Skeleton variant="text" width={200} height={32} />
@@ -61,7 +72,9 @@ export function AdminCourseDetailSkeleton() {
             <Card
               sx={{
                 borderRadius: 1,
-                border: "1px solid rgba(15, 23, 42, 0.08)",
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
               }}
             >
               <CardContent sx={{ p: 2.5 }}>

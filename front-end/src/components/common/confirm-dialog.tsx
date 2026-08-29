@@ -48,6 +48,9 @@ export function ConfirmDialog({
             borderRadius: { xs: 3, sm: 2.5 },
             m: { xs: 2, sm: 3 },
             width: { xs: "calc(100% - 32px)", sm: "auto" },
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
           },
         },
       }}

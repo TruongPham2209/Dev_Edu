@@ -14,7 +14,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import {
   CheckCircle,
   ChevronDown,
@@ -31,8 +31,9 @@ import {
   usePostVersionsInfiniteQuery,
   useUpdatePostVersionMutation,
 } from "@/lib/api/forum";
+import type { CustomPaging } from "@/lib/type/api";
 import { PostStatus } from "@/lib/type/enum";
-import { PostResponse } from "@/lib/type/forums";
+import type { PostResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 
@@ -43,11 +44,15 @@ const ExpandableContent = ({ content }: { content: string }) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (contentRef.current) {
-      if (contentRef.current.scrollHeight > 160) {
-        setIsOverflowing(true);
-      }
-    }
+    const el = contentRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(() => {
+      setIsOverflowing(el.scrollHeight > 160);
+    });
+    observer.observe(el);
+
+    return () => observer.disconnect();
   }, [content]);
 
   return (
@@ -498,16 +503,16 @@ export default function AdminPostsPage() {
 
       // 2. Remove from cache after animation completes
       setTimeout(() => {
-        queryClient.setQueryData(
+        queryClient.setQueryData<InfiniteData<CustomPaging<PostResponse>>>(
           ["forum", "versions-infinite", "PENDING"],
-          (oldData: any) => {
+          (oldData) => {
             if (!oldData) return oldData;
             return {
               ...oldData,
-              pages: oldData.pages.map((page: any) => ({
+              pages: oldData.pages.map((page) => ({
                 ...page,
                 contents: page.contents.filter(
-                  (p: any) => !idsToRemove.includes(p.id),
+                  (p) => !idsToRemove.includes(p.id),
                 ),
               })),
             };

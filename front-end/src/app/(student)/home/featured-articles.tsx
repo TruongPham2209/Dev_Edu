@@ -45,13 +45,14 @@ export async function FeaturedArticlesSection() {
               gap: { xs: 2, sm: 3 },
               p: { xs: 1.75, sm: 2 },
               borderRadius: 2,
-              border: "1px solid #e2e8f0",
+              border: "1px solid",
+              borderColor: "divider",
               transition: "all 0.2s ease",
               "&:hover": {
-                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                boxShadow: 3,
                 transform: "translateY(-2px)",
               },
-              bgcolor: "#ffffff",
+              bgcolor: "background.paper",
               height: "100%",
             }}
           >
@@ -139,8 +140,9 @@ export function FeaturedArticlesFallback() {
             gap: { xs: 2, sm: 3 },
             p: { xs: 1.75, sm: 2 },
             borderRadius: 3,
-            border: "1px solid #e2e8f0",
-            bgcolor: "#ffffff",
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
             height: "100%",
           }}
         >

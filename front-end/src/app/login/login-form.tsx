@@ -14,18 +14,16 @@ import {
 } from "@mui/material";
 import { Chrome, Eye, EyeOff, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { AuthLayout } from "@/components/layout/auth-layout";
 import { FormInput } from "@/components/common/form/form-input";
+import { AuthLayout } from "@/components/layout/auth-layout";
 import { setAuthSession } from "@/lib/auth-storage";
 import { getPrimaryRole, getRedirectPathForRoles } from "@/lib/auth/constants";
 import { decodeJwt } from "@/lib/auth/jwt";
 import { useToast } from "@/lib/toast-context";
 
 export default function LoginForm() {
-  const router = useRouter();
   const toast = useToast();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +43,6 @@ export default function LoginForm() {
         // Temporarily set token so apiCall can authorize the /me request
         localStorage.setItem("auth_token", state.token);
 
-        let role = "STUDENT";
         let fullName = state.username?.split("@")[0] || "User";
         let id = "";
         let email = "";
@@ -55,7 +52,6 @@ export default function LoginForm() {
           const meResult = await fetchMe();
           if (!meResult.data) throw new Error("Failed to fetch user info");
           const me = meResult.data;
-          role = me.role;
           fullName = me.fullName || me.username || fullName;
           id = me.id || "";
           email = me.email || "";
@@ -65,7 +61,7 @@ export default function LoginForm() {
         }
 
         const decoded = decodeJwt(state.token);
-        const roles = decoded?.roles || [role as any];
+        const roles = decoded?.roles || [];
         const primaryRole = getPrimaryRole(roles);
 
         setAuthSession(state.token, {
@@ -246,14 +242,14 @@ export default function LoginForm() {
           sx={{
             py: { xs: 1.1, sm: 1.3 },
             borderRadius: "14px",
-            borderColor: "rgba(15, 23, 42, 0.08)",
-            color: "#475569",
+            borderColor: "divider",
+            color: "text.secondary",
             fontWeight: 600,
             transition: "all 0.2s ease",
             "&:hover": {
-              borderColor: "#0f172a",
-              bgcolor: "rgba(15, 23, 42, 0.03)",
-              color: "#0f172a",
+              borderColor: "text.primary",
+              bgcolor: "action.hover",
+              color: "text.primary",
             },
           }}
         >
@@ -304,7 +300,7 @@ export default function LoginForm() {
               fontFamily: "inherit",
               transition: "color 0.2s ease",
               "&:hover": {
-                color: "#0f172a",
+                color: "text.primary",
                 textDecoration: "underline",
               },
             }}

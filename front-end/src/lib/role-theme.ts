@@ -24,8 +24,8 @@ export const roleThemes: Record<RoleKey, RoleTheme> = {
     accent: "#2563eb",
     accentSoft: "rgba(37, 99, 235, 0.12)",
     background:
-      "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 48%, #f8fafc 100%)",
-    glow: "radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 40%), radial-gradient(circle at top right, rgba(124, 58, 237, 0.1), transparent 35%)",
+      "linear-gradient(180deg, var(--bg-linear-1, #f8fafc) 0%, var(--bg-linear-2, #f1f5f9) 48%, var(--bg-linear-3, #f8fafc) 100%)",
+    glow: "radial-gradient(circle at top left, var(--bg-radial-1, rgba(37, 99, 235, 0.12)), transparent 40%), radial-gradient(circle at top right, var(--bg-radial-2, rgba(124, 58, 237, 0.1)), transparent 35%)",
     chips: ["Live cohorts", "Project-based learning", "Career support"],
     navItems: [
       { label: "Home", href: "/home" },
@@ -41,8 +41,8 @@ export const roleThemes: Record<RoleKey, RoleTheme> = {
     accent: "#7c3aed",
     accentSoft: "rgba(124, 58, 237, 0.12)",
     background:
-      "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 48%, #f8fafc 100%)",
-    glow: "radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 40%), radial-gradient(circle at top right, rgba(37, 99, 235, 0.1), transparent 35%)",
+      "linear-gradient(180deg, var(--bg-linear-1, #f8fafc) 0%, var(--bg-linear-2, #f1f5f9) 48%, var(--bg-linear-3, #f8fafc) 100%)",
+    glow: "radial-gradient(circle at top left, var(--bg-radial-2, rgba(124, 58, 237, 0.12)), transparent 40%), radial-gradient(circle at top right, var(--bg-radial-1, rgba(37, 99, 235, 0.1)), transparent 35%)",
     chips: ["Lesson pipeline", "Live sessions", "Student progress"],
     navItems: [],
   },
@@ -54,8 +54,8 @@ export const roleThemes: Record<RoleKey, RoleTheme> = {
     accent: "#2563eb",
     accentSoft: "rgba(37, 99, 235, 0.12)",
     background:
-      "linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #f8fafc 100%)",
-    glow: "radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 40%), radial-gradient(circle at top right, rgba(124, 58, 237, 0.1), transparent 35%)",
+      "linear-gradient(180deg, var(--bg-linear-1, #f8fafc) 0%, var(--bg-linear-2, #f1f5f9) 50%, var(--bg-linear-3, #f8fafc) 100%)",
+    glow: "radial-gradient(circle at top left, var(--bg-radial-1, rgba(37, 99, 235, 0.12)), transparent 40%), radial-gradient(circle at top right, var(--bg-radial-2, rgba(124, 58, 237, 0.1)), transparent 35%)",
     chips: ["Revenue watch", "Moderation queue", "Governance"],
     navItems: [
       { label: "Dashboard", href: "/admin" },

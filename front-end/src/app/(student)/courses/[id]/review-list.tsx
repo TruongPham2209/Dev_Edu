@@ -12,6 +12,7 @@ import {
   Skeleton,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { MessageSquare } from "lucide-react";
 
@@ -52,18 +53,22 @@ export const ReviewList = ({
         <Box
           sx={{
             p: 1.5,
-            bgcolor: "#fef3c7",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.warning.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.1,
+              ),
             borderRadius: 3,
-            color: "#d97706",
+            color: "warning.main",
           }}
         >
           <MessageSquare size={28} />
         </Box>
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 800, color: "#0f172a" }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: "text.primary" }}>
             Reviews from students
           </Typography>
-          <Typography sx={{ color: "#64748b", mt: 0.5 }}>
+          <Typography sx={{ color: "text.secondary", mt: 0.5 }}>
             What do students say about this course?
           </Typography>
         </Box>
@@ -80,23 +85,28 @@ export const ReviewList = ({
             mb: 2,
             p: 2,
             borderRadius: 1,
-            border: "1px solid #e2e8f0",
+            border: "1px solid",
+            borderColor: "divider",
             alignItems: "center",
-            bgcolor: "white",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.02)",
+            bgcolor: "background.paper",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 4px 20px rgba(0,0,0,0.4)"
+                : "0 4px 20px rgba(0,0,0,0.02)",
           }}
         >
           <Box
             sx={{
               textAlign: "center",
               pr: { xs: 0, sm: 4 },
-              borderRight: { xs: "none", sm: "1px solid #e2e8f0" },
+              borderRight: { xs: "none", sm: "1px solid" },
+              borderColor: { xs: "transparent", sm: "divider" },
               width: { xs: "100%", sm: "auto" },
             }}
           >
             <Typography
               variant="h2"
-              sx={{ fontWeight: 900, color: "#0f172a", mb: 1 }}
+              sx={{ fontWeight: 900, color: "text.primary", mb: 1 }}
             >
               {rating ? rating.toFixed(1) : "0.0"}
             </Typography>
@@ -107,20 +117,20 @@ export const ReviewList = ({
               size="large"
               sx={{ color: "#fbbf24" }}
             />
-            <Typography sx={{ color: "#64748b", mt: 1, fontWeight: 500 }}>
+            <Typography sx={{ color: "text.secondary", mt: 1, fontWeight: 500 }}>
               {reviewCount || 0} reviews
             </Typography>
           </Box>
           <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 800, mb: 1, color: "#1e293b" }}
+              sx={{ fontWeight: 800, mb: 1, color: "text.primary" }}
             >
               {rating >= 4.0
                 ? "This course is highly rated!"
                 : "Student feedback"}
             </Typography>
-            <Typography sx={{ color: "#475569", lineHeight: 1.6 }}>
+            <Typography sx={{ color: "text.secondary", lineHeight: 1.6 }}>
               {rating >= 4.0
                 ? "Most students are satisfied with the teaching quality and practical application of this course."
                 : "See what students are saying about the teaching quality and practical application of this course."}
@@ -161,7 +171,7 @@ export const ReviewList = ({
             flexDirection: "column",
             height: 300,
             borderRadius: 1,
-            bgcolor: "#e2e8f0",
+            bgcolor: "action.hover",
           }}
         >
           <EmptyState
@@ -180,12 +190,16 @@ export const ReviewList = ({
                 px: 4,
                 py: 2,
                 borderRadius: 1,
-                border: "1px solid #e2e8f0",
-                bgcolor: "white",
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
                 transition: "all 0.2s ease",
                 "&:hover": {
-                  borderColor: "#cbd5e1",
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
+                  borderColor: "primary.main",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 10px 25px -5px rgba(0, 0, 0, 0.4)"
+                      : "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
                   transform: "translateY(-2px)",
                 },
               }}
@@ -210,7 +224,7 @@ export const ReviewList = ({
                     <Typography
                       sx={{
                         fontWeight: 600,
-                        color: "#1e293b",
+                        color: "text.primary",
                         fontSize: "0.95rem",
                       }}
                     >
@@ -219,7 +233,7 @@ export const ReviewList = ({
                     <Typography
                       sx={{
                         fontSize: "0.85rem",
-                        color: "#64748b",
+                        color: "text.secondary",
                         mt: 0.25,
                       }}
                     >
@@ -237,7 +251,7 @@ export const ReviewList = ({
                   <Typography
                     sx={{
                       fontSize: "0.85rem",
-                      color: "#64748b",
+                      color: "text.secondary",
                     }}
                   >
                     {formatDate(review.createdAt)}
@@ -245,7 +259,7 @@ export const ReviewList = ({
                 </Box>
                 <Typography
                   sx={{
-                    color: "#334155",
+                    color: "text.primary",
                     lineHeight: 1.6,
                     fontSize: "0.95rem",
                   }}
@@ -270,12 +284,12 @@ export const ReviewList = ({
                   fontWeight: 700,
                   fontSize: "1rem",
                   borderWidth: 2,
-                  borderColor: "#cbd5e1",
-                  color: "#475569",
+                  borderColor: "divider",
+                  color: "text.primary",
                   "&:hover": {
                     borderWidth: 2,
-                    borderColor: "#64748b",
-                    bgcolor: "#f8fafc",
+                    borderColor: "primary.main",
+                    bgcolor: "action.hover",
                   },
                 }}
               >

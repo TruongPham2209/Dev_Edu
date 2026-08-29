@@ -145,8 +145,11 @@ export function DataTable<T>({
         variant="outlined"
         sx={{
           borderRadius: 1.5,
-          borderColor: "rgba(0,0,0,0.08)",
-          boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
+          borderColor: "divider",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+              : "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
           width: "100%",
           maxWidth: "100%",
           overflowX: "auto !important",
@@ -175,7 +178,10 @@ export function DataTable<T>({
                   width={col.width}
                   sx={{
                     fontWeight: 700,
-                    bgcolor: "#f8fafc",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.04)"
+                        : "#f8fafc",
                     color: "text.secondary",
                     textAlign: col.align || "left",
                     py: { xs: 1.25, sm: 1.75 },
@@ -221,7 +227,7 @@ export function DataTable<T>({
                     hover
                     sx={{
                       transition: "all 0.1s ease",
-                      "& td": { borderBottom: "1px solid rgba(0,0,0,0.04)" },
+                      "& td": { borderBottom: "1px solid", borderColor: "divider" },
                     }}
                   >
                     {columns.map((col, colIndex) => (
@@ -266,10 +272,14 @@ export function DataTable<T>({
               alignItems: "center",
               justifyContent: "space-between",
               p: { xs: 1.5, sm: 2.5 },
-              borderTop: "1px solid rgba(15, 23, 42, 0.08)",
+              borderTop: "1px solid",
+              borderColor: "divider",
               flexWrap: "wrap",
               gap: 1.5,
-              bgcolor: "#f8fafc",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.02)"
+                  : "#f8fafc",
               borderBottomLeftRadius: 8,
               borderBottomRightRadius: 8,
             }}
@@ -297,12 +307,12 @@ export function DataTable<T>({
                   textTransform: "none",
                   fontWeight: 600,
                   px: 2,
-                  borderColor: "rgba(15, 23, 42, 0.12)",
+                  borderColor: "divider",
                   color: "text.primary",
-                  bgcolor: "white",
+                  bgcolor: "background.paper",
                   "&:hover": {
                     borderColor: "text.primary",
-                    bgcolor: "rgba(15, 23, 42, 0.03)",
+                    bgcolor: "action.hover",
                   },
                 }}
               >
@@ -318,12 +328,12 @@ export function DataTable<T>({
                   textTransform: "none",
                   fontWeight: 600,
                   px: 2,
-                  borderColor: "rgba(15, 23, 42, 0.12)",
+                  borderColor: "divider",
                   color: "text.primary",
-                  bgcolor: "white",
+                  bgcolor: "background.paper",
                   "&:hover": {
                     borderColor: "text.primary",
-                    bgcolor: "rgba(15, 23, 42, 0.03)",
+                    bgcolor: "action.hover",
                   },
                 }}
               >

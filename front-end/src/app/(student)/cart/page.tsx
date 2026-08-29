@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatedTabs } from "@/components/common/animated-tabs";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, alpha } from "@mui/material";
 import { PackageOpen, ShoppingCart } from "lucide-react";
 import { Suspense, useState } from "react";
 import { CartTabContent } from "./cart-tab";
@@ -29,17 +29,35 @@ function CartPageContent() {
         width: "100%",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1.5, sm: 2 }, mb: { xs: 2.5, sm: 4 } }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: { xs: 1.5, sm: 2 },
+          mb: { xs: 2.5, sm: 4 },
+        }}
+      >
         <Box
-          sx={{ p: { xs: 1.25, sm: 1.5 }, bgcolor: "#e0f2fe", borderRadius: 2, display: "flex", flexShrink: 0 }}
+          sx={{
+            p: { xs: 1.25, sm: 1.5 },
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.primary.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.08,
+              ),
+            color: "primary.main",
+            borderRadius: 2,
+            display: "flex",
+            flexShrink: 0,
+          }}
         >
-          <ShoppingCart size={24} color="#0284c7" />
+          <ShoppingCart size={24} color="currentColor" />
         </Box>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 800,
-            color: "#0f172a",
+            color: "text.primary",
             fontSize: { xs: "1.35rem", sm: "1.75rem", md: "2.125rem" },
           }}
         >
@@ -55,7 +73,7 @@ function CartPageContent() {
           position: "sticky",
           top: { xs: 56, sm: 64, md: 70 },
           zIndex: 10,
-          bgcolor: "rgba(255,255,255,0.9)",
+          bgcolor: (theme) => alpha(theme.palette.background.default, 0.9),
           backdropFilter: "blur(8px)",
           overflowX: "auto",
         }}

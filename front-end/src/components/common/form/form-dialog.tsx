@@ -80,8 +80,10 @@ export function FormDialog({
           timeout: 300,
           sx: {
             backdropFilter: "blur(10px)",
-            background:
-              "radial-gradient(circle at center, rgba(15,23,42,0.35), rgba(15,23,42,0.65))",
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? "radial-gradient(circle at center, rgba(0,0,0,0.6), rgba(0,0,0,0.85))"
+                : "radial-gradient(circle at center, rgba(15,23,42,0.35), rgba(15,23,42,0.65))",
           },
         },
       }}
@@ -92,19 +94,17 @@ export function FormDialog({
           borderRadius: { xs: "20px", sm: "28px" },
           margin: { xs: 1.5, sm: 4 },
           width: { xs: "calc(100% - 24px)", sm: "100%" },
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: `
-            linear-gradient(
-              135deg,
-              rgba(255,255,255,0.95),
-              rgba(248,250,252,0.92)
-            )
-          `,
+          border: "1px solid",
+          borderColor: "divider",
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.95))"
+              : "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.92))",
           backdropFilter: "blur(20px)",
-          boxShadow: `
-            0 20px 60px rgba(15,23,42,0.25),
-            0 8px 24px rgba(15,23,42,0.12)
-          `,
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 20px 60px rgba(0,0,0,0.6)"
+              : "0 20px 60px rgba(15,23,42,0.25)",
         },
 
         "& .MuiDialog-paper::before": {
@@ -113,14 +113,10 @@ export function FormDialog({
           inset: 0,
           padding: "1px",
           borderRadius: { xs: "20px", sm: "28px" },
-          background: `
-            linear-gradient(
-              135deg,
-              rgba(99,102,241,0.5),
-              rgba(168,85,247,0.2),
-              rgba(255,255,255,0.4)
-            )
-          `,
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "linear-gradient(135deg, rgba(99,102,241,0.4), rgba(168,85,247,0.2), rgba(255,255,255,0.1))"
+              : "linear-gradient(135deg, rgba(99,102,241,0.5), rgba(168,85,247,0.2), rgba(255,255,255,0.4))",
           WebkitMask:
             "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           WebkitMaskComposite: "xor",
@@ -138,8 +134,10 @@ export function FormDialog({
           width: 260,
           height: 260,
           borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.18), transparent 70%)",
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? "radial-gradient(circle, rgba(99,102,241,0.25), transparent 70%)"
+              : "radial-gradient(circle, rgba(99,102,241,0.18), transparent 70%)",
           pointerEvents: "none",
         }}
       />
@@ -206,7 +204,7 @@ export function FormDialog({
                 variant="h5"
                 sx={{
                   fontWeight: 800,
-                  color: "#0f172a",
+                  color: "text.primary",
                   lineHeight: 1.1,
                   letterSpacing: "-0.02em",
                   fontSize: { xs: "1.2rem", sm: "1.5rem" },
@@ -219,7 +217,7 @@ export function FormDialog({
                 variant="body2"
                 sx={{
                   mt: 0.5,
-                  color: "#64748b",
+                  color: "text.secondary",
                   fontWeight: 500,
                   fontSize: { xs: "0.775rem", sm: "0.875rem" },
                 }}
@@ -237,8 +235,9 @@ export function FormDialog({
               width: { xs: 36, sm: 40 },
               height: { xs: 36, sm: 40 },
               borderRadius: "14px",
-              background: "rgba(148,163,184,0.12)",
-              border: "1px solid rgba(148,163,184,0.18)",
+              background: "action.hover",
+              border: "1px solid",
+              borderColor: "divider",
               transition: "all .2s ease",
               flexShrink: 0,
 
@@ -287,15 +286,15 @@ export function FormDialog({
             borderRadius: "14px",
             px: 2.5,
             py: { xs: 1, sm: 1.2 },
-            borderColor: "rgba(148,163,184,0.25)",
-            color: "#475569",
+            borderColor: "divider",
+            color: "text.secondary",
             fontWeight: 700,
             textTransform: "none",
             transition: "all .2s ease",
 
             "&:hover": {
-              borderColor: "rgba(148,163,184,0.45)",
-              background: "rgba(148,163,184,0.08)",
+              borderColor: "text.primary",
+              background: "action.hover",
               transform: "translateY(-1px)",
             },
           }}
@@ -336,8 +335,8 @@ export function FormDialog({
             },
 
             "&.Mui-disabled": {
-              background: "#cbd5e1",
-              color: "#64748b",
+              background: "action.disabledBackground",
+              color: "action.disabled",
             },
           }}
         >

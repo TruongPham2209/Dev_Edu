@@ -3,10 +3,10 @@
 import type { QuestionType } from "@/lib/type/quizzes";
 import {
   Alert,
+  alpha,
   Box,
   Button,
   Chip,
-  Divider,
   Paper,
   Stack,
   Table,
@@ -54,7 +54,28 @@ export function ImportErrorState({
       <Alert
         severity="error"
         icon={<XCircle size={20} />}
-        sx={{ borderRadius: 1 }}
+        sx={{ borderRadius: 1.5, alignItems: "center" }}
+        action={
+          <Button
+            color="inherit"
+            size="small"
+            onClick={onReset}
+            sx={{
+              fontWeight: 700,
+              fontSize: "0.8rem",
+              textTransform: "none",
+              bgcolor: (theme) =>
+                alpha(
+                  theme.palette.error.main,
+                  theme.palette.mode === "dark" ? 0.25 : 0.1,
+                ),
+              px: 1.5,
+              borderRadius: 1,
+            }}
+          >
+            Re-upload File
+          </Button>
+        }
       >
         <strong>Import Failed!</strong> Please fix the errors listed below and
         re-upload your Excel file.
@@ -67,7 +88,11 @@ export function ImportErrorState({
           sx={{
             p: 2,
             borderRadius: 1,
-            bgcolor: "error.50",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.error.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
             borderColor: "error.light",
           }}
         >
@@ -88,7 +113,11 @@ export function ImportErrorState({
           sx={{
             p: 2.5,
             borderRadius: 1,
-            bgcolor: "warning.50",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.warning.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
             borderColor: "warning.light",
           }}
         >
@@ -149,20 +178,25 @@ export function ImportErrorState({
             component={Paper}
             variant="outlined"
             sx={{
-              borderRadius: 2,
-              borderColor: "error.light",
+              borderRadius: 1.5,
+              borderColor: (theme) => alpha(theme.palette.error.main, 0.3),
               boxShadow: "none",
               overflowX: "auto",
+              maxHeight: 300,
             }}
           >
-            <Table size="small" sx={{ minWidth: 650 }}>
+            <Table size="small" stickyHeader sx={{ minWidth: 600 }}>
               <TableHead>
                 <TableRow
                   sx={{
                     "& th": {
-                      bgcolor: "error.50",
+                      bgcolor: (theme) =>
+                        alpha(
+                          theme.palette.error.main,
+                          theme.palette.mode === "dark" ? 0.2 : 0.08,
+                        ),
                       fontWeight: 700,
-                      color: "error.dark",
+                      color: "error.main",
                     },
                   }}
                 >
@@ -181,7 +215,13 @@ export function ImportErrorState({
                     hover
                     sx={{
                       "&:last-child td, &:last-child th": { border: 0 },
-                      "&:hover": { bgcolor: "rgba(239, 68, 68, 0.03)" },
+                      "&:hover": {
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.error.main,
+                            theme.palette.mode === "dark" ? 0.1 : 0.04,
+                          ),
+                      },
                     }}
                   >
                     <TableCell
@@ -252,19 +292,6 @@ export function ImportErrorState({
           </TableContainer>
         </Stack>
       )}
-
-      <Divider />
-
-      <Stack direction="row" spacing={2} sx={{ justifyContent: "flex-end" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onReset}
-          sx={{ borderRadius: 2 }}
-        >
-          Re-select File
-        </Button>
-      </Stack>
     </Stack>
   );
 }

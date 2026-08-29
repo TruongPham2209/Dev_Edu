@@ -2,7 +2,7 @@
 
 import type { AssignmentResponse } from "@/lib/type/assignments";
 import { formatServerDate } from "@/lib/util/date-utils";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography, alpha } from "@mui/material";
 import { Calendar, ClipboardCheck, Users } from "lucide-react";
 
 interface AssignmentHeroProps {
@@ -23,12 +23,13 @@ export function AssignmentHeroInfo({
         overflow: "hidden",
         borderRadius: 2,
         mb: 3,
-        background: "#ffffff",
-        border: "1px solid rgba(148, 163, 184, 0.14)",
-        boxShadow: `
-          0 10px 40px rgba(15, 23, 42, 0.04),
-          0 2px 10px rgba(15, 23, 42, 0.02)
-        `,
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 10px 40px rgba(0, 0, 0, 0.4)"
+            : "0 10px 40px rgba(15, 23, 42, 0.04)",
       }}
     >
       <Box
@@ -36,16 +37,9 @@ export function AssignmentHeroInfo({
           position: "relative",
           px: { xs: 2.5, sm: 3, md: 4 },
           py: { xs: 2.5, sm: 3.5, md: 4 },
-          background: `
-            linear-gradient(
-              135deg,
-              #f0fdf4 0%,
-              #ecfdf5 30%,
-              #f0f9ff 70%,
-              #fafafa 100%
-            )
-          `,
-          borderBottom: "1px solid rgba(148,163,184,0.08)",
+          bgcolor: "background.paper",
+          borderBottom: "1px solid",
+          borderColor: "divider",
         }}
       >
         {/* Glowing background circles for visual depth */}
@@ -57,7 +51,7 @@ export function AssignmentHeroInfo({
             width: { xs: 160, sm: 250 },
             height: { xs: 160, sm: 250 },
             borderRadius: "50%",
-            background: "rgba(34, 197, 94, 0.06)",
+            background: (theme) => alpha(theme.palette.success.main, 0.06),
             filter: "blur(70px)",
             pointerEvents: "none",
           }}
@@ -70,7 +64,7 @@ export function AssignmentHeroInfo({
             width: { xs: 140, sm: 220 },
             height: { xs: 140, sm: 220 },
             borderRadius: "50%",
-            background: "rgba(59, 130, 246, 0.04)",
+            background: (theme) => alpha(theme.palette.primary.main, 0.04),
             filter: "blur(60px)",
             pointerEvents: "none",
           }}
@@ -109,7 +103,7 @@ export function AssignmentHeroInfo({
                   display: "flex",
                   alignItems: "center",
                   gap: 0.8,
-                  boxShadow: "0 4px 12px rgba(34,197,94,0.18)",
+                  boxShadow: (theme) => `0 4px 12px ${alpha(theme.palette.success.main, 0.18)}`,
                 }}
               >
                 <ClipboardCheck size={12} />
@@ -117,7 +111,11 @@ export function AssignmentHeroInfo({
               </Box>
               <Typography
                 variant="body2"
-                sx={{ color: "text.secondary", fontWeight: 600, wordBreak: "break-word" }}
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                  wordBreak: "break-word",
+                }}
               >
                 {lectureTitle}
               </Typography>
@@ -129,7 +127,7 @@ export function AssignmentHeroInfo({
                 fontWeight: 900,
                 fontSize: { xs: "1.35rem", sm: "1.8rem", md: "2.4rem" },
                 letterSpacing: "-0.04em",
-                color: "grey.900",
+                color: "text.primary",
                 wordBreak: "break-word",
               }}
             >
@@ -144,10 +142,14 @@ export function AssignmentHeroInfo({
               width: { xs: "100%", md: "auto" },
               p: { xs: 2, sm: 2.5 },
               borderRadius: 2.5,
-              bgcolor: "rgba(255, 255, 255, 0.85)",
+              bgcolor: "action.hover",
               backdropFilter: "blur(12px)",
-              border: "1px solid rgba(255, 255, 255, 0.7)",
-              boxShadow: "0 8px 30px rgba(15, 23, 42, 0.04)",
+              border: "1px solid",
+              borderColor: "divider",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 8px 30px rgba(0, 0, 0, 0.4)"
+                  : "0 8px 30px rgba(15, 23, 42, 0.04)",
             }}
           >
             <Stack component="div" spacing={2.5}>
@@ -161,7 +163,7 @@ export function AssignmentHeroInfo({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor: "success.50",
+                    bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
                     color: "success.main",
                   }}
                 >
@@ -183,7 +185,7 @@ export function AssignmentHeroInfo({
                     sx={{
                       fontSize: "0.95rem",
                       fontWeight: 800,
-                      color: "grey.900",
+                      color: "text.primary",
                     }}
                   >
                     {formatServerDate(assignment.createdAt, "date")}
@@ -202,7 +204,7 @@ export function AssignmentHeroInfo({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      bgcolor: "info.50",
+                      bgcolor: (theme) => alpha(theme.palette.info.main, 0.1),
                       color: "info.main",
                     }}
                   >
@@ -224,7 +226,7 @@ export function AssignmentHeroInfo({
                       sx={{
                         fontSize: "0.95rem",
                         fontWeight: 800,
-                        color: "grey.900",
+                        color: "text.primary",
                       }}
                     >
                       {submissionsTotal} submissions

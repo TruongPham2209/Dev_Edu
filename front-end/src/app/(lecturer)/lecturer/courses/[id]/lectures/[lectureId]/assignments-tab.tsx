@@ -11,10 +11,12 @@ import {
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
+  alpha,
   Box,
   Card,
   CardContent,
   IconButton,
+  Skeleton,
   Stack,
   Tooltip,
   Typography,
@@ -90,36 +92,27 @@ export function AssignmentsTab({
             key={idx}
             variant="outlined"
             sx={{
-              borderRadius: 3,
+              borderRadius: 2,
               borderColor: "divider",
               p: 2.5,
             }}
           >
-            <Box
-              sx={{
-                width: "30%",
-                height: 22,
-                bgcolor: "grey.100",
-                borderRadius: 1,
-                mb: 1.5,
-              }}
+            <Skeleton
+              variant="text"
+              width="30%"
+              height={26}
+              sx={{ mb: 1 }}
             />
-            <Box
-              sx={{
-                width: "70%",
-                height: 16,
-                bgcolor: "grey.100",
-                borderRadius: 0.5,
-                mb: 1,
-              }}
+            <Skeleton
+              variant="text"
+              width="70%"
+              height={18}
+              sx={{ mb: 0.5 }}
             />
-            <Box
-              sx={{
-                width: "50%",
-                height: 16,
-                bgcolor: "grey.100",
-                borderRadius: 0.5,
-              }}
+            <Skeleton
+              variant="text"
+              width="50%"
+              height={18}
             />
           </Card>
         ))}
@@ -146,7 +139,7 @@ export function AssignmentsTab({
           borderColor: "divider",
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2 },
-          bgcolor: "grey.50",
+          bgcolor: "action.hover",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -155,7 +148,11 @@ export function AssignmentsTab({
               width: 36,
               height: 36,
               borderRadius: 2,
-              bgcolor: "primary.50",
+              bgcolor: (theme) =>
+                alpha(
+                  theme.palette.primary.main,
+                  theme.palette.mode === "dark" ? 0.2 : 0.08,
+                ),
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -170,7 +167,7 @@ export function AssignmentsTab({
               variant="h6"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 fontSize: { xs: "1.1rem", sm: "1.25rem" },
               }}
             >
@@ -271,7 +268,13 @@ export function AssignmentsTab({
                               sx={{
                                 p: 0.75,
                                 borderRadius: 1.5,
-                                bgcolor: "rgba(37, 99, 235, 0.08)",
+                                bgcolor: (theme) =>
+                                  alpha(
+                                    theme.palette.primary.main,
+                                    theme.palette.mode === "dark"
+                                      ? 0.18
+                                      : 0.08,
+                                  ),
                                 color: "primary.main",
                                 display: "flex",
                                 flexShrink: 0,
@@ -283,7 +286,7 @@ export function AssignmentsTab({
                               variant="subtitle1"
                               sx={{
                                 fontWeight: 750,
-                                color: "#1e293b",
+                                color: "text.primary",
                                 fontSize: { xs: "0.9rem", sm: "1.025rem" },
                                 lineHeight: 1.35,
                                 wordBreak: "break-word",
@@ -301,7 +304,7 @@ export function AssignmentsTab({
                               color: "text.secondary",
                               border: "1px solid",
                               borderColor: "divider",
-                              bgcolor: "grey.50",
+                              bgcolor: "action.hover",
                               borderRadius: 1,
                               px: 1,
                               py: 0.25,

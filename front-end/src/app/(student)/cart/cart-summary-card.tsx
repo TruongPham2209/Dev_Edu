@@ -1,4 +1,12 @@
-import { Box, Button, Chip, Container, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Paper,
+  Typography,
+  alpha,
+} from "@mui/material";
 import { CreditCard, ShieldCheck } from "lucide-react";
 
 interface CartSummaryCardProps {
@@ -36,10 +44,13 @@ export function CartSummaryCard({
         borderTop: "1px solid",
         borderColor: "divider",
 
-        bgcolor: "rgba(255,255,255,0.95)",
+        bgcolor: (theme) => alpha(theme.palette.background.paper, 0.95),
         backdropFilter: "blur(16px)",
 
-        boxShadow: "0 -8px 32px rgba(0,0,0,0.08)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 -8px 32px rgba(0,0,0,0.6)"
+            : "0 -8px 32px rgba(0,0,0,0.08)",
       }}
     >
       <Container
@@ -176,7 +187,8 @@ export function CartSummaryCard({
                 textTransform: "none",
                 fontWeight: 800,
                 fontSize: { xs: "0.875rem", sm: "1rem" },
-                boxShadow: "0 6px 20px rgba(25,118,210,0.25)",
+                boxShadow: (theme) =>
+                  `0 6px 20px ${alpha(theme.palette.primary.main, 0.25)}`,
                 whiteSpace: "nowrap",
                 "&:hover": {
                   transform: "translateY(-1px)",

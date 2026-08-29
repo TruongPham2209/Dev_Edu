@@ -260,6 +260,7 @@ export interface AttemptResultResponse {
   totalScore?: number | null;
   maxScore: number;
   answers: AttemptQuestionResultDto[];
+  quizTitle?: string;
 }
 
 export interface QuizAttemptReviewResponse {

@@ -1,4 +1,5 @@
 import { InfoDialog } from "@/components/common/info-dialog";
+import type { PostResponse } from "@/lib/type/forums";
 import { formatServerDate } from "@/lib/util/date-utils";
 import { Avatar, Box, Chip, Stack, Typography } from "@mui/material";
 import { Calendar, FileText } from "lucide-react";
@@ -7,7 +8,7 @@ import { getStatusColor } from "../../../lib/util/status-utils";
 interface VersionDetailDialogProps {
   open: boolean;
   onClose: () => void;
-  selectedVersion: any;
+  selectedVersion: PostResponse | null;
   mode?: "normal" | "manage";
 }
 
@@ -124,7 +125,7 @@ export function VersionDetailDialog({
                 <Chip
                   label={selectedVersion.status}
                   size="small"
-                  color={getStatusColor(selectedVersion.status) as any}
+                  color={getStatusColor(selectedVersion.status)}
                   sx={{
                     fontWeight: 700,
                     borderRadius: 2,
@@ -201,8 +202,9 @@ export function VersionDetailDialog({
                   borderRadius: 2,
                   overflow: "hidden",
                   mt: 1.5,
-                  border: "1px solid #e2e8f0",
-                  bgcolor: "#f8fafc",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  bgcolor: "action.hover",
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -211,27 +213,6 @@ export function VersionDetailDialog({
                   alt={selectedVersion.title || "Post thumbnail"}
                   style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 />
-              </Box>
-            )}
-
-            {/* REJECTION REASON BANNER */}
-            {(selectedVersion.rejectionReason || selectedVersion.reason || selectedVersion.note) && (
-              <Box
-                sx={{
-                  p: 2,
-                  mt: 2,
-                  borderRadius: 2,
-                  bgcolor: "#fef2f2",
-                  border: "1px solid #fecaca",
-                  color: "#991b1b",
-                }}
-              >
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
-                  Rejection Reason:
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: "0.875rem", lineHeight: 1.5 }}>
-                  {selectedVersion.rejectionReason || selectedVersion.reason || selectedVersion.note}
-                </Typography>
               </Box>
             )}
           </Box>

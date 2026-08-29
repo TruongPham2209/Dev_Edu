@@ -89,7 +89,11 @@ export default function ButtonAction({
         };
       case "primary":
       default:
-        return { main: "#3b82f6", dark: "#2563eb", light: "#60a5fa" };
+        return {
+          main: theme.palette.primary.main,
+          dark: theme.palette.primary.dark,
+          light: theme.palette.primary.light,
+        };
     }
   };
 
@@ -151,7 +155,7 @@ export default function ButtonAction({
       color: disabled
         ? "action.disabled"
         : isDefault
-          ? theme.palette.grey[600]
+          ? theme.palette.text.secondary
           : color === "error"
             ? theme.palette.error.main
             : c.main,
@@ -159,13 +163,13 @@ export default function ButtonAction({
       borderColor: disabled
         ? "transparent"
         : isDefault
-          ? theme.palette.grey[200]
+          ? theme.palette.divider
           : alpha(c.main, 0.3),
-      bgcolor: "white",
+      bgcolor: "background.paper",
       "&:hover": disabled
         ? {}
         : {
-            bgcolor: isDefault ? "#f8fafc" : alpha(c.main, 0.04),
+            bgcolor: isDefault ? "action.hover" : alpha(c.main, 0.08),
             borderColor: isDefault ? theme.palette.primary.light : c.main,
             color: isDefault
               ? theme.palette.primary.main

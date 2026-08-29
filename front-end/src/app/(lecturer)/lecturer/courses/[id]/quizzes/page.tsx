@@ -2,7 +2,6 @@
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { FormInput } from "@/components/common/form/form-input";
-import { HeroInfo } from "@/components/common/hero-section/hero-info";
 import { TypeConfigDialog } from "@/components/dialog/quiz/type-config-dialog";
 import {
   useCreateQuizMutation,
@@ -33,11 +32,10 @@ import {
 import {
   ArrowRight,
   CheckCircle2,
-  FileQuestion,
   Layers,
   Plus,
   Save,
-  Trash2,
+  Trash2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useMemo, useState } from "react";

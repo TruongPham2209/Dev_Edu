@@ -159,8 +159,9 @@ export function CreateGroupNotificationDialog({
           sx={{
             p: { xs: 1.75, sm: 2.5 },
             borderRadius: 2.5,
-            bgcolor: "#f8fafc",
-            border: "1px solid rgba(15, 23, 42, 0.08)",
+            bgcolor: "action.hover",
+            border: "1px solid",
+            borderColor: "divider",
           }}
         >
           <FormLabel

@@ -86,7 +86,7 @@ export default function CourseQuizzesPage({
   const [selectedAssignment, setSelectedAssignment] =
     useState<QuizAssignmentResponse | null>(null);
 
-  const { data: course, isLoading: isLoadingCourse } =
+  const { isLoading: isLoadingCourse } =
     useCourseByIdQuery(courseId);
 
   const {
@@ -134,9 +134,7 @@ export default function CourseQuizzesPage({
           <Grid container spacing={{ xs: 2, sm: 3 }}>
             {assignments.map((assignment) => {
               const assignmentName =
-                assignment.assignmentName ||
-                (assignment as any).quizTitle ||
-                "Quiz Assignment";
+                assignment.assignmentName || "Quiz Assignment";
 
               return (
                 <Grid key={assignment.id} size={{ xs: 12, md: 6 }}>

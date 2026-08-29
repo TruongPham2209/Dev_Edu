@@ -94,7 +94,11 @@ export function MaterialsList({
       sx={{
         borderRadius: 1,
         borderColor: "divider",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px -2px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.02)",
       }}
     >
       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
@@ -112,7 +116,7 @@ export function MaterialsList({
               variant="h6"
               sx={{
                 fontWeight: 800,
-                color: "#0f172a",
+                color: "text.primary",
                 fontSize: { xs: "1.05rem", sm: "1.25rem" },
               }}
             >
@@ -155,10 +159,14 @@ export function MaterialsList({
                     sx={{
                       borderRadius: 1,
                       borderColor: "divider",
+                      bgcolor: "background.paper",
                       transition: "all 0.2s ease-in-out",
                       "&:hover": {
                         borderColor: "primary.light",
-                        boxShadow: "0 4px 12px rgba(37, 99, 235, 0.03)",
+                        boxShadow: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "0 4px 12px rgba(0, 0, 0, 0.4)"
+                            : "0 4px 12px rgba(37, 99, 235, 0.03)",
                         transform: "translateY(-1px)",
                       },
                     }}
@@ -182,9 +190,9 @@ export function MaterialsList({
                               width: { xs: 40, sm: 48 },
                               height: { xs: 40, sm: 48 },
                               borderRadius: 2.5,
-                              bgcolor: "grey.50",
+                              bgcolor: "action.hover",
                               border: "1px solid",
-                              borderColor: "grey.100",
+                              borderColor: "divider",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -198,7 +206,7 @@ export function MaterialsList({
                               variant="subtitle1"
                               sx={{
                                 fontWeight: 750,
-                                color: "#1e293b",
+                                color: "text.primary",
                                 fontSize: { xs: "0.875rem", sm: "1rem" },
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -231,7 +239,7 @@ export function MaterialsList({
                                   width: 4,
                                   height: 4,
                                   borderRadius: "50%",
-                                  bgcolor: "grey.300",
+                                  bgcolor: "text.disabled",
                                 }}
                               />
                               <Typography

@@ -2,7 +2,7 @@
 
 import { CourseCard } from "@/components/card/course-card";
 import type { CourseResponse } from "@/lib/type/courses";
-import { Box, Grid, Paper, Skeleton, Typography } from "@mui/material";
+import { Box, Grid, Paper, Skeleton, Typography, alpha } from "@mui/material";
 import { Award } from "lucide-react";
 
 interface RelatedCourseListProps {
@@ -27,9 +27,13 @@ export const RelatedCourseList = ({
         <Box
           sx={{
             p: { xs: 1.25, sm: 1.5 },
-            bgcolor: "#f3e8ff",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.secondary.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.1,
+              ),
             borderRadius: 3,
-            color: "#9333ea",
+            color: "secondary.main",
             display: "flex",
             flexShrink: 0,
           }}
@@ -41,7 +45,7 @@ export const RelatedCourseList = ({
             variant="h5"
             sx={{
               fontWeight: 800,
-              color: "#0f172a",
+              color: "text.primary",
               fontSize: { xs: "1.2rem", sm: "1.5rem" },
             }}
           >
@@ -49,7 +53,7 @@ export const RelatedCourseList = ({
           </Typography>
           <Typography
             sx={{
-              color: "#64748b",
+              color: "text.secondary",
               mt: 0.5,
               fontSize: { xs: "0.85rem", sm: "0.95rem" },
             }}
@@ -78,10 +82,10 @@ export const RelatedCourseList = ({
             p: 4,
             textAlign: "center",
             borderRadius: 3,
-            bgcolor: "rgba(248, 250, 252, 0.5)",
+            bgcolor: "action.hover",
           }}
         >
-          <Typography sx={{ color: "#64748b" }}>
+          <Typography sx={{ color: "text.secondary" }}>
             No related courses found.
           </Typography>
         </Paper>

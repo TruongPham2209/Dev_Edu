@@ -20,10 +20,14 @@ export const CourseCategories = ({
       sx={{
         mb: { xs: 5, sm: 8 },
         p: { xs: 2, sm: 3 },
-        bgcolor: "#ffffff",
-        borderRadius: { xs: 3, sm: 4 },
-        boxShadow: "0 4px 20px -10px rgba(0,0,0,0.05)",
-        border: "1px solid rgba(0,0,0,0.02)",
+        bgcolor: "background.paper",
+        borderRadius: { xs: 1, sm: 1.5 },
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px -10px rgba(0,0,0,0.5)"
+            : "0 4px 20px -10px rgba(0,0,0,0.05)",
+        border: "1px solid",
+        borderColor: "divider",
       }}
     >
       <Box
@@ -32,14 +36,15 @@ export const CourseCategories = ({
           alignItems: "center",
           gap: 1.25,
           mb: { xs: 2, sm: 3 },
+          color: "text.primary",
         }}
       >
-        <LayoutGrid size={20} color="#0f172a" style={{ flexShrink: 0 }} />
+        <LayoutGrid size={20} color="currentColor" style={{ flexShrink: 0 }} />
         <Typography
           variant="h6"
           sx={{
             fontWeight: 800,
-            color: "#0f172a",
+            color: "text.primary",
             fontSize: { xs: "1.1rem", sm: "1.25rem" },
           }}
         >
@@ -55,14 +60,19 @@ export const CourseCategories = ({
           pb: 1.5,
           "&::-webkit-scrollbar": { height: 5 },
           "&::-webkit-scrollbar-track": {
-            background: "#f8fafc",
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(255,255,255,0.04)"
+                : "#f8fafc",
             borderRadius: 10,
           },
           "&::-webkit-scrollbar-thumb": {
-            background: "#cbd5e1",
+            background: (theme) => theme.palette.divider,
             borderRadius: 10,
           },
-          "&::-webkit-scrollbar-thumb:hover": { background: "#94a3b8" },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: (theme) => theme.palette.text.disabled,
+          },
         }}
       >
         <Button
@@ -79,29 +89,29 @@ export const CourseCategories = ({
             fontWeight: 700,
             textTransform: "none",
             fontSize: { xs: "0.85rem", sm: "0.95rem" },
-            color: selectedCategory === null ? "#fff" : "#475569",
+            color: selectedCategory === null ? "#fff" : "text.secondary",
             background:
               selectedCategory === null
-                ? "linear-gradient(135deg, #0f172a 0%, #334155 100%)"
+                ? "linear-gradient(135deg, #16a34a 0%, #15803d 100%)"
                 : "transparent",
-            borderColor: selectedCategory === null ? "transparent" : "#e2e8f0",
+            borderColor: selectedCategory === null ? "transparent" : "divider",
             boxShadow:
               selectedCategory === null
-                ? "0 8px 15px -5px rgba(15,23,42,0.3)"
+                ? "0 8px 15px -5px rgba(22,163,74,0.3)"
                 : "none",
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             "&:hover": {
               background:
                 selectedCategory === null
-                  ? "linear-gradient(135deg, #1e293b 0%, #475569 100%)"
-                  : "#f8fafc",
+                  ? "linear-gradient(135deg, #15803d 0%, #166534 100%)"
+                  : "action.hover",
               borderColor:
-                selectedCategory === null ? "transparent" : "#cbd5e1",
+                selectedCategory === null ? "transparent" : "text.secondary",
               transform: "translateY(-2px)",
               boxShadow:
                 selectedCategory === null
-                  ? "0 10px 20px -5px rgba(15,23,42,0.4)"
-                  : "0 4px 10px -5px rgba(0,0,0,0.05)",
+                  ? "0 10px 20px -5px rgba(22,163,74,0.4)"
+                  : "none",
             },
           }}
         >
@@ -124,11 +134,11 @@ export const CourseCategories = ({
                 fontWeight: 600,
                 textTransform: "none",
                 fontSize: { xs: "0.85rem", sm: "0.95rem" },
-                color: isActive ? "#fff" : "#475569",
+                color: isActive ? "#fff" : "text.secondary",
                 background: isActive
                   ? "linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)"
                   : "transparent",
-                borderColor: isActive ? "transparent" : "#e2e8f0",
+                borderColor: isActive ? "transparent" : "divider",
                 boxShadow: isActive
                   ? "0 8px 15px -5px rgba(2,132,199,0.3)"
                   : "none",
@@ -136,12 +146,12 @@ export const CourseCategories = ({
                 "&:hover": {
                   background: isActive
                     ? "linear-gradient(135deg, #0369a1 0%, #0284c7 100%)"
-                    : "#f8fafc",
-                  borderColor: isActive ? "transparent" : "#cbd5e1",
+                    : "action.hover",
+                  borderColor: isActive ? "transparent" : "text.secondary",
                   transform: "translateY(-2px)",
                   boxShadow: isActive
                     ? "0 10px 20px -5px rgba(2,132,199,0.4)"
-                    : "0 4px 10px -5px rgba(0,0,0,0.05)",
+                    : "none",
                 },
               }}
             >

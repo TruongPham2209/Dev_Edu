@@ -105,7 +105,10 @@ export function SubmissionDetailsDialog({
               borderRadius: { xs: 2, sm: 3 },
               m: { xs: 1.5, sm: 2, md: 3 },
               width: { xs: "calc(100% - 24px)", sm: "auto" },
-              boxShadow: "0 20px 60px rgba(15, 23, 42, 0.15)",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 20px 60px rgba(0, 0, 0, 0.5)"
+                  : "0 20px 60px rgba(15, 23, 42, 0.15)",
             },
           },
         }}
@@ -119,7 +122,7 @@ export function SubmissionDetailsDialog({
             alignItems: "center",
             borderBottom: "1px solid",
             borderColor: "divider",
-            bgcolor: "grey.50",
+            bgcolor: "action.hover",
           }}
         >
           <Box sx={{ minWidth: 0 }}>

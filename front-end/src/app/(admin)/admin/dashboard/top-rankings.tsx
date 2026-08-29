@@ -40,7 +40,12 @@ export function TopCoursesList() {
   if (error) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <ErrorState
@@ -56,7 +61,12 @@ export function TopCoursesList() {
   if (isLoading) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <Skeleton width={180} height={28} sx={{ mb: 1 }} />
@@ -71,14 +81,14 @@ export function TopCoursesList() {
                   <TableCell>
                     <Skeleton width={80} height={20} />
                   </TableCell>
-                  <TableCell>
-                    <Skeleton width={60} height={20} />
+                  <TableCell align="right">
+                    <Skeleton width={60} height={20} sx={{ ml: "auto" }} />
                   </TableCell>
-                  <TableCell>
-                    <Skeleton width={60} height={20} />
+                  <TableCell align="center">
+                    <Skeleton width={50} height={20} sx={{ mx: "auto" }} />
                   </TableCell>
-                  <TableCell>
-                    <Skeleton width={80} height={20} />
+                  <TableCell align="right">
+                    <Skeleton width={80} height={20} sx={{ ml: "auto" }} />
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -86,19 +96,32 @@ export function TopCoursesList() {
                 {Array.from({ length: 5 }).map((_, idx) => (
                   <TableRow key={idx}>
                     <TableCell>
-                      <Skeleton width={200} height={24} />
+                      <Box
+                        sx={{ display: "flex", gap: 1.5, alignItems: "center" }}
+                      >
+                        <Skeleton variant="rounded" width={32} height={32} />
+                        <Box>
+                          <Skeleton width={160} height={20} />
+                          <Skeleton width={80} height={16} sx={{ mt: 0.5 }} />
+                        </Box>
+                      </Box>
                     </TableCell>
                     <TableCell>
-                      <Skeleton width={100} height={20} />
+                      <Skeleton width={90} height={20} />
                     </TableCell>
-                    <TableCell>
-                      <Skeleton width={50} height={20} />
+                    <TableCell align="right">
+                      <Skeleton
+                        variant="rounded"
+                        width={70}
+                        height={24}
+                        sx={{ ml: "auto" }}
+                      />
                     </TableCell>
-                    <TableCell>
-                      <Skeleton width={100} height={20} />
+                    <TableCell align="center">
+                      <Skeleton width={40} height={20} sx={{ mx: "auto" }} />
                     </TableCell>
-                    <TableCell>
-                      <Skeleton width={80} height={20} />
+                    <TableCell align="right">
+                      <Skeleton width={100} height={20} sx={{ ml: "auto" }} />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -115,10 +138,14 @@ export function TopCoursesList() {
   return (
     <Card
       sx={{
-        border: "1px solid rgba(15, 23, 42, 0.08)",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 3,
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-        background: "rgba(255, 255, 255, 0.95)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+        bgcolor: "background.paper",
         backdropFilter: "blur(8px)",
       }}
     >
@@ -161,7 +188,8 @@ export function TopCoursesList() {
                   sx={{
                     "& th": {
                       fontWeight: 700,
-                      borderBottom: "2px solid rgba(15, 23, 42, 0.06)",
+                      borderBottom: "2px solid",
+                      borderColor: "divider",
                       py: 1.5,
                     },
                   }}
@@ -181,10 +209,11 @@ export function TopCoursesList() {
                       "&:last-child td": { border: 0 },
                       "& td": {
                         py: 1.8,
-                        borderBottom: "1px solid rgba(15, 23, 42, 0.05)",
+                        borderBottom: "1px solid",
+                        borderColor: "divider",
                       },
                       transition: "background 0.2s",
-                      "&:hover": { bgcolor: "rgba(15, 23, 42, 0.01)" },
+                      "&:hover": { bgcolor: "action.hover" },
                     }}
                   >
                     <TableCell>
@@ -198,8 +227,12 @@ export function TopCoursesList() {
                             width: 32,
                             height: 32,
                             borderRadius: 1.5,
-                            bgcolor: alpha("#3b82f6", 0.1),
-                            color: "#3b82f6",
+                            bgcolor: (theme) =>
+                              alpha(
+                                theme.palette.primary.main,
+                                theme.palette.mode === "dark" ? 0.2 : 0.1,
+                              ),
+                            color: "primary.main",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -299,7 +332,12 @@ export function TopUsersList() {
   if (error) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <ErrorState
@@ -315,7 +353,12 @@ export function TopUsersList() {
   if (isLoading) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <Skeleton width={180} height={28} sx={{ mb: 1 }} />
@@ -346,10 +389,14 @@ export function TopUsersList() {
     <Card
       sx={{
         height: "100%",
-        border: "1px solid rgba(15, 23, 42, 0.08)",
+        border: "1px solid",
+        borderColor: "divider",
         borderRadius: 3,
-        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-        background: "rgba(255, 255, 255, 0.95)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+        bgcolor: "background.paper",
         backdropFilter: "blur(8px)",
       }}
     >
@@ -380,7 +427,8 @@ export function TopUsersList() {
           value={activeTab}
           onChange={(_, val) => setActiveTab(val)}
           sx={{
-            borderBottom: "1px solid rgba(15, 23, 42, 0.06)",
+            borderBottom: "1px solid",
+            borderColor: "divider",
             mb: 2.5,
             minHeight: 38,
             "& .MuiTab-root": {
@@ -421,13 +469,17 @@ export function TopUsersList() {
                     alignItems: { xs: "flex-start", sm: "center" },
                     p: { xs: 1.25, sm: 1.5 },
                     borderRadius: 2,
-                    border: "1px solid rgba(15, 23, 42, 0.04)",
-                    bgcolor: "rgba(255, 255, 255, 0.5)",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "action.hover"
+                        : "rgba(255, 255, 255, 0.5)",
                     gap: 1,
                     transition: "all 0.2s",
                     "&:hover": {
                       transform: "translateX(4px)",
-                      bgcolor: "rgba(15, 23, 42, 0.01)",
+                      bgcolor: "action.selected",
                     },
                   }}
                 >
@@ -464,7 +516,8 @@ export function TopUsersList() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            border: "2px solid #fff",
+                            border: "2px solid",
+                            borderColor: "background.paper",
                           }}
                         >
                           <Award size={10} color="#fff" />
@@ -506,9 +559,10 @@ export function TopUsersList() {
                       alignItems: { xs: "center", sm: "flex-end" },
                       pt: { xs: 0.75, sm: 0 },
                       borderTop: {
-                        xs: "1px dashed rgba(15, 23, 42, 0.08)",
+                        xs: "1px dashed",
                         sm: "none",
                       },
+                      borderColor: "divider",
                     }}
                   >
                     <Typography
@@ -548,13 +602,17 @@ export function TopUsersList() {
                   alignItems: { xs: "flex-start", sm: "center" },
                   p: { xs: 1.25, sm: 1.5 },
                   borderRadius: 2,
-                  border: "1px solid rgba(15, 23, 42, 0.04)",
-                  bgcolor: "rgba(255, 255, 255, 0.5)",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "action.hover"
+                      : "rgba(255, 255, 255, 0.5)",
                   gap: 1,
                   transition: "all 0.2s",
                   "&:hover": {
                     transform: "translateX(4px)",
-                    bgcolor: "rgba(15, 23, 42, 0.01)",
+                    bgcolor: "action.selected",
                   },
                 }}
               >
@@ -593,7 +651,8 @@ export function TopUsersList() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          border: "2px solid #fff",
+                          border: "2px solid",
+                          borderColor: "background.paper",
                         }}
                       >
                         <Award size={10} color="#fff" />
@@ -635,9 +694,10 @@ export function TopUsersList() {
                     gap: 2,
                     pt: { xs: 0.75, sm: 0 },
                     borderTop: {
-                      xs: "1px dashed rgba(15, 23, 42, 0.08)",
+                      xs: "1px dashed",
                       sm: "none",
                     },
+                    borderColor: "divider",
                   }}
                 >
                   <Box sx={{ textAlign: { xs: "left", sm: "right" } }}>
@@ -646,7 +706,7 @@ export function TopUsersList() {
                       spacing={0.5}
                       sx={{ alignItems: "center" }}
                     >
-                      <MessageSquare size={13} color="text.secondary" />
+                      <MessageSquare size={13} className="text-slate-400" />
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
                         {contributor.commentCount}
                       </Typography>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, alpha } from "@mui/material";
 import { GraduationCap } from "lucide-react";
 import { EnrollmentList } from "./enrollment-list";
 
@@ -26,19 +26,24 @@ export default function MyCoursesPage() {
         <Box
           sx={{
             p: { xs: 1.25, sm: 1.5 },
-            bgcolor: "#e0f2fe",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.primary.main,
+                theme.palette.mode === "dark" ? 0.18 : 0.08,
+              ),
             borderRadius: 2,
             display: "flex",
             flexShrink: 0,
+            color: "primary.main",
           }}
         >
-          <GraduationCap size={24} color="#0284c7" />
+          <GraduationCap size={24} color="currentColor" />
         </Box>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 800,
-            color: "#0f172a",
+            color: "text.primary",
             fontSize: { xs: "1.35rem", sm: "1.75rem", md: "2.1rem" },
             lineHeight: 1.3,
           }}

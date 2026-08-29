@@ -73,7 +73,7 @@ export function ReviewDialog({ open, onClose, courseId }: ReviewDialogProps) {
         <Box sx={{ py: { xs: 1, sm: 2 } }}>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 700, color: "#0f172a", mb: 1, fontSize: { xs: "0.95rem", sm: "1.1rem" } }}
+            sx={{ fontWeight: 700, color: "text.primary", mb: 1, fontSize: { xs: "0.95rem", sm: "1.1rem" } }}
           >
             Your Review
           </Typography>
@@ -81,11 +81,12 @@ export function ReviewDialog({ open, onClose, courseId }: ReviewDialogProps) {
           <Typography
             variant="body1"
             sx={{
-              color: "#334155",
+              color: "text.secondary",
               p: { xs: 1.5, sm: 2 },
-              bgcolor: "#f8fafc",
+              bgcolor: "action.hover",
               borderRadius: 2,
-              border: "1px solid #e2e8f0",
+              border: "1px solid",
+              borderColor: "divider",
               fontSize: { xs: "0.85rem", sm: "0.95rem" },
               lineHeight: 1.6,
             }}
@@ -102,9 +103,13 @@ export function ReviewDialog({ open, onClose, courseId }: ReviewDialogProps) {
               gap: { xs: 1.25, sm: 1.5 },
               mb: { xs: 2, sm: 3 },
               p: { xs: 1.5, sm: 2 },
-              bgcolor: "rgba(245, 158, 11, 0.1)",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(245, 158, 11, 0.15)"
+                  : "rgba(245, 158, 11, 0.1)",
               borderRadius: 2,
-              color: "#d97706",
+              color: (theme) =>
+                theme.palette.mode === "dark" ? "#fbbf24" : "#d97706",
             }}
           >
             <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 2 }} />

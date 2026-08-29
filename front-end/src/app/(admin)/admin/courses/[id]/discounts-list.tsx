@@ -21,6 +21,7 @@ import {
   Stack,
   Tooltip,
   Typography,
+  alpha,
 } from "@mui/material";
 import { BadgePercent, Percent, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -87,9 +88,15 @@ export function DiscountsList({
           label="Not started yet"
           size="small"
           sx={{
-            bgcolor: "rgba(59, 130, 246, 0.08)",
-            color: "#3b82f6",
-            border: "1px solid rgba(59, 130, 246, 0.12)",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.primary.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
+            color: "primary.main",
+            border: "1px solid",
+            borderColor: (theme) =>
+              alpha(theme.palette.primary.main, 0.2),
             fontWeight: 700,
             borderRadius: 1.5,
           }}
@@ -101,9 +108,15 @@ export function DiscountsList({
           label="Active"
           size="small"
           sx={{
-            bgcolor: "rgba(16, 185, 129, 0.08)",
-            color: "#10b981",
-            border: "1px solid rgba(16, 185, 129, 0.12)",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.success.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
+            color: "success.main",
+            border: "1px solid",
+            borderColor: (theme) =>
+              alpha(theme.palette.success.main, 0.2),
             fontWeight: 700,
             borderRadius: 1.5,
           }}
@@ -115,9 +128,15 @@ export function DiscountsList({
           label="Expired"
           size="small"
           sx={{
-            bgcolor: "rgba(239, 68, 68, 0.08)",
-            color: "#ef4444",
-            border: "1px solid rgba(239, 68, 68, 0.12)",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.error.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
+            color: "error.main",
+            border: "1px solid",
+            borderColor: (theme) =>
+              alpha(theme.palette.error.main, 0.2),
             fontWeight: 700,
             borderRadius: 1.5,
           }}
@@ -134,9 +153,13 @@ export function DiscountsList({
     <Card
       sx={{
         borderRadius: 1,
-        border: "1px solid rgba(15, 23, 42, 0.08)",
-        background: "rgba(255, 255, 255, 0.9)",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
         height: { xs: 450, sm: 520 }, // Consistent height for the Data Row
@@ -146,7 +169,8 @@ export function DiscountsList({
       <Box
         sx={{
           p: { xs: 2, sm: 2.5 },
-          borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -157,11 +181,17 @@ export function DiscountsList({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Avatar
             sx={{
-              bgcolor: "rgba(245, 158, 11, 0.08)",
-              color: "rgb(245, 158, 11)",
+              bgcolor: (theme) =>
+                alpha(
+                  theme.palette.warning.main,
+                  theme.palette.mode === "dark" ? 0.2 : 0.08,
+                ),
+              color: "warning.main",
               width: 36,
               height: 36,
-              border: "1px solid rgba(245, 158, 11, 0.12)",
+              border: "1px solid",
+              borderColor: (theme) =>
+                alpha(theme.palette.warning.main, 0.2),
             }}
           >
             <Percent size={18} />
@@ -227,7 +257,7 @@ export function DiscountsList({
                     py: { xs: 1.5, sm: 2 },
                     transition: "background-color 0.15s ease",
                     "&:hover": {
-                      bgcolor: "rgba(15, 23, 42, 0.02)",
+                      bgcolor: "action.hover",
                     },
                   }}
                 >
@@ -239,12 +269,18 @@ export function DiscountsList({
                     <Avatar
                       variant="rounded"
                       sx={{
-                        bgcolor: "rgba(13, 168, 34, 0.15)",
-                        color: "#0da822",
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.success.main,
+                            theme.palette.mode === "dark" ? 0.2 : 0.1,
+                          ),
+                        color: "success.main",
                         width: { xs: 38, sm: 44 },
                         height: { xs: 38, sm: 44 },
                         flexShrink: 0,
-                        border: "1px solid rgba(13, 168, 34, 0.15)",
+                        border: "1px solid",
+                        borderColor: (theme) =>
+                          alpha(theme.palette.success.main, 0.2),
                       }}
                     >
                       <Typography
@@ -301,9 +337,17 @@ export function DiscountsList({
                         height: 32,
                         borderRadius: 2,
                         color: "error.main",
-                        bgcolor: "rgba(211,47,47,0.06)",
+                        bgcolor: (theme) =>
+                          alpha(
+                            theme.palette.error.main,
+                            theme.palette.mode === "dark" ? 0.2 : 0.08,
+                          ),
                         "&:hover": {
-                          bgcolor: "rgba(211,47,47,0.12)",
+                          bgcolor: (theme) =>
+                            alpha(
+                              theme.palette.error.main,
+                              theme.palette.mode === "dark" ? 0.3 : 0.16,
+                            ),
                         },
                         flexShrink: 0,
                       }}
@@ -314,7 +358,7 @@ export function DiscountsList({
                 </Box>
                 {index < discounts.length - 1 && (
                   <Divider
-                    sx={{ mx: 3, borderColor: "rgba(15, 23, 42, 0.04)" }}
+                    sx={{ mx: 3, borderColor: "divider" }}
                   />
                 )}
               </Box>

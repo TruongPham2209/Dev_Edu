@@ -1,3 +1,5 @@
+"use client";
+
 import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
 import type { PaymentStatus } from "@/lib/type/enum";
 import { formatServerDate } from "@/lib/util/date-utils";
@@ -11,6 +13,7 @@ import {
   IconButton,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { CheckCircle2, PlayCircle, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -22,7 +25,7 @@ const stripHtml = (html: string = "") => {
 };
 
 interface CourseOrderItemProps {
-  item: CourseItemDetailResponse | any;
+  item: CourseItemDetailResponse;
   tabContext: "cart" | "order" | "enrolled";
   onRemove?: (id: string) => void;
   selected?: boolean;
@@ -44,7 +47,7 @@ export function CourseOrderItem({
     "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=300&auto=format&fit=crop";
   const courseId = item.courseId || item.id;
   const originalPrice = item.originalPrice;
-  const discountedPrice = item.discountedPrice ?? item.price;
+  const discountedPrice = item.discountedPrice;
 
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
@@ -52,16 +55,23 @@ export function CourseOrderItem({
     <Card
       sx={{
         borderRadius: 1,
-        boxShadow: "0 4px 15px -5px rgba(0,0,0,0.05)",
-        border: "1px solid rgba(0,0,0,0.05)",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 15px -5px rgba(0,0,0,0.4)"
+            : "0 4px 15px -5px rgba(0,0,0,0.05)",
+        border: "1px solid",
+        borderColor: "divider",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         height: "100%",
         display: "flex",
         flexDirection: "column",
         "&:hover": {
-          boxShadow: "0 12px 30px -10px rgba(0,0,0,0.12)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 12px 30px -10px rgba(0,0,0,0.6)"
+              : "0 12px 30px -10px rgba(0,0,0,0.12)",
           transform: "translateY(-4px)",
-          borderColor: "rgba(14, 165, 233, 0.2)",
+          borderColor: "primary.main",
         },
       }}
     >
@@ -87,8 +97,8 @@ export function CourseOrderItem({
                 onChange={(e) => onSelect(courseId, e.target.checked)}
                 sx={{
                   p: 0.5,
-                  color: "#cbd5e1",
-                  "&.Mui-checked": { color: "#0284c7" },
+                  color: "text.disabled",
+                  "&.Mui-checked": { color: "primary.main" },
                 }}
               />
             )}
@@ -104,7 +114,8 @@ export function CourseOrderItem({
                 flexShrink: 0,
                 position: "relative",
                 display: "block",
-                border: "1px solid #e2e8f0",
+                border: "1px solid",
+                borderColor: "divider",
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -121,7 +132,7 @@ export function CourseOrderItem({
                 href={`/courses/${courseId}`}
                 sx={{
                   fontWeight: 800,
-                  color: "#0f172a",
+                  color: "text.primary",
                   textDecoration: "none",
                   fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.1rem" },
                   lineHeight: 1.4,
@@ -129,7 +140,7 @@ export function CourseOrderItem({
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
-                  "&:hover": { color: "#0284c7" },
+                  "&:hover": { color: "primary.main" },
                 }}
               >
                 {title}
@@ -141,9 +152,9 @@ export function CourseOrderItem({
                 onClick={() => onRemove(item.id)}
                 size="small"
                 sx={{
-                  color: "#94a3b8",
+                  color: "text.secondary",
                   flexShrink: 0,
-                  "&:hover": { color: "#ef4444", bgcolor: "#fee2e2" },
+                  "&:hover": { color: "error.main", bgcolor: "action.hover" },
                 }}
               >
                 <Trash2 size={18} />
@@ -156,11 +167,19 @@ export function CourseOrderItem({
                 label={orderStatus}
                 size="small"
                 sx={{
-                  bgcolor: "#dcfce7",
-                  color: "#166534",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.success.main,
+                      theme.palette.mode === "dark" ? 0.2 : 0.12,
+                    ),
+                  color: "success.main",
                   fontWeight: 700,
                   flexShrink: 0,
-                  "& .MuiChip-icon": { color: "#166534" },
+                  border: "1px solid",
+                  borderColor: (theme) => alpha(theme.palette.success.main, 0.2),
+                  "& .MuiChip-icon": {
+                    color: "success.main",
+                  },
                 }}
               />
             )}
@@ -171,7 +190,7 @@ export function CourseOrderItem({
             <Typography
               variant="body2"
               sx={{
-                color: "#64748b",
+                color: "text.secondary",
                 fontSize: { xs: "0.825rem", sm: "0.875rem" },
                 lineHeight: 1.6,
                 display: "-webkit-box",
@@ -191,7 +210,8 @@ export function CourseOrderItem({
               justifyContent: "space-between",
               alignItems: "center",
               pt: 1.25,
-              borderTop: "1px solid #f1f5f9",
+              borderTop: "1px solid",
+              borderColor: "divider",
               flexWrap: "wrap",
               gap: 1.5,
             }}
@@ -209,7 +229,7 @@ export function CourseOrderItem({
                 <Typography
                   sx={{
                     fontWeight: 800,
-                    color: "#0ea5e9",
+                    color: "primary.main",
                     fontSize: { xs: "1rem", sm: "1.15rem" },
                     lineHeight: 1,
                   }}
@@ -222,7 +242,7 @@ export function CourseOrderItem({
                   <Typography
                     variant="caption"
                     sx={{
-                      color: "#94a3b8",
+                      color: "text.disabled",
                       textDecoration: "line-through",
                       fontWeight: 600,
                       fontSize: { xs: "0.75rem", sm: "0.8rem" },
@@ -237,15 +257,18 @@ export function CourseOrderItem({
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "#64748b",
+                    color: "text.secondary",
                     fontWeight: 500,
                     fontSize: { xs: "0.775rem", sm: "0.85rem" },
                   }}
                 >
                   Purchased:{" "}
-                  <span style={{ color: "#334155", fontWeight: 600 }}>
-                    {formatServerDate(item.timestamp || item.createdAt)}
-                  </span>
+                  <Box
+                    component="span"
+                    sx={{ color: "text.primary", fontWeight: 600 }}
+                  >
+                    {formatServerDate(item.timestamp)}
+                  </Box>
                 </Typography>
               )}
             </Box>
@@ -263,13 +286,13 @@ export function CourseOrderItem({
                     textTransform: "none",
                     fontWeight: 700,
                     fontSize: { xs: "0.8rem", sm: "0.85rem" },
-                    borderColor: "#cbd5e1",
-                    color: "#475569",
+                    borderColor: "divider",
+                    color: "text.primary",
                     py: 0.5,
                     px: 1.5,
                     "&:hover": {
-                      bgcolor: "#f8fafc",
-                      borderColor: "#94a3b8",
+                      bgcolor: "action.hover",
+                      borderColor: "text.secondary",
                     },
                   }}
                 >
@@ -285,19 +308,12 @@ export function CourseOrderItem({
                   size="small"
                   startIcon={<PlayCircle size={15} />}
                   sx={{
-                    bgcolor: "#0ea5e9",
-                    color: "#fff",
                     borderRadius: "20px",
                     textTransform: "none",
                     fontWeight: 800,
                     fontSize: { xs: "0.8rem", sm: "0.875rem" },
                     px: 2.5,
                     py: 0.6,
-                    boxShadow: "0 4px 14px rgba(14,165,233,0.25)",
-                    "&:hover": {
-                      bgcolor: "#0284c7",
-                      boxShadow: "0 6px 20px rgba(14,165,233,0.35)",
-                    },
                   }}
                 >
                   Learn Now

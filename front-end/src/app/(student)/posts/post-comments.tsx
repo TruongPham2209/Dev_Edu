@@ -204,7 +204,7 @@ export function PostComments({
               onAddReply={async (content, replyToId) => {
                 if (onCreateReply) {
                   const res = await onCreateReply(comment.id, content);
-                  return res as any;
+                  return res;
                 } else {
                   const res = await createCommentMutate({
                     postId,

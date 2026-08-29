@@ -97,18 +97,19 @@ export default function AdminDashboardPage() {
             px: 2.5,
             py: 1,
             textTransform: "none",
-            fontWeight: 700,
-            fontSize: { xs: "0.8rem", sm: "0.875rem" },
-            borderColor: "rgba(15, 23, 42, 0.12)",
+            borderColor: "divider",
             color: "text.primary",
             bgcolor: "background.paper",
-            boxShadow: "0px 2px 8px rgba(0,0,0,0.02)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0px 2px 8px rgba(0, 0, 0, 0.4)"
+                : "0px 2px 8px rgba(0,0,0,0.02)",
             width: { xs: "100%", sm: "auto" },
             whiteSpace: "nowrap",
             flexShrink: 0,
             "&:hover": {
-              borderColor: "rgba(15, 23, 42, 0.2)",
-              bgcolor: "rgba(15, 23, 42, 0.02)",
+              borderColor: "text.primary",
+              bgcolor: "action.hover",
             },
           }}
         >

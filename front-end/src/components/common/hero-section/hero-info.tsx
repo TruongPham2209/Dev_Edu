@@ -12,30 +12,29 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
   return (
     <Box
       sx={{
+        width: "100%",
         position: "relative",
         overflow: "hidden",
 
-        borderRadius: { xs: "20px", sm: "24px", md: "32px" },
+        p: { xs: 2.5, sm: 3.5, md: 4 },
 
-        px: { xs: 2.5, sm: 3, md: 4 },
-        py: { xs: 2.5, sm: 3, md: 3.5 },
+        borderRadius: { xs: "20px", sm: "24px" },
 
-        background: `
-          linear-gradient(
-            135deg,
-            #dcfce7 0%,
-            #ecfdf5 45%,
-            #f0fdf4 100%
-          )
-        `,
+        bgcolor: (theme) =>
+          theme.palette.mode === "dark"
+            ? "background.paper"
+            : alpha(theme.palette.success.main, 0.08),
 
         border: "1px solid",
-        borderColor: alpha("#16a34a", 0.18),
+        borderColor: (theme) =>
+          theme.palette.mode === "dark"
+            ? "divider"
+            : alpha(theme.palette.success.main, 0.18),
 
-        boxShadow: `
-          0 16px 40px rgba(22,101,52,.08),
-          0 4px 16px rgba(34,197,94,.08)
-        `,
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 16px 40px rgba(0, 0, 0, 0.4)"
+            : `0 16px 40px ${alpha(theme.palette.success.main, 0.08)}`,
       }}
     >
       {/* Glow */}
@@ -50,10 +49,10 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
 
           borderRadius: "50%",
 
-          background: `
+          background: (theme) => `
             radial-gradient(
               circle,
-              rgba(34,197,94,.18) 0%,
+              ${alpha(theme.palette.success.main, 0.18)} 0%,
               rgba(34,197,94,0) 72%
             )
           `,
@@ -82,21 +81,15 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
             size="small"
             sx={{
               mb: 1.5,
-
-              bgcolor: alpha("#16a34a", 0.1),
-
-              color: "#166534",
-
+              bgcolor: (theme) => alpha(theme.palette.success.main, 0.1),
+              color: "success.main",
               fontWeight: 700,
-
               borderRadius: "999px",
               fontSize: { xs: "0.75rem", sm: "0.8125rem" },
-
               border: "1px solid",
-              borderColor: alpha("#16a34a", 0.12),
-
+              borderColor: (theme) => alpha(theme.palette.success.main, 0.15),
               "& .MuiChip-icon": {
-                color: "#16a34a",
+                color: "success.main",
               },
             }}
           />
@@ -115,32 +108,23 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
               sx={{
                 width: { xs: 42, sm: 48, md: 52 },
                 height: { xs: 42, sm: 48, md: 52 },
-
                 borderRadius: { xs: "12px", sm: "16px" },
-
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
-
-                background: `
+                background: (theme) => `
                   linear-gradient(
                     135deg,
-                    rgba(22,163,74,.22),
-                    rgba(21,128,61,.14)
+                    ${alpha(theme.palette.success.main, 0.22)},
+                    ${alpha(theme.palette.success.main, 0.14)}
                   )
                 `,
-
                 border: "1px solid",
-                borderColor: alpha("#16a34a", 0.15),
-
-                color: "#166534",
-
-                boxShadow: `
-                  inset 0 1px 0 rgba(255,255,255,.6),
-                  0 10px 24px rgba(22,163,74,.12)
-                `,
-
+                borderColor: (theme) => alpha(theme.palette.success.main, 0.15),
+                color: "success.main",
+                boxShadow: (theme) =>
+                  `0 10px 24px ${alpha(theme.palette.success.main, 0.12)}`,
                 "& svg": {
                   width: { xs: 22, sm: 24, md: 26 },
                   height: { xs: 22, sm: 24, md: 26 },
@@ -159,15 +143,10 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
                   md: "2.25rem",
                   lg: "2.5rem",
                 },
-
                 fontWeight: 900,
-
                 lineHeight: 1.15,
-
                 letterSpacing: "-0.03em",
-
-                color: "#14532d",
-
+                color: "text.primary",
                 wordBreak: "break-word",
               }}
             >
@@ -179,19 +158,14 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
           <Typography
             sx={{
               maxWidth: 760,
-
               fontSize: {
                 xs: "0.85rem",
                 sm: "0.95rem",
                 md: "1.05rem",
               },
-
               lineHeight: 1.6,
-
-              color: alpha("#14532d", 0.82),
-
+              color: "text.secondary",
               wordBreak: "break-word",
-
               mb: 0,
             }}
           >
@@ -225,13 +199,13 @@ export function HeroInfo({ title, description, icon, tags }: HeroInfoProps) {
                   label={item}
                   size="small"
                   sx={{
-                    bgcolor: "rgba(255,255,255,.65)",
-                    color: "#166534",
+                    bgcolor: "action.hover",
+                    color: "text.primary",
                     fontWeight: 600,
                     fontSize: { xs: "0.725rem", sm: "0.8125rem" },
                     borderRadius: "10px",
                     border: "1px solid",
-                    borderColor: alpha("#16a34a", 0.1),
+                    borderColor: "divider",
                     backdropFilter: "blur(10px)",
                   }}
                 />

@@ -49,15 +49,6 @@ export default function AdminLectureDetailPage() {
     refetchMaterials();
   };
 
-  // Assignments updates
-  const handleAssignmentCreated = () => {
-    refetchAssignments();
-  };
-
-  const handleAssignmentDeleted = () => {
-    refetchAssignments();
-  };
-
   // 1. Initial Lecture Loading Skeleton State
   if (loadingLecture) {
     return <LectureDetailSkeleton />;

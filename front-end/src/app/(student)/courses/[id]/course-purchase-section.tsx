@@ -10,7 +10,7 @@ import type { LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { useAuth } from "@/lib/use-auth";
 import { formatPrice } from "@/lib/util/date-utils";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, alpha } from "@mui/material";
 import { PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -98,10 +98,14 @@ export function CoursePurchaseSection({
           zIndex: 1000,
           px: 2.5,
           py: 1.25,
-          bgcolor: "rgba(15, 23, 42, 0.95)",
+          bgcolor: (theme) => alpha(theme.palette.background.paper, 0.95),
           backdropFilter: "blur(16px)",
-          borderTop: "1px solid rgba(255,255,255,0.15)",
-          boxShadow: "0 -10px 25px rgba(0,0,0,0.3)",
+          borderTop: "1px solid",
+          borderColor: "divider",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 -10px 25px rgba(0,0,0,0.5)"
+              : "0 -10px 25px rgba(0,0,0,0.08)",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 2,
@@ -111,7 +115,7 @@ export function CoursePurchaseSection({
           <Typography
             sx={{
               fontSize: "0.7rem",
-              color: "#94a3b8",
+              color: "text.secondary",
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.05em",
@@ -122,7 +126,7 @@ export function CoursePurchaseSection({
           <Typography
             sx={{
               fontWeight: 900,
-              color: isFree ? "#34d399" : "white",
+              color: isFree ? "success.main" : "text.primary",
               fontSize: "1.15rem",
               lineHeight: 1.1,
             }}

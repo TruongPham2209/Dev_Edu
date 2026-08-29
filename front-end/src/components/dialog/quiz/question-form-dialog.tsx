@@ -12,6 +12,7 @@ import type {
   QuizTypeConfigResponse,
 } from "@/lib/type/quizzes";
 import {
+  alpha,
   Box,
   Button,
   Checkbox,
@@ -23,7 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FileQuestion, Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface QuestionFormDialogProps {
   open: boolean;
@@ -36,7 +37,18 @@ interface QuestionFormDialogProps {
   loading?: boolean;
 }
 
-export function QuestionFormDialog({
+export function QuestionFormDialog(props: QuestionFormDialogProps) {
+  const { open, initialData, isDuplicate } = props;
+  if (!open) return null;
+  return (
+    <QuestionFormContent
+      key={`${initialData?.id || "new"}_${isDuplicate}`}
+      {...props}
+    />
+  );
+}
+
+function QuestionFormContent({
   open,
   onClose,
   onSave,
@@ -46,15 +58,33 @@ export function QuestionFormDialog({
   isDuplicate = false,
   loading = false,
 }: QuestionFormDialogProps) {
-  const [questionType, setQuestionType] =
-    useState<QuestionType>("SINGLE_CHOICE");
-  const [content, setContent] = useState("");
-  const [options, setOptions] = useState<QuizOptionRequest[]>([
-    { optionText: "", isCorrect: true, orderIndex: 0 },
-    { optionText: "", isCorrect: false, orderIndex: 1 },
-    { optionText: "", isCorrect: false, orderIndex: 2 },
-    { optionText: "", isCorrect: false, orderIndex: 3 },
-  ]);
+  const [questionType, setQuestionType] = useState<QuestionType>(() => {
+    if (initialData) return initialData.questionType;
+    return (
+      defaultType ||
+      (availableTypeConfigs[0]?.questionType as QuestionType) ||
+      "SINGLE_CHOICE"
+    );
+  });
+  const [content, setContent] = useState<string>(
+    () => initialData?.content || "",
+  );
+  const [options, setOptions] = useState<QuizOptionRequest[]>(() => {
+    if (initialData?.options && initialData.options.length > 0) {
+      return initialData.options.map((opt, idx) => ({
+        id: isDuplicate ? undefined : opt.id,
+        optionText: opt.optionText,
+        isCorrect: !!opt.isCorrect,
+        orderIndex: idx,
+      }));
+    }
+    return [
+      { optionText: "", isCorrect: true, orderIndex: 0 },
+      { optionText: "", isCorrect: false, orderIndex: 1 },
+      { optionText: "", isCorrect: false, orderIndex: 2 },
+      { optionText: "", isCorrect: false, orderIndex: 3 },
+    ];
+  });
   const [touched, setTouched] = useState(false);
 
   // FilterItems for FilterSelect
@@ -74,44 +104,6 @@ export function QuestionFormDialog({
       return { id: cfg.questionType, title };
     });
   }, [availableTypeConfigs]);
-
-  useEffect(() => {
-    if (open) {
-      if (initialData) {
-        setQuestionType(initialData.questionType);
-        setContent(initialData.content);
-        if (initialData.options && initialData.options.length > 0) {
-          setOptions(
-            initialData.options.map((opt, idx) => ({
-              id: isDuplicate ? undefined : opt.id,
-              optionText: opt.optionText,
-              isCorrect: !!opt.isCorrect,
-              orderIndex: idx,
-            })),
-          );
-        } else {
-          setOptions([
-            { optionText: "", isCorrect: true, orderIndex: 0 },
-            { optionText: "", isCorrect: false, orderIndex: 1 },
-          ]);
-        }
-      } else {
-        const initialType =
-          defaultType ||
-          (availableTypeConfigs[0]?.questionType as QuestionType) ||
-          "SINGLE_CHOICE";
-        setQuestionType(initialType);
-        setContent("");
-        setOptions([
-          { optionText: "", isCorrect: true, orderIndex: 0 },
-          { optionText: "", isCorrect: false, orderIndex: 1 },
-          { optionText: "", isCorrect: false, orderIndex: 2 },
-          { optionText: "", isCorrect: false, orderIndex: 3 },
-        ]);
-      }
-      setTouched(false);
-    }
-  }, [open, initialData, defaultType, availableTypeConfigs, isDuplicate]);
 
   // Option handlers
   const handleAddOption = () => {
@@ -301,11 +293,15 @@ export function QuestionFormDialog({
                     alignItems: "center",
                     gap: 1.5,
                     bgcolor: opt.isCorrect
-                      ? "rgba(34, 197, 94, 0.05)"
-                      : "transparent",
+                      ? (theme) =>
+                          alpha(
+                            theme.palette.success.main,
+                            theme.palette.mode === "dark" ? 0.15 : 0.05,
+                          )
+                      : "background.paper",
                     borderColor: opt.isCorrect
-                      ? "rgba(34, 197, 94, 0.3)"
-                      : "rgba(0,0,0,0.12)",
+                      ? (theme) => alpha(theme.palette.success.main, 0.4)
+                      : "divider",
                   }}
                 >
                   {questionType === "SINGLE_CHOICE" ? (

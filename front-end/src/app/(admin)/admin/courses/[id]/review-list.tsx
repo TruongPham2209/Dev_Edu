@@ -21,6 +21,7 @@ import {
   Rating,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { Star, Trash2 } from "lucide-react";
@@ -79,24 +80,29 @@ export function ReviewList({ courseId }: ReviewListProps) {
       { threshold: 0.1 },
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
       }
     };
-  }, [observerTarget, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <Card
       sx={{
         borderRadius: 1,
-        border: "1px solid rgba(15, 23, 42, 0.08)",
-        background: "rgba(255, 255, 255, 0.9)",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
         height: { xs: 450, sm: 520 }, // Consistent height for the Data Row
@@ -106,7 +112,8 @@ export function ReviewList({ courseId }: ReviewListProps) {
       <Box
         sx={{
           p: { xs: 2, sm: 2.5 },
-          borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -117,11 +124,17 @@ export function ReviewList({ courseId }: ReviewListProps) {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Avatar
             sx={{
-              bgcolor: "rgba(245, 158, 11, 0.08)",
-              color: "rgb(245, 158, 11)",
+              bgcolor: (theme) =>
+                alpha(
+                  theme.palette.warning.main,
+                  theme.palette.mode === "dark" ? 0.2 : 0.08,
+                ),
+              color: "warning.main",
               width: 36,
               height: 36,
-              border: "1px solid rgba(245, 158, 11, 0.12)",
+              border: "1px solid",
+              borderColor: (theme) =>
+                alpha(theme.palette.warning.main, 0.2),
             }}
           >
             <Star size={18} />
@@ -193,7 +206,7 @@ export function ReviewList({ courseId }: ReviewListProps) {
                     py: { xs: 1.5, sm: 2 },
                     transition: "background-color 0.15s ease",
                     "&:hover": {
-                      bgcolor: "rgba(15, 23, 42, 0.02)",
+                      bgcolor: "action.hover",
                     },
                   }}
                 >
@@ -209,7 +222,8 @@ export function ReviewList({ courseId }: ReviewListProps) {
                         width: { xs: 36, sm: 44 },
                         height: { xs: 36, sm: 44 },
                         flexShrink: 0,
-                        border: "1px solid rgba(15, 23, 42, 0.08)",
+                        border: "1px solid",
+                        borderColor: "divider",
                       }}
                     >
                       {review.fullName
@@ -279,7 +293,7 @@ export function ReviewList({ courseId }: ReviewListProps) {
                 </Box>
                 {index < reviews.length - 1 && (
                   <Divider
-                    sx={{ mx: 3, borderColor: "rgba(15, 23, 42, 0.04)" }}
+                    sx={{ mx: 3, borderColor: "divider" }}
                   />
                 )}
               </Box>

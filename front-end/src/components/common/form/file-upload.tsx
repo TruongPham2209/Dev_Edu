@@ -29,6 +29,7 @@ export interface FileUploadProps {
   accept?: string;
   fileType?: "image" | "video" | "document";
   fileExtensions?: string[]; // e.g. [".pdf", ".docx"] or ["pdf", "docx"]
+  disabled?: boolean;
 }
 
 export function FileUpload({
@@ -42,8 +43,9 @@ export function FileUpload({
   width = "100%",
   height = 200,
   accept,
-  fileType,
+  fileType = "image",
   fileExtensions,
+  disabled = false,
 }: FileUploadProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -137,11 +139,15 @@ export function FileUpload({
     [effectiveFileType, normalizedExtensions, maxSizeMB, onChange],
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(true);
-  }, []);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (disabled) return;
+      setIsDragActive(true);
+    },
+    [disabled],
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -154,32 +160,36 @@ export function FileUpload({
       e.preventDefault();
       e.stopPropagation();
       setIsDragActive(false);
+      if (disabled) return;
 
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         const droppedFile = e.dataTransfer.files[0];
         validateAndProcessFile(droppedFile);
       }
     },
-    [validateAndProcessFile],
+    [disabled, validateAndProcessFile],
   );
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (disabled) return;
       if (e.target.files && e.target.files.length > 0) {
         const selectedFile = e.target.files[0];
         validateAndProcessFile(selectedFile);
       }
     },
-    [validateAndProcessFile],
+    [disabled, validateAndProcessFile],
   );
 
   const handleButtonClick = useCallback(() => {
+    if (disabled) return;
     fileInputRef.current?.click();
-  }, []);
+  }, [disabled]);
 
   const handleRemove = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (disabled) return;
       onChange(null);
       if (onClear) {
         onClear();
@@ -189,7 +199,7 @@ export function FileUpload({
         fileInputRef.current.value = "";
       }
     },
-    [onChange, onClear],
+    [disabled, onChange, onClear],
   );
 
   const activeError = error || Boolean(localError);
@@ -214,24 +224,29 @@ export function FileUpload({
             ? "error.main"
             : isDragActive
               ? "primary.main"
-              : "rgba(15, 23, 42, 0.15)",
+              : "divider",
           bgcolor: isDragActive
-            ? "rgba(37, 99, 235, 0.02)"
-            : "rgba(15, 23, 42, 0.01)",
+            ? "action.selected"
+            : "action.hover",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          cursor: "pointer",
+          cursor: disabled ? "default" : "pointer",
+          opacity: disabled ? 0.75 : 1,
           position: "relative",
           overflow: "hidden",
           transition: "all 0.22s ease",
 
           "&:hover": {
-            borderColor: activeError ? "error.main" : "primary.main",
-            bgcolor: activeError ? "error.50" : "rgba(37, 99, 235, 0.02)",
+            borderColor: activeError
+              ? "error.main"
+              : disabled
+                ? "divider"
+                : "primary.main",
+            bgcolor: "action.hover",
             "& .upload-overlay": {
-              opacity: 1,
+              opacity: disabled ? 0 : 1,
             },
           },
         }}
@@ -280,56 +295,60 @@ export function FileUpload({
               </Stack>
             )}
 
-            {/* Hover overlay to change file */}
-            <Box
-              className="upload-overlay"
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                bgcolor: "rgba(15, 23, 42, 0.6)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                opacity: 0,
-                transition: "opacity 0.22s ease",
-              }}
-            >
-              <UploadCloud size={28} />
-              <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
-                Change File
-              </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.8, mt: 0.5 }}>
-                Drag and drop or click to replace
-              </Typography>
-            </Box>
+            {/* Hover overlay to change image */}
+            {!disabled && (
+              <Box
+                className="upload-overlay"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  bgcolor: "rgba(15, 23, 42, 0.6)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  opacity: 0,
+                  transition: "opacity 0.22s ease",
+                }}
+              >
+                <UploadCloud size={28} />
+                <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
+                  Change File
+                </Typography>
+                <Typography variant="caption" sx={{ opacity: 0.8, mt: 0.5 }}>
+                  Drag and drop or click to replace
+                </Typography>
+              </Box>
+            )}
 
             {/* Remove button */}
-            <IconButton
-              size="small"
-              onClick={handleRemove}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                bgcolor: "rgba(255, 255, 255, 0.9)",
-                color: "text.primary",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                zIndex: 2,
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  bgcolor: "error.main",
-                  color: "white",
-                  transform: "scale(1.05)",
-                },
-              }}
-            >
-              <X size={16} />
-            </IconButton>
+            {!disabled && (
+              <IconButton
+                size="small"
+                onClick={handleRemove}
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  bgcolor: "background.paper",
+                  color: "text.primary",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  zIndex: 2,
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    bgcolor: "error.main",
+                    color: "white",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                <X size={16} />
+              </IconButton>
+            )}
           </>
         ) : (
           <Stack
@@ -399,6 +418,7 @@ export function FileUpload({
                 : "*")
           }
           onChange={handleFileChange}
+          disabled={disabled}
         />
       </Box>
       {displayHelperText && (

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Avatar,
   Box,
@@ -26,13 +28,20 @@ export function MetricItem({
     <Card
       sx={{
         borderRadius: 1,
-        border: "1px solid rgba(15, 23, 42, 0.08)",
-        background: "rgba(255, 255, 255, 0.9)",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
         "&:hover": {
           transform: "translateY(-2px)",
-          boxShadow: "0 10px 25px -5px rgba(15, 23, 42, 0.08)",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 10px 25px rgba(0, 0, 0, 0.6)"
+              : "0 10px 25px -5px rgba(15, 23, 42, 0.08)",
         },
       }}
     >

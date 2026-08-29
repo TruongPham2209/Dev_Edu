@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ChevronRight, Home, Info, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   useAssignmentByIdQuery,
@@ -13,15 +13,12 @@ import {
   useDeleteFeedbackMutation,
   useFeedbacksQuery,
   useSubmissionsInfiniteQuery,
-  useSubmissionTrackingQuery,
+  useSubmissionTrackingInfiniteQuery,
 } from "@/lib/api/assignments";
 import { useCourseByIdQuery } from "@/lib/api/courses";
 import { getDownloadUrl } from "@/lib/api/files";
 import { useLectureByIdQuery } from "@/lib/api/lectures";
-import type {
-  SubmissionLogResponse,
-  SubmissionResponse,
-} from "@/lib/type/assignments";
+import type { SubmissionResponse } from "@/lib/type/assignments";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { formatServerDate } from "@/lib/util/date-utils";
 
@@ -99,42 +96,23 @@ export default function LecturerAssignmentDetailPage() {
     enabled: !!selectedSubmission,
   });
 
-  const [historyPage, setHistoryPage] = useState(0);
+  const {
+    data: trackingData,
+    isLoading: historyQueryLoading,
+    isFetchingNextPage: historyFetchingMore,
+    hasNextPage: historyHasMore,
+    fetchNextPage: fetchNextHistory,
+  } = useSubmissionTrackingInfiniteQuery(
+    assignmentId,
+    selectedSubmission?.studentUsername,
+  );
 
-  const { data: trackingData, isLoading: historyLoading } =
-    useSubmissionTrackingQuery(
-      assignmentId,
-      selectedSubmission?.studentUsername,
-      historyPage,
-      {
-        enabled: !!selectedSubmission,
-      },
-    );
-
-  const [history, setHistory] = useState<SubmissionLogResponse[]>([]);
-
-  useEffect(() => {
-    if (!selectedSubmission) {
-      setHistory([]);
-      setHistoryPage(0);
-      return;
-    }
-    if (trackingData) {
-      if (historyPage === 0) {
-        setHistory(trackingData.contents);
-      } else {
-        setHistory((prev) => [...prev, ...trackingData.contents]);
-      }
-    }
-  }, [trackingData, historyPage, selectedSubmission]);
-
-  const historyHasMore = trackingData
-    ? trackingData.currentPage < trackingData.totalPages - 1
-    : false;
+  const history = trackingData?.pages.flatMap((p) => p.contents) || [];
+  const historyLoading = historyQueryLoading || historyFetchingMore;
 
   const loadMoreHistory = async () => {
     if (historyLoading || !historyHasMore) return;
-    setHistoryPage((prev) => prev + 1);
+    fetchNextHistory();
   };
 
   // --- Handle File Downloads ---
@@ -155,8 +133,6 @@ export default function LecturerAssignmentDetailPage() {
   };
 
   const openSubmissionDetails = (submission: SubmissionResponse) => {
-    setHistoryPage(0);
-    setHistory([]);
     setSelectedSubmission(submission);
   };
 
@@ -174,7 +150,6 @@ export default function LecturerAssignmentDetailPage() {
       });
       showSuccess("Successfully added feedback");
       refetchFeedbacks();
-      setHistoryPage(0);
     } catch (error) {
       handleError(error, "Failed to add feedback");
       throw error;
@@ -187,7 +162,6 @@ export default function LecturerAssignmentDetailPage() {
       await deleteFeedbackMutate(feedbackId);
       showSuccess("Successfully deleted feedback");
       refetchFeedbacks();
-      setHistoryPage(0);
     } catch (error) {
       handleError(error, "Failed to delete feedback");
       throw error;
@@ -255,40 +229,64 @@ export default function LecturerAssignmentDetailPage() {
           },
         }}
       >
-        <Link
+        <Box
+          component={Link}
           href="/lecturer"
-          className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors gap-1 shrink-0"
-          style={{ textDecoration: "none", lineHeight: 1.4 }}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: "text.secondary",
+            textDecoration: "none",
+            lineHeight: 1.4,
+            flexShrink: 0,
+            transition: "color 0.2s ease",
+            "&:hover": { color: "text.primary" },
+          }}
         >
           <Home size={14} style={{ flexShrink: 0 }} />
-          <span className="hidden sm:inline">Dashboard</span>
-        </Link>
-        <Link
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            Dashboard
+          </Box>
+        </Box>
+        <Box
+          component={Link}
           href={`/lecturer/courses/${courseId}`}
-          className="text-slate-500 hover:text-slate-900 transition-colors truncate"
-          style={{
+          sx={{
+            color: "text.secondary",
             textDecoration: "none",
             lineHeight: 1.4,
             maxWidth: 100,
             display: "inline-block",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            transition: "color 0.2s ease",
+            "&:hover": { color: "text.primary" },
           }}
           title={courseTitle}
         >
           {courseTitle}
-        </Link>
-        <Link
+        </Box>
+        <Box
+          component={Link}
           href={`/lecturer/courses/${courseId}/lectures/${lectureId}`}
-          className="text-slate-500 hover:text-slate-900 transition-colors truncate"
-          style={{
+          sx={{
+            color: "text.secondary",
             textDecoration: "none",
             lineHeight: 1.4,
             maxWidth: 110,
             display: "inline-block",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            transition: "color 0.2s ease",
+            "&:hover": { color: "text.primary" },
           }}
           title={lectureTitle}
         >
           {lectureTitle}
-        </Link>
+        </Box>
         <Typography
           component="span"
           sx={{

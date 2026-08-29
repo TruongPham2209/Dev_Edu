@@ -96,7 +96,12 @@ export function ActivityStats() {
   if (error) {
     return (
       <Card
-        sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+        }}
       >
         <CardContent sx={{ p: 3 }}>
           <ErrorState
@@ -114,7 +119,12 @@ export function ActivityStats() {
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Card
-            sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              borderRadius: 3,
+            }}
           >
             <CardContent sx={{ p: 3 }}>
               <Skeleton width={180} height={28} sx={{ mb: 1 }} />
@@ -149,7 +159,12 @@ export function ActivityStats() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <Card
-            sx={{ border: "1px solid rgba(15, 23, 42, 0.08)", borderRadius: 3 }}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              borderRadius: 3,
+            }}
           >
             <CardContent sx={{ p: 3 }}>
               <Skeleton width={180} height={28} sx={{ mb: 1 }} />
@@ -194,10 +209,14 @@ export function ActivityStats() {
         <Card
           sx={{
             height: "100%",
-            border: "1px solid rgba(15, 23, 42, 0.08)",
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: 3,
-            boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-            background: "rgba(255, 255, 255, 0.95)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+                : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+            bgcolor: "background.paper",
             backdropFilter: "blur(8px)",
           }}
         >
@@ -222,8 +241,14 @@ export function ActivityStats() {
                   sx={{
                     p: { xs: 1.75, sm: 2 },
                     borderRadius: 2.5,
-                    bgcolor: alpha("#10b981", 0.08),
-                    border: "1px solid rgba(16, 185, 129, 0.15)",
+                    bgcolor: (theme) =>
+                      alpha(
+                        theme.palette.success.main,
+                        theme.palette.mode === "dark" ? 0.18 : 0.08,
+                      ),
+                    border: "1px solid",
+                    borderColor: (theme) =>
+                      alpha(theme.palette.success.main, 0.2),
                   }}
                 >
                   <Box
@@ -231,7 +256,7 @@ export function ActivityStats() {
                       display: "flex",
                       alignItems: "center",
                       gap: 1,
-                      color: "#10b981",
+                      color: "success.main",
                       mb: 1,
                     }}
                   >
@@ -251,7 +276,7 @@ export function ActivityStats() {
                     variant="h4"
                     sx={{
                       fontWeight: 800,
-                      color: "#10b981",
+                      color: "success.main",
                       fontSize: { xs: "1.5rem", sm: "1.85rem", md: "2rem" },
                     }}
                   >
@@ -264,8 +289,14 @@ export function ActivityStats() {
                   sx={{
                     p: { xs: 1.75, sm: 2 },
                     borderRadius: 2.5,
-                    bgcolor: alpha("#3b82f6", 0.08),
-                    border: "1px solid rgba(59, 130, 246, 0.15)",
+                    bgcolor: (theme) =>
+                      alpha(
+                        theme.palette.primary.main,
+                        theme.palette.mode === "dark" ? 0.18 : 0.08,
+                      ),
+                    border: "1px solid",
+                    borderColor: (theme) =>
+                      alpha(theme.palette.primary.main, 0.2),
                   }}
                 >
                   <Box
@@ -273,7 +304,7 @@ export function ActivityStats() {
                       display: "flex",
                       alignItems: "center",
                       gap: 1,
-                      color: "#3b82f6",
+                      color: "primary.main",
                       mb: 1,
                     }}
                   >
@@ -387,10 +418,14 @@ export function ActivityStats() {
         <Card
           sx={{
             height: "100%",
-            border: "1px solid rgba(15, 23, 42, 0.08)",
+            border: "1px solid",
+            borderColor: "divider",
             borderRadius: 3,
-            boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.01)",
-            background: "rgba(255, 255, 255, 0.95)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0px 4px 20px rgba(0, 0, 0, 0.4)"
+                : "0px 4px 20px rgba(0, 0, 0, 0.01)",
+            bgcolor: "background.paper",
             backdropFilter: "blur(8px)",
           }}
         >

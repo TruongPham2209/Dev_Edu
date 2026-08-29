@@ -1,14 +1,18 @@
+"use client";
+
 import { Box, Container, Grid, Skeleton, Stack } from "@mui/material";
 
 export function StudentCourseDetailSkeleton() {
   return (
     <Box
       sx={{
-        bgcolor: "#f1f5f9",
+        bgcolor: "background.default",
         minHeight: "100vh",
         pb: 12,
-        backgroundImage:
-          "radial-gradient(circle at top center, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)",
+        backgroundImage: (theme) =>
+          theme.palette.mode === "dark"
+            ? "radial-gradient(circle at top center, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 1) 100%)"
+            : "radial-gradient(circle at top center, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)",
         overflowX: "clip",
       }}
     >

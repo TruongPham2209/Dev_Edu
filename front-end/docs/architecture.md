@@ -47,6 +47,12 @@ front-end/
 │   ├── lib/                     # Core Logic, API Client, Authentication & Types
 │   │   ├── api/                 # Backend REST API calls & React Query Hooks (courses.ts, users.ts, forum.ts, quizzes.ts...)
 │   │   ├── auth/                # Auth logic (JWT parser, RBAC routes, Cookie helper, Login logic)
+│   │   ├── theme/               # Centralized Light/Dark Theme Subsystem (types, tokens, overrides, provider)
+│   │   │   ├── components.ts    # Global MUI component default overrides (MuiPaper, MuiCard, MuiCssBaseline...)
+│   │   │   ├── create-app-theme.ts # Dynamic MUI Theme & AntD Algorithm generator
+│   │   │   ├── theme-provider.tsx # ThemeModeProvider & useThemeMode hook
+│   │   │   ├── tokens.ts        # Light/Dark color palette semantic tokens
+│   │   │   └── types.ts         # ThemeMode union type ('light' | 'dark')
 │   │   ├── type/                # TypeScript interfaces & Enums (api.ts, courses.ts, users.ts, quizzes.ts...)
 │   │   ├── util/                # Utility functions (date-utils.ts, file-utils.tsx, status-utils.ts)
 │   │   ├── auth-storage.ts      # LocalStorage auth state management
@@ -144,3 +150,10 @@ front-end/
    * `src/app/firebase-messaging-sw.js` Service Worker renders push notifications even when the browser runs in background.
    * FCM registration tokens are registered with the backend API `/api/v1/notifications`.
    * Personal and group notification channels support unread count indicators.
+
+7. **Theme Subsystem & Dark/Light Mode Architecture**:
+   * Managed via `ThemeModeProvider` at `src/lib/theme/theme-provider.tsx` wrapping the app in `AppProviders`.
+   * Dynamically constructs Material UI Theme (`createAppTheme`) and aligns Ant Design Algorithm (`antdTheme.darkAlgorithm` vs `defaultAlgorithm`).
+   * `layout.tsx` injects an inline `#theme-init-script` that sets `data-theme="dark"` attribute and `dark` class on `<html>` before hydration to prevent FOUC (Flash of Unstyled Content).
+   * MUI global overrides in `src/lib/theme/components.ts` customize `MuiCssBaseline`, `MuiPaper`, `MuiCard`, `MuiAppBar`, `MuiDialog`, `MuiMenu`, `MuiPopover`, `MuiDrawer`, `MuiTableCell`, `MuiOutlinedInput`, `MuiChip`, `MuiTooltip` default behaviors across Light and Dark modes.
+

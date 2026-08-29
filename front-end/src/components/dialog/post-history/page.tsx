@@ -9,6 +9,7 @@ import {
   useDeletePostVersionMutation,
   usePostVersionsByPostIdQuery,
 } from "@/lib/api/forum";
+import type { PostResponse } from "@/lib/type/forums";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
 import { Box, Skeleton, Stack } from "@mui/material";
 import { History } from "lucide-react";
@@ -34,7 +35,9 @@ export function PostHistoryModal({
 }: PostHistoryModalProps) {
   const [filterStatus, setFilterStatus] = useState("ALL");
 
-  const [selectedVersion, setSelectedVersion] = useState<any>(null);
+  const [selectedVersion, setSelectedVersion] = useState<PostResponse | null>(
+    null,
+  );
   const [versionToDelete, setVersionToDelete] = useState<string | null>(null);
 
   const { handleError, showSuccess } = useApiWithToast();

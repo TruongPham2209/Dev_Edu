@@ -40,16 +40,21 @@ export function TrendingTopics({
     <Card
       sx={{
         borderRadius: 2,
-        bgcolor: "#ffffff",
-        boxShadow: "0 4px 20px -5px rgba(0,0,0,0.05)",
-        border: "1px solid rgba(0,0,0,0.03)",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px -5px rgba(0,0,0,0.5)"
+            : "0 4px 20px -5px rgba(0,0,0,0.05)",
+        border: "1px solid",
+        borderColor: "divider",
         mb: { xs: 3, sm: 4 },
       }}
     >
       <Box
         sx={{
           p: { xs: 2, sm: 2.5 },
-          borderBottom: "1px solid #f1f5f9",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           display: "flex",
           alignItems: "center",
           gap: 1.5,
@@ -60,7 +65,7 @@ export function TrendingTopics({
           variant="subtitle1"
           sx={{
             fontWeight: 800,
-            color: "#0f172a",
+            color: "text.primary",
             fontSize: { xs: "0.95rem", sm: "1rem" },
           }}
         >
@@ -75,9 +80,10 @@ export function TrendingTopics({
               onClick={() => onSelectTopic?.(topic.title)}
               sx={{
                 p: { xs: 2, sm: 2.5 },
-                borderBottom: "1px solid #f8fafc",
+                borderBottom: "1px solid",
+                borderColor: "divider",
                 cursor: onSelectTopic ? "pointer" : "default",
-                "&:hover": onSelectTopic ? { bgcolor: "#f8fafc" } : {},
+                "&:hover": onSelectTopic ? { bgcolor: "action.hover" } : {},
                 transition: "background 0.2s",
               }}
             >
@@ -85,7 +91,7 @@ export function TrendingTopics({
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  color: "#1e293b",
+                  color: "text.primary",
                   mb: 1,
                   lineHeight: 1.4,
                 }}
@@ -97,7 +103,7 @@ export function TrendingTopics({
                   display: "flex",
                   alignItems: "center",
                   gap: 2,
-                  color: "#64748b",
+                  color: "text.secondary",
                 }}
               >
                 <Typography

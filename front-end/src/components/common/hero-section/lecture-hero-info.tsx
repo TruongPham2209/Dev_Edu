@@ -13,6 +13,7 @@ import {
   Grid,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { Calendar, Play, Video } from "lucide-react";
 import { useState } from "react";
@@ -49,10 +50,13 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
     <Card
       sx={{
         borderRadius: 2,
-        border: "1px solid rgba(15, 23, 42, 0.08)",
-        background:
-          "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.95) 100%)",
-        boxShadow: "0 10px 30px -10px rgba(15, 23, 42, 0.08)",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 10px 30px -10px rgba(0, 0, 0, 0.5)"
+            : "0 10px 30px -10px rgba(15, 23, 42, 0.08)",
         overflow: "hidden",
       }}
     >
@@ -211,22 +215,24 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
                     label="Lecture"
                     size="small"
                     sx={{
-                      bgcolor: "rgba(37, 99, 235, 0.08)",
-                      color: "#2563eb",
+                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                      color: "primary.main",
                       fontWeight: 700,
                       borderRadius: 1.5,
-                      border: "1px solid rgba(37, 99, 235, 0.12)",
+                      border: "1px solid",
+                      borderColor: (theme) => alpha(theme.palette.primary.main, 0.2),
                     }}
                   />
                   <Chip
                     label="Management"
                     size="small"
                     sx={{
-                      bgcolor: "rgba(100, 116, 139, 0.08)",
-                      color: "#475569",
+                      bgcolor: "action.hover",
+                      color: "text.secondary",
                       fontWeight: 700,
                       borderRadius: 1.5,
-                      border: "1px solid rgba(100, 116, 139, 0.12)",
+                      border: "1px solid",
+                      borderColor: "divider",
                     }}
                   />
                 </Box>

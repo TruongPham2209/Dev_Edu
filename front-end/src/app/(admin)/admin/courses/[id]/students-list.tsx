@@ -15,6 +15,7 @@ import {
   Skeleton,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { Users } from "lucide-react";
 import { useEffect, useMemo } from "react";
@@ -93,9 +94,13 @@ export const StudentsList = ({
     <Card
       sx={{
         borderRadius: 1,
-        border: "1px solid rgba(15, 23, 42, 0.08)",
-        background: "rgba(255, 255, 255, 0.9)",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
         height: { xs: 420, sm: 480 }, // Consistent height for the User Row
@@ -104,7 +109,8 @@ export const StudentsList = ({
       <Box
         sx={{
           p: { xs: 2, sm: 2.5 },
-          borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           display: "flex",
           alignItems: "center",
           gap: 1.5,
@@ -112,11 +118,17 @@ export const StudentsList = ({
       >
         <Avatar
           sx={{
-            bgcolor: "rgba(16, 185, 129, 0.08)",
-            color: "rgb(16, 185, 129)",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.success.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
+            color: "success.main",
             width: 36,
             height: 36,
-            border: "1px solid rgba(16, 185, 129, 0.12)",
+            border: "1px solid",
+            borderColor: (theme) =>
+              alpha(theme.palette.success.main, 0.2),
           }}
         >
           <Users size={18} />
@@ -179,7 +191,7 @@ export const StudentsList = ({
                       gap: 1,
                       transition: "background-color 0.15s ease",
                       "&:hover": {
-                        bgcolor: "rgba(15, 23, 42, 0.02)",
+                        bgcolor: "action.hover",
                       },
                     }}
                   >
@@ -237,7 +249,7 @@ export const StudentsList = ({
                   </Box>
                   {index < students.length - 1 && (
                     <Divider
-                      sx={{ mx: 3, borderColor: "rgba(15, 23, 42, 0.04)" }}
+                      sx={{ mx: 3, borderColor: "divider" }}
                     />
                   )}
                 </Box>

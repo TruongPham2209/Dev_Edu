@@ -149,24 +149,26 @@ export const RichTextEditor = ({
         width: "100%",
         overflow: "hidden",
         borderRadius: "12px",
-        bgcolor: "#ffffff",
-        border: `1.5px solid ${
-          error ? "#ef4444" : focused ? "#6366f1" : "#e2e8f0"
-        }`,
+        bgcolor: "background.paper",
+        border: "1.5px solid",
+        borderColor: (theme) =>
+          error ? theme.palette.error.main : focused ? theme.palette.primary.main : theme.palette.divider,
         boxShadow: focused
           ? "0 0 0 4px rgba(99,102,241,0.12)"
           : "0 1px 3px rgba(0,0,0,0.02)",
         transition: "all 0.2s ease",
         "&:hover": {
-          borderColor: error ? "#ef4444" : focused ? "#6366f1" : "#cbd5e1",
+          borderColor: (theme) =>
+            error ? theme.palette.error.main : focused ? theme.palette.primary.main : theme.palette.text.secondary,
         },
       }}
     >
       <Box
         sx={{
-          borderBottom: "1px solid #e2e8f0",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           p: { xs: 0.75, sm: 1 },
-          bgcolor: "#f8fafc",
+          bgcolor: "action.hover",
         }}
       >
         <Stack
@@ -194,7 +196,7 @@ export const RichTextEditor = ({
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ width: "1px", height: 16, bgcolor: "#cbd5e1", mx: 0.5 }} />
+          <Box sx={{ width: "1px", height: 16, bgcolor: "divider", mx: 0.5 }} />
 
           <Tooltip title="Heading 1" arrow placement="top">
             <IconButton
@@ -220,7 +222,7 @@ export const RichTextEditor = ({
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ width: "1px", height: 16, bgcolor: "#cbd5e1", mx: 0.5 }} />
+          <Box sx={{ width: "1px", height: 16, bgcolor: "divider", mx: 0.5 }} />
 
           <Tooltip title="Bullet List" arrow placement="top">
             <IconButton
@@ -262,7 +264,7 @@ export const RichTextEditor = ({
             </IconButton>
           </Tooltip>
 
-          <Box sx={{ width: "1px", height: 16, bgcolor: "#cbd5e1", mx: 0.5 }} />
+          <Box sx={{ width: "1px", height: 16, bgcolor: "divider", mx: 0.5 }} />
 
           <Tooltip title="Insert Link" arrow placement="top">
             <IconButton
@@ -309,7 +311,7 @@ export const RichTextEditor = ({
       <Box
         sx={{
           p: { xs: 1.5, sm: 2 },
-          bgcolor: "#ffffff",
+          bgcolor: "background.paper",
           "& .ProseMirror": {
             minHeight: { xs: Math.min(120, minHeight), sm: minHeight },
             outline: "none",
@@ -317,13 +319,13 @@ export const RichTextEditor = ({
             lineHeight: 1.7,
             fontFamily:
               '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            color: "#0f172a",
+            color: "text.primary",
             "& p": { margin: "0 0 0.75em 0" },
             "& h1, & h2, & h3": {
               marginTop: "1.2em",
               marginBottom: "0.6em",
               fontWeight: 700,
-              color: "#0f172a",
+              color: "text.primary",
               letterSpacing: "-0.01em",
             },
             "& h1": { fontSize: "1.6rem" },
@@ -346,12 +348,12 @@ export const RichTextEditor = ({
               ml: 0,
               my: "1em",
               bgcolor: "rgba(99, 102, 241, 0.04)",
-              color: "#475569",
+              color: "text.secondary",
               fontStyle: "italic",
               borderRadius: "0 6px 6px 0",
             },
             "& pre": {
-              background: "#0f172a",
+              background: (theme) => (theme.palette.mode === "dark" ? "#1e293b" : "#0f172a"),
               color: "#f8fafc",
               p: 2,
               borderRadius: 1.5,

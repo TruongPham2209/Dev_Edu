@@ -56,9 +56,11 @@ function createWrapper() {
       queries: { retry: false },
     },
   });
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = "QueryClientTestWrapper";
+  return Wrapper;
 }
 
 describe("useQuizExamSession hook", () => {
@@ -75,13 +77,13 @@ describe("useQuizExamSession hook", () => {
       mutate: vi.fn(),
       mutateAsync: mockAutosaveMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof quizzesApi.useAutosaveAttemptMutation>);
 
     vi.mocked(quizzesApi.useHeartbeatAttemptMutation).mockReturnValue({
       mutate: mockHeartbeatMutate,
       mutateAsync: mockHeartbeatMutateAsync,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof quizzesApi.useHeartbeatAttemptMutation>);
 
     // Mock sessionStorage
     const storage: Record<string, string> = {};

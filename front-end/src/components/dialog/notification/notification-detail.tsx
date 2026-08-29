@@ -91,12 +91,13 @@ export function NotificationDetailDialog({
           <Box
             dangerouslySetInnerHTML={{ __html: notification.content || "" }}
             sx={{
-              color: "#334155",
+              color: "text.primary",
               lineHeight: 1.6,
-              bgcolor: "#f8fafc",
+              bgcolor: "action.hover",
               p: { xs: 1.75, sm: 2.5 },
               borderRadius: 1,
-              border: "1px solid rgba(15, 23, 42, 0.06)",
+              border: "1px solid",
+              borderColor: "divider",
               wordBreak: "break-word",
               overflowX: "auto",
               "& p": { margin: "0 0 0.5em 0" },
@@ -118,14 +119,15 @@ export function NotificationDetailDialog({
           <Typography
             variant="body2"
             sx={{
-              color: "#334155",
+              color: "text.primary",
               lineHeight: 1.6,
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
-              bgcolor: "#f8fafc",
+              bgcolor: "action.hover",
               p: { xs: 1.75, sm: 2.5 },
               borderRadius: 1,
-              border: "1px solid rgba(15, 23, 42, 0.06)",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
             {notification.content || "No detailed content provided."}

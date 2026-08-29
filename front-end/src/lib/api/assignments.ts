@@ -251,6 +251,40 @@ export function useSubmissionTrackingQuery(
   });
 }
 
+export function useSubmissionTrackingInfiniteQuery(
+  assignmentId: string,
+  studentUsername?: string,
+  options?: Omit<
+    UseInfiniteQueryOptions<
+      CustomPaging<SubmissionLogResponse>,
+      Error,
+      InfiniteData<CustomPaging<SubmissionLogResponse>>,
+      unknown[],
+      number
+    >,
+    "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam"
+  >,
+) {
+  return useInfiniteQuery({
+    queryKey: [
+      "submissions",
+      "tracking",
+      "infinite",
+      assignmentId,
+      studentUsername,
+    ],
+    queryFn: ({ pageParam }) =>
+      getSubmissionTracking(assignmentId, studentUsername, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =>
+      lastPage.currentPage < lastPage.totalPages - 1
+        ? lastPage.currentPage + 1
+        : undefined,
+    enabled: !!assignmentId && !!studentUsername,
+    ...options,
+  });
+}
+
 export function useFeedbacksQuery(
   assignmentId: string,
   studentUsername?: string,

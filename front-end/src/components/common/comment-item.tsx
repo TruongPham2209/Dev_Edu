@@ -27,7 +27,7 @@ export interface CommentNodeData {
   createdAt: string | Date;
   replyCount?: number;
   parentId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CommentItemProps {
@@ -76,7 +76,7 @@ export function CommentItem({
   onChildAddReply,
 }: CommentItemProps) {
   const theme = useTheme();
-  const { isAuthenticated, roles } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const [commentState, setCommentState] = useState<CommentNodeData>({
     id,

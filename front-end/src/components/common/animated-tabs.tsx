@@ -36,10 +36,15 @@ export function AnimatedTabs<T extends string = string>({
       {...props}
       sx={{
         minHeight: 48,
+        borderBottom: "1px solid",
+        borderColor: "divider",
         "& .MuiTabs-indicator": {
           height: 3,
           borderRadius: "3px 3px 0 0",
-          bgcolor: `${colorTheme}.main`,
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark"
+              ? theme.palette[colorTheme].light
+              : theme.palette[colorTheme].main,
         },
         "& .MuiTab-root": {
           textTransform: "none",
@@ -50,6 +55,10 @@ export function AnimatedTabs<T extends string = string>({
           transition: "all 0.2s ease-in-out",
           position: "relative",
           color: "text.secondary",
+          "& svg, & .MuiSvgIcon-root": {
+            color: "inherit",
+            transition: "color 0.2s ease",
+          },
           "&::after": {
             content: '""',
             position: "absolute",
@@ -58,21 +67,34 @@ export function AnimatedTabs<T extends string = string>({
             width: "80%",
             height: 3,
             borderRadius: "3px 3px 0 0",
-            bgcolor: `${colorTheme}.light`,
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark"
+                ? theme.palette[colorTheme].light
+                : theme.palette[colorTheme].main,
             transform: "scaleX(0)",
             transformOrigin: "center",
             transition: "transform 0.3s ease-in-out",
           },
           "&:hover": {
-            color: `${colorTheme}.main`,
-            bgcolor: (theme) => alpha(theme.palette[colorTheme].main, 0.08),
+            color: (theme) =>
+              theme.palette.mode === "dark"
+                ? theme.palette[colorTheme].light
+                : theme.palette[colorTheme].main,
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette[colorTheme].main,
+                theme.palette.mode === "dark" ? 0.16 : 0.08,
+              ),
             borderRadius: "8px 8px 0 0",
             "&::after": {
               transform: "scaleX(1)",
             },
           },
           "&.Mui-selected": {
-            color: `${colorTheme}.main`,
+            color: (theme) =>
+              theme.palette.mode === "dark"
+                ? theme.palette[colorTheme].light
+                : theme.palette[colorTheme].main,
           },
           "&.Mui-selected::after": {
             display: "none",

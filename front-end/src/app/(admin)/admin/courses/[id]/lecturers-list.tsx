@@ -1,13 +1,14 @@
 "use client";
 
 import {
+  Avatar,
+  Box,
   Card,
   CardContent,
-  Typography,
-  Stack,
-  Box,
-  Avatar,
   Divider,
+  Stack,
+  Typography,
+  alpha,
 } from "@mui/material";
 import { GraduationCap } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
@@ -40,9 +41,13 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
     <Card
       sx={{
         borderRadius: 1,
-        border: "1px solid rgba(15, 23, 42, 0.08)",
-        background: "rgba(255, 255, 255, 0.9)",
-        boxShadow: "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        boxShadow: (theme) =>
+          theme.palette.mode === "dark"
+            ? "0 4px 20px rgba(0, 0, 0, 0.4)"
+            : "0 4px 20px -2px rgba(15, 23, 42, 0.04)",
         display: "flex",
         flexDirection: "column",
         height: { xs: 420, sm: 480 }, // Consistent height for the User Row
@@ -51,7 +56,8 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
       <Box
         sx={{
           p: { xs: 2, sm: 2.5 },
-          borderBottom: "1px solid rgba(15, 23, 42, 0.08)",
+          borderBottom: "1px solid",
+          borderColor: "divider",
           display: "flex",
           alignItems: "center",
           gap: 1.5,
@@ -59,11 +65,17 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
       >
         <Avatar
           sx={{
-            bgcolor: "rgba(139, 92, 246, 0.08)",
-            color: "rgb(139, 92, 246)",
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.secondary.main,
+                theme.palette.mode === "dark" ? 0.2 : 0.08,
+              ),
+            color: "secondary.main",
             width: 36,
             height: 36,
-            border: "1px solid rgba(139, 92, 246, 0.12)",
+            border: "1px solid",
+            borderColor: (theme) =>
+              alpha(theme.palette.secondary.main, 0.2),
           }}
         >
           <GraduationCap size={18} />
@@ -120,7 +132,7 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
                       py: { xs: 1.5, sm: 2 },
                       transition: "background-color 0.15s ease",
                       "&:hover": {
-                        bgcolor: "rgba(15, 23, 42, 0.02)",
+                        bgcolor: "action.hover",
                       },
                     }}
                   >
@@ -166,7 +178,7 @@ export const LecturersList = ({ lecturers }: LecturersListProps) => {
                   </Box>
                   {index < lecturerList.length - 1 && (
                     <Divider
-                      sx={{ mx: 3, borderColor: "rgba(15, 23, 42, 0.04)" }}
+                      sx={{ mx: 3, borderColor: "divider" }}
                     />
                   )}
                 </Box>

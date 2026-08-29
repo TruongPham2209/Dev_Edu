@@ -4,15 +4,14 @@ import { AnimatedTabs } from "@/components/common/animated-tabs";
 import { ErrorState } from "@/components/common/error-state";
 import { useCourseByIdQuery } from "@/lib/api/courses";
 import { useLectureByIdQuery } from "@/lib/api/lectures";
-import { useApiWithToast } from "@/lib/use-api-with-toast";
 import {
+  alpha,
   Box,
   Breadcrumbs,
   Card,
   CardContent,
   Container,
   Typography,
-  useTheme,
 } from "@mui/material";
 import {
   ArrowLeft,
@@ -37,8 +36,6 @@ import { TabComments } from "./comment-tab";
 export default function LecturerLectureDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const theme = useTheme();
-  const { handleError } = useApiWithToast();
 
   const lectureId = params.lectureId as string;
   const courseId = params.id as string;
@@ -56,10 +53,6 @@ export default function LecturerLectureDetailPage() {
 
   const loading = lectureLoading || courseLoading;
   const error = !!lectureError || (!lectureLoading && !lecture);
-
-  // Synchronized counts for Hero metadata
-  const [materialsCount, setMaterialsCount] = useState(0);
-  const [assignmentsCount, setAssignmentsCount] = useState(0);
 
   // Tab State
   const [tab, setTab] = useState("overview");
@@ -115,27 +108,45 @@ export default function LecturerLectureDetailPage() {
           },
         }}
       >
-        <Link
+        <Box
+          component={Link}
           href="/lecturer"
-          className="inline-flex items-center text-slate-500 hover:text-slate-900 transition-colors gap-1 shrink-0"
-          style={{ textDecoration: "none", lineHeight: 1.4 }}
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: "text.secondary",
+            textDecoration: "none",
+            lineHeight: 1.4,
+            flexShrink: 0,
+            transition: "color 0.2s ease",
+            "&:hover": { color: "text.primary" },
+          }}
         >
           <Home size={14} style={{ flexShrink: 0 }} />
-          <span className="hidden sm:inline">Dashboard</span>
-        </Link>
-        <Link
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            Dashboard
+          </Box>
+        </Box>
+        <Box
+          component={Link}
           href={`/lecturer/courses/${courseId}`}
-          className="text-slate-500 hover:text-slate-900 transition-colors truncate"
-          style={{
+          sx={{
+            color: "text.secondary",
             textDecoration: "none",
             lineHeight: 1.4,
             maxWidth: 130,
             display: "inline-block",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            transition: "color 0.2s ease",
+            "&:hover": { color: "text.primary" },
           }}
           title={courseTitle}
         >
           {courseTitle}
-        </Link>
+        </Box>
         <Typography
           component="span"
           sx={{
@@ -223,7 +234,7 @@ export default function LecturerLectureDetailPage() {
                 borderColor: "divider",
                 px: { xs: 2, sm: 3 },
                 py: { xs: 1.5, sm: 2 },
-                bgcolor: "grey.50",
+                bgcolor: "action.hover",
                 display: "flex",
                 alignItems: "center",
                 gap: 1.5,
@@ -234,7 +245,11 @@ export default function LecturerLectureDetailPage() {
                   width: 32,
                   height: 32,
                   borderRadius: 1.5,
-                  bgcolor: "primary.50",
+                  bgcolor: (theme) =>
+                    alpha(
+                      theme.palette.primary.main,
+                      theme.palette.mode === "dark" ? 0.2 : 0.08,
+                    ),
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -248,7 +263,7 @@ export default function LecturerLectureDetailPage() {
                 variant="subtitle1"
                 sx={{
                   fontWeight: 800,
-                  color: "#1e293b",
+                  color: "text.primary",
                   fontSize: { xs: "0.95rem", sm: "1rem" },
                 }}
               >
@@ -296,7 +311,7 @@ export default function LecturerLectureDetailPage() {
           display: tab === "materials" ? "block" : "none",
         }}
       >
-        <MaterialsTab lectureId={lectureId} onCountChange={setMaterialsCount} />
+        <MaterialsTab lectureId={lectureId} />
       </Box>
 
       <Box
@@ -308,7 +323,6 @@ export default function LecturerLectureDetailPage() {
         <AssignmentsTab
           lectureId={lectureId}
           courseId={courseId}
-          onCountChange={setAssignmentsCount}
         />
       </Box>
 
