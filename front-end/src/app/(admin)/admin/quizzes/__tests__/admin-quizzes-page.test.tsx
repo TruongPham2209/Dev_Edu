@@ -50,7 +50,7 @@ vi.mock("@/lib/api/quizzes", () => ({
   useQuizzesInfiniteQuery: vi.fn(),
   useQuizByIdQuery: vi.fn(),
   useReviewQuizMutation: vi.fn(),
-  useSubmitQuizMutation: vi.fn(),
+  useSubmitQuizMutation: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
 }));
 
 vi.mock("@/lib/toast-context", () => ({

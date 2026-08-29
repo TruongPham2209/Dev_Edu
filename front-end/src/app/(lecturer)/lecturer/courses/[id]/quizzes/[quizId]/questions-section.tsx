@@ -17,7 +17,15 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Copy, Edit, FileSpreadsheet, Plus, Trash2 } from "lucide-react";
+import {
+  Copy,
+  Edit,
+  FileSpreadsheet,
+  Plus,
+  Sparkles,
+  Trash2
+} from "lucide-react";
+import { useMemo } from "react";
 
 interface QuestionsSectionProps {
   typeConfigs: QuizTypeConfigResponse[];
@@ -29,6 +37,9 @@ interface QuestionsSectionProps {
   onDuplicateQuestion: (question: QuizQuestionResponse) => void;
   onDeleteQuestion: (question: QuizQuestionResponse) => void;
   onImportQuestions: () => void;
+  onOpenAiGenerator?: () => void;
+  onViewTraceability?: (question: QuizQuestionResponse) => void;
+  hasActiveJobId?: boolean;
 }
 
 export function QuestionsSection({
@@ -41,7 +52,19 @@ export function QuestionsSection({
   onDuplicateQuestion,
   onDeleteQuestion,
   onImportQuestions,
+  onOpenAiGenerator,
+  onViewTraceability,
+  hasActiveJobId,
 }: QuestionsSectionProps) {
+  const totalRemainingSlots = useMemo(() => {
+    return typeConfigs.reduce((acc, cfg) => {
+      const currentCount = questions.filter(
+        (q) => q.questionType === cfg.questionType,
+      ).length;
+      return acc + Math.max(0, cfg.requiredCount - currentCount);
+    }, 0);
+  }, [typeConfigs, questions]);
+
   return (
     <Card variant="outlined" sx={{ borderRadius: 1 }}>
       <CardContent sx={{ p: 3 }}>
@@ -60,29 +83,76 @@ export function QuestionsSection({
             Total)
           </Typography>
 
-          <Tooltip
-            title={
-              isPendingStatus
-                ? "Questions cannot be imported when Quiz is pending approval."
-                : typeConfigs.length === 0
-                  ? "Please add matrix type configs first."
-                  : ""
-            }
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{ alignItems: "center", flexWrap: "wrap", gap: 1.5 }}
           >
-            <span>
-              <Button
-                variant="outlined"
-                color="secondary"
-                size="small"
-                disabled={isPendingStatus || typeConfigs.length === 0}
-                startIcon={<FileSpreadsheet size={16} />}
-                onClick={onImportQuestions}
-                sx={{ borderRadius: 2, fontWeight: 700 }}
+            {onOpenAiGenerator && (
+              <Tooltip
+                title={
+                  isPendingStatus
+                    ? "Questions cannot be generated when Quiz is pending approval."
+                    : typeConfigs.length === 0
+                      ? "Please add matrix type configs first."
+                      : totalRemainingSlots <= 0
+                        ? "All question matrix slots are filled. (100% capacity)"
+                        : ""
+                }
               >
-                Import Questions
-              </Button>
-            </span>
-          </Tooltip>
+                <span>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    disabled={
+                      isPendingStatus ||
+                      typeConfigs.length === 0 ||
+                      totalRemainingSlots <= 0
+                    }
+                    startIcon={<Sparkles size={16} />}
+                    onClick={onOpenAiGenerator}
+                    sx={{
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      background:
+                        "linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%)",
+                      },
+                    }}
+                  >
+                    Generate with AI ({totalRemainingSlots} slots)
+                  </Button>
+                </span>
+              </Tooltip>
+            )}
+
+            <Tooltip
+              title={
+                isPendingStatus
+                  ? "Questions cannot be imported when Quiz is pending approval."
+                  : typeConfigs.length === 0
+                    ? "Please add matrix type configs first."
+                    : ""
+              }
+            >
+              <span>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  disabled={isPendingStatus || typeConfigs.length === 0}
+                  startIcon={<FileSpreadsheet size={16} />}
+                  onClick={onImportQuestions}
+                  sx={{ borderRadius: 2, fontWeight: 700 }}
+                >
+                  Import Questions
+                </Button>
+              </span>
+            </Tooltip>
+          </Stack>
         </Box>
 
         {typeConfigs.length === 0 ? (
@@ -257,6 +327,32 @@ export function QuestionsSection({
                                 },
                               }}
                             >
+                              {onViewTraceability && hasActiveJobId && (
+                                <Tooltip title="View Source Citation & Validation Metrics">
+                                  <span>
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      color="secondary"
+                                      startIcon={<Sparkles size={13} />}
+                                      onClick={() => onViewTraceability(q)}
+                                      sx={{
+                                        borderRadius: 1.5,
+                                        fontSize: {
+                                          xs: "0.725rem",
+                                          sm: "0.75rem",
+                                        },
+                                        px: { xs: 1, sm: 1.25 },
+                                        py: 0.3,
+                                        whiteSpace: "nowrap",
+                                        flexShrink: 0,
+                                      }}
+                                    >
+                                      Traceability
+                                    </Button>
+                                  </span>
+                                </Tooltip>
+                              )}
                               <Tooltip
                                 title={
                                   isPendingStatus

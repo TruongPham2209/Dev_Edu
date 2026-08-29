@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 /*
@@ -213,9 +214,7 @@ class CourseServiceImplTest {
     @Mock
     private CategoryService categoryService;
     @Mock
-    private CourseEmbeddingService courseEmbeddingService;
-    @Mock
-    private org.springframework.data.redis.core.RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     @Mock
     private ValueOperations<String, Object> valueOperations;
     @Mock
@@ -224,6 +223,8 @@ class CourseServiceImplTest {
     private CourseMapper courseMapper;
     @Mock
     private Executor executor;
+    @Mock
+    private CourseEmbeddingService courseEmbeddingService;
 
     @InjectMocks
     private CourseServiceImpl courseService;

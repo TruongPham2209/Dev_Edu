@@ -1,0 +1,20 @@
+package com.pht.dev_edu.quiz.dto.enums;
+
+public enum QuizGenerationJobStatus {
+    PENDING,
+    PROCESSING,
+    DOCUMENT_PROCESSING,
+    RELEVANCE_CHECKING,
+    KNOWLEDGE_EVALUATING,
+    PLANNING,
+    GENERATING,
+    VALIDATING,
+    COMPLETED,
+    PARTIAL,
+    FAILED,
+    CANCELLED,
+    IRRELEVANT_DOCUMENT,
+    INSUFFICIENT_SOURCE,
+    INVALID_REQUEST,
+    TIMEOUT
+}

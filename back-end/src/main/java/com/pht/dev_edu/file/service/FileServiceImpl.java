@@ -115,6 +115,53 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
+    public FileUploadResponse uploadDirectFile(org.springframework.web.multipart.MultipartFile file, boolean isPublic, String username) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("File is empty.");
+        }
+
+        String originalFileName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf";
+        String contentType = file.getContentType() != null ? file.getContentType() : "application/pdf";
+        String objectKey = generateObjectKey(originalFileName);
+        var bucketName = isPublic ? publicBucketName : privateBucketName;
+        String fullObjectKey = bucketName + "/" + objectKey;
+
+        try {
+            byte[] bytes = file.getBytes();
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .contentType(contentType)
+                    .build();
+
+            s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromBytes(bytes));
+
+            var fileUpload = FileUploadEntity.builder()
+                    .objectKey(fullObjectKey)
+                    .fileName(originalFileName)
+                    .contentType(contentType)
+                    .status(UploadStatus.PENDING)
+                    .fileSize(file.getSize())
+                    .createdBy(username)
+                    .expiredAt(LocalDateTime.now().plusMinutes(MAX_EXPIRED_FILE_DURATION_MINUTES))
+                    .build();
+            fileUploadRepository.save(fileUpload);
+
+            return FileUploadResponse.builder()
+                    .originalFileName(originalFileName)
+                    .contentType(contentType)
+                    .fileSize(file.getSize())
+                    .objectKey(fullObjectKey)
+                    .publicUrl(isPublic ? resolvePublicUrl(objectKey) : null)
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to upload direct multipart file: {}", originalFileName, e);
+            throw new ServerInternalException("Failed to upload file to storage: " + e.getMessage());
+        }
+    }
+
+    @Override
     public FileUploadResponse getFileInfo(String fullObjectKey) {
         Pair<String, String> pair = parseFullObjectKey(fullObjectKey);
         String bucket = pair.getLeft();
@@ -411,6 +458,28 @@ public class FileServiceImpl implements FileService {
                 KafkaUtils.sendDeleteFileEvent(fileUpload.getObjectKey());
                 throw new IllegalStateException("File size not match.");
             }
+        }
+    }
+
+    @Override
+    public byte[] downloadFileBytes(String fullObjectKey) {
+        if (fullObjectKey == null || fullObjectKey.isBlank()) {
+            throw new BadRequestException("Object key cannot be null or empty.");
+        }
+        var bucketAndKey = parseFullObjectKey(fullObjectKey);
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketAndKey.getLeft())
+                    .key(bucketAndKey.getRight())
+                    .build();
+
+            return s3Client.getObjectAsBytes(getObjectRequest).asByteArray();
+        } catch (NoSuchKeyException e) {
+            log.error("File not found in storage for objectKey: {}", fullObjectKey, e);
+            throw new DataNotFoundException("File not found in storage: " + fullObjectKey);
+        } catch (Exception e) {
+            log.error("Failed to download file bytes for objectKey: {}", fullObjectKey, e);
+            throw new ServerInternalException("Failed to download file from storage: " + e.getMessage());
         }
     }
 }

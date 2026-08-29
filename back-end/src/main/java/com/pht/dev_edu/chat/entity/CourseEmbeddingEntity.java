@@ -28,6 +28,7 @@ public class CourseEmbeddingEntity {
     @Column(name = "content_hash", nullable = false)
     String contentHash;
 
+    @org.hibernate.annotations.ColumnTransformer(write = "CAST(? AS vector)")
     @Column(name = "embedding", nullable = false, columnDefinition = "vector(1536)")
     String embedding;
 

@@ -41,6 +41,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as coursesApi from "@/lib/api/courses";
 import * as quizzesApi from "@/lib/api/quizzes";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -69,6 +70,20 @@ vi.mock("@/lib/api/quizzes", () => ({
   useCreateQuizQuestionMutation: vi.fn(),
   useUpdateQuizQuestionMutation: vi.fn(),
   useDeleteQuizQuestionMutation: vi.fn(),
+  useGenerateQuizFromFileMutation: vi.fn(),
+  useGenerateQuizFromDocumentMutation: vi.fn(),
+  useQuizGenerationJobQuery: vi.fn(() => ({ data: null, isLoading: false })),
+  useQuestionTraceabilityQuery: vi.fn(() => ({ data: null, isLoading: false })),
+}));
+
+vi.mock("@/lib/api/documents", () => ({
+  useGlobalDocumentsInfiniteQuery: vi.fn(() => ({
+    data: { pages: [{ content: [] }] },
+    isLoading: false,
+    hasNextPage: false,
+    fetchNextPage: vi.fn(),
+    isFetchingNextPage: false,
+  })),
 }));
 
 vi.mock("@/lib/api/courses", () => ({
@@ -80,6 +95,8 @@ vi.mock("@/lib/toast-context", () => ({
 }));
 
 describe("LecturerQuizConfigurePage Component", () => {
+  let queryClient: QueryClient;
+
   const mockQuiz = {
     id: "quiz-99",
     courseId: "course-123",
@@ -98,6 +115,9 @@ describe("LecturerQuizConfigurePage Component", () => {
   };
 
   beforeEach(() => {
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
     vi.clearAllMocks();
 
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
@@ -108,8 +128,15 @@ describe("LecturerQuizConfigurePage Component", () => {
     vi.mocked(quizzesApi.useQuizByIdQuery).mockReturnValue({
       data: {
         quiz: mockQuiz,
-        typeConfigs: [],
         questions: mockQuiz.questions,
+        typeConfigs: [
+          {
+            id: "cfg-1",
+            questionType: "SINGLE_CHOICE",
+            requiredCount: 5,
+            pointsPerQuestion: 2,
+          },
+        ],
       },
       isLoading: false,
       isError: false,
@@ -121,12 +148,12 @@ describe("LecturerQuizConfigurePage Component", () => {
         {
           id: "cfg-1",
           questionType: "SINGLE_CHOICE",
-          numberOfQuestions: 5,
+          requiredCount: 5,
           pointsPerQuestion: 2,
-          passPercentage: 70,
         },
       ],
       isLoading: false,
+      refetch: vi.fn(),
     } as any);
 
     vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue({
@@ -163,14 +190,26 @@ describe("LecturerQuizConfigurePage Component", () => {
       mutateAsync: vi.fn(),
       isPending: false,
     } as any);
+
+    vi.mocked(quizzesApi.useGenerateQuizFromFileMutation).mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+    } as any);
+
+    vi.mocked(quizzesApi.useGenerateQuizFromDocumentMutation).mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+    } as any);
   });
 
   it("shouldRenderQuizTitleAndSections", async () => {
     const params = Promise.resolve({ id: "course-123", quizId: "quiz-99" });
     await act(async () => {
-      render(<LecturerQuizConfigurePage params={params} />, {
-        wrapper: createWrapper(),
-      });
+      render(
+        <QueryClientProvider client={queryClient}>
+          <LecturerQuizConfigurePage params={params} />
+        </QueryClientProvider>,
+      );
     });
 
     await waitFor(() => {
@@ -181,3 +220,4 @@ describe("LecturerQuizConfigurePage Component", () => {
     });
   });
 });
+

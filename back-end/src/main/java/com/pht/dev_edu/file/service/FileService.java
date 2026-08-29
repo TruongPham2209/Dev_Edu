@@ -6,6 +6,8 @@ import com.pht.dev_edu.file.dto.FileUploadResponse;
 public interface FileService {
     FileUploadResponse generatePreSignedUrl(FilePreSignUploadRequest request);
 
+    FileUploadResponse uploadDirectFile(org.springframework.web.multipart.MultipartFile file, boolean isPublic, String username);
+
     // For download, we can generate a pre-signed URL for private files, but for public files, we can directly return the URL.
     FileUploadResponse getFileInfo(String fullObjectKey);
 
@@ -20,4 +22,6 @@ public interface FileService {
     void deleteFile(String fullObjectKey);
 
     int getVideoDuration(String fullObjectKey);
+
+    byte[] downloadFileBytes(String fullObjectKey);
 }

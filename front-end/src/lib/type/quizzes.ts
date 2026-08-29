@@ -277,3 +277,75 @@ export interface QuizAttemptReviewResponse {
   answers: AttemptQuestionResultDto[];
 }
 
+// --- AI Quiz Generation Models ---
+
+export type QuizGenerationJobStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "DOCUMENT_PROCESSING"
+  | "RELEVANCE_CHECKING"
+  | "KNOWLEDGE_EVALUATING"
+  | "PLANNING"
+  | "GENERATING"
+  | "VALIDATING"
+  | "COMPLETED"
+  | "PARTIAL"
+  | "FAILED"
+  | "IRRELEVANT_DOCUMENT"
+  | "INSUFFICIENT_SOURCE"
+  | "INVALID_REQUEST"
+  | "TIMEOUT"
+  | "CANCELLED";
+
+export interface QuizGenerationJobResponse {
+  jobId: string;
+  courseId: string;
+  documentId?: string | null;
+  documentName?: string | null;
+  status: QuizGenerationJobStatus;
+  currentStep: string;
+  requestedTotal: number;
+  usableCapacity?: number | null;
+  processedCount: number;
+  acceptedCount: number;
+  rejectedCount: number;
+  rejectionReasons?: Record<string, number> | null;
+  resultQuizId?: string | null;
+  errorMessage?: string | null;
+  tokenUsage?: number | null;
+  executionTimeMs?: number | null;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GenerateFromFileRequest {
+  quizId: string;
+  description: string;
+  saveDocument?: boolean;
+  file: File;
+}
+
+export interface GenerateFromDocumentRequest {
+  quizId: string;
+  sourceType: "LIBRARY";
+  documentId: string;
+  description: string;
+  saveDocument?: boolean;
+}
+
+export interface QuestionTraceabilityResponse {
+  id: string;
+  questionId: string;
+  generationJobId: string;
+  documentId?: string;
+  chunkId?: string;
+  sectionName?: string;
+  pageNumber?: number;
+  modelName?: string;
+  promptVersion?: string;
+  attemptCount?: number;
+  validationMetrics?: string;
+  createdAt: string;
+}
+

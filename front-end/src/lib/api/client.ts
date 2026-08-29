@@ -24,9 +24,11 @@ export async function apiCall<T>(
 
   const headers: Record<string, string> = {};
 
-  // Only set Content-Type to JSON if not explicitly overridden
-  // (e.g. form-urlencoded requests should not have JSON content type)
-  if (!options.headers || !hasContentType(options.headers)) {
+  // Only set Content-Type to JSON if body is NOT FormData and not explicitly overridden
+  // (e.g. form-urlencoded requests should not have JSON content type, FormData should let browser set boundary)
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (!isFormData && (!options.headers || !hasContentType(options.headers))) {
     headers["Content-Type"] = "application/json";
   }
 
@@ -46,10 +48,19 @@ export async function apiCall<T>(
     headers.Authorization = `Bearer ${token.trim()}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (err: any) {
+    throw new ApiError(
+      "NETWORK_ERROR",
+      err?.message || "Network Error",
+      null,
+    );
+  }
 
   const data = await response.json();
 
@@ -66,7 +77,7 @@ export async function apiCall<T>(
   if (!response.ok) {
     throw new ApiError(
       "INTERNAL_SERVER_ERROR",
-      data?.message || "API Error",
+      data?.message || `HTTP Error ${response.status}: ${response.statusText}`,
       data,
     );
   }
@@ -114,6 +125,17 @@ export async function apiDelete<T>(
   const response = await apiCall<T>(endpoint, {
     method: "DELETE",
     body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  return response.data;
+}
+
+export async function apiPostFormData<T>(
+  endpoint: string,
+  formData: FormData,
+): Promise<T> {
+  const response = await apiCall<T>(endpoint, {
+    method: "POST",
+    body: formData,
   });
   return response.data;
 }

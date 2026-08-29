@@ -66,9 +66,17 @@ import {
   getAttemptResult,
   getEssaySubmissions,
   gradeEssayQuestion,
+  generateQuizFromFile,
+  generateQuizFromDocument,
+  getQuizGenerationJob,
+  getQuestionTraceability,
   useQuizzesByCourseQuery,
   useQuizByIdQuery,
   useCreateQuizMutation,
+  useGenerateQuizFromFileMutation,
+  useGenerateQuizFromDocumentMutation,
+  useQuizGenerationJobQuery,
+  useQuestionTraceabilityQuery,
 } from "../quizzes";
 import * as client from "../client";
 
@@ -78,6 +86,7 @@ vi.mock("../client", () => ({
   apiPut: vi.fn(),
   apiDelete: vi.fn(),
   apiCall: vi.fn(),
+  apiPostFormData: vi.fn(),
 }));
 
 function createWrapper() {
@@ -416,5 +425,162 @@ describe("quizzes API & React Query hooks", () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(client.apiPost).toHaveBeenCalled();
     });
+
+    it("shouldExecuteGenerateFromFileMutation", async () => {
+      const mockJob = { jobId: "job-1", status: "PENDING" };
+      vi.mocked(client.apiPostFormData).mockResolvedValue(mockJob);
+
+      const { result } = renderHook(() => useGenerateQuizFromFileMutation(), {
+        wrapper: createWrapper(),
+      });
+
+      const file = new File(["dummy"], "test.pdf", { type: "application/pdf" });
+      result.current.mutate({
+        quizId: "q-1",
+        description: "Test prompt",
+        file,
+        saveDocument: true,
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(client.apiPostFormData).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generate-from-file",
+        expect.any(FormData),
+      );
+      expect(result.current.data).toEqual(mockJob);
+    });
+
+    it("shouldExecuteGenerateFromDocumentMutation", async () => {
+      const mockJob = { jobId: "job-2", status: "PENDING" };
+      vi.mocked(client.apiPost).mockResolvedValue(mockJob);
+
+      const { result } = renderHook(
+        () => useGenerateQuizFromDocumentMutation(),
+        { wrapper: createWrapper() },
+      );
+
+      result.current.mutate({
+        quizId: "q-1",
+        sourceType: "LIBRARY",
+        documentId: "doc-1",
+        description: "Test prompt",
+        saveDocument: false,
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(client.apiPost).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generate-from-document",
+        expect.objectContaining({
+          quizId: "q-1",
+          documentId: "doc-1",
+        }),
+      );
+      expect(result.current.data).toEqual(mockJob);
+    });
+
+    it("shouldFetchJobStatusViaHook", async () => {
+      const mockJob = { jobId: "job-1", status: "PROCESSING" };
+      vi.mocked(client.apiGet).mockResolvedValue(mockJob);
+
+      const { result } = renderHook(() => useQuizGenerationJobQuery("job-1"), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(client.apiGet).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generation-jobs/job-1",
+      );
+      expect(result.current.data).toEqual(mockJob);
+    });
+
+    it("shouldFetchQuestionTraceabilityViaHook", async () => {
+      const mockTraceability = {
+        id: "tr-1",
+        questionId: "q-1",
+        sectionName: "Chapter 4",
+        pageNumber: 42,
+      };
+      vi.mocked(client.apiGet).mockResolvedValue(mockTraceability);
+
+      const { result } = renderHook(
+        () => useQuestionTraceabilityQuery("job-1", "q-1"),
+        { wrapper: createWrapper() },
+      );
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(client.apiGet).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generation-jobs/job-1/traceability/q-1",
+      );
+      expect(result.current.data).toEqual(mockTraceability);
+    });
+  });
+
+  describe("AI Quiz Generation Pure Async Functions", () => {
+    it("shouldGenerateQuizFromFile", async () => {
+      const mockJob = { jobId: "job-1", status: "PENDING" };
+      vi.mocked(client.apiPostFormData).mockResolvedValue(mockJob);
+
+      const file = new File(["test"], "file.pdf", { type: "application/pdf" });
+      const res = await generateQuizFromFile({
+        quizId: "quiz-1",
+        description: "Test prompt",
+        file,
+        saveDocument: true,
+      });
+
+      expect(client.apiPostFormData).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generate-from-file",
+        expect.any(FormData),
+      );
+      expect(res).toEqual(mockJob);
+    });
+
+    it("shouldGenerateQuizFromDocument", async () => {
+      const mockJob = { jobId: "job-2", status: "PENDING" };
+      vi.mocked(client.apiPost).mockResolvedValue(mockJob);
+
+      const res = await generateQuizFromDocument({
+        quizId: "quiz-1",
+        sourceType: "LIBRARY",
+        documentId: "doc-1",
+        description: "Test description",
+        saveDocument: false,
+      });
+
+      expect(client.apiPost).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generate-from-document",
+        {
+          quizId: "quiz-1",
+          sourceType: "LIBRARY",
+          documentId: "doc-1",
+          description: "Test description",
+          saveDocument: false,
+        },
+      );
+      expect(res).toEqual(mockJob);
+    });
+
+    it("shouldGetQuizGenerationJob", async () => {
+      const mockJob = { jobId: "job-1", status: "COMPLETED" };
+      vi.mocked(client.apiGet).mockResolvedValue(mockJob);
+
+      const res = await getQuizGenerationJob("job-1");
+      expect(client.apiGet).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generation-jobs/job-1",
+      );
+      expect(res).toEqual(mockJob);
+    });
+
+    it("shouldGetQuestionTraceability", async () => {
+      const mockTraceability = { id: "tr-1", pageNumber: 10 };
+      vi.mocked(client.apiGet).mockResolvedValue(mockTraceability);
+
+      const res = await getQuestionTraceability("job-1", "q-1");
+      expect(client.apiGet).toHaveBeenCalledWith(
+        "/api/v1/quizzes/generation-jobs/job-1/traceability/q-1",
+      );
+      expect(res).toEqual(mockTraceability);
+    });
   });
 });
+
