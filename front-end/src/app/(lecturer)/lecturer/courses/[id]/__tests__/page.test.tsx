@@ -46,8 +46,10 @@
 import * as coursesApi from "@/lib/api/courses";
 import * as apiToast from "@/lib/use-api-with-toast";
 import { createMockCourse, createMockRouter } from "@/testing/mock-data";
+import { createMockApiWithToast } from "@/testing/mock-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";
+import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerCourseDetailPage from "../page";
 
@@ -65,20 +67,20 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../course-hero", () => ({
-  CourseHero: ({ course }: { course?: { title?: string } }) => (
+  CourseHero: ({ course }: { course: { title: string } }) => (
     <div data-testid="course-hero-mock">{course?.title}</div>
   ),
 }));
 
 vi.mock("../lectures-tab", () => ({
   LecturesTab: () => (
-    <div data-testid="lectures-tab-component">Curriculum Content</div>
+    <div data-testid="lectures-tab-component">Lectures Tab</div>
   ),
 }));
 
 vi.mock("../students-tab", () => ({
   StudentsTab: () => (
-    <div data-testid="students-tab-component">Students List Content</div>
+    <div data-testid="students-tab-component">Students Tab</div>
   ),
 }));
 
@@ -107,7 +109,7 @@ describe("LecturerCourseDetailPage", () => {
     // Reject getCourseById request.
     // ----------------------------------------------------------------------------
     vi.mocked(coursesApi.getCourseById).mockRejectedValue(
-      new Error("Course not found"),
+      new Error("Network Error"),
     );
 
     // ----------------------------------------------------------------------------
@@ -118,8 +120,10 @@ describe("LecturerCourseDetailPage", () => {
 
     // ----------------------------------------------------------------------------
     // Assert
-    // Verify error state title.
+    // Verify toast error and error state title rendering.
     // ----------------------------------------------------------------------------
+    await waitFor(() => expect(mockHandleError).toHaveBeenCalled());
+
     await waitFor(() =>
       expect(
         screen.getByText("Failed to load course details"),
@@ -134,6 +138,7 @@ describe("LecturerCourseDetailPage", () => {
     // ----------------------------------------------------------------------------
     const mockCourse = createMockCourse({
       id: "course-777",
+      title: "Enterprise Microservices with Spring Boot",
       description: "<p>Build resilient cloud-native applications.</p>",
       thumbnailUrl: "https://example.com/thumb.jpg",
       createdAt: "2026-05-01T00:00:00.000Z",
@@ -141,8 +146,12 @@ describe("LecturerCourseDetailPage", () => {
     vi.mocked(coursesApi.getCourseById).mockResolvedValue(mockCourse);
 
     // ----------------------------------------------------------------------------
+    // Act
+    // Render LecturerCourseDetailPage.
     // ----------------------------------------------------------------------------
     render(<LecturerCourseDetailPage />);
+
+    // ----------------------------------------------------------------------------
     // Assert
     // Verify course overview description rendering.
     // ----------------------------------------------------------------------------

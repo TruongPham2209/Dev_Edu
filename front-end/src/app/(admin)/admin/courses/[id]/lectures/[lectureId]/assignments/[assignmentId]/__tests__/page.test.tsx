@@ -53,7 +53,10 @@ import * as assignmentsApi from "@/lib/api/assignments";
 import * as coursesApi from "@/lib/api/courses";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
-import type { AssignmentResponse } from "@/lib/type/assignments";
+import type {
+  AssignmentResponse,
+  SubmissionResponse,
+} from "@/lib/type/assignments";
 import type { CustomPaging } from "@/lib/type/api";
 import {
   createMockAssignment,
@@ -149,7 +152,7 @@ describe("AdminAssignmentDetailPage", () => {
       createMockApiWithToast(),
     );
 
-    const emptyPaging: CustomPaging<any> = {
+    const emptyPaging: CustomPaging<SubmissionResponse> = {
       contents: [],
       currentPage: 0,
       pageSize: 10,

@@ -18,9 +18,12 @@ if (typeof window !== "undefined") {
       readonly thresholds: ReadonlyArray<number> = [];
 
       constructor(
-        _callback: IntersectionObserverCallback,
-        _options?: IntersectionObserverInit,
-      ) {}
+        callback: IntersectionObserverCallback,
+        options?: IntersectionObserverInit,
+      ) {
+        void callback;
+        void options;
+      }
 
       observe = vi.fn();
       unobserve = vi.fn();

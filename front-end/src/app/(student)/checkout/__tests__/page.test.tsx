@@ -47,7 +47,6 @@ import type {
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import * as apiToast from "@/lib/use-api-with-toast";
 import {
-  createMockCourseItemDetail,
   createMockRouter,
   createMockSearchParams,
 } from "@/testing/mock-data";

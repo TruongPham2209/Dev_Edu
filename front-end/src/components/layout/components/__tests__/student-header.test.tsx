@@ -70,6 +70,10 @@ vi.mock("../notification-center", () => ({
   ),
 }));
 
+vi.mock("@/components/common/theme-toggle", () => ({
+  ThemeToggle: () => <div data-testid="theme-toggle">ThemeToggle</div>,
+}));
+
 describe("StudentHeader Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();

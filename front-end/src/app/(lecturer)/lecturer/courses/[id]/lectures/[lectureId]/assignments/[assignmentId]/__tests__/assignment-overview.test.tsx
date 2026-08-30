@@ -52,12 +52,14 @@ describe("AssignmentOverview", () => {
       createdAt: "2026-06-01T00:00:00.000Z",
     });
 
+    // ----------------------------------------------------------------------------
     // Act
     // Render AssignmentOverview.
     // ----------------------------------------------------------------------------
     render(<AssignmentOverview assignment={mockAssignment} />);
 
     // ----------------------------------------------------------------------------
+    // Assert
     // Verify header title and description rendering.
     // ----------------------------------------------------------------------------
     expect(screen.getByText("Requirements & Content")).toBeInTheDocument();

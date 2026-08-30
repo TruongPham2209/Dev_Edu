@@ -86,6 +86,22 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+vi.mock("@/components/dialog/post-form", () => ({
+  PostFormDialog: ({
+    open,
+    onClose,
+  }: {
+    open?: boolean;
+    onClose?: () => void;
+  }) =>
+    open ? (
+      <div data-testid="post-form-dialog" role="dialog">
+        <h2>Create Post</h2>
+        <button onClick={onClose}>Close</button>
+      </div>
+    ) : null,
+}));
+
 vi.mock("next/image", () => ({
   default: ({ alt = "image", ...props }: React.ComponentProps<"img">) =>
     React.createElement("img", { alt, ...props }),
@@ -134,17 +150,6 @@ describe("ForumPage", () => {
         pageParams: [null],
       }),
     );
-
-    class MockIntersectionObserver {
-      observe = vi.fn();
-      unobserve = vi.fn();
-      disconnect = vi.fn();
-    }
-    Object.defineProperty(window, "IntersectionObserver", {
-      writable: true,
-      configurable: true,
-      value: MockIntersectionObserver,
-    });
   });
 
   it("shouldRenderHeroDiscussionsFeedAndOpenCreatePostModal", () => {
