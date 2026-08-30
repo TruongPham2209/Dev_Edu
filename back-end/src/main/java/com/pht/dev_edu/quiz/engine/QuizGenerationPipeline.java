@@ -9,20 +9,19 @@ import java.io.InputStream;
 import java.util.UUID;
 
 /**
- * Interface điều phối tổng thể (Orchestrator Pipeline) của hệ thống Tự động sinh Quiz từ Tài liệu.
- * Quản lý khởi chạy công việc bất đồng bộ trên Virtual Threads, kiểm tra quyền hạn, đếm slot câu hỏi và theo dõi trạng thái tiến độ.
+ * Orchestrator pipeline for the Automated Quiz Generation from Documents system.
+ * Manages asynchronous execution on Virtual Threads, permission checks, question quota calculation, and progress tracking.
  */
 public interface QuizGenerationPipeline {
 
     /**
-     * Khởi tạo một công việc sinh đề thi bất đồng bộ từ tài liệu (File Upload hoặc Global Library Document).
-     * Thực hiện kiểm tra quyền truy cập quizId, tính số câu còn lại theo chỉ tiêu loại câu hỏi,
-     * khởi tạo QuizGenerationJob ở trạng thái PENDING và đẩy công việc vào Virtual Thread Executor.
+     * Initializes an asynchronous quiz generation job from a document (file upload or global library document).
+     * Validates quiz access, calculates remaining question quotas, creates a pending job record, and delegates to Virtual Thread executor.
      *
-     * @param request    Dữ liệu yêu cầu cấu hình sinh Quiz từ client
-     * @param fileStream Luồng đọc dữ liệu file tài liệu PDF (nếu upload trực tiếp)
-     * @param username   Tên tài khoản người dùng thực hiện yêu cầu
-     * @return QuizGenerationJobResponse phản hồi thông tin Job vừa tạo (ID, status PENDING, v.v.)
+     * @param request    the {@link GenerateQuizFromDocumentRequest} configuration.
+     * @param fileStream the {@link InputStream} of the document (if uploaded directly).
+     * @param username   the username of the requesting user.
+     * @return the {@link QuizGenerationJobResponse} containing job metadata and PENDING status.
      */
     QuizGenerationJobResponse startGenerationJob(
             GenerateQuizFromDocumentRequest request,
@@ -31,15 +30,14 @@ public interface QuizGenerationPipeline {
     );
 
     /**
-     * Khởi tạo một công việc sinh đề thi từ file upload trực tiếp (MultipartFile).
-     * Xử lý đọc luồng file, khởi tạo request DTO và ủy quyền cho pipeline xử lý.
+     * Initializes an asynchronous quiz generation job from a direct multipart file upload.
      *
-     * @param quizId       ID bài thi cần bổ sung câu hỏi
-     * @param description  Mô tả chi tiết yêu cầu độ khó, chất lượng hoặc hướng dẫn phân bổ
-     * @param saveDocument Checkbox có lưu tài liệu vào Thư viện chung hay không
-     * @param file         File tài liệu PDF upload từ client
-     * @param username     Tên tài khoản người thực hiện
-     * @return QuizGenerationJobResponse phản hồi thông tin Job vừa tạo
+     * @param quizId       the UUID of the quiz to append questions to.
+     * @param description  detailed difficulty, style, or topic instructions.
+     * @param saveDocument whether to promote the document to the global library upon completion.
+     * @param file         the {@link MultipartFile} uploaded from client.
+     * @param username     the username of the requesting user.
+     * @return the {@link QuizGenerationJobResponse}.
      */
     QuizGenerationJobResponse startGenerationJobFromFile(
             UUID quizId,
@@ -50,20 +48,20 @@ public interface QuizGenerationPipeline {
     );
 
     /**
-     * Truy vấn thông tin trạng thái, bước xử lý hiện tại, số lượng câu đã xử lý/chấp nhận/từ chối của một Job.
+     * Queries the status, current pipeline stage, and question processing counters of a generation job.
      *
-     * @param jobId    ID công việc sinh Quiz cần tra cứu
-     * @param username Tên tài khoản thực hiện yêu cầu
-     * @return QuizGenerationJobResponse chứa thông tin trạng thái chi tiết
+     * @param jobId    the UUID of the generation job.
+     * @param username the username of the requesting user.
+     * @return the {@link QuizGenerationJobResponse} containing detailed progress status.
      */
     QuizGenerationJobResponse getJobStatus(UUID jobId, String username);
 
     /**
-     * Truy vấn thông tin vết nguồn gốc (Traceability) của một câu hỏi đã sinh từ tài liệu.
+     * Queries source traceability information for an AI-generated question.
      *
-     * @param jobId      ID công việc sinh Quiz
-     * @param questionId ID câu hỏi cần tra cứu vết nguồn gốc
-     * @return QuestionSourceTraceResponse chứa thông tin trích dẫn trang, chương, chunk và model
+     * @param jobId      the UUID of the generation job.
+     * @param questionId the UUID of the generated question.
+     * @return the {@link QuestionSourceTraceResponse} containing page, chapter, chunk, and model citations.
      */
     QuestionSourceTraceResponse getQuestionSourceTraceability(UUID jobId, UUID questionId);
 }

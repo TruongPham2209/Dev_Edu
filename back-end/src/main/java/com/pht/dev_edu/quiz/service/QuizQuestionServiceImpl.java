@@ -73,13 +73,10 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
 
         validateOptionsForQuestionType(request.getQuestionType(), request.getOptions());
 
-        QuizQuestionEntity question = QuizQuestionEntity.builder()
-                .quizId(quizId)
-                .questionType(request.getQuestionType())
-                .content(request.getContent())
-                .points(config.getPointsPerQuestion())
-                .orderIndex(request.getOrderIndex() != null ? request.getOrderIndex() : currentCount + 1)
-                .build();
+        QuizQuestionEntity question = quizMapper.toEntity(request);
+        question.setQuizId(quizId);
+        question.setPoints(config.getPointsPerQuestion());
+        question.setOrderIndex(request.getOrderIndex() != null ? request.getOrderIndex() : currentCount + 1);
 
         questionRepo.save(question);
 
@@ -87,12 +84,11 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
         if (!CollectionUtils.isEmpty(request.getOptions())) {
             int optOrder = 1;
             for (QuizQuestionOptionRequest optReq : request.getOptions()) {
-                QuizQuestionOptionEntity option = QuizQuestionOptionEntity.builder()
-                        .questionId(question.getId())
-                        .optionText(optReq.getOptionText())
-                        .isCorrect(optReq.getIsCorrect())
-                        .orderIndex(optReq.getOrderIndex() != null ? optReq.getOrderIndex() : optOrder++)
-                        .build();
+                QuizQuestionOptionEntity option = quizMapper.toEntity(optReq);
+                option.setQuestionId(question.getId());
+                if (optReq.getOrderIndex() == null) {
+                    option.setOrderIndex(optOrder++);
+                }
                 savedOptions.add(optionRepo.save(option));
             }
         }
@@ -139,12 +135,11 @@ public class QuizQuestionServiceImpl implements QuizQuestionService {
         if (!CollectionUtils.isEmpty(request.getOptions())) {
             int optOrder = 1;
             for (QuizQuestionOptionRequest optReq : request.getOptions()) {
-                QuizQuestionOptionEntity option = QuizQuestionOptionEntity.builder()
-                        .questionId(question.getId())
-                        .optionText(optReq.getOptionText())
-                        .isCorrect(optReq.getIsCorrect())
-                        .orderIndex(optReq.getOrderIndex() != null ? optReq.getOrderIndex() : optOrder++)
-                        .build();
+                QuizQuestionOptionEntity option = quizMapper.toEntity(optReq);
+                option.setQuestionId(question.getId());
+                if (optReq.getOrderIndex() == null) {
+                    option.setOrderIndex(optOrder++);
+                }
                 savedOptions.add(optionRepo.save(option));
             }
         }

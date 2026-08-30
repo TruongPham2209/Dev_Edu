@@ -80,7 +80,7 @@ vi.mock("next/image", () => ({
 }));
 
 import type { UserResponse } from "@/lib/type/users";
-import { createMockAuthUser, createMockUser } from "@/testing/mock-data";
+import { createMockUser } from "@/testing/mock-data";
 import {
   createMockApiWithToast,
   createMockInfiniteQueryResult,

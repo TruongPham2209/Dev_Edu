@@ -151,20 +151,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         List<QuizQuestionResponse> questionDtos = buildQuestionsForStudent(questions,
                 assignment.getShuffleOptions());
 
-        return StartAttemptResponse.builder()
-                .attemptId(attempt.getId())
-                .assignmentId(assignmentId)
-                .quizId(quizId)
-                .studentUsername(username)
-                .attemptNumber(attempt.getAttemptNumber())
-                .status(attempt.getStatus())
-                .startedAt(attempt.getStartedAt())
-                .expiresAt(attempt.getExpiresAt())
-                .maxScore(maxScore)
-                .activeSessionToken(sessionToken)
-                .questions(questionDtos)
-                .existingAnswers(Collections.emptyList())
-                .build();
+        return quizMapper.toStartResponse(attempt, questionDtos, Collections.emptyList());
     }
 
     @Override
@@ -286,30 +273,14 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         // Fetch existing answers
         List<QuizAttemptAnswerEntity> existingAnswers = answerRepo.findByAttemptId(attempt.getId());
         List<QuizAttemptAnswerEntityDto> existingAnswerDtos = existingAnswers.stream()
-                .map(ans -> QuizAttemptAnswerEntityDto.builder()
-                        .questionId(ans.getQuestionId())
-                        .questionType(ans.getQuestionType())
-                        .answerText(ans.getAnswerText())
-                        .selectedOptionIds(parseOptionIdsJson(ans.getSelectedOptionIds()))
-                        .autosaveVersion(ans.getAutosaveVersion())
-                        .lastSavedAt(ans.getLastSavedAt())
-                        .build())
+                .map(ans -> {
+                    QuizAttemptAnswerEntityDto dto = quizMapper.toAnswerDto(ans);
+                    dto.setSelectedOptionIds(parseOptionIdsJson(ans.getSelectedOptionIds()));
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
-        return StartAttemptResponse.builder()
-                .attemptId(attempt.getId())
-                .assignmentId(attempt.getAssignmentId())
-                .quizId(attempt.getQuizId())
-                .studentUsername(attempt.getStudentUsername())
-                .attemptNumber(attempt.getAttemptNumber())
-                .status(attempt.getStatus())
-                .startedAt(attempt.getStartedAt())
-                .expiresAt(attempt.getExpiresAt())
-                .maxScore(attempt.getMaxScore())
-                .activeSessionToken(attempt.getActiveSessionToken())
-                .questions(questionDtos)
-                .existingAnswers(existingAnswerDtos)
-                .build();
+        return quizMapper.toStartResponse(attempt, questionDtos, existingAnswerDtos);
     }
 
     @Override
@@ -321,13 +292,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                         "Attempt not found with ID: " + attemptId));
 
         if (attempt.getStatus() != AttemptStatus.IN_PROGRESS) {
-            return SubmitAttemptResponse.builder()
-                    .attemptId(attemptId)
-                    .status(attempt.getStatus())
-                    .submittedAt(attempt.getSubmittedAt())
-                    .totalScore(attempt.getTotalScore())
-                    .maxScore(attempt.getMaxScore())
-                    .build();
+            return quizMapper.toSubmitResponse(attempt);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -461,13 +426,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
         auditService.log("ATTEMPT", attemptId, QuizAuditAction.SUBMIT, username, null, attempt,
                 "Submitted quiz attempt");
 
-        return SubmitAttemptResponse.builder()
-                .attemptId(attemptId)
-                .status(attempt.getStatus())
-                .submittedAt(now)
-                .totalScore(attempt.getTotalScore())
-                .maxScore(attempt.getMaxScore())
-                .build();
+        return quizMapper.toSubmitResponse(attempt);
     }
 
     @Override
@@ -532,34 +491,14 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
 
         List<QuizAttemptAnswerEntity> existingAnswers = answerRepo.findByAttemptId(finalAttempt.getId());
         List<QuizAttemptAnswerEntityDto> existingAnswerDtos = existingAnswers.stream()
-                .map(ans -> QuizAttemptAnswerEntityDto.builder()
-                        .questionId(ans.getQuestionId())
-                        .questionType(ans.getQuestionType())
-                        .answerText(ans.getAnswerText())
-                        .selectedOptionIds(parseOptionIdsJson(ans.getSelectedOptionIds()))
-                        .autosaveVersion(ans.getAutosaveVersion())
-                        .lastSavedAt(ans.getLastSavedAt())
-                        .build())
+                .map(ans -> {
+                    QuizAttemptAnswerEntityDto dto = quizMapper.toAnswerDto(ans);
+                    dto.setSelectedOptionIds(parseOptionIdsJson(ans.getSelectedOptionIds()));
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
-        return StartAttemptResponse.builder()
-                .attemptId(finalAttempt.getId())
-                .assignmentId(finalAttempt.getAssignmentId())
-                .quizId(finalAttempt.getQuizId())
-                .studentUsername(finalAttempt.getStudentUsername())
-                .attemptNumber(finalAttempt.getAttemptNumber())
-                .status(finalAttempt.getStatus())
-                .startedAt(finalAttempt.getStartedAt())
-                .expiresAt(finalAttempt.getExpiresAt())
-                .maxScore(finalAttempt.getMaxScore())
-                .activeSessionToken(
-                        finalAttempt.getStatus() == AttemptStatus.IN_PROGRESS
-                                ? finalAttempt.getActiveSessionToken()
-                                : null)
-                .questions(questionDtos)
-                .existingAnswers(existingAnswerDtos)
-                .build();
-
+        return quizMapper.toStartResponse(finalAttempt, questionDtos, existingAnswerDtos);
     }
 
     @Override
@@ -597,15 +536,9 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                     .filter(o -> o.getQuestionId().equals(q.getId()))
                     .toList();
 
-            List<QuizQuestionOptionResponse> optionResponses = options.stream()
-                    .map(opt -> QuizQuestionOptionResponse.builder()
-                            .id(opt.getId())
-                            .questionId(opt.getQuestionId())
-                            .optionText(opt.getOptionText())
-                            .orderIndex(opt.getOrderIndex())
-                            .isCorrect(isGraded ? opt.getIsCorrect() : null)
-                            .build())
-                    .toList();
+            List<QuizQuestionOptionResponse> optionResponses = isGraded
+                    ? quizMapper.toOptionResponseList(options)
+                    : quizMapper.toMaskedOptionResponseList(options);
 
             AttemptAnswerResultDto.AttemptAnswerResultDtoBuilder builder = AttemptAnswerResultDto.builder()
                     .questionId(q.getId())
@@ -626,20 +559,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             reviewAnswers.add(builder.build());
         }
 
-        return QuizAttemptReviewResponse.builder()
-                .attemptId(attempt.getId())
-                .assignmentId(attempt.getAssignmentId())
-                .quizId(attempt.getQuizId())
-                .studentUsername(attempt.getStudentUsername())
-                .attemptNumber(attempt.getAttemptNumber())
-                .status(attempt.getStatus())
-                .startedAt(attempt.getStartedAt())
-                .submittedAt(attempt.getSubmittedAt())
-                .gradedAt(attempt.getGradedAt())
-                .maxScore(attempt.getMaxScore())
-                .totalScore(attempt.getTotalScore())
-                .answers(reviewAnswers)
-                .build();
+        return quizMapper.toReviewResponse(attempt, reviewAnswers);
     }
 
     @Override
@@ -679,17 +599,9 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                     .toList();
 
             final boolean isEssayQuestion = (q.getQuestionType() == QuestionType.ESSAY);
-            List<QuizQuestionOptionResponse> optionResponses = options.stream()
-                    .map(opt -> QuizQuestionOptionResponse.builder()
-                            .id(opt.getId())
-                            .questionId(opt.getQuestionId())
-                            .optionText(opt.getOptionText())
-                            .orderIndex(opt.getOrderIndex())
-                            .isCorrect(isFullyGraded ? opt.getIsCorrect()
-                                    : (!isEssayQuestion ? opt.getIsCorrect()
-                                       : null))
-                            .build())
-                    .toList();
+            List<QuizQuestionOptionResponse> optionResponses = (isFullyGraded || !isEssayQuestion)
+                    ? quizMapper.toOptionResponseList(options)
+                    : quizMapper.toMaskedOptionResponseList(options);
 
             AttemptAnswerResultDto.AttemptAnswerResultDtoBuilder builder = AttemptAnswerResultDto.builder()
                     .questionId(q.getId())
@@ -710,20 +622,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
             answerResults.add(builder.build());
         }
 
-        return AttemptResultResponse.builder()
-                .attemptId(attempt.getId())
-                .assignmentId(attempt.getAssignmentId())
-                .quizId(attempt.getQuizId())
-                .studentUsername(attempt.getStudentUsername())
-                .attemptNumber(attempt.getAttemptNumber())
-                .status(attempt.getStatus())
-                .startedAt(attempt.getStartedAt())
-                .submittedAt(attempt.getSubmittedAt())
-                .gradedAt(attempt.getGradedAt())
-                .totalScore(attempt.getTotalScore())
-                .maxScore(attempt.getMaxScore())
-                .answers(answerResults)
-                .build();
+        return quizMapper.toResultResponse(attempt, answerResults);
     }
 
     @Override
@@ -740,18 +639,7 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 .findByAssignmentIdAndStudentUsernameAndStatusNotOrderByAttemptNumberAsc(
                         assignmentId, username, AttemptStatus.IN_PROGRESS);
 
-        return attempts.stream()
-                .map(a -> SubmitAttemptResponse.builder()
-                        .attemptId(a.getId())
-                        .attemptNumber(a.getAttemptNumber())
-                        .status(a.getStatus())
-                        .startedAt(a.getStartedAt())
-                        .submittedAt(a.getSubmittedAt())
-                        .gradedAt(a.getGradedAt())
-                        .totalScore(a.getTotalScore())
-                        .maxScore(a.getMaxScore())
-                        .build())
-                .collect(Collectors.toList());
+        return quizMapper.toSubmitResponseList(attempts);
     }
 
     private List<QuizQuestionResponse> buildQuestionsForStudent(List<QuizQuestionEntity> questions,
@@ -769,16 +657,8 @@ public class QuizAttemptServiceImpl implements QuizAttemptService {
                 options = new ArrayList<>(options);
                 Collections.shuffle(options);
             }
-            // Hide is_correct from student during attempt
-            List<QuizQuestionOptionResponse> optionDtos = options.stream()
-                    .map(opt -> QuizQuestionOptionResponse.builder()
-                            .id(opt.getId())
-                            .questionId(opt.getQuestionId())
-                            .optionText(opt.getOptionText())
-                            .orderIndex(opt.getOrderIndex())
-                            .isCorrect(null) // STRICT HIDE
-                            .build())
-                    .collect(Collectors.toList());
+            // Hide is_correct from student during attempt using MapStruct masked option mapping
+            List<QuizQuestionOptionResponse> optionDtos = quizMapper.toMaskedOptionResponseList(options);
             dto.setOptions(optionDtos);
             list.add(dto);
         }

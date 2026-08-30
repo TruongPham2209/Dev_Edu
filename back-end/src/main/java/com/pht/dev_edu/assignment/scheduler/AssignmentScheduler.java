@@ -18,6 +18,10 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for the assignment module.
+ * Cleans up soft-deleted assignments older than the retention cutoff.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,7 +36,10 @@ public class AssignmentScheduler {
 
     private static final long DELETION_DELAY_DAYS = 60;
 
-    // Run every hour to clean up deleted assignments and their associated files
+    /**
+     * Periodically cleans up assignments that were soft-deleted more than 60 days ago.
+     * Runs every hour and emits execution telemetry to Kafka.
+     */
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void cleanDeletedAssignments() {
         var startTime = LocalDateTime.now();

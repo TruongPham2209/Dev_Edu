@@ -8,12 +8,17 @@ import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
-import com.pht.dev_edu.common.util.*;
+import com.pht.dev_edu.common.util.KafkaUtils;
+import com.pht.dev_edu.common.util.PagingUtils;
+import com.pht.dev_edu.common.util.RedisUtils;
+import com.pht.dev_edu.common.util.SecurityContextUtils;
+import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.notification.dto.CreateGroupNotificationRequest;
 import com.pht.dev_edu.notification.dto.NotificationCategory;
 import com.pht.dev_edu.notification.dto.NotificationResponse;
 import com.pht.dev_edu.notification.entity.NotificationGroupEntity;
 import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
+import com.pht.dev_edu.notification.mapper.NotificationMapper;
 import com.pht.dev_edu.notification.repo.NotificationGroupReadStatusRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupTargetRepository;
@@ -41,6 +46,7 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
     NotificationGroupRepository notificationGroupRepository;
     NotificationGroupTargetRepository notificationGroupTargetRepository;
     NotificationGroupReadStatusRepository notificationGroupReadStatusRepository;
+    NotificationMapper notificationMapper;
 
     Executor executor;
 
@@ -53,35 +59,17 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
             throw new BadRequestException("Target roles cannot be empty for group notification");
         }
 
-        var groupEntity = NotificationGroupEntity.builder()
-                .title(request.getTitle())
-                .content(request.getContent())
-                .createdBy(createdBy)
-                .build();
+        var groupEntity = notificationMapper.toGroupEntity(request, createdBy);
 
         var savedGroup = notificationGroupRepository.save(groupEntity);
 
         List<NotificationGroupTargetEntity> targetEntities = request.getTargetRoles().stream()
-                .map(role -> NotificationGroupTargetEntity.builder()
-                        .notificationGroupId(savedGroup.getId())
-                        .role(role)
-                        .build())
+                .map(role -> notificationMapper.toGroupTargetEntity(savedGroup.getId(), role))
                 .toList();
 
         notificationGroupTargetRepository.saveAll(targetEntities);
 
-        return NotificationResponse.builder()
-                .id(savedGroup.getId())
-                .title(savedGroup.getTitle())
-                .content(savedGroup.getContent())
-                .type(savedGroup.getType())
-                .targetData(savedGroup.getTargetData())
-                .createdBy(savedGroup.getCreatedBy())
-                .createdAt(savedGroup.getCreatedAt())
-                .category(NotificationCategory.GROUP)
-                .targetRoles(new ArrayList<>(request.getTargetRoles()))
-                .isRead(false)
-                .build();
+        return notificationMapper.toGroupResponse(savedGroup, new ArrayList<>(request.getTargetRoles()));
     }
 
     @Override
@@ -108,18 +96,7 @@ public class NotificationGroupServiceImpl implements NotificationGroupService {
 
         return PagingUtils.getPagedWithCursor(
                 groupList,
-                group -> NotificationResponse.builder()
-                        .id(group.getId())
-                        .title(group.getTitle())
-                        .content(group.getContent())
-                        .type(group.getType())
-                        .targetData(group.getTargetData())
-                        .createdBy(group.getCreatedBy())
-                        .createdAt(group.getCreatedAt())
-                        .category(NotificationCategory.GROUP)
-                        .targetRoles(rolesMap.getOrDefault(group.getId(),
-                                Collections.emptyList()))
-                        .build(),
+                group -> notificationMapper.toGroupResponse(group, rolesMap.getOrDefault(group.getId(), Collections.emptyList())),
                 NotificationGroupEntity::getCreatedAt,
                 NotificationGroupEntity::getId,
                 NOTIFICATION_PAGE_SIZE);

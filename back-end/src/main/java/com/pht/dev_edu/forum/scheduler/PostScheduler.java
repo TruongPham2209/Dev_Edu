@@ -15,6 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for forum posts, post versions, and bookmarks maintenance.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,6 +30,10 @@ public class PostScheduler {
 
     private static final long DELETION_DELAY_DAYS = 30;
 
+    /**
+     * Cleans up forum posts that were soft-deleted more than 30 days ago.
+     * Runs every 6 hours.
+     */
     @Scheduled(fixedDelay = 6 * 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedPosts() {
@@ -40,6 +47,10 @@ public class PostScheduler {
         );
     }
 
+    /**
+     * Cleans up orphaned post versions whose main post entity was removed, deleting thumbnail images from S3.
+     * Runs every 12 hours.
+     */
     @Scheduled(fixedDelay = 12 * 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedPostVersions() {
@@ -50,6 +61,10 @@ public class PostScheduler {
         );
     }
 
+    /**
+     * Cleans up orphaned saved post bookmarks referring to deleted posts.
+     * Runs every 12 hours.
+     */
     @Scheduled(fixedDelay = 12 * 60 * 60 * 1000)
     @Transactional
     public void cleanSavePosts() {

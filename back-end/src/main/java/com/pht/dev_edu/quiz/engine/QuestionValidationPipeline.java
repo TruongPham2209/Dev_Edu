@@ -9,11 +9,15 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Interface kiểm định chất lượng đa tầng (Multi-Stage Quality Validation Pipeline).
- * Thực thi các lớp kiểm tra: Schema hợp lệ, tính mơ hồ của đáp án, bằng chứng thực tế từ tài liệu nguồn (Grounding Evidence),
- * và chống trùng lặp ngữ nghĩa (Duplicate Check) với các câu đã sinh và CSDL hiện có.
+ * Multi-stage quality validation pipeline interface for LLM-generated questions.
+ * Enforces JSON schema validity, answer unambiguity, factual grounding against source context,
+ * and semantic deduplication against previously generated questions and the question bank.
  */
 public interface QuestionValidationPipeline {
+
+    /**
+     * Represents the outcome of a question validation check.
+     */
     @Getter
     @Builder
     class ValidationResult {
@@ -23,13 +27,13 @@ public interface QuestionValidationPipeline {
     }
 
     /**
-     * Kiểm định toàn bộ các tiêu chí chất lượng đối với một câu hỏi vừa sinh ra.
+     * Validates all quality criteria for a newly generated question.
      *
-     * @param question             Dữ liệu hợp đồng câu hỏi vừa sinh từ LLM
-     * @param sourceContextText    Văn bản nguồn dùng để kiểm tra tính thực tế (Grounding)
-     * @param acceptedJobQuestions Danh sách các câu hỏi đã được chấp nhận trong Job hiện tại (chống trùng lặp nội bộ)
-     * @param courseId             ID khóa học để kiểm tra chống trùng lặp với Ngân hàng câu hỏi trong CSDL
-     * @return ValidationResult chứa trạng thái Đạt/Không đạt và lý do thất bại chi tiết (nếu có)
+     * @param question             the generated {@link GeneratedQuestionContract} from LLM.
+     * @param sourceContextText    the source document context used for grounding verification.
+     * @param acceptedJobQuestions the list of already accepted questions in the current job (for internal deduplication).
+     * @param courseId             the UUID of the course (for repository-level deduplication).
+     * @return the {@link ValidationResult} indicating pass/fail status and failure details.
      */
     ValidationResult validateQuestion(
             GeneratedQuestionContract question,

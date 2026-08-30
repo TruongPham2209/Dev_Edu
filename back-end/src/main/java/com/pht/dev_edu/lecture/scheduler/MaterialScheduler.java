@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for lecture supplementary materials.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -21,8 +24,12 @@ public class MaterialScheduler {
     LectureMaterialRepository lectureMaterialRepository;
     DeleteProcessor deleteProcessor;
 
-    private static final long DELETION_DELAY_DAYS = 30;// Run every 15m to clean up deleted comments that are older than the specified delay
+    private static final long DELETION_DELAY_DAYS = 30;
 
+    /**
+     * Cleans up lecture material attachments soft-deleted more than 30 days ago, returning S3 object keys for deletion.
+     * Runs every 15 minutes.
+     */
     @Scheduled(fixedDelay = 15 * 60 * 1000)
     @Transactional
     public void cleanDeletedMaterials() {

@@ -4,18 +4,18 @@ import com.pht.dev_edu.quiz.dto.engine.GeneratedQuestionContract;
 import com.pht.dev_edu.quiz.dto.engine.QuestionSlot;
 
 /**
- * Interface chịu trách nhiệm tương tác với Mô hình Ngôn ngữ Bất biến (LLM - OpenAI GPT)
- * để sinh nội dung câu hỏi cấu trúc (Structured JSON Output) dựa trên ngữ cảnh được cung cấp.
+ * Service for interacting with Large Language Models (LLM - OpenAI GPT)
+ * to generate structured JSON question content based on provided context.
  */
 public interface QuestionGeneratorService {
 
     /**
-     * Gửi Prompt tới OpenAI để sinh một câu hỏi khớp với yêu cầu của QuestionSlot và ngữ cảnh nguồn.
+     * Sends a prompt to OpenAI to generate a question matching the question slot specification and source context.
      *
-     * @param slot          Slot câu hỏi chứa chỉ tiêu loại, độ khó và chủ đề
-     * @param context       Ngữ cảnh văn bản nguồn đã trích xuất
-     * @param retryFeedback Lý do thất bại từ lượt trước (nếu đang ở lượt retry) để LLM tự khắc phục
-     * @return GeneratedQuestionContract chứa câu hỏi, các đáp án, đáp án đúng và giải thích
+     * @param slot          the {@link QuestionSlot} defining question type, difficulty, and topic.
+     * @param context       the {@link KnowledgeRetrieverService.RetrievedContext} source context.
+     * @param retryFeedback the failure reason from a previous iteration (if retrying).
+     * @return the {@link GeneratedQuestionContract} containing question text, options, correct answer, and explanation.
      */
     GeneratedQuestionContract generateQuestion(
             QuestionSlot slot,

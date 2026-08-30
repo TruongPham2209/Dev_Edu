@@ -15,6 +15,9 @@ import org.springframework.util.StringUtils;
 import java.time.ZoneId;
 import java.util.UUID;
 
+/**
+ * Static helper utility for publishing asynchronous events to Kafka topics across the application.
+ */
 @Component
 public class KafkaUtils {
 
@@ -24,6 +27,11 @@ public class KafkaUtils {
         KafkaUtils.kafkaTemplate = kafkaTemplate;
     }
 
+    /**
+     * Publishes a file deletion event to trigger asynchronous removal of objects from S3/R2 storage.
+     *
+     * @param objectKey the S3 storage object key to delete.
+     */
     public static void sendDeleteFileEvent(String objectKey) {
         if (StringUtils.hasText(objectKey)) {
             kafkaTemplate.send(
@@ -33,6 +41,11 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Publishes a user behavioral tracking event for telemetry processing.
+     *
+     * @param event the {@link TrackingEvent} payload.
+     */
     public static void sendTrackingEvent(TrackingEvent event) {
         if (event != null) {
             kafkaTemplate.send(
@@ -42,6 +55,11 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Publishes a personal notification event to be recorded and sent to a user.
+     *
+     * @param event the {@link PersonalNotificationEvent} payload.
+     */
     public static void sendPersonalNotificationEvent(PersonalNotificationEvent event) {
         if (event != null) {
             kafkaTemplate.send(
@@ -51,6 +69,11 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Publishes a push notification event to dispatch Firebase Cloud Messaging (FCM) messages.
+     *
+     * @param event the {@link PushNotificationEvent} payload.
+     */
     public static void sendPushNotificationEvent(PushNotificationEvent event) {
         if (event != null) {
             kafkaTemplate.send(
@@ -60,6 +83,12 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Publishes an event to synchronize a published forum post version into Elasticsearch.
+     *
+     * @param entity   the {@link PostVersionEntity} containing updated post content.
+     * @param username the username of the post author.
+     */
     public static void sendSyncPostEvent(PostVersionEntity entity, String username) {
         if (entity != null) {
             var zoneId = ZoneId.systemDefault();
@@ -77,12 +106,22 @@ public class KafkaUtils {
         }
     }
 
+    /**
+     * Publishes an event to synchronize updated post interaction counters (likes, comments, views) into Elasticsearch.
+     *
+     * @param interactiveData the {@link PostInteractiveData} counters.
+     */
     public static void sendSyncInteractivePostEvent(PostInteractiveData interactiveData) {
         if (interactiveData != null && interactiveData.getPostId() != null) {
             kafkaTemplate.send(KafkaTopicConstant.POST_INTERACT_ELASTIC_DATA_UPDATE_TOPIC, interactiveData);
         }
     }
 
+    /**
+     * Publishes an event to delete a forum post index from Elasticsearch.
+     *
+     * @param postId the UUID of the post to delete from the index.
+     */
     public static void sendSyncPostDeleteEvent(UUID postId) {
         if (postId != null) {
             kafkaTemplate.send(KafkaTopicConstant.POST_ELASTIC_DATA_DELETE_TOPIC, postId);

@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for lecture video comments.
+ */
 @Slf4j
 @Component("lectureCommentScheduler")
 @RequiredArgsConstructor
@@ -23,7 +26,10 @@ public class CommentScheduler {
 
     private static final long DELETION_DELAY_DAYS = 7;
 
-    // Run every hour to clean up deleted comments that are older than the specified delay
+    /**
+     * Cleans up lecture comments that were soft-deleted more than 7 days ago.
+     * Runs every hour.
+     */
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedComments() {

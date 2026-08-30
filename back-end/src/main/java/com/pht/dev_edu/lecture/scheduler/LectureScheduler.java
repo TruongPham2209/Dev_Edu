@@ -19,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for video lectures cleanup.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -33,7 +36,10 @@ public class LectureScheduler {
 
     private static final long DELETION_DELAY_DAYS = 60;
 
-    // Run every hour to clean up deleted comments that are older than the specified delay
+    /**
+     * Cleans up lectures that were soft-deleted more than 60 days ago.
+     * Runs every hour and emits telemetry to Kafka.
+     */
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedLectures() {

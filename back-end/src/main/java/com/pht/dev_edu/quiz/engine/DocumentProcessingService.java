@@ -7,19 +7,18 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * Interface chịu trách nhiệm tiếp nhận tài liệu đầu vào (file PDF hoặc văn bản thô),
- * thực hiện trích xuất nội dung, kiểm tra chất lượng ký tự (OCR Quality Check),
- * phân đoạn kiến thức (Chunking) và tạo Vector Embeddings lưu trữ trong CSDL.
+ * Service responsible for ingesting document inputs (PDF files or raw text),
+ * extracting text content, performing OCR quality checks, chunking text, and generating vector embeddings.
  */
 public interface DocumentProcessingService {
 
     /**
-     * Trích xuất văn bản từ luồng dữ liệu file (PDF/Docs), chia nhỏ thành các đoạn kiến thức (~350 từ),
-     * tính toán Vector Embedding và lưu vào CSDL (bảng document_knowledge_chunks liên kết theo document_id).
+     * Extracts text from a document stream (PDF/Docs), splits it into knowledge chunks (~350 words),
+     * computes vector embeddings, and persists them into the database.
      *
-     * @param document   Thực thể CourseDocumentEntity chứa thông tin tài liệu
-     * @param fileStream Luồng byte đọc file tài liệu
-     * @return Danh sách các bản ghi DocumentKnowledgeChunkEntity đã được tạo vector embedding
+     * @param document   the {@link CourseDocumentEntity} document metadata.
+     * @param fileStream the {@link InputStream} of the document file.
+     * @return a list of processed and embedded {@link DocumentKnowledgeChunkEntity} records.
      */
     List<DocumentKnowledgeChunkEntity> processAndStoreDocument(
             CourseDocumentEntity document,
@@ -27,11 +26,11 @@ public interface DocumentProcessingService {
     );
 
     /**
-     * Phân đoạn văn bản thô (raw text), tính toán Vector Embedding và lưu vào CSDL.
+     * Chunks raw text, computes vector embeddings, and persists them into the database.
      *
-     * @param document Thực thể CourseDocumentEntity chứa thông tin tài liệu
-     * @param rawText  Nội dung văn bản thô cần xử lý
-     * @return Danh sách các bản ghi DocumentKnowledgeChunkEntity đã được lưu
+     * @param document the {@link CourseDocumentEntity} document metadata.
+     * @param rawText  the raw text content to process.
+     * @return a list of processed and embedded {@link DocumentKnowledgeChunkEntity} records.
      */
     List<DocumentKnowledgeChunkEntity> processAndStoreText(
             CourseDocumentEntity document,

@@ -2,6 +2,7 @@ package com.pht.dev_edu.quiz.repo;
 
 import com.pht.dev_edu.quiz.entity.CourseDocumentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -30,4 +31,13 @@ public interface CourseDocumentRepository extends JpaRepository<CourseDocumentEn
             @Param("cursorId") UUID cursorId,
             @Param("limit") int limit
     );
+
+    @Modifying
+    @Query(value = """
+            DELETE FROM course_documents
+            WHERE (deleted_at IS NOT NULL AND deleted_at < :cutoffTime)
+               OR (visibility = 'TEMPORARY' AND created_at < :cutoffTime)
+            RETURNING file_object_key
+            """, nativeQuery = true)
+    List<String> deleteDocumentsBeforeCutoffTimeThenReturnObjectKey(@Param("cutoffTime") LocalDateTime cutoffTime);
 }

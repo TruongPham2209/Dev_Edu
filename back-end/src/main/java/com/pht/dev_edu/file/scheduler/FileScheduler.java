@@ -13,6 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for file upload cleanup.
+ * Removes expired pre-signed upload records and failed uploads from S3 storage and database.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,7 +27,10 @@ public class FileScheduler {
 
     private static final long TIME_EXTEND_MINUTES = 1;
 
-    // Run every 5 minutes to clean up expired and failed files
+    /**
+     * Cleans up expired and failed upload records and removes orphaned files from S3.
+     * Runs every 5 minutes.
+     */
     @Scheduled(fixedDelay = 5 * 60 * 1000)
     @Transactional
     public void cleanExpiredAndFailedFiles() {

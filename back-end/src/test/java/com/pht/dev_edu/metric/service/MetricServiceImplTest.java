@@ -1,16 +1,7 @@
-package com.pht.dev_edu.metric.service.impl;
+package com.pht.dev_edu.metric.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
+import com.pht.dev_edu.metric.dto.*;
+import com.pht.dev_edu.metric.repo.MetricRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,17 +9,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.pht.dev_edu.metric.dto.ActivityMetricDto;
-import com.pht.dev_edu.metric.dto.DashboardOverviewDto;
-import com.pht.dev_edu.metric.dto.GrowthDataDto;
-import com.pht.dev_edu.metric.dto.GrowthPeriod;
-import com.pht.dev_edu.metric.dto.RecentActivityDto;
-import com.pht.dev_edu.metric.dto.RevenueGrowthDto;
-import com.pht.dev_edu.metric.dto.TopContributorDto;
-import com.pht.dev_edu.metric.dto.TopCourseDto;
-import com.pht.dev_edu.metric.dto.TopStudentDto;
-import com.pht.dev_edu.metric.dto.TopUserDto;
-import com.pht.dev_edu.metric.repo.MetricRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MetricServiceImplTest {

@@ -11,25 +11,27 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.pht.dev_edu.file.repo.FileUploadRepository;
 import com.pht.dev_edu.quiz.dto.enums.DocumentStatus;
 import com.pht.dev_edu.quiz.dto.enums.DocumentVisibility;
 import com.pht.dev_edu.quiz.dto.request.GenerateQuizFromDocumentRequest;
 import com.pht.dev_edu.quiz.entity.CourseDocumentEntity;
 import com.pht.dev_edu.quiz.entity.DocumentUploadAuditEntity;
 import com.pht.dev_edu.quiz.entity.QuizGenerationJobEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 import com.pht.dev_edu.quiz.repo.DocumentUploadAuditRepository;
-
-import com.pht.dev_edu.file.repo.FileUploadRepository;
 
 class DocumentPromotionServiceTest {
 
         private CourseDocumentRepository mockDocRepo;
         private DocumentUploadAuditRepository mockAuditRepo;
         private FileUploadRepository mockFileUploadRepo;
+        private QuizMapper quizMapper;
         private DocumentPromotionServiceImpl promotionService;
 
         @BeforeEach
@@ -37,7 +39,8 @@ class DocumentPromotionServiceTest {
                 mockDocRepo = Mockito.mock(CourseDocumentRepository.class);
                 mockAuditRepo = Mockito.mock(DocumentUploadAuditRepository.class);
                 mockFileUploadRepo = Mockito.mock(FileUploadRepository.class);
-                promotionService = new DocumentPromotionServiceImpl(mockDocRepo, mockAuditRepo, mockFileUploadRepo);
+                quizMapper = Mappers.getMapper(QuizMapper.class);
+                promotionService = new DocumentPromotionServiceImpl(mockDocRepo, mockAuditRepo, mockFileUploadRepo, quizMapper);
         }
 
         @Test

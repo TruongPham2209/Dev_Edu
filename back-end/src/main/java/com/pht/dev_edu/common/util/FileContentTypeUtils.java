@@ -4,6 +4,9 @@ import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+/**
+ * Utility class for validating MIME content types against allowed media/document categories.
+ */
 public class FileContentTypeUtils {
 
     private static final List<String> PDFS = List.of(
@@ -77,10 +80,20 @@ public class FileContentTypeUtils {
             "text/xml"
     );
 
+    /**
+     * Supported high-level file classification types.
+     */
     public enum FileType {
         DOCUMENT, IMAGE, VIDEO, AUDIO, ARCHIVE
     }
 
+    /**
+     * Validates whether the given MIME content type matches at least one allowed {@link FileType}.
+     *
+     * @param contentType  the MIME content type to check (e.g. "application/pdf").
+     * @param allowedTypes the allowed {@link FileType} categories.
+     * @return true if the content type is permitted, false otherwise.
+     */
     public static boolean isValidContentType(String contentType, FileType... allowedTypes) {
         if (!StringUtils.hasText(contentType) || allowedTypes == null || allowedTypes.length == 0) {
             return false;

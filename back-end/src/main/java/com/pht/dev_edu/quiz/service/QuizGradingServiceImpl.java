@@ -34,6 +34,7 @@ import com.pht.dev_edu.quiz.entity.QuizAttemptAnswerEntity;
 import com.pht.dev_edu.quiz.entity.QuizAttemptEntity;
 import com.pht.dev_edu.quiz.entity.QuizEssayGradingEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.QuizAttemptAnswerRepo;
 import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizEssayGradingRepo;
@@ -59,6 +60,7 @@ public class QuizGradingServiceImpl implements QuizGradingService {
     QuizAccessService quizAccessService;
     QuizAttemptService attemptService;
     QuizAuditService auditService;
+    QuizMapper quizMapper;
 
     private static final int DEFAULT_ESSAY_PAGE_SIZE = 10;
 
@@ -81,25 +83,7 @@ public class QuizGradingServiceImpl implements QuizGradingService {
 
         return PagingUtils.getPagedWithCursor(
                 projections,
-                p -> QuizEssaySubmissionResponse.builder()
-                        .attemptAnswerId(p.getAttemptAnswerId())
-                        .attemptId(p.getAttemptId())
-                        .questionId(p.getQuestionId())
-                        .assignmentId(p.getAssignmentId())
-                        .assignmentName(p.getAssignmentName())
-                        .studentUsername(p.getStudentUsername())
-                        .studentFullName(p.getStudentFullName())
-                        .submittedAt(p.getSubmittedAt())
-                        .lastSavedAt(p.getLastSavedAt())
-                        .questionContent(p.getQuestionContent())
-                        .maxPoints(p.getMaxPoints())
-                        .answerText(p.getAnswerText())
-                        .awardedPoints(p.getAwardedPoints())
-                        .feedback(p.getFeedback())
-                        .gradedBy(p.getGradedBy())
-                        .gradedAt(p.getGradedAt())
-                        .essayStatus(p.getEssayStatus())
-                        .build(),
+                quizMapper::toResponse,
                 QuizEssaySubmissionProjection::getSubmittedAt,
                 QuizEssaySubmissionProjection::getAttemptAnswerId,
                 DEFAULT_ESSAY_PAGE_SIZE);
@@ -145,15 +129,8 @@ public class QuizGradingServiceImpl implements QuizGradingService {
         answerRepo.save(answer);
 
         // Insert history record into quiz_essay_gradings
-        QuizEssayGradingEntity essayGrading = QuizEssayGradingEntity.builder()
-                .attemptAnswerId(answer.getId())
-                .questionId(questionId)
-                .attemptId(attemptId)
-                .graderUsername(graderUsername)
-                .awardedPoints(request.getAwardedPoints())
-                .feedback(request.getFeedback())
-                .gradedAt(now)
-                .build();
+        QuizEssayGradingEntity essayGrading = quizMapper.toEssayGradingEntity(
+                answer, attemptId, questionId, request, graderUsername, now);
 
         essayGradingRepo.save(essayGrading);
 

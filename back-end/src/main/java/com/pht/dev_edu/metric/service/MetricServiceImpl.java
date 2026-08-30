@@ -1,4 +1,4 @@
-package com.pht.dev_edu.metric.service.impl;
+package com.pht.dev_edu.metric.service;
 
 import com.pht.dev_edu.metric.dto.*;
 import com.pht.dev_edu.metric.repo.MetricRepository;

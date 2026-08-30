@@ -21,6 +21,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Utility component for executing batch deletion tasks and scheduled cleanup jobs with telemetry logging via Kafka.
+ */
 @Slf4j
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -29,6 +32,14 @@ public class DeleteProcessor {
     Executor executor;
     KafkaTemplate<String, Object> kafkaTemplate;
 
+    /**
+     * Concurrently processes a batch of IDs using the provided handler function.
+     *
+     * @param <T>     the type of the identifier.
+     * @param ids     the list of entity IDs to process.
+     * @param handler the deletion/processing function applied to each ID.
+     * @return a {@link BatchResult} containing successful IDs and failure error details.
+     */
     public <T> BatchResult<T> processBatch(
             List<T> ids,
             Function<T, Void> handler
@@ -64,6 +75,13 @@ public class DeleteProcessor {
         return new BatchResult<>(successIds, failedErrors);
     }
 
+    /**
+     * Executes a scheduled cleanup job that deletes entities, publishes S3 file deletion events to Kafka, and publishes job telemetry.
+     *
+     * @param cronJobName            the unique name of the cron job for telemetry tracking.
+     * @param deleteFunction         the supplier executing the database deletion and returning deleted S3 file object keys.
+     * @param successMessageTemplate a formatting template for the success details message (e.g. "Cleaned %d files").
+     */
     public void executeCleanupJobHasObjectKeys(
             String cronJobName,
             Supplier<List<String>> deleteFunction,
@@ -110,6 +128,13 @@ public class DeleteProcessor {
         }
     }
 
+    /**
+     * Executes a scheduled database cleanup job and publishes job execution telemetry to Kafka.
+     *
+     * @param cronJobName            the unique name of the cron job for telemetry tracking.
+     * @param deleteFunction         the supplier executing the database deletion and returning the number of deleted rows.
+     * @param successMessageTemplate a formatting template for the success details message (e.g. "Deleted %d records").
+     */
     public void executeCleanupJob(
             String cronJobName,
             Supplier<Integer> deleteFunction,
@@ -162,9 +187,24 @@ public class DeleteProcessor {
         }
     }
 
+    /**
+     * Result representation of an individual item processing step.
+     *
+     * @param <T>          the identifier type.
+     * @param id           the processed item ID.
+     * @param success      whether processing succeeded.
+     * @param errorMessage the error message if processing failed.
+     */
     public record ProcessResult<T>(T id, boolean success, String errorMessage) {
     }
 
+    /**
+     * Aggregated result of a batch processing operation.
+     *
+     * @param <T>          the identifier type.
+     * @param successIds   the list of successfully processed IDs.
+     * @param failedErrors the map of failed IDs to their error messages.
+     */
     public record BatchResult<T>(List<T> successIds, Map<T, String> failedErrors) {
     }
 }

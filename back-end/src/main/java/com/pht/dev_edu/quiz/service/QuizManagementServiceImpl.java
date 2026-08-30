@@ -59,13 +59,7 @@ public class QuizManagementServiceImpl implements QuizManagementService {
     public QuizResponse createQuiz(QuizRequest request, String username, Set<String> authorities) {
         quizAccessService.validateAccessByCourse(username, authorities, request.getCourseId());
 
-        QuizEntity quiz = QuizEntity.builder()
-                .courseId(request.getCourseId())
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .status(QuizStatus.DRAFT)
-                .createdBy(username)
-                .build();
+        QuizEntity quiz = quizMapper.toEntity(request, username);
 
         quizRepo.save(quiz);
         auditService.log("QUIZ", quiz.getId(), QuizAuditAction.CREATE_QUIZ, username, null, quiz,
@@ -184,10 +178,11 @@ public class QuizManagementServiceImpl implements QuizManagementService {
 
         QuizQuestionTypeConfigEntity config = typeConfigRepo
                 .findByQuizIdAndQuestionType(quizId, request.getQuestionType())
-                .orElseGet(() -> QuizQuestionTypeConfigEntity.builder()
-                        .quizId(quizId)
-                        .questionType(request.getQuestionType())
-                        .build());
+                .orElseGet(() -> {
+                    QuizQuestionTypeConfigEntity created = quizMapper.toEntity(request);
+                    created.setQuizId(quizId);
+                    return created;
+                });
 
         config.setRequiredCount(request.getRequiredCount());
         config.setPointsPerQuestion(request.getPointsPerQuestion());

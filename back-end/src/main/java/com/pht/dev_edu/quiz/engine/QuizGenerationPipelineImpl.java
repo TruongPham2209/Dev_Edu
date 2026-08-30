@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
@@ -47,6 +48,7 @@ import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionOptionEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionSourceTraceEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 import com.pht.dev_edu.quiz.repo.DocumentKnowledgeChunkRepository;
 import com.pht.dev_edu.quiz.repo.QuizGenerationJobRepository;
@@ -89,6 +91,7 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
     CourseDocumentRepository courseDocumentRepository;
     FileUploadRepository fileUploadRepository;
 
+    QuizMapper quizMapper;
     Executor taskExecutor;
     ObjectMapper objectMapper;
 
@@ -228,20 +231,7 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
                 .orElseThrow(() -> new DataNotFoundException(
                         "Source traceability record not found for question: " + questionId));
 
-        return QuestionSourceTraceResponse.builder()
-                .id(trace.getId())
-                .questionId(trace.getQuestionId())
-                .generationJobId(trace.getGenerationJobId())
-                .documentId(trace.getDocumentId())
-                .chunkId(trace.getChunkId())
-                .sectionName(trace.getSectionName())
-                .pageNumber(trace.getPageNumber())
-                .modelName(trace.getModelName())
-                .promptVersion(trace.getPromptVersion())
-                .attemptCount(trace.getAttemptCount())
-                .validationMetrics(trace.getValidationMetrics())
-                .createdAt(trace.getCreatedAt())
-                .build();
+        return quizMapper.toResponse(trace);
     }
 
     private void executePipelineAsync(UUID jobId, GenerateQuizFromDocumentRequest request, byte[] fileBytes,
@@ -629,37 +619,16 @@ public class QuizGenerationPipelineImpl implements QuizGenerationPipeline {
         log.warn("Job {} failed with status {}: {}", job.getId(), status, errorMessage);
     }
 
-    @SuppressWarnings("unchecked")
     private QuizGenerationJobResponse mapToResponse(QuizGenerationJobEntity job) {
         Map<String, Integer> rejectionReasonsMap = null;
         if (job.getRejectionReasons() != null && !job.getRejectionReasons().isBlank()) {
             try {
-                rejectionReasonsMap = objectMapper.readValue(job.getRejectionReasons(), Map.class);
+                rejectionReasonsMap = objectMapper.readValue(job.getRejectionReasons(), new TypeReference<Map<String, Integer>>() {});
             } catch (Exception ignored) {
             }
         }
 
-        return QuizGenerationJobResponse.builder()
-                .jobId(job.getId())
-                .courseId(job.getCourseId())
-                .documentId(job.getDocumentId())
-                .documentName(job.getDocumentName())
-                .status(job.getStatus())
-                .currentStep(job.getCurrentStep())
-                .requestedTotal(job.getRequestedTotal())
-                .usableCapacity(job.getUsableCapacity())
-                .processedCount(job.getProcessedCount())
-                .acceptedCount(job.getAcceptedCount())
-                .rejectedCount(job.getRejectedCount())
-                .rejectionReasons(rejectionReasonsMap)
-                .resultQuizId(job.getResultQuizId())
-                .errorMessage(job.getErrorMessage())
-                .tokenUsage(job.getTokenUsage())
-                .executionTimeMs(job.getExecutionTimeMs())
-                .createdBy(job.getCreatedBy())
-                .createdAt(job.getCreatedAt())
-                .updatedAt(job.getUpdatedAt())
-                .build();
+        return quizMapper.toResponse(job, rejectionReasonsMap);
     }
 
     private String serializeJson(Object obj) {

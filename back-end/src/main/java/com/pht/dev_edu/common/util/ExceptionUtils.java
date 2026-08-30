@@ -14,8 +14,18 @@ import jakarta.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Utility class for formatting, categorizing, and logging exception error messages and stack traces.
+ */
 @Slf4j
 public class ExceptionUtils {
+
+    /**
+     * Extracts a client-friendly error message for validation, binding, and bad request exceptions.
+     *
+     * @param ex the input client {@link Exception}.
+     * @return a user-friendly error summary string.
+     */
     public static String getClientErrorMessage(Exception ex) {
         String message;
         String logMessage = "";
@@ -87,6 +97,12 @@ public class ExceptionUtils {
         return message;
     }
 
+    /**
+     * Extracts a client-friendly error message for HTTP Method Not Allowed exceptions.
+     *
+     * @param ex the HTTP method {@link Exception}.
+     * @return a user-friendly method not allowed message.
+     */
     public static String getMethodNotAllowedMessage(Exception ex) {
         String message;
         String logMessage;
@@ -110,6 +126,12 @@ public class ExceptionUtils {
         return message;
     }
 
+    /**
+     * Extracts a client-friendly message for internal server errors.
+     *
+     * @param ex the server {@link Exception}.
+     * @return an internal server error message.
+     */
     public static String getServerErrorMessage(Exception ex) {
         String message;
         if (ex instanceof IOException) {
@@ -123,6 +145,12 @@ public class ExceptionUtils {
         return message;
     }
 
+    /**
+     * Extracts a client-friendly message for data conflict and constraint violation exceptions.
+     *
+     * @param ex the conflict {@link Exception}.
+     * @return a data conflict message.
+     */
     public static String getConflictErrorMessage(Exception ex) {
         String message;
         if (ex instanceof DataIntegrityViolationException) {
@@ -134,6 +162,12 @@ public class ExceptionUtils {
         return message;
     }
 
+    /**
+     * Serializes an exception's stack trace into a newline-separated string.
+     *
+     * @param ex the {@link Exception}.
+     * @return the complete stack trace string.
+     */
     public static String getStackTraceAsString(Exception ex) {
         StringBuilder sb = new StringBuilder();
         for (StackTraceElement element : ex.getStackTrace()) {

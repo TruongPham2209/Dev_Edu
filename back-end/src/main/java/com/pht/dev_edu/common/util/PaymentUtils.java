@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+/**
+ * Utility class for constructing VNPay payment parameters, signing URLs with HMAC SHA-512, and formatting gateway requests.
+ */
 @Slf4j
 @Component
 public class PaymentUtils {
@@ -45,6 +48,16 @@ public class PaymentUtils {
 
     private static final String HCM_ZONE = "Asia/Ho_Chi_Minh";
 
+    /**
+     * Constructs the map of standard query parameters required for initiating a VNPay checkout request.
+     *
+     * @param paymentId  the unique transaction reference ID.
+     * @param amount     the payment amount in VND.
+     * @param ipAddress  the client IP address.
+     * @param desc       the order description summary.
+     * @param expireTime the transaction expiration time.
+     * @return the parameter key-value map.
+     */
     public static Map<String, String> createVnPayPaymentParams(String paymentId, BigDecimal amount, String ipAddress, String desc, LocalDateTime expireTime) {
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
@@ -81,6 +94,12 @@ public class PaymentUtils {
         return vnp_Params;
     }
 
+    /**
+     * Sorts parameters alphabetically, URL-encodes values, calculates the HMAC SHA-512 checksum, and returns the full redirect URL.
+     *
+     * @param vnp_Params the map of payment parameters.
+     * @return the complete VNPay payment redirect URL string.
+     */
     public static String getPaymentUrl(Map<String, String> vnp_Params) {
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
@@ -91,12 +110,12 @@ public class PaymentUtils {
             String fieldName = itr.next();
             String fieldValue = vnp_Params.get(fieldName);
             if ((fieldValue != null) && !fieldValue.isEmpty()) {
-                //Build hash data
+                // Build hash data
                 hashData.append(fieldName);
                 hashData.append('=');
                 hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
 
-                //Build query
+                // Build query
                 query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
                 query.append('=');
                 query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
@@ -113,6 +132,13 @@ public class PaymentUtils {
         return vnpayUrl + "?" + queryUrl;
     }
 
+    /**
+     * Calculates the HMAC SHA-512 hex signature for the given input data with a secret key.
+     *
+     * @param key  the secret hash key.
+     * @param data the raw data string to sign.
+     * @return the lowercase hex hash string.
+     */
     private static String hmacSHA512(final String key, final String data) {
         try {
             if (key == null || data == null) {

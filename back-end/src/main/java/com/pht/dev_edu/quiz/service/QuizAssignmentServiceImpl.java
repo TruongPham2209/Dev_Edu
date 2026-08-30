@@ -68,18 +68,8 @@ public class QuizAssignmentServiceImpl implements QuizAssignmentService {
             initialStatus = AssignmentStatus.ACTIVE;
         }
 
-        QuizAssignmentEntity assignment = QuizAssignmentEntity.builder()
-                .quizId(request.getQuizId())
-                .assignmentName(request.getAssignmentName())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .durationMinutes(request.getDurationMinutes())
-                .shuffleQuestions(Boolean.TRUE.equals(request.getShuffleQuestions()))
-                .shuffleOptions(Boolean.TRUE.equals(request.getShuffleOptions()))
-                .maxAttempts(request.getMaxAttempts() != null ? request.getMaxAttempts() : 1)
-                .status(initialStatus)
-                .createdBy(username)
-                .build();
+        QuizAssignmentEntity assignment = quizMapper.toEntity(request, username);
+        assignment.setStatus(initialStatus);
 
         assignmentRepo.save(assignment);
 

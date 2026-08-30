@@ -9,10 +9,14 @@ import lombok.Getter;
 import java.util.Map;
 
 /**
- * Interface chịu trách nhiệm kiểm tra tính hợp lệ (Validation) và chuẩn hóa (Normalization)
- * các thông số yêu cầu sinh Quiz từ request đầu vào (tổng số câu hỏi, phân bổ loại câu hỏi và phân bổ độ khó).
+ * Validator interface responsible for validating and normalizing quiz generation request parameters
+ * (total question quota, question type distribution, and difficulty breakdown).
  */
 public interface QuizRequirementValidator {
+
+    /**
+     * Holds normalized and validated quiz generation requirements.
+     */
     @Getter
     @Builder
     class ValidatedRequirements {
@@ -22,10 +26,10 @@ public interface QuizRequirementValidator {
     }
 
     /**
-     * Kiểm tra ràng buộc dữ liệu đầu vào và chuẩn hóa phân bổ loại câu hỏi / độ khó theo tỷ lệ mặc định nếu thiếu.
+     * Validates input constraints and normalizes question type and difficulty distributions using defaults if unspecified.
      *
-     * @param request Dữ liệu yêu cầu sinh Quiz từ API
-     * @return ValidatedRequirements chứa các chỉ tiêu số lượng đã chuẩn hóa an toàn
+     * @param request the {@link GenerateQuizFromDocumentRequest} payload.
+     * @return the {@link ValidatedRequirements} containing sanitized question counts and distributions.
      */
     ValidatedRequirements validateAndNormalize(GenerateQuizFromDocumentRequest request);
 }

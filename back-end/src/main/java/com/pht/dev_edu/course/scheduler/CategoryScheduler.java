@@ -13,6 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+/**
+ * Scheduled background tasks for course categories.
+ * Cleans up soft-deleted categories and triggers file deletion events for attached thumbnails.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -23,7 +27,10 @@ public class CategoryScheduler {
 
     private static final long DELETION_DELAY_DAYS = 30;
 
-    // Run every hour to clean up deleted assignments and their associated files
+    /**
+     * Cleans up categories soft-deleted more than 30 days ago, returning thumbnail object keys for S3 removal.
+     * Runs every hour.
+     */
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedAssignments() {

@@ -9,14 +9,48 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
+/**
+ * Service for managing user accounts, authentication data, registration, and user search queries.
+ */
 public interface UserService {
-    UserEntity findByUsername(String username); // Cached
 
-    UserEntity findByEmail(String email); // Cached
+    /**
+     * Finds a user entity by username (cached).
+     *
+     * @param username the username to look up.
+     * @return the {@link UserEntity} or null if not found.
+     */
+    UserEntity findByUsername(String username);
 
-    CustomPaging<UserInfoResponse> searchUsers(String keyword, RoleEnum role, Pageable  pageable);
+    /**
+     * Finds a user entity by email (cached).
+     *
+     * @param email the email address to look up.
+     * @return the {@link UserEntity} or null if not found.
+     */
+    UserEntity findByEmail(String email);
 
+    /**
+     * Searches and paginates users by keyword and role.
+     *
+     * @param keyword  the search keyword matching name, username, or email.
+     * @param role     the {@link RoleEnum} filter.
+     * @param pageable the {@link Pageable} pagination configuration.
+     * @return a {@link CustomPaging} of {@link UserInfoResponse} items.
+     */
+    CustomPaging<UserInfoResponse> searchUsers(String keyword, RoleEnum role, Pageable pageable);
+
+    /**
+     * Registers a new user in the system.
+     *
+     * @param registerUser the {@link RegisterUser} payload containing registration details.
+     */
     void registerUser(RegisterUser registerUser);
 
+    /**
+     * Registers multiple users in batch mode.
+     *
+     * @param registerUsers the list of {@link RegisterUser} objects to register.
+     */
     void batchRegisterUsers(List<RegisterUser> registerUsers);
 }

@@ -13,6 +13,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Scheduled background tasks for orders, payment sessions, and shopping cart maintenance.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,8 +29,11 @@ public class OrderScheduler {
 
     public static final long EXPIRATION_TIME_IN_MINUTES = 15;
     private static final long EXPIRED_ORDER_DELAY_DAYS = 7;
-    // private static final long INVALID_CART_ITEM_DELAY_DAYS = 3;
 
+    /**
+     * Cleans up expired and canceled payment sessions and their corresponding order records older than 7 days.
+     * Runs every hour.
+     */
     @Transactional
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void cleanCancelledPayments() {
@@ -61,6 +67,10 @@ public class OrderScheduler {
                 "Deleted %d expired payment sessions that were cancelled.");
     }
 
+    /**
+     * Cleans up invalid items from shopping carts (e.g. deleted courses or already enrolled courses).
+     * Runs every hour.
+     */
     @Transactional
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     public void cleanInvalidCartItem() {
@@ -68,13 +78,15 @@ public class OrderScheduler {
                 CronJobConstant.CLEAN_INVALID_CART_ITEMS_JOB,
                 () -> {
                     var deletedCartItemIds = cartItemRepository.deleteInvalidCourseCartItems();
-                    // TODO: if implement subscription, need to delete invalid subscription cart
-                    // items as well
                     return deletedCartItemIds.size();
                 },
                 "Deleted %d invalid cart items that were cancelled.");
     }
 
+    /**
+     * Cleans up unpaid pending orders that have exceeded the 15-minute checkout window.
+     * Runs every 30 minutes.
+     */
     @Transactional
     @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void cleanExpiredOrders() {

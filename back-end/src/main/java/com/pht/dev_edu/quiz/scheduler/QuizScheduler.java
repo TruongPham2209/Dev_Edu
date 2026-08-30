@@ -1,6 +1,8 @@
 package com.pht.dev_edu.quiz.scheduler;
 
+import com.pht.dev_edu.common.constant.CronJobConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
+import com.pht.dev_edu.common.service.DeleteProcessor;
 import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.common.util.TransactionUtils;
 import com.pht.dev_edu.notification.dto.NotificationEvent;
@@ -12,6 +14,7 @@ import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.entity.QuizAssignmentEntity;
 import com.pht.dev_edu.quiz.entity.QuizAttemptEntity;
 import com.pht.dev_edu.quiz.entity.UserQuizSessionEntity;
+import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 import com.pht.dev_edu.quiz.repo.QuizAssignmentRepo;
 import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.UserQuizSessionRepo;
@@ -30,6 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+/**
+ * Scheduled background tasks for quiz management, attempt auto-submission, assignment lifecycle, and document cleanup.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -38,13 +44,18 @@ public class QuizScheduler {
     QuizAttemptRepo attemptRepo;
     QuizAssignmentRepo assignmentRepo;
     UserQuizSessionRepo sessionRepo;
+    CourseDocumentRepository courseDocumentRepository;
+    DeleteProcessor deleteProcessor;
 
     Executor executor;
     NotificationPersonalService notificationPersonalService;
     QuizAttemptService attemptService;
 
+    private static final long DELETION_DELAY_DAYS = 7;
+
     /**
-     * Auto-submit attempts whose expires_at time has passed (runs every 1 minute)
+     * Auto-submits active in-progress attempts whose allotted duration or expiration time has passed.
+     * Runs every 1 minute.
      */
     @Scheduled(cron = "0 * * * * *")
     public void autoSubmitExpiredAttempts() {
@@ -66,7 +77,9 @@ public class QuizScheduler {
     }
 
     /**
-     * Update Assignment status: SCHEDULED -> ACTIVE -> CLOSED (runs every 1 minute)
+     * Transitions assignment statuses based on start and end time (SCHEDULED -> ACTIVE -> CLOSED).
+     * Publishes notification events when assignments become ACTIVE.
+     * Runs every 1 minute.
      */
     @Scheduled(cron = "0 * * * * *")
     @Transactional
@@ -111,7 +124,8 @@ public class QuizScheduler {
     }
 
     /**
-     * Clean up expired sessions (runs every hour)
+     * Cleans up expired user quiz sessions and marks them as inactive/revoked.
+     * Runs every hour.
      */
     @Scheduled(cron = "0 0 * * * *")
     public void cleanupExpiredSessions() {
@@ -128,5 +142,26 @@ public class QuizScheduler {
             sessionRepo.save(session);
         }
         log.info("Cleaned up {} expired user quiz sessions", expiredSessions.size());
+    }
+
+    /**
+     * Cleans up soft-deleted global documents and expired temporary documents older than 7 days.
+     * Automatically cascades deletion of associated knowledge chunks and embeddings, and sends Kafka events to remove stored S3 files.
+     * Runs every hour.
+     */
+    @Scheduled(fixedDelay = 60 * 60 * 1000)
+    @Transactional
+    public void cleanDeletedDocuments() {
+        var cutoffTime = LocalDateTime.now().minusDays(DELETION_DELAY_DAYS);
+
+        deleteProcessor.executeCleanupJobHasObjectKeys(
+                CronJobConstant.CLEAN_DELETED_DOCUMENTS_JOB,
+                () -> courseDocumentRepository
+                        .deleteDocumentsBeforeCutoffTimeThenReturnObjectKey(cutoffTime)
+                        .stream()
+                        .filter(key -> key != null && !key.isBlank() && !key.startsWith("topic/"))
+                        .toList(),
+                "Deleted %d documents."
+        );
     }
 }

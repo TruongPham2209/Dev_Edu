@@ -6,13 +6,13 @@ import com.pht.dev_edu.quiz.entity.DocumentKnowledgeChunkEntity;
 import java.util.List;
 
 /**
- * Interface trích xuất ngữ cảnh kiến thức mục tiêu (Knowledge Retrieval) phục vụ trực tiếp cho từng slot câu hỏi.
- * Cung cấp văn bản nguồn cùng các thông tin trích dẫn (chương, trang, tài liệu) cho LLM prompt.
+ * Service for retrieving target knowledge contexts for specific question slots,
+ * supplying source text and citations (chapter, page, document) to the LLM prompt.
  */
 public interface KnowledgeRetrieverService {
 
     /**
-     * Chứa kết quả trích xuất ngữ cảnh nguồn bao gồm nội dung văn bản và các chunk liên quan.
+     * Holds retrieved knowledge context text and associated chunk entities.
      */
     class RetrievedContext {
         private final String contextText;
@@ -33,11 +33,11 @@ public interface KnowledgeRetrieverService {
     }
 
     /**
-     * Trích xuất ngữ cảnh kiến thức phù hợp cho một QuestionSlot dựa trên danh sách các chunk hợp lệ.
+     * Retrieves the best knowledge context for a question slot from eligible knowledge chunks.
      *
-     * @param slot                Slot câu hỏi đang xử lý
-     * @param allEligibleChunks   Tất cả các đoạn kiến thức hợp lệ của tài liệu
-     * @return RetrievedContext chứa chuỗi ngữ cảnh văn bản nguồn và bản ghi chunk được chọn
+     * @param slot              the {@link QuestionSlot} currently being processed.
+     * @param allEligibleChunks the list of eligible {@link DocumentKnowledgeChunkEntity} chunks.
+     * @return the {@link RetrievedContext} containing text and selected chunks.
      */
     RetrievedContext retrieveContextForSlot(QuestionSlot slot, List<DocumentKnowledgeChunkEntity> allEligibleChunks);
 }

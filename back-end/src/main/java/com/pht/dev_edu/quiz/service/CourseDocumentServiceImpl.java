@@ -1,15 +1,5 @@
 package com.pht.dev_edu.quiz.service;
 
-import java.security.MessageDigest;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.TimeStampCursor;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
@@ -19,17 +9,25 @@ import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.dto.UploadStatus;
 import com.pht.dev_edu.file.repo.FileUploadRepository;
 import com.pht.dev_edu.file.service.FileService;
-import com.pht.dev_edu.quiz.dto.enums.DocumentStatus;
-import com.pht.dev_edu.quiz.dto.enums.DocumentVisibility;
 import com.pht.dev_edu.quiz.dto.response.CourseDocumentResponse;
 import com.pht.dev_edu.quiz.engine.DocumentProcessingService;
 import com.pht.dev_edu.quiz.entity.CourseDocumentEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -40,6 +38,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
     DocumentProcessingService documentProcessingService;
     FileService fileService;
     FileUploadRepository fileUploadRepository;
+    QuizMapper quizMapper;
 
     private static final int DEFAULT_LIBRARY_PAGE_SIZE = 15;
 
@@ -57,7 +56,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
 
         return PagingUtils.getPagedWithCursor(
                 docs,
-                this::mapToResponse,
+                quizMapper::toResponse,
                 CourseDocumentEntity::getCreatedAt,
                 CourseDocumentEntity::getId,
                 DEFAULT_LIBRARY_PAGE_SIZE
@@ -98,18 +97,14 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
             String hash = computeSha256(bytes);
             String docTitle = title != null && !title.isBlank() ? title : filename;
 
-            // 3. Save CourseDocumentEntity referencing the objectKey in the private bucket
-            CourseDocumentEntity doc = CourseDocumentEntity.builder()
-                    .title(docTitle)
-                    .fileName(filename)
-                    .fileObjectKey(fileResp.getObjectKey())
-                    .fileSize(file.getSize())
-                    .contentHash(hash)
-                    .status(DocumentStatus.READY)
-                    .visibility(DocumentVisibility.GLOBAL)
-                    .isPromoted(false)
-                    .createdBy(username)
-                    .build();
+            // 3. Save CourseDocumentEntity referencing the objectKey in the private bucket using MapStruct mapper
+            CourseDocumentEntity doc = quizMapper.toGlobalDocumentEntity(
+                    docTitle,
+                    filename,
+                    fileResp.getObjectKey(),
+                    file.getSize(),
+                    hash,
+                    username);
 
             CourseDocumentEntity savedDoc = documentRepository.save(doc);
 
@@ -120,7 +115,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
 
             log.info("Admin {} uploaded global document {} to private bucket (id={}, objectKey={})",
                     username, filename, savedDoc.getId(), fileResp.getObjectKey());
-            return mapToResponse(savedDoc);
+            return quizMapper.toResponse(savedDoc);
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -140,23 +135,6 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
         log.info("Admin {} deleted global document {}", username, documentId);
     }
 
-    private CourseDocumentResponse mapToResponse(CourseDocumentEntity entity) {
-        return CourseDocumentResponse.builder()
-                .id(entity.getId())
-                .title(entity.getTitle())
-                .fileName(entity.getFileName())
-                .fileObjectKey(entity.getFileObjectKey())
-                .fileSize(entity.getFileSize())
-                .contentHash(entity.getContentHash())
-                .status(entity.getStatus())
-                .visibility(entity.getVisibility())
-                .isPromoted(entity.getIsPromoted())
-                .createdBy(entity.getCreatedBy())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .build();
-    }
-
     private String computeSha256(byte[] data) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -170,7 +148,7 @@ public class CourseDocumentServiceImpl implements CourseDocumentService {
             }
             return hexString.toString();
         } catch (Exception e) {
-            return String.valueOf(data.hashCode());
+            return String.valueOf(Arrays.hashCode(data));
         }
     }
 }

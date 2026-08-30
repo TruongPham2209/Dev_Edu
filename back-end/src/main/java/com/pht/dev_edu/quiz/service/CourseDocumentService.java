@@ -7,28 +7,27 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 /**
- * Interface quản lý Thư viện Tài liệu chung (Global Document Library) cho môn học.
- * Hỗ trợ truy vấn phân trang bằng Cursor, Admin upload trực tiếp file PDF và xóa mềm tài liệu.
+ * Service for managing the global document library (Global Document Library) for courses.
+ * Supports cursor-based pagination, admin PDF uploads, and soft deletion.
  */
 public interface CourseDocumentService {
 
     /**
-     * Lấy danh sách các tài liệu thuộc Thư viện chung (visibility = GLOBAL, status = READY)
-     * sử dụng phân trang bằng Con trỏ (Cursor-based Pagination) với kích thước trang cố định là 15.
+     * Retrieves documents from the global library (visibility = GLOBAL, status = READY) using cursor pagination.
      *
-     * @param nextCursor Con trỏ mã hóa trang tiếp theo (Time + UUID), truyền null/trống cho trang đầu
-     * @param fileName   Từ khóa lọc theo tên file hoặc tiêu đề tài liệu (không bắt buộc)
-     * @return CustomPaging chứa danh sách CourseDocumentResponse và con trỏ nextCursor cho trang kế tiếp
+     * @param nextCursor the encoded cursor token for the next page (null or empty for the first page).
+     * @param fileName   optional filter by file name or document title.
+     * @return a {@link CustomPaging} containing {@link CourseDocumentResponse} items.
      */
     CustomPaging<CourseDocumentResponse> getGlobalDocumentLibrary(String nextCursor, String fileName);
 
     /**
-     * Cho phép quản trị viên (Admin) upload trực tiếp file PDF vào Thư viện chung mà không cần thông qua bước sinh Quiz.
+     * Allows administrators to upload a PDF document directly into the global library without quiz generation.
      *
-     * @param file     File tài liệu PDF cần upload
-     * @param title    Tiêu đề mô tả tài liệu (tùy chọn)
-     * @param username Tên tài khoản Admin thực hiện upload
-     * @return CourseDocumentResponse thông tin bản ghi tài liệu vừa lưu
+     * @param file     the PDF {@link MultipartFile} to upload.
+     * @param title    the optional title of the document.
+     * @param username the username of the administrator uploading the file.
+     * @return the saved {@link CourseDocumentResponse}.
      */
     CourseDocumentResponse uploadGlobalDocumentByAdmin(
             MultipartFile file,
@@ -37,10 +36,10 @@ public interface CourseDocumentService {
     );
 
     /**
-     * Thực hiện xóa mềm (Soft Delete) một tài liệu khỏi Thư viện chung.
+     * Soft-deletes a document from the global library.
      *
-     * @param documentId ID của tài liệu cần xóa
-     * @param username   Tên tài khoản người thực hiện xóa
+     * @param documentId the UUID of the document to delete.
+     * @param username   the username of the user performing the deletion.
      */
     void deleteGlobalDocument(UUID documentId, String username);
 }

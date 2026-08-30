@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * Scheduled background tasks for forum comments maintenance.
+ */
 @Slf4j
 @Component("forumCommentScheduler")
 @RequiredArgsConstructor
@@ -21,6 +24,10 @@ public class CommentScheduler {
 
     private static final long DELETION_DELAY_DAYS = 7;
 
+    /**
+     * Cleans up forum comments that were soft-deleted more than 7 days ago.
+     * Runs every hour.
+     */
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanDeletedComments() {
@@ -34,6 +41,10 @@ public class CommentScheduler {
         );
     }
 
+    /**
+     * Cleans up orphaned forum comments whose parent post no longer exists.
+     * Runs every hour.
+     */
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     @Transactional
     public void cleanCommentsWithoutReference() {

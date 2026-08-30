@@ -1,6 +1,5 @@
 package com.pht.dev_edu.notification.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pht.dev_edu.common.constant.RedisDurationConstant;
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
@@ -14,6 +13,7 @@ import com.pht.dev_edu.common.util.RedisUtils;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.notification.dto.*;
 import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
+import com.pht.dev_edu.notification.mapper.NotificationMapper;
 import com.pht.dev_edu.notification.repo.NotificationGroupRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupTargetRepository;
 import com.pht.dev_edu.notification.repo.NotificationRepository;
@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,6 +44,7 @@ public class NotificationServiceImpl implements NotificationService {
     UserService userService;
     NotificationPersonalService notificationPersonalService;
     NotificationGroupService notificationGroupService;
+    NotificationMapper notificationMapper;
 
     ObjectMapper objectMapper;
 
@@ -74,7 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         return PagingUtils.getPagedWithCursor(
                 projections,
-                this::toNotificationResponse,
+                proj -> notificationMapper.toResponse(proj, objectMapper),
                 UnifiedNotificationProjection::getCreatedAt,
                 UnifiedNotificationProjection::getId,
                 NOTIFICATION_PAGE_SIZE);
@@ -156,59 +156,13 @@ public class NotificationServiceImpl implements NotificationService {
                     .map(NotificationGroupTargetEntity::getRole)
                     .toList();
 
-            return CachedNotification.builder()
-                    .id(groupEntity.getId())
-                    .title(groupEntity.getTitle())
-                    .content(groupEntity.getContent())
-                    .category(NotificationCategory.GROUP)
-                    .targetData(groupEntity.getTargetData())
-                    .createdAt(groupEntity.getCreatedAt())
-                    .deleteAt(groupEntity.getDeletedAt())
-                    .createdBy(groupEntity.getCreatedBy())
-                    .targetRoles(targetRoles)
-                    .build();
+            return notificationMapper.toCached(groupEntity, targetRoles);
         }
 
         var personalEntity = notificationRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Personal notification not found with id: " + id));
 
-        return CachedNotification.builder()
-                .id(personalEntity.getId())
-                .username(personalEntity.getUsername())
-                .title(personalEntity.getTitle())
-                .content(personalEntity.getContent())
-                .category(NotificationCategory.PERSONAL)
-                .targetData(personalEntity.getTargetData())
-                .createdAt(personalEntity.getCreatedAt())
-                .build();
-    }
-
-    private NotificationResponse toNotificationResponse(UnifiedNotificationProjection proj) {
-        return NotificationResponse.builder()
-                .id(proj.getId())
-                .username(proj.getUsername())
-                .type(proj.getType())
-                .title(proj.getTitle())
-                .content(proj.getContent())
-                .targetData(parseTargetData(proj.getTargetData()))
-                .isRead(proj.getIsRead())
-                .readAt(proj.getReadAt())
-                .createdAt(proj.getCreatedAt())
-                .category(NotificationCategory.valueOf(proj.getCategory()))
-                .createdBy(proj.getCreatedBy())
-                .build();
-    }
-
-    private Map<NotificationTargetType, String> parseTargetData(String rawTargetData) {
-        if (!StringUtils.hasText(rawTargetData)) {
-            return null;
-        }
-        try {
-            return objectMapper.readValue(rawTargetData, new TypeReference<Map<NotificationTargetType, String>>() {});
-        } catch (Exception e) {
-            log.error("Failed to parse targetData JSON: {}", rawTargetData, e);
-            return null;
-        }
+        return notificationMapper.toCached(personalEntity);
     }
 
     private TimeStampCursor resolveCursor(String nextCursor) {

@@ -9,6 +9,7 @@ import com.pht.dev_edu.quiz.dto.request.GenerateQuizFromDocumentRequest;
 import com.pht.dev_edu.quiz.entity.CourseDocumentEntity;
 import com.pht.dev_edu.quiz.entity.DocumentUploadAuditEntity;
 import com.pht.dev_edu.quiz.entity.QuizGenerationJobEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 import com.pht.dev_edu.quiz.repo.DocumentUploadAuditRepository;
 import lombok.AccessLevel;
@@ -29,6 +30,7 @@ public class DocumentPromotionServiceImpl implements DocumentPromotionService {
     CourseDocumentRepository documentRepository;
     DocumentUploadAuditRepository auditRepository;
     FileUploadRepository fileUploadRepository;
+    QuizMapper quizMapper;
 
     @Override
     @Transactional
@@ -80,21 +82,17 @@ public class DocumentPromotionServiceImpl implements DocumentPromotionService {
                     documentEntity != null ? documentEntity.getId() : null, job.getId(), failureReason);
         }
 
-        // Save Audit Record
-        DocumentUploadAuditEntity audit = DocumentUploadAuditEntity.builder()
-                .uploadedBy(username != null ? username : job.getCreatedBy())
-                .userRole(userRole != null ? userRole : "LECTURER")
-                .fileName(request.getDocumentName() != null ? request.getDocumentName() : job.getDocumentName())
-                .fileSize(documentEntity != null ? documentEntity.getFileSize() : 0L)
-                .contentHash(documentEntity != null ? documentEntity.getContentHash() : "N/A")
-                .quizId(job.getResultQuizId())
-                .courseId(job.getCourseId())
-                .generationJobId(job.getId())
-                .requestedSave(requestedSave)
-                .isPromoted(shouldPromote)
-                .promotionStatus(promotionStatus)
-                .failureReason(failureReason)
-                .build();
+        // Save Audit Record using MapStruct mapper
+        DocumentUploadAuditEntity audit = quizMapper.toAuditEntity(
+                request,
+                job,
+                documentEntity,
+                requestedSave,
+                shouldPromote,
+                promotionStatus,
+                failureReason,
+                username,
+                userRole);
 
         auditRepository.save(audit);
         return shouldPromote;

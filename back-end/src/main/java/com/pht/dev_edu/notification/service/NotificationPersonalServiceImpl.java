@@ -16,6 +16,7 @@ import com.pht.dev_edu.notification.dto.NotificationEvent;
 import com.pht.dev_edu.notification.dto.NotificationTargetType;
 import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
 import com.pht.dev_edu.notification.entity.NotificationPersonalEntity;
+import com.pht.dev_edu.notification.mapper.NotificationMapper;
 import com.pht.dev_edu.notification.repo.NotificationPersonalRepository;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import com.pht.dev_edu.quiz.repo.QuizRepo;
@@ -37,6 +38,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationPersonalServiceImpl implements NotificationPersonalService {
     NotificationPersonalRepository notificationPersonalRepository;
+    NotificationMapper notificationMapper;
 
     QuizRepo quizRepo;
     PostRepository postRepo;
@@ -70,12 +72,7 @@ public class NotificationPersonalServiceImpl implements NotificationPersonalServ
                         }
                     });
                 }
-                var pushEvent = com.pht.dev_edu.notification.dto.PushNotificationEvent.builder()
-                        .username(notification.getUsername())
-                        .title(notification.getTitle())
-                        .body(notification.getContent())
-                        .data(dataMap)
-                        .build();
+                var pushEvent = notificationMapper.toPushEvent(notification, dataMap);
 
                 KafkaUtils.sendPushNotificationEvent(pushEvent);
                 log.info("Published PushNotificationEvent to Kafka for username={}", notification.getUsername());
@@ -115,14 +112,7 @@ public class NotificationPersonalServiceImpl implements NotificationPersonalServ
         List<String> targetUsernames = getTargetUsernames(event, targetData);
 
         return targetUsernames.stream()
-                .map(username -> NotificationPersonalEntity.builder()
-                        .type(eventType)
-                        .title(title)
-                        .username(username)
-                        .content(event.getContent())
-                        .targetData(targetData)
-                        .isRead(false)
-                        .build())
+                .map(username -> notificationMapper.toPersonalEntity(event, username, title, targetData))
                 .toList();
     }
 
