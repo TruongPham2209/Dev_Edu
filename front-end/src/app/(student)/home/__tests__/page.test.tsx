@@ -64,11 +64,16 @@ vi.mock("../featured-articles", () => ({
   FeaturedArticlesFallback: () => <div>Loading Articles...</div>,
 }));
 
+import type { PostResponse } from "@/lib/type/forums";
+import { createMockCustomPaging } from "@/testing/mock-data";
+
 describe("HomePage Component", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(coursesApi.getFeaturedCourses).mockResolvedValue([]);
-    vi.mocked(forumApi.getForumFeed).mockResolvedValue({ contents: [] } as never);
+    vi.mocked(forumApi.getForumFeed).mockResolvedValue(
+      createMockCustomPaging<PostResponse>([]),
+    );
   });
 
   it("shouldRenderHeroHeadlineExploreButtonsAndSectionTitles", async () => {

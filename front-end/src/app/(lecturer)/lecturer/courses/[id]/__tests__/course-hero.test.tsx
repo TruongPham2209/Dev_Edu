@@ -37,6 +37,7 @@ import React from "react";
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { createMockCourse } from "@/testing/mock-data";
 import { CourseHero } from "../course-hero";
 
 vi.mock("@/components/common/hero-section/course-hero-info", () => ({
@@ -55,19 +56,19 @@ describe("CourseHero", () => {
     // Arrange
     // Mock course response.
     // ----------------------------------------------------------------------------
-    const mockCourse = {
+    const mockCourse = createMockCourse({
       id: "course-123",
       title: "Advanced System Architecture",
       description: "Learn distributed systems design.",
       thumbnailUrl: "https://example.com/thumb.jpg",
       createdAt: "2026-06-01T00:00:00.000Z",
-    };
+    });
 
     // ----------------------------------------------------------------------------
     // Act
     // Render CourseHero.
     // ----------------------------------------------------------------------------
-    render(<CourseHero course={mockCourse as never} />);
+    render(<CourseHero course={mockCourse} />);
 
     // ----------------------------------------------------------------------------
     // Assert

@@ -44,9 +44,20 @@
  * Unit test for LecturerLectureDetailPage component.
  */
 
+import type { CourseResponse } from "@/lib/type/courses";
+import type { LectureResponse } from "@/lib/type/lectures";
 import * as coursesApi from "@/lib/api/courses";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
+import {
+  createMockCourse,
+  createMockLecture,
+  createMockRouter,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -100,11 +111,13 @@ describe("LecturerLectureDetailPage", () => {
       id: "course-1",
       lectureId: "lec-99",
     });
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: vi.fn(),
+        handleError: mockHandleError,
+      }),
+    );
   });
 
   it("shouldRenderErrorStateWhenLectureIsNotFound", () => {
@@ -112,16 +125,17 @@ describe("LecturerLectureDetailPage", () => {
     // Arrange
     // Return null lecture.
     // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: new Error("Not found"),
-    } as never);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult<LectureResponse>(undefined, {
+        error: new Error("Not found"),
+      }),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-1", title: "Test Course" },
-      isLoading: false,
-    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult<CourseResponse>(
+        createMockCourse({ id: "course-1", title: "Test Course" }),
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -143,24 +157,26 @@ describe("LecturerLectureDetailPage", () => {
     // Arrange
     // Return mock lecture and course.
     // ----------------------------------------------------------------------------
-    const mockLecture = {
+    const mockLecture: LectureResponse = createMockLecture({
       id: "lec-99",
       title: "Domain-Driven Design Fundamentals",
       summary: "Learn aggregates and value objects",
       content: "Deep dive into domain boundaries.",
       videoObjectKey: "videos/ddd.mp4",
-    };
+    });
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: mockLecture,
-      isLoading: false,
-      error: null,
-    } as never);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult(mockLecture),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-1", title: "Clean Code & Architecture" },
-      isLoading: false,
-    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult<CourseResponse>(
+        createMockCourse({
+          id: "course-1",
+          title: "Clean Code & Architecture",
+        }),
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

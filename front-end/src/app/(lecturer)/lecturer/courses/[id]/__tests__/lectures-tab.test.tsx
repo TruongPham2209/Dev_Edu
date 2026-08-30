@@ -92,7 +92,6 @@ describe("LecturesTab", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
     vi.mocked(useRouter).mockReturnValue({
       push: mockPush,
       back: vi.fn(),
@@ -102,17 +101,10 @@ describe("LecturesTab", () => {
       prefetch: vi.fn(),
     });
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue(
       createMockApiWithToast(),
     );
 
-    vi.mocked(lecturesApi.useDeleteLectureMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as never);
     vi.mocked(lecturesApi.useDeleteLectureMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: vi.fn().mockResolvedValue(undefined),
@@ -125,11 +117,6 @@ describe("LecturesTab", () => {
     // Arrange
     // Return empty lectures list.
     // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-      refetch: mockRefetch,
-    } as never);
     vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
       createMockQueryResult([], { refetch: mockRefetch }),
     );
@@ -153,14 +140,6 @@ describe("LecturesTab", () => {
     // Arrange
     // Return sample lectures array.
     // ----------------------------------------------------------------------------
-    const mockLectures = [
-      {
-        id: "lec-1",
-        title: "Introduction to Clean Architecture",
-        summary: "Understand domain-driven boundaries",
-        videoObjectKey: "videos/intro.mp4",
-      },
-    ];
     const mockLecture: LectureResponse = createMockLecture({
       id: "lec-1",
       title: "Introduction to Clean Architecture",
@@ -168,11 +147,6 @@ describe("LecturesTab", () => {
       videoObjectKey: "videos/intro.mp4",
     });
 
-    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
-      data: mockLectures,
-      isLoading: false,
-      refetch: mockRefetch,
-    } as never);
     vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
       createMockQueryResult([mockLecture], { refetch: mockRefetch }),
     );

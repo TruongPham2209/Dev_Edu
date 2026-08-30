@@ -66,36 +66,51 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
+import {
+  createMockCourseItemDetail,
+  createMockCustomPaging,
+  createMockRouter,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("CartTabContent", () => {
   const mockPush = vi.fn();
   const mockCheckoutMutate = vi.fn();
   const mockRemoveMutate = vi.fn();
-  const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({
-      push: mockPush,
-    } as never);
+    vi.mocked(useRouter).mockReturnValue(
+      createMockRouter({ push: mockPush }),
+    );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({ handleError: vi.fn() }),
+    );
 
-    vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue({
-      mutateAsync: mockCheckoutMutate,
-    } as never);
+    vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue(
+      createMockMutationResult({ mutateAsync: mockCheckoutMutate }),
+    );
 
-    vi.mocked(enrollmentsApi.useRemoveFromCartMutation).mockReturnValue({
-      mutateAsync: mockRemoveMutate,
-    } as never);
+    vi.mocked(enrollmentsApi.useRemoveFromCartMutation).mockReturnValue(
+      createMockMutationResult({ mutateAsync: mockRemoveMutate }),
+    );
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe() { }
+      unobserve() { }
+      disconnect() { }
     }
-    window.IntersectionObserver = MockIntersectionObserver as never;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderEmptyCartStateWhenCartIsEmpty", () => {
@@ -103,14 +118,12 @@ describe("CartTabContent", () => {
     // Arrange
     // Return empty cart pages.
     // ----------------------------------------------------------------------------
-    vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseItemDetailResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -130,24 +143,22 @@ describe("CartTabContent", () => {
     // Arrange
     // Return cart items.
     // ----------------------------------------------------------------------------
-    const mockCartItems = [
-      {
+    const mockCartItems: CourseItemDetailResponse[] = [
+      createMockCourseItemDetail({
         id: "cart-item-1",
         courseId: "course-1",
         title: "Docker & Kubernetes Mastery",
         discountedPrice: 500000,
         originalPrice: 700000,
-      },
+      }),
     ];
 
-    vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: mockCartItems }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseItemDetailResponse>(mockCartItems)],
+        pageParams: [null],
+      }),
+    );
 
     mockCheckoutMutate.mockResolvedValue({ orderId: "order-999" });
 

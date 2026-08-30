@@ -39,8 +39,18 @@
  * Unit test for TabComments component.
  */
 
+import type { LectureCommentResponse } from "@/lib/type/lectures";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as useAuthHook from "@/lib/use-auth";
+import {
+  createMockAuthStatus,
+  createMockAuthUser,
+  createMockCustomPaging,
+} from "@/testing/mock-data";
+import {
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -58,12 +68,6 @@ vi.mock("@/lib/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 
-import { createMockAuthStatus, createMockAuthUser } from "@/testing/mock-data";
-import {
-  createMockInfiniteQueryResult,
-  createMockMutationResult,
-} from "@/testing/mock-query";
-
 describe("TabComments (Lecturer)", () => {
   let queryClient: QueryClient;
 
@@ -74,9 +78,6 @@ describe("TabComments (Lecturer)", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    vi.mocked(useAuthHook.useAuth).mockReturnValue({
-      user: { id: "lecturer-1", username: "prof_smith", avatarUrl: "" },
-    } as never);
     vi.mocked(useAuthHook.useAuth).mockReturnValue(
       createMockAuthStatus({
         user: createMockAuthUser({
@@ -87,12 +88,6 @@ describe("TabComments (Lecturer)", () => {
       }),
     );
 
-    vi.mocked(lecturesApi.useCreateLectureCommentMutation).mockReturnValue({
-      mutateAsync: vi
-        .fn()
-        .mockResolvedValue({ id: "c-new", content: "Thanks!" }),
-      isPending: false,
-    } as never);
     vi.mocked(lecturesApi.useCreateLectureCommentMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: vi
@@ -102,9 +97,6 @@ describe("TabComments (Lecturer)", () => {
       }),
     );
 
-    vi.mocked(lecturesApi.useDeleteLectureCommentMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as never);
     vi.mocked(lecturesApi.useDeleteLectureCommentMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: vi.fn().mockResolvedValue(undefined),
@@ -122,20 +114,11 @@ describe("TabComments (Lecturer)", () => {
     // Arrange
     // Return empty comments list.
     // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useInfiniteLectureCommentsQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
     vi.mocked(lecturesApi.useInfiniteLectureCommentsQuery).mockReturnValue(
-      createMockInfiniteQueryResult(
-        {
-          pages: [{ contents: [], currentPage: 0, pageSize: 10, totalElements: 0, totalPages: 0 }],
-          pageParams: [0],
-        },
-      ),
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<LectureCommentResponse>([])],
+        pageParams: [0],
+      }),
     );
 
     // ----------------------------------------------------------------------------

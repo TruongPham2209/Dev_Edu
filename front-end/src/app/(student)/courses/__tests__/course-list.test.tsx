@@ -48,6 +48,9 @@ vi.mock("next/image", () => ({
   default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
+import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse } from "@/testing/mock-data";
+
 describe("CourseList", () => {
   it("shouldRenderEmptyCoursesStateAndTriggerClearFilters", () => {
     // ----------------------------------------------------------------------------
@@ -89,14 +92,14 @@ describe("CourseList", () => {
     // Arrange
     // Mock course list.
     // ----------------------------------------------------------------------------
-    const mockCourses = [
-      {
+    const mockCourses: CourseResponse[] = [
+      createMockCourse({
         id: "c-10",
         title: "Spring Boot Microservices",
         originalPrice: 1500000,
         discountedPrice: 1200000,
-        rating: 4.9,
-      },
+        avgReview: 4.9,
+      }),
     ];
 
     const handleLoadMore = vi.fn();
@@ -107,7 +110,7 @@ describe("CourseList", () => {
     // ----------------------------------------------------------------------------
     render(
       <CourseList
-        courses={mockCourses as never}
+        courses={mockCourses}
         loading={false}
         initialLoad={false}
         nextCursor="cursor-123"

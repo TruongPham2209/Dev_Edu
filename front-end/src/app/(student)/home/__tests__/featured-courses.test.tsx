@@ -55,6 +55,9 @@ vi.mock("next/image", () => ({
   default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
+import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse } from "@/testing/mock-data";
+
 describe("FeaturedCoursesSection & Fallback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -65,19 +68,16 @@ describe("FeaturedCoursesSection & Fallback", () => {
     // Arrange
     // Mock getFeaturedCourses resolution.
     // ----------------------------------------------------------------------------
-    const mockCourses = [
-      {
+    const mockCourses: CourseResponse[] = [
+      createMockCourse({
         id: "fc-1",
         title: "Fullstack Web Development 2026",
         originalPrice: 1200000,
-        discountedPrice: 900000,
-        rating: 4.8,
-      },
+        discountedPrice: 900000
+      }),
     ];
 
-    vi.mocked(coursesApi.getFeaturedCourses).mockResolvedValue(
-      mockCourses as never,
-    );
+    vi.mocked(coursesApi.getFeaturedCourses).mockResolvedValue(mockCourses);
 
     // ----------------------------------------------------------------------------
     // Act

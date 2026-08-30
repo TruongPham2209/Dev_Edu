@@ -55,13 +55,11 @@ vi.mock("@/lib/toast-context", () => ({
   useToast: vi.fn(),
 }));
 
+import { createMockToast } from "@/testing/mock-data";
+import { createMockMutationResult } from "@/testing/mock-query";
+
 describe("EssayGradingCard Component", () => {
-  const mockToast = {
-    success: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    warning: vi.fn(),
-  };
+  const mockToast = createMockToast();
 
   const mockMutateAsync = vi.fn().mockResolvedValue({});
 
@@ -85,11 +83,13 @@ describe("EssayGradingCard Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as never);
-    vi.mocked(quizzesApi.useGradeEssayMutation).mockReturnValue({
-      mutateAsync: mockMutateAsync,
-      isPending: false,
-    } as never);
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast);
+    vi.mocked(quizzesApi.useGradeEssayMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockMutateAsync,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderSubmissionDetailsAndUngradedStatus", () => {

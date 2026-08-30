@@ -40,9 +40,15 @@
  * Unit test for PostHeader component.
  */
 
+import type { PostResponse } from "@/lib/type/forums";
 import * as forumApi from "@/lib/api/forum";
 import * as apiToast from "@/lib/use-api-with-toast";
 import * as useAuthModule from "@/lib/use-auth";
+import { createMockAuthStatus, createMockForumPost } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PostHeader } from "../post-header";
@@ -61,13 +67,17 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+vi.mock("@/components/dialog/post-history/page", () => ({
+  PostHistoryModal: () => <div>Post History Modal Component</div>,
+}));
+
 describe("PostHeader", () => {
   const mockSaveMutate = vi.fn();
   const mockUnsaveMutate = vi.fn();
   const mockShowSuccess = vi.fn();
   const mockHandleError = vi.fn();
 
-  const mockPost = {
+  const mockPost: PostResponse = createMockForumPost({
     id: "p-888",
     title: "Vitest Best Practices for Next.js",
     authorFullName: "Tran Van B",
@@ -75,26 +85,36 @@ describe("PostHeader", () => {
     views: 450,
     comments: 12,
     isSaved: false,
-  };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuthModule.useAuth).mockReturnValue({
-      isAuthenticated: true,
-    } as never);
+    vi.mocked(useAuthModule.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        role: "STUDENT",
+        roles: ["STUDENT"],
+      }),
+    );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: mockShowSuccess,
+        handleError: mockHandleError,
+      }),
+    );
 
-    vi.mocked(forumApi.useSavePostMutation).mockReturnValue({
-      mutateAsync: mockSaveMutate,
-    } as never);
+    vi.mocked(forumApi.useSavePostMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockSaveMutate,
+      }),
+    );
 
-    vi.mocked(forumApi.useUnsavePostMutation).mockReturnValue({
-      mutateAsync: mockUnsaveMutate,
-    } as never);
+    vi.mocked(forumApi.useUnsavePostMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockUnsaveMutate,
+      }),
+    );
   });
 
   it("shouldRenderTitleAuthorAndToggleSavePost", async () => {
@@ -102,7 +122,7 @@ describe("PostHeader", () => {
     // Arrange & Act
     // Render PostHeader.
     // ----------------------------------------------------------------------------
-    render(<PostHeader post={mockPost as never} />);
+    render(<PostHeader post={mockPost} />);
 
     // ----------------------------------------------------------------------------
     // Assert
@@ -118,11 +138,10 @@ describe("PostHeader", () => {
 
     // ----------------------------------------------------------------------------
     // Act & Verify
-    // Click save bookmark button.
+    // Click bookmark button to trigger save.
     // ----------------------------------------------------------------------------
-    const buttons = screen.getAllByRole("button");
-    const saveBtn = buttons[1]; // Bookmark button is index 1
-    fireEvent.click(saveBtn);
+    const bookmarkBtn = screen.getByRole("button", { name: "Save" });
+    fireEvent.click(bookmarkBtn);
 
     await waitFor(() => {
       expect(mockSaveMutate).toHaveBeenCalledWith("p-888");

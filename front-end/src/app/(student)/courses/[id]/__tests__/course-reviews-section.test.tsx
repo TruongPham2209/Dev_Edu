@@ -35,6 +35,9 @@
  */
 
 import * as coursesApi from "@/lib/api/courses";
+import type { ReviewResponse } from "@/lib/type/courses";
+import { createMockCustomPaging, createMockReview } from "@/testing/mock-data";
+import { createMockInfiniteQueryResult } from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CourseReviewsSection } from "../course-reviews-section";
@@ -53,23 +56,23 @@ describe("CourseReviewsSection", () => {
     // Arrange
     // Mock reviews infinite query.
     // ----------------------------------------------------------------------------
-    const mockReviews = [
-      {
+    const mockReviews: ReviewResponse[] = [
+      createMockReview({
         id: "rev-100",
         rating: 5,
         comment: "Excellent course on Next.js 15!",
-        userFullName: "John Doe",
+        fullName: "John Doe",
+        username: "john_doe",
         createdAt: "2026-06-15T10:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(coursesApi.useCourseReviewsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: mockReviews }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
+    vi.mocked(coursesApi.useCourseReviewsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<ReviewResponse>(mockReviews)],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

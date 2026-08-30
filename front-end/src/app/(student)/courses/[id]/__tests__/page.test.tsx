@@ -39,9 +39,20 @@ import React from "react";
  * Unit test for CourseDetailPage component.
  */
 
+import type { CategoryResponse, CourseResponse, ReviewResponse } from "@/lib/type/courses";
+import type { LectureResponse } from "@/lib/type/lectures";
 import * as coursesApi from "@/lib/api/courses";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as useAuthModule from "@/lib/use-auth";
+import {
+  createMockAuthStatus,
+  createMockCourse,
+  createMockCustomPaging,
+} from "@/testing/mock-data";
+import {
+  createMockInfiniteQueryResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -82,30 +93,36 @@ vi.mock("@/lib/api/lectures", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) =>
+    React.createElement("img", { alt, ...props }),
 }));
 
 describe("CourseDetailPage ([id])", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuthModule.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      roles: ["STUDENT"],
-    } as never);
+    vi.mocked(useAuthModule.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        role: "STUDENT",
+        roles: ["STUDENT"],
+      }),
+    );
 
-    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
-      data: [],
-    } as never);
-    vi.mocked(coursesApi.useCoursesQuery).mockReturnValue({
-      data: { contents: [] },
-    } as never);
-    vi.mocked(coursesApi.useCourseReviewsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-    } as never);
-    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue({
-      data: [],
-    } as never);
+    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue(
+      createMockQueryResult<CategoryResponse[]>([]),
+    );
+    vi.mocked(coursesApi.useCoursesQuery).mockReturnValue(
+      createMockQueryResult(createMockCustomPaging<CourseResponse>([])),
+    );
+    vi.mocked(coursesApi.useCourseReviewsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<ReviewResponse>([])],
+        pageParams: [null],
+      }),
+    );
+    vi.mocked(lecturesApi.useLecturesByCourseQuery).mockReturnValue(
+      createMockQueryResult<LectureResponse[]>([]),
+    );
   });
 
   it("shouldRenderCourseDetailsWhenCourseIdIsValid", async () => {
@@ -113,7 +130,7 @@ describe("CourseDetailPage ([id])", () => {
     // Arrange
     // Return course details.
     // ----------------------------------------------------------------------------
-    const mockCourse = {
+    const mockCourse: CourseResponse = createMockCourse({
       id: "course-555",
       title: "Mastering React 19 Server Actions",
       description: "<p>Deep dive into React 19 Actions and Hooks</p>",
@@ -122,13 +139,11 @@ describe("CourseDetailPage ([id])", () => {
       registered: false,
       discountedPrice: 900000,
       originalPrice: 1200000,
-    };
+    });
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: mockCourse,
-      isLoading: false,
-      error: null,
-    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult(mockCourse),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

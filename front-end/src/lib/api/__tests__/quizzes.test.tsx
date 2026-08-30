@@ -36,49 +36,66 @@
  * - src/lib/api/client (apiGet, apiPost, apiPut, apiDelete, apiCall)
  */
 
-import React from "react";
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import type {
+  AttemptResultResponse,
+  AutosaveRequest,
+  CreateAssignmentRequest,
+  HeartbeatRequest,
+  QuestionTraceabilityResponse,
+  QuizAssignmentResponse,
+  QuizGenerationJobResponse,
+  QuizQuestionRequest,
+  QuizQuestionResponse,
+  QuizRequest,
+  QuizResponse,
+  QuizReviewRequest,
+  QuizTypeConfigRequest,
+  QuizTypeConfigResponse,
+  StartAttemptResponse,
+} from "@/lib/type/quizzes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { renderHook, waitFor } from "@testing-library/react";
+import React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as client from "../client";
 import {
-  getQuizzesByCourse,
-  getQuizById,
-  createQuiz,
-  updateQuiz,
-  submitQuizForApproval,
-  getQuizzes,
-  reviewQuiz,
-  createQuizTypeConfig,
-  getQuizTypeConfigs,
-  deleteQuizTypeConfig,
-  createQuizQuestion,
-  updateQuizQuestion,
-  deleteQuizQuestion,
-  createQuizAssignment,
-  getQuizAssignmentsByCourse,
-  getQuizAssignmentsByQuiz,
-  getAssignmentById,
-  deleteQuizAssignment,
-  startAttempt,
   autosaveAttempt,
-  heartbeatAttempt,
-  submitAttempt,
+  createQuiz,
+  createQuizAssignment,
+  createQuizQuestion,
+  createQuizTypeConfig,
+  deleteQuizAssignment,
+  deleteQuizQuestion,
+  deleteQuizTypeConfig,
+  generateQuizFromDocument,
+  generateQuizFromFile,
+  getAssignmentById,
   getAttemptResult,
   getEssaySubmissions,
-  gradeEssayQuestion,
-  generateQuizFromFile,
-  generateQuizFromDocument,
-  getQuizGenerationJob,
   getQuestionTraceability,
-  useQuizzesByCourseQuery,
-  useQuizByIdQuery,
+  getQuizAssignmentsByCourse,
+  getQuizAssignmentsByQuiz,
+  getQuizById,
+  getQuizGenerationJob,
+  getQuizzes,
+  getQuizzesByCourse,
+  getQuizTypeConfigs,
+  gradeEssayQuestion,
+  heartbeatAttempt,
+  reviewQuiz,
+  startAttempt,
+  submitAttempt,
+  submitQuizForApproval,
+  updateQuiz,
+  updateQuizQuestion,
   useCreateQuizMutation,
-  useGenerateQuizFromFileMutation,
   useGenerateQuizFromDocumentMutation,
-  useQuizGenerationJobQuery,
+  useGenerateQuizFromFileMutation,
   useQuestionTraceabilityQuery,
+  useQuizByIdQuery,
+  useQuizGenerationJobQuery,
+  useQuizzesByCourseQuery,
 } from "../quizzes";
-import * as client from "../client";
 
 vi.mock("../client", () => ({
   apiGet: vi.fn(),
@@ -145,27 +162,37 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldCreateQuiz", async () => {
-      const quizReq = {
+      const quizReq: QuizRequest = {
         courseId: "c-1",
         title: "New Quiz",
         description: "Desc",
-        passPercentage: 70,
       };
-      const mockRes = { id: "q-100", ...quizReq };
+      const mockRes: QuizResponse = {
+        id: "q-100",
+        status: "DRAFT",
+        ...quizReq,
+      };
       vi.mocked(client.apiPost).mockResolvedValue(mockRes);
 
-      const result = await createQuiz(quizReq as never);
+      const result = await createQuiz(quizReq);
 
       expect(client.apiPost).toHaveBeenCalledWith("/api/v1/quizzes", quizReq);
       expect(result).toEqual(mockRes);
     });
 
     it("shouldUpdateQuiz", async () => {
-      const quizReq = { courseId: "c-1", title: "Updated Quiz" };
-      const mockRes = { id: "q-1", ...quizReq };
+      const quizReq: QuizRequest = {
+        courseId: "c-1",
+        title: "Updated Quiz",
+      };
+      const mockRes: QuizResponse = {
+        id: "q-1",
+        status: "DRAFT",
+        ...quizReq,
+      };
       vi.mocked(client.apiPut).mockResolvedValue(mockRes);
 
-      const result = await updateQuiz("q-1", quizReq as never);
+      const result = await updateQuiz("q-1", quizReq);
 
       expect(client.apiPut).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1",
@@ -199,7 +226,10 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldReviewQuiz", async () => {
-      const reviewReq = { approved: true, comment: "Approved" } as never;
+      const reviewReq: QuizReviewRequest = {
+        approved: true,
+        rejectionReason: undefined,
+      };
       vi.mocked(client.apiPost).mockResolvedValue({
         id: "q-1",
         status: "APPROVED",
@@ -215,22 +245,26 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldCreateQuizTypeConfig", async () => {
-      const configReq = {
+      const configReq: QuizTypeConfigRequest = {
         questionType: "SINGLE_CHOICE",
-        numberOfQuestions: 10,
+        requiredCount: 10,
+        pointsPerQuestion: 1,
+        scoringMethod: "AUTO",
       };
-      vi.mocked(client.apiPost).mockResolvedValue({
+      const mockRes: QuizTypeConfigResponse = {
         id: "cfg-1",
+        quizId: "q-1",
         ...configReq,
-      });
+      };
+      vi.mocked(client.apiPost).mockResolvedValue(mockRes);
 
-      const result = await createQuizTypeConfig("q-1", configReq as never);
+      const result = await createQuizTypeConfig("q-1", configReq);
 
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1/type-configs",
         configReq,
       );
-      expect(result).toEqual({ id: "cfg-1", ...configReq });
+      expect(result).toEqual(mockRes);
     });
 
     it("shouldGetQuizTypeConfigs", async () => {
@@ -256,30 +290,38 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldCreateAndUpdateAndDeleteQuizQuestion", async () => {
-      const qReq = {
+      const qReq: QuizQuestionRequest = {
         content: "Question text?",
         questionType: "SINGLE_CHOICE",
+        orderIndex: 1,
       };
-      vi.mocked(client.apiPost).mockResolvedValue({ id: "quest-1", ...qReq });
-      vi.mocked(client.apiPut).mockResolvedValue({
+      const mockCreated: QuizQuestionResponse = {
+        ...qReq,
         id: "quest-1",
+        quizId: "q-1",
+        points: 1,
+        options: [],
+      };
+      vi.mocked(client.apiPost).mockResolvedValue(mockCreated);
+      vi.mocked(client.apiPut).mockResolvedValue({
+        ...mockCreated,
         content: "Updated",
       });
       vi.mocked(client.apiDelete).mockResolvedValue(undefined);
 
-      const created = await createQuizQuestion("q-1", qReq as never);
+      const created = await createQuizQuestion("q-1", qReq);
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1/questions",
         qReq,
       );
-      expect(created).toEqual({ id: "quest-1", ...qReq });
+      expect(created).toEqual(mockCreated);
 
-      const updated = await updateQuizQuestion("q-1", "quest-1", qReq as never);
+      const updated = await updateQuizQuestion("q-1", "quest-1", qReq);
       expect(client.apiPut).toHaveBeenCalledWith(
         "/api/v1/quizzes/q-1/questions/quest-1",
         qReq,
       );
-      expect(updated).toEqual({ id: "quest-1", content: "Updated" });
+      expect(updated).toEqual({ ...mockCreated, content: "Updated" });
 
       await deleteQuizQuestion("q-1", "quest-1");
       expect(client.apiDelete).toHaveBeenCalledWith(
@@ -288,12 +330,25 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldHandleQuizAssignments", async () => {
-      const assignReq = { quizId: "q-1", title: "Assignment 1" };
-      vi.mocked(client.apiPost).mockResolvedValue({ id: "a-1", ...assignReq });
-      vi.mocked(client.apiGet).mockResolvedValue([{ id: "a-1" }]);
+      const assignReq: CreateAssignmentRequest = {
+        quizId: "q-1",
+        assignmentName: "Assignment 1",
+        startTime: "2026-08-01T00:00:00Z",
+        durationMinutes: 60,
+        maxAttempts: 1,
+      };
+      const mockAssignment: QuizAssignmentResponse = {
+        id: "a-1",
+        status: "ACTIVE",
+        shuffleQuestions: false,
+        shuffleOptions: false,
+        ...assignReq,
+      };
+      vi.mocked(client.apiPost).mockResolvedValue(mockAssignment);
+      vi.mocked(client.apiGet).mockResolvedValue([mockAssignment]);
       vi.mocked(client.apiDelete).mockResolvedValue(undefined);
 
-      await createQuizAssignment(assignReq as never);
+      await createQuizAssignment(assignReq);
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quiz-assignments",
         assignReq,
@@ -321,8 +376,25 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldStartAttemptWithSessionTokenHeader", async () => {
-      const mockAttempt = { attemptId: "att-1" };
-      vi.mocked(client.apiCall).mockResolvedValue({ data: mockAttempt } as never);
+      const mockAttempt: StartAttemptResponse = {
+        attemptId: "att-1",
+        assignmentId: "assign-1",
+        quizId: "q-1",
+        attemptNumber: 1,
+        status: "IN_PROGRESS",
+        startedAt: "2026-08-01T00:00:00Z",
+        expiresAt: "2026-08-01T01:00:00Z",
+        maxScore: 100,
+        activeSessionToken: "token-xyz",
+        questions: [],
+      };
+      vi.mocked(client.apiCall).mockResolvedValue({
+        success: true,
+        status: "OK",
+        message: "Success",
+        data: mockAttempt,
+        timestamp: Date.now(),
+      });
 
       const result = await startAttempt("assign-1", "token-xyz");
 
@@ -337,7 +409,11 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldAutosaveHeartbeatSubmitAttempt", async () => {
-      const autoSaveReq = { answers: [] } as never;
+      const autoSaveReq: AutosaveRequest = {
+        questionId: "q-1",
+        clientSeq: 1,
+        sessionToken: "st-1",
+      };
       vi.mocked(client.apiPost).mockResolvedValue({ status: "SAVED" });
 
       await autosaveAttempt("att-1", autoSaveReq);
@@ -346,10 +422,11 @@ describe("quizzes API & React Query hooks", () => {
         autoSaveReq,
       );
 
-      await heartbeatAttempt("att-1", { sessionToken: "st-1" } as never);
+      const heartbeatReq: HeartbeatRequest = { sessionToken: "st-1" };
+      await heartbeatAttempt("att-1", heartbeatReq);
       expect(client.apiPost).toHaveBeenCalledWith(
         "/api/v1/quiz-attempts/att-1/heartbeat",
-        { sessionToken: "st-1" },
+        heartbeatReq,
       );
 
       await submitAttempt("att-1");
@@ -359,14 +436,22 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldGetAttemptResultAndPendingEssays", async () => {
-      vi.mocked(client.apiGet).mockResolvedValue({
+      const mockResult: AttemptResultResponse = {
         attemptId: "att-1",
-        score: 90,
-      });
-      vi.mocked(client.apiPost).mockResolvedValue({
-        attemptId: "att-1",
-        score: 95,
-      } as never);
+        assignmentId: "asg-1",
+        quizId: "q-1",
+        studentUsername: "john_doe",
+        attemptNumber: 1,
+        status: "GRADED",
+        startedAt: "2026-08-01T00:00:00Z",
+        submittedAt: "2026-08-01T01:00:00Z",
+        gradedAt: "2026-08-01T01:30:00Z",
+        maxScore: 100,
+        totalScore: 90,
+        answers: [],
+      };
+      vi.mocked(client.apiGet).mockResolvedValue(mockResult);
+      vi.mocked(client.apiPost).mockResolvedValue(mockResult);
 
       await getAttemptResult("att-1");
       expect(client.apiGet).toHaveBeenCalledWith(
@@ -422,14 +507,24 @@ describe("quizzes API & React Query hooks", () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ courseId: "c-1", title: "New" } as never);
+      result.current.mutate({ courseId: "c-1", title: "New" });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(client.apiPost).toHaveBeenCalled();
     });
 
     it("shouldExecuteGenerateFromFileMutation", async () => {
-      const mockJob = { jobId: "job-1", status: "PENDING" };
+      const mockJob: QuizGenerationJobResponse = {
+        jobId: "job-1",
+        courseId: "c-1",
+        status: "PENDING",
+        currentStep: "INIT",
+        requestedTotal: 10,
+        processedCount: 0,
+        acceptedCount: 0,
+        rejectedCount: 0,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiPostFormData).mockResolvedValue(mockJob);
 
       const { result } = renderHook(() => useGenerateQuizFromFileMutation(), {
@@ -453,7 +548,17 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldExecuteGenerateFromDocumentMutation", async () => {
-      const mockJob = { jobId: "job-2", status: "PENDING" };
+      const mockJob: QuizGenerationJobResponse = {
+        jobId: "job-2",
+        courseId: "c-1",
+        status: "PENDING",
+        currentStep: "INIT",
+        requestedTotal: 10,
+        processedCount: 0,
+        acceptedCount: 0,
+        rejectedCount: 0,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiPost).mockResolvedValue(mockJob);
 
       const { result } = renderHook(
@@ -481,7 +586,17 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldFetchJobStatusViaHook", async () => {
-      const mockJob = { jobId: "job-1", status: "PROCESSING" };
+      const mockJob: QuizGenerationJobResponse = {
+        jobId: "job-1",
+        courseId: "c-1",
+        status: "PROCESSING",
+        currentStep: "ANALYZING",
+        requestedTotal: 10,
+        processedCount: 5,
+        acceptedCount: 5,
+        rejectedCount: 0,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiGet).mockResolvedValue(mockJob);
 
       const { result } = renderHook(() => useQuizGenerationJobQuery("job-1"), {
@@ -496,11 +611,16 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldFetchQuestionTraceabilityViaHook", async () => {
-      const mockTraceability = {
+      const mockTraceability: QuestionTraceabilityResponse = {
         id: "tr-1",
         questionId: "q-1",
         sectionName: "Chapter 4",
         pageNumber: 42,
+        generationJobId: "job-1",
+        modelName: "gpt-4o",
+        promptVersion: "v2",
+        attemptCount: 1,
+        createdAt: "2026-08-01T00:00:00Z",
       };
       vi.mocked(client.apiGet).mockResolvedValue(mockTraceability);
 
@@ -519,7 +639,17 @@ describe("quizzes API & React Query hooks", () => {
 
   describe("AI Quiz Generation Pure Async Functions", () => {
     it("shouldGenerateQuizFromFile", async () => {
-      const mockJob = { jobId: "job-1", status: "PENDING" };
+      const mockJob: QuizGenerationJobResponse = {
+        jobId: "job-1",
+        courseId: "c-1",
+        status: "PENDING",
+        currentStep: "INIT",
+        requestedTotal: 10,
+        processedCount: 0,
+        acceptedCount: 0,
+        rejectedCount: 0,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiPostFormData).mockResolvedValue(mockJob);
 
       const file = new File(["test"], "file.pdf", { type: "application/pdf" });
@@ -538,7 +668,17 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldGenerateQuizFromDocument", async () => {
-      const mockJob = { jobId: "job-2", status: "PENDING" };
+      const mockJob: QuizGenerationJobResponse = {
+        jobId: "job-2",
+        courseId: "c-1",
+        status: "PENDING",
+        currentStep: "INIT",
+        requestedTotal: 10,
+        processedCount: 0,
+        acceptedCount: 0,
+        rejectedCount: 0,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiPost).mockResolvedValue(mockJob);
 
       const res = await generateQuizFromDocument({
@@ -563,7 +703,17 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldGetQuizGenerationJob", async () => {
-      const mockJob = { jobId: "job-1", status: "COMPLETED" };
+      const mockJob: QuizGenerationJobResponse = {
+        jobId: "job-1",
+        courseId: "c-1",
+        status: "COMPLETED",
+        currentStep: "DONE",
+        requestedTotal: 10,
+        processedCount: 10,
+        acceptedCount: 10,
+        rejectedCount: 0,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiGet).mockResolvedValue(mockJob);
 
       const res = await getQuizGenerationJob("job-1");
@@ -574,7 +724,16 @@ describe("quizzes API & React Query hooks", () => {
     });
 
     it("shouldGetQuestionTraceability", async () => {
-      const mockTraceability = { id: "tr-1", pageNumber: 10 };
+      const mockTraceability: QuestionTraceabilityResponse = {
+        id: "tr-1",
+        pageNumber: 10,
+        questionId: "q-1",
+        generationJobId: "job-1",
+        modelName: "gpt-4o",
+        promptVersion: "v1",
+        attemptCount: 1,
+        createdAt: "2026-08-01T00:00:00Z",
+      };
       vi.mocked(client.apiGet).mockResolvedValue(mockTraceability);
 
       const res = await getQuestionTraceability("job-1", "q-1");
@@ -585,4 +744,3 @@ describe("quizzes API & React Query hooks", () => {
     });
   });
 });
-

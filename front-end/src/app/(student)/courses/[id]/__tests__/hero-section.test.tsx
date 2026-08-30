@@ -36,7 +36,10 @@
  * Unit test for HeroSection component.
  */
 
+import type { CategoryResponse, CourseResponse } from "@/lib/type/courses";
 import * as coursesApi from "@/lib/api/courses";
+import { createMockCategory, createMockCourse } from "@/testing/mock-data";
+import { createMockQueryResult } from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { HeroSection } from "../hero-section";
@@ -46,7 +49,7 @@ vi.mock("@/lib/api/courses", () => ({
 }));
 
 describe("HeroSection", () => {
-  const mockCourse = {
+  const mockCourse: CourseResponse = createMockCourse({
     id: "c-300",
     title: "Node.js Microservices Architecture",
     description: "<p>Build scalable backend microservices</p>",
@@ -55,13 +58,16 @@ describe("HeroSection", () => {
     createdAt: "2026-03-01T12:00:00.000Z",
     lecturers: ["John Doe", "Jane Smith"],
     avgReview: 4.8,
-  };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
-      data: [{ id: "cat-backend", name: "Backend" }],
-    } as never);
+    const mockCategories: CategoryResponse[] = [
+      createMockCategory({ id: "cat-backend", name: "Backend" }),
+    ];
+    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue(
+      createMockQueryResult(mockCategories),
+    );
   });
 
   it("shouldRenderBreadcrumbsTitleCategoryAndLecturers", () => {
@@ -69,7 +75,7 @@ describe("HeroSection", () => {
     // Arrange & Act
     // Render HeroSection.
     // ----------------------------------------------------------------------------
-    render(<HeroSection course={mockCourse as never} />);
+    render(<HeroSection course={mockCourse} />);
 
     // ----------------------------------------------------------------------------
     // Assert

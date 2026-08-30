@@ -45,6 +45,7 @@
 
 import * as coursesApi from "@/lib/api/courses";
 import * as apiToast from "@/lib/use-api-with-toast";
+import { createMockCourse, createMockRouter } from "@/testing/mock-data";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -90,12 +91,14 @@ describe("LecturerCourseDetailPage", () => {
     vi.clearAllMocks();
 
     vi.mocked(useParams).mockReturnValue({ id: "course-777" });
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: mockShowSuccess,
+        handleError: mockHandleError,
+      }),
+    );
   });
 
   it("shouldRenderErrorStateWhenCourseIsNotFound", async () => {
@@ -129,22 +132,17 @@ describe("LecturerCourseDetailPage", () => {
     // Arrange
     // Mock course response.
     // ----------------------------------------------------------------------------
-    const mockCourse = {
+    const mockCourse = createMockCourse({
       id: "course-777",
-      title: "Enterprise Microservices with Spring Boot",
       description: "<p>Build resilient cloud-native applications.</p>",
       thumbnailUrl: "https://example.com/thumb.jpg",
       createdAt: "2026-05-01T00:00:00.000Z",
-    };
-    vi.mocked(coursesApi.getCourseById).mockResolvedValue(mockCourse as never);
+    });
+    vi.mocked(coursesApi.getCourseById).mockResolvedValue(mockCourse);
 
     // ----------------------------------------------------------------------------
-    // Act
-    // Render LecturerCourseDetailPage.
     // ----------------------------------------------------------------------------
     render(<LecturerCourseDetailPage />);
-
-    // ----------------------------------------------------------------------------
     // Assert
     // Verify course overview description rendering.
     // ----------------------------------------------------------------------------

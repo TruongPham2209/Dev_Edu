@@ -39,8 +39,23 @@
  * Unit test for CheckoutPage component.
  */
 
+import type {
+  CheckoutDetailResponse,
+  PaymentRequest,
+  PaymentResponse,
+} from "@/lib/type/enrollments";
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import * as apiToast from "@/lib/use-api-with-toast";
+import {
+  createMockCourseItemDetail,
+  createMockRouter,
+  createMockSearchParams,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -70,22 +85,28 @@ describe("CheckoutPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: mockShowSuccess,
+        handleError: mockHandleError,
+      }),
+    );
 
-    vi.mocked(enrollmentsApi.useCancelOrderMutation).mockReturnValue({
-      mutate: mockCancelMutate,
-      isPending: false,
-    } as never);
+    vi.mocked(enrollmentsApi.useCancelOrderMutation).mockReturnValue(
+      createMockMutationResult({
+        mutate: mockCancelMutate,
+        isPending: false,
+      }),
+    );
 
-    vi.mocked(enrollmentsApi.useCreatePaymentMutation).mockReturnValue({
-      mutate: mockCreatePaymentMutate,
-      isPending: false,
-    } as never);
+    vi.mocked(enrollmentsApi.useCreatePaymentMutation).mockReturnValue(
+      createMockMutationResult<PaymentResponse, Error, PaymentRequest>({
+        mutate: mockCreatePaymentMutate,
+        isPending: false,
+      }),
+    );
   });
 
   it("shouldRenderErrorStateWhenOrderIdIsMissingInURL", () => {
@@ -93,15 +114,11 @@ describe("CheckoutPage", () => {
     // Arrange
     // Return empty searchParams.
     // ----------------------------------------------------------------------------
-    vi.mocked(useSearchParams).mockReturnValue({
-      get: () => null,
-    } as never);
+    vi.mocked(useSearchParams).mockReturnValue(createMockSearchParams(""));
 
-    vi.mocked(enrollmentsApi.useOrderDetailQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-      error: null,
-    } as never);
+    vi.mocked(enrollmentsApi.useOrderDetailQuery).mockReturnValue(
+      createMockQueryResult<CheckoutDetailResponse>(undefined),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -123,28 +140,29 @@ describe("CheckoutPage", () => {
     // Arrange
     // Return valid orderId and order details data.
     // ----------------------------------------------------------------------------
-    vi.mocked(useSearchParams).mockReturnValue({
-      get: (key: string) => (key === "orderId" ? "order-123" : null),
-    } as never);
+    vi.mocked(useSearchParams).mockReturnValue(
+      createMockSearchParams({ orderId: "order-123" }),
+    );
 
-    const mockOrderData = {
-      id: "order-123",
+    const mockOrderData: CheckoutDetailResponse = {
+      orderId: "order-123",
       totalAmount: 800000,
+      entityType: "COURSE",
       items: [
         {
           id: "c-1",
           title: "Next.js App Router Masterclass",
           discountedPrice: 800000,
           originalPrice: 1000000,
+          registered: false,
+          thumbnailUrl: null,
         },
       ],
     };
 
-    vi.mocked(enrollmentsApi.useOrderDetailQuery).mockReturnValue({
-      data: mockOrderData,
-      isLoading: false,
-      error: null,
-    } as never);
+    vi.mocked(enrollmentsApi.useOrderDetailQuery).mockReturnValue(
+      createMockQueryResult(mockOrderData),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

@@ -39,7 +39,10 @@
  * Unit test for EnrollmentList component.
  */
 
+import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
 import * as enrollmentsApi from "@/lib/api/enrollments";
+import { createMockCustomPaging, createMockRouter } from "@/testing/mock-data";
+import { createMockInfiniteQueryResult } from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -58,16 +61,18 @@ describe("EnrollmentTabContent", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({
-      push: mockPush,
-    } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as never;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderEmptyStateAndNavigateToCoursesWhenEnrolledItemsListIsEmpty", () => {
@@ -75,13 +80,12 @@ describe("EnrollmentTabContent", () => {
     // Arrange
     // Return empty pages.
     // ----------------------------------------------------------------------------
-    vi.mocked(enrollmentsApi.useEnrollmentsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
+    vi.mocked(enrollmentsApi.useEnrollmentsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseItemDetailResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

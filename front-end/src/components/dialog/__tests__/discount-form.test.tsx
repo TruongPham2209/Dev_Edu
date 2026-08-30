@@ -65,17 +65,9 @@ import {
 describe("DiscountFormDialog", () => {
   const mockMutateAsync = vi.fn();
   const mockShowSuccess = vi.fn();
-  const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(enrollmentsApi.useCreateCourseDiscountMutation).mockReturnValue({
-      mutateAsync: mockMutateAsync,
-    } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
     vi.mocked(enrollmentsApi.useCreateCourseDiscountMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockMutateAsync,

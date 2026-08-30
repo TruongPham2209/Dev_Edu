@@ -70,21 +70,9 @@ import {
 describe("MaterialFormDialog", () => {
   const mockPreSignMutate = vi.fn();
   const mockCreateMaterialMutate = vi.fn();
-  const mockShowSuccess = vi.fn();
-  const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
-      mutateAsync: mockPreSignMutate,
-    } as never);
-    vi.mocked(lecturesApi.useCreateMaterialMutation).mockReturnValue({
-      mutateAsync: mockCreateMaterialMutate,
-    } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
     vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockPreSignMutate,

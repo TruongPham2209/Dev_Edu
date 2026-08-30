@@ -49,6 +49,9 @@ vi.mock("@/lib/api/forum", () => ({
   getForumFeed: vi.fn(),
 }));
 
+import type { PostResponse } from "@/lib/type/forums";
+import { createMockCustomPaging, createMockForumPost } from "@/testing/mock-data";
+
 describe("FeaturedArticlesSection & Fallback", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -59,19 +62,19 @@ describe("FeaturedArticlesSection & Fallback", () => {
     // Arrange
     // Mock getForumFeed resolution.
     // ----------------------------------------------------------------------------
-    const mockArticles = [
-      {
+    const mockArticles: PostResponse[] = [
+      createMockForumPost({
         id: "art-1",
         title: "Top 10 Features in React 19",
         shortDescription:
           "Exploring Server Actions, useOptimistic, and useFormStatus.",
         createdAt: "2026-05-15T10:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(forumApi.getForumFeed).mockResolvedValue({
-      contents: mockArticles,
-    } as never);
+    vi.mocked(forumApi.getForumFeed).mockResolvedValue(
+      createMockCustomPaging<PostResponse>(mockArticles),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

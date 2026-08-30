@@ -39,8 +39,14 @@
  * Unit test for StudentsTab component.
  */
 
+import type { EnrollmentUserResponse } from "@/lib/type/users";
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import * as apiToast from "@/lib/use-api-with-toast";
+import { createMockCustomPaging } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StudentsTab } from "../students-tab";
@@ -57,10 +63,9 @@ describe("StudentsTab", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
   });
 
   it("shouldRenderEmptyStateWhenNoStudentsEnrolled", () => {
@@ -68,14 +73,12 @@ describe("StudentsTab", () => {
     // Arrange
     // Return empty students.
     // ----------------------------------------------------------------------------
-    vi.mocked(enrollmentsApi.useEnrolledUsersInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      error: null,
-    } as never);
+    vi.mocked(enrollmentsApi.useEnrolledUsersInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<EnrollmentUserResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -95,7 +98,7 @@ describe("StudentsTab", () => {
     // Arrange
     // Return student array and hasNextPage = true.
     // ----------------------------------------------------------------------------
-    const mockStudents = [
+    const mockStudents: EnrollmentUserResponse[] = [
       {
         id: "student-1",
         fullName: "Alex Johnson",
@@ -106,14 +109,18 @@ describe("StudentsTab", () => {
     ];
     const mockFetchNext = vi.fn();
 
-    vi.mocked(enrollmentsApi.useEnrolledUsersInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: mockStudents }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: true,
-      fetchNextPage: mockFetchNext,
-      error: null,
-    } as never);
+    vi.mocked(enrollmentsApi.useEnrolledUsersInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult(
+        {
+          pages: [createMockCustomPaging<EnrollmentUserResponse>(mockStudents)],
+          pageParams: [null],
+        },
+        {
+          hasNextPage: true,
+          fetchNextPage: mockFetchNext,
+        },
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

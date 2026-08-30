@@ -86,13 +86,6 @@ describe("AssignmentFormDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(assignmentsApi.useCreateAssignmentMutation).mockReturnValue({
-      mutateAsync: mockMutateAsync,
-    } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
     vi.mocked(assignmentsApi.useCreateAssignmentMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockMutateAsync,

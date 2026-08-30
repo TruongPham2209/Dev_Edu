@@ -43,6 +43,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SubmissionsTable } from "../submissions-table";
 
+import type { SubmissionResponse } from "@/lib/type/assignments";
+import { createMockSubmission } from "@/testing/mock-data";
+
 describe("SubmissionsTable", () => {
   const mockLoadSubmissions = vi.fn();
   const mockTriggerDownload = vi.fn();
@@ -78,15 +81,14 @@ describe("SubmissionsTable", () => {
   it("shouldRenderSubmissionsTableRowsAndTriggerActions", () => {
     // ----------------------------------------------------------------------------
     // Arrange
-    // Mock submission item.
-    // ----------------------------------------------------------------------------
-    const mockSubmissions = [
-      {
+    const mockSubmissions: SubmissionResponse[] = [
+      createMockSubmission({
         id: "sub-1",
         studentUsername: "alex_dev",
         submittedAt: "2026-06-15T14:00:00.000Z",
         fileObjectKey: "submissions/sub-1.zip",
-      },
+        fileName: "sub-1.zip",
+      }),
     ];
 
     // ----------------------------------------------------------------------------
@@ -95,7 +97,7 @@ describe("SubmissionsTable", () => {
     // ----------------------------------------------------------------------------
     render(
       <SubmissionsTable
-        submissions={mockSubmissions as never}
+        submissions={mockSubmissions}
         submissionsLoading={false}
         submissionsHasMore={false}
         loadSubmissions={mockLoadSubmissions}

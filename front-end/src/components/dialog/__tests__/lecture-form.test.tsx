@@ -94,19 +94,9 @@ describe("LectureFormDialog", () => {
   const mockCreateMutate = vi.fn();
   const mockUpdateMutate = vi.fn();
   const mockShowSuccess = vi.fn();
-  const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
-    vi.mocked(filesApi.useDownloadUrlQuery).mockReturnValue({
-      data: null,
-    } as never);
-    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
       createMockMutationResult(),
     );
@@ -117,12 +107,6 @@ describe("LectureFormDialog", () => {
       createMockMutationResult(),
     );
 
-    vi.mocked(lecturesApi.useCreateLectureMutation).mockReturnValue({
-      mutateAsync: mockCreateMutate,
-    } as never);
-    vi.mocked(lecturesApi.useUpdateLectureMutation).mockReturnValue({
-      mutateAsync: mockUpdateMutate,
-    } as never);
     vi.mocked(lecturesApi.useCreateLectureMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockCreateMutate,
@@ -134,10 +118,6 @@ describe("LectureFormDialog", () => {
       }),
     );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue(
       createMockApiWithToast({ showSuccess: mockShowSuccess }),
     );

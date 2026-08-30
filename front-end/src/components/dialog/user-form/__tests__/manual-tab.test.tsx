@@ -61,17 +61,9 @@ import {
 describe("ManualTab", () => {
   const mockBatchMutate = vi.fn();
   const mockShowSuccess = vi.fn();
-  const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue({
-      mutateAsync: mockBatchMutate,
-    } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
     vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockBatchMutate,

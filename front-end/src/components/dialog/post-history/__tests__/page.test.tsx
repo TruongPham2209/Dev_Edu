@@ -65,22 +65,13 @@ import {
 describe("PostHistoryModal", () => {
   const mockDeleteMutate = vi.fn();
   const mockRefetch = vi.fn();
-  const mockShowSuccess = vi.fn();
-  const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue(
       createMockApiWithToast(),
     );
 
-    vi.mocked(forumApi.useDeletePostVersionMutation).mockReturnValue({
-      mutateAsync: mockDeleteMutate,
-    } as never);
     vi.mocked(forumApi.useDeletePostVersionMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockDeleteMutate,

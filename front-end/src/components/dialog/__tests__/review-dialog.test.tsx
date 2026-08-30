@@ -39,17 +39,16 @@
  */
 
 import * as coursesApi from "@/lib/api/courses";
-import * as apiToast from "@/lib/use-api-with-toast";
 import type { ReviewResponse } from "@/lib/type/courses";
-import { useQueryClient } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ReviewDialog } from "../review-dialog";
+import * as apiToast from "@/lib/use-api-with-toast";
 import {
   createMockApiWithToast,
   createMockMutationResult,
   createMockQueryResult,
 } from "@/testing/mock-query";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ReviewDialog } from "../review-dialog";
 
 vi.mock("@/lib/api/courses", () => ({
   useCreateReviewMutation: vi.fn(),
@@ -60,21 +59,21 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+const mockInvalidateQueries = vi.fn();
+
 vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: vi.fn(),
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+  }),
 }));
 
 describe("ReviewDialog", () => {
   const mockCreateMutate = vi.fn();
   const mockShowSuccess = vi.fn();
   const mockHandleError = vi.fn();
-  const mockInvalidateQueries = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useQueryClient).mockReturnValue({
-      invalidateQueries: mockInvalidateQueries,
-    } as ReturnType<typeof useQueryClient>);
 
     vi.mocked(apiToast.useApiWithToast).mockReturnValue(
       createMockApiWithToast({

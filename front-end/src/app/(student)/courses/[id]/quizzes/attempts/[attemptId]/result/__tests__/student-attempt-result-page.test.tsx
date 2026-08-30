@@ -35,7 +35,9 @@
  * Unit test for CourseStudentAttemptResultPage component.
  */
 
+import type { AttemptResultResponse } from "@/lib/type/quizzes";
 import * as quizzesApi from "@/lib/api/quizzes";
+import { createMockQueryResult } from "@/testing/mock-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CourseStudentAttemptResultPage from "../page";
@@ -45,13 +47,19 @@ vi.mock("@/lib/api/quizzes", () => ({
 }));
 
 describe("CourseStudentAttemptResultPage Component", () => {
-  const mockResult = {
+  const mockResult: AttemptResultResponse = {
     attemptId: "att-100",
+    assignmentId: "asg-1",
+    quizId: "q-1",
+    studentUsername: "student_user",
+    attemptNumber: 1,
     quizTitle: "Final Exam 2026",
     status: "GRADED",
+    startedAt: "2026-08-06T10:00:00Z",
+    submittedAt: "2026-08-06T11:00:00Z",
+    gradedAt: "2026-08-06T11:30:00Z",
     totalScore: 85,
     maxScore: 100,
-    isPassed: true,
     answers: [
       {
         questionId: "q-1",
@@ -66,11 +74,9 @@ describe("CourseStudentAttemptResultPage Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(quizzesApi.useAttemptResultQuery).mockReturnValue({
-      data: mockResult,
-      isLoading: false,
-      isError: false,
-    } as never);
+    vi.mocked(quizzesApi.useAttemptResultQuery).mockReturnValue(
+      createMockQueryResult<AttemptResultResponse>(mockResult),
+    );
   });
 
   it("shouldRenderAttemptResultTitleScoreAndPassedBanner", async () => {

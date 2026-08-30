@@ -44,6 +44,15 @@ import React from "react";
 import * as enrollmentsApi from "@/lib/api/enrollments";
 import * as apiToast from "@/lib/use-api-with-toast";
 import * as useAuthModule from "@/lib/use-auth";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+import {
+  createMockAuthStatus,
+  createMockCourse,
+  createMockRouter,
+} from "@/testing/mock-data";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -74,37 +83,33 @@ describe("CoursePurchaseSection", () => {
   const mockPush = vi.fn();
   const mockCheckoutMutate = vi.fn();
   const mockAddToCartMutate = vi.fn();
-  const mockShowSuccess = vi.fn();
-  const mockHandleError = vi.fn();
 
-  const mockCourse = {
+  const mockCourse = createMockCourse({
     id: "c-200",
     title: "TypeScript Deep Dive",
     discountedPrice: 600000,
     originalPrice: 800000,
-  };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
-    vi.mocked(useAuthModule.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      roles: ["STUDENT"],
-    } as never);
+    vi.mocked(useAuthModule.useAuth).mockReturnValue(
+      createMockAuthStatus({ isAuthenticated: true, roles: ["STUDENT"] }),
+    );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue({
-      mutateAsync: mockCheckoutMutate,
-    } as never);
+    vi.mocked(enrollmentsApi.useCheckoutMutation).mockReturnValue(
+      createMockMutationResult({ mutateAsync: mockCheckoutMutate }),
+    );
 
-    vi.mocked(enrollmentsApi.useAddToCartMutation).mockReturnValue({
-      mutateAsync: mockAddToCartMutate,
-    } as never);
+    vi.mocked(enrollmentsApi.useAddToCartMutation).mockReturnValue(
+      createMockMutationResult({ mutateAsync: mockAddToCartMutate }),
+    );
   });
 
   it("shouldInitiateCheckoutOnBuyNowClick", async () => {
@@ -120,7 +125,7 @@ describe("CoursePurchaseSection", () => {
     // ----------------------------------------------------------------------------
     render(
       <CoursePurchaseSection
-        course={mockCourse as never}
+        course={mockCourse}
         isEnrolled={false}
         lectures={[]}
       />,
@@ -145,12 +150,21 @@ describe("CoursePurchaseSection", () => {
 
   it("shouldAddCourseToCartOnAddToCartClick", async () => {
     // ----------------------------------------------------------------------------
-    // Arrange & Act
+    // Arrange
+    // Mock showSuccess separately for this assertion.
+    // ----------------------------------------------------------------------------
+    const mockShowSuccess = vi.fn();
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({ showSuccess: mockShowSuccess }),
+    );
+
+    // ----------------------------------------------------------------------------
+    // Act
     // Render CoursePurchaseSection.
     // ----------------------------------------------------------------------------
     render(
       <CoursePurchaseSection
-        course={mockCourse as never}
+        course={mockCourse}
         isEnrolled={false}
         lectures={[]}
       />,

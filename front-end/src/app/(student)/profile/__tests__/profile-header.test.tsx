@@ -59,38 +59,43 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+import { createMockAuthUser } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
+
 describe("ProfileHeader", () => {
-  const mockUser = {
+  const mockUser = createMockAuthUser({
     id: "u-100",
     fullName: "Truong Pham",
     username: "truongpham22",
     email: "truong@example.com",
     role: "STUDENT",
     avatarUrl: "",
-  };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
+    vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
+    vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
+    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
+    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderUserProfileAndOpenChangePasswordDialog", () => {
@@ -98,7 +103,7 @@ describe("ProfileHeader", () => {
     // Arrange & Act
     // Render ProfileHeader.
     // ----------------------------------------------------------------------------
-    render(<ProfileHeader user={mockUser as never} onAvatarChange={vi.fn()} />);
+    render(<ProfileHeader user={mockUser} onAvatarChange={vi.fn()} />);
 
     // ----------------------------------------------------------------------------
     // Assert

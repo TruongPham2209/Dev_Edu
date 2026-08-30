@@ -86,13 +86,6 @@ describe("SavedPostsTab", () => {
     // Arrange
     // Return empty saved posts.
     // ----------------------------------------------------------------------------
-    vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
     const emptyPaging: CustomPaging<SavedPostResponse> = {
       contents: [],
       currentPage: 0,

@@ -48,10 +48,31 @@
  * Unit test for LecturerAssignmentDetailPage component.
  */
 
+import type {
+  AssignmentResponse,
+  FeedbackResponse,
+  SubmissionLogResponse,
+  SubmissionResponse,
+} from "@/lib/type/assignments";
+import type { CourseResponse } from "@/lib/type/courses";
+import type { LectureResponse } from "@/lib/type/lectures";
 import * as assignmentsApi from "@/lib/api/assignments";
 import * as coursesApi from "@/lib/api/courses";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
+import {
+  createMockAssignment,
+  createMockCourse,
+  createMockCustomPaging,
+  createMockLecture,
+  createMockRouter,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useParams, useRouter } from "next/navigation";
@@ -125,47 +146,43 @@ describe("LecturerAssignmentDetailPage", () => {
       assignmentId: "assign-50",
     });
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(assignmentsApi.useSubmissionsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [], totalElements: 0 }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
+    vi.mocked(assignmentsApi.useSubmissionsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<SubmissionResponse>([])],
+        pageParams: [0],
+      }),
+    );
 
-    vi.mocked(assignmentsApi.useFeedbacksQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(assignmentsApi.useFeedbacksQuery).mockReturnValue(
+      createMockQueryResult<FeedbackResponse[]>([]),
+    );
 
-    vi.mocked(assignmentsApi.useSubmissionTrackingQuery).mockReturnValue({
-      data: { contents: [], currentPage: 0, totalPages: 1 },
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useSubmissionTrackingQuery).mockReturnValue(
+      createMockQueryResult(
+        createMockCustomPaging<SubmissionLogResponse>([]),
+      ),
+    );
 
-    vi.mocked(assignmentsApi.useSubmissionTrackingInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [], nextCursor: undefined }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
+    vi.mocked(assignmentsApi.useSubmissionTrackingInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<SubmissionLogResponse>([])],
+        pageParams: [0],
+      }),
+    );
 
-    vi.mocked(assignmentsApi.useCreateFeedbackMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as never);
+    vi.mocked(assignmentsApi.useCreateFeedbackMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(assignmentsApi.useDeleteFeedbackMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as never);
+    vi.mocked(assignmentsApi.useDeleteFeedbackMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -177,20 +194,21 @@ describe("LecturerAssignmentDetailPage", () => {
     // Arrange
     // Return null assignment.
     // ----------------------------------------------------------------------------
-    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue(
+      createMockQueryResult<AssignmentResponse>(undefined),
+    );
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: { id: "lec-1", title: "Clean Code" },
-      isLoading: false,
-    } as never);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult<LectureResponse>(
+        createMockLecture({ id: "lec-1", title: "Clean Code" }),
+      ),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-1", title: "Fullstack Dev" },
-      isLoading: false,
-    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult<CourseResponse>(
+        createMockCourse({ id: "course-1", title: "Fullstack Dev" }),
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -212,27 +230,34 @@ describe("LecturerAssignmentDetailPage", () => {
     // Arrange
     // Return mock assignment.
     // ----------------------------------------------------------------------------
-    const mockAssignment = {
+    const mockAssignment: AssignmentResponse = createMockAssignment({
       id: "assign-50",
       title: "React State Management Task",
       description: "Implement Redux Toolkit store",
       createdAt: "2026-06-01T00:00:00.000Z",
-    };
+    });
 
-    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue({
-      data: mockAssignment,
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useAssignmentByIdQuery).mockReturnValue(
+      createMockQueryResult(mockAssignment),
+    );
 
-    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue({
-      data: { id: "lec-1", title: "State Management in React" },
-      isLoading: false,
-    } as never);
+    vi.mocked(lecturesApi.useLectureByIdQuery).mockReturnValue(
+      createMockQueryResult<LectureResponse>(
+        createMockLecture({
+          id: "lec-1",
+          title: "State Management in React",
+        }),
+      ),
+    );
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-1", title: "Advanced React Mastery" },
-      isLoading: false,
-    } as never);
+    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
+      createMockQueryResult<CourseResponse>(
+        createMockCourse({
+          id: "course-1",
+          title: "Advanced React Mastery",
+        }),
+      ),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

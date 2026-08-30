@@ -38,6 +38,7 @@
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import type { LectureResponse } from "@/lib/type/lectures";
 import { CourseContent } from "../course-content";
 
 describe("CourseContent", () => {
@@ -65,18 +66,26 @@ describe("CourseContent", () => {
     // Arrange
     // Mock lectures list.
     // ----------------------------------------------------------------------------
-    const mockLectures = [
+    const mockLectures: LectureResponse[] = [
       {
         id: "lec-1",
         title: "Introduction to React 19",
         duration: 360, // 6 mins
         summary: "Overview of new features in React 19",
+        content: "",
+        videoObjectKey: "video.mp4",
+        uploadedAt: "2026-01-01T00:00:00Z",
+        isCompleted: false,
       },
       {
         id: "lec-2",
         title: "Server Components Deep Dive",
         duration: 0, // Document
         summary: "In-depth guide on React Server Components",
+        content: "",
+        videoObjectKey: "",
+        uploadedAt: "2026-01-02T00:00:00Z",
+        isCompleted: false,
       },
     ];
 
@@ -84,7 +93,7 @@ describe("CourseContent", () => {
     // Act
     // Render CourseContent.
     // ----------------------------------------------------------------------------
-    render(<CourseContent lectures={mockLectures as never} />);
+    render(<CourseContent lectures={mockLectures} />);
 
     // ----------------------------------------------------------------------------
     // Assert

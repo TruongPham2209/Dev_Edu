@@ -44,8 +44,19 @@ import React from "react";
  * Unit test for LecturerDashboardPage component.
  */
 
+import type { CategoryResponse, CourseResponse } from "@/lib/type/courses";
 import * as coursesApi from "@/lib/api/courses";
 import * as apiToast from "@/lib/use-api-with-toast";
+import {
+  createMockCategory,
+  createMockCourse,
+  createMockCustomPaging,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerDashboardPage from "../page";
@@ -60,33 +71,37 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) =>
+    React.createElement("img", { alt, ...props }),
 }));
 
 describe("LecturerDashboardPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue({
-      data: [
-        { id: "cat-1", name: "Web Development" },
-        { id: "cat-2", name: "Mobile App" },
-      ],
-      isLoading: false,
-      error: null,
-    } as never);
+    const mockCategories: CategoryResponse[] = [
+      createMockCategory({ id: "cat-1", name: "Web Development" }),
+      createMockCategory({ id: "cat-2", name: "Mobile App" }),
+    ];
+
+    vi.mocked(coursesApi.useCategoriesQuery).mockReturnValue(
+      createMockQueryResult(mockCategories),
+    );
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as never;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderEmptyStateWhenNoCoursesAssigned", () => {
@@ -94,15 +109,12 @@ describe("LecturerDashboardPage", () => {
     // Arrange
     // Return empty assigned courses.
     // ----------------------------------------------------------------------------
-    vi.mocked(coursesApi.useAssignedCoursesInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(coursesApi.useAssignedCoursesInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -122,25 +134,22 @@ describe("LecturerDashboardPage", () => {
     // Arrange
     // Mock assigned courses.
     // ----------------------------------------------------------------------------
-    const mockAssignedCourses = [
-      {
+    const mockAssignedCourses: CourseResponse[] = [
+      createMockCourse({
         id: "course-101",
         title: "Full-Stack Web Development Bootcamp",
         description: "Master React, Node.js, and PostgreSQL",
         createdAt: "2026-05-10T10:00:00.000Z",
         thumbnailUrl: "https://example.com/thumb.jpg",
-      },
+      }),
     ];
 
-    vi.mocked(coursesApi.useAssignedCoursesInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: mockAssignedCourses }] },
-      isLoading: false,
-      isFetchingNextPage: false,
-      hasNextPage: false,
-      fetchNextPage: vi.fn(),
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(coursesApi.useAssignedCoursesInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseResponse>(mockAssignedCourses)],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

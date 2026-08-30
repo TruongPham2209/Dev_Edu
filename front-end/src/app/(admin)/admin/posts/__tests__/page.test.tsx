@@ -39,8 +39,15 @@
  * Unit test for AdminPostsPage component.
  */
 
+import type { PostResponse } from "@/lib/type/forums";
 import * as forumApi from "@/lib/api/forum";
 import * as apiToast from "@/lib/use-api-with-toast";
+import { createMockCustomPaging, createMockForumPost } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -77,15 +84,19 @@ describe("AdminPostsPage", () => {
       value: MockIntersectionObserver,
     });
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: vi.fn(),
+        handleError: vi.fn(),
+      }),
+    );
 
-    vi.mocked(forumApi.useUpdatePostVersionMutation).mockReturnValue({
-      mutate: mockUpdateVersion,
-      isPending: false,
-    } as never);
+    vi.mocked(forumApi.useUpdatePostVersionMutation).mockReturnValue(
+      createMockMutationResult({
+        mutate: mockUpdateVersion,
+        isPending: false,
+      }),
+    );
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -97,14 +108,12 @@ describe("AdminPostsPage", () => {
     // Arrange
     // Return empty pending posts page.
     // ----------------------------------------------------------------------------
-    vi.mocked(forumApi.usePostVersionsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isError: false,
-      hasNextPage: false,
-      isFetchingNextPage: false,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(forumApi.usePostVersionsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<PostResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -124,7 +133,7 @@ describe("AdminPostsPage", () => {
     // Arrange
     // Mock pending post.
     // ----------------------------------------------------------------------------
-    const mockPost = {
+    const mockPost: PostResponse = createMockForumPost({
       id: "post-v1",
       title: "Building Microservices with Spring Boot & Next.js",
       shortDescription: "A comprehensive guide to backend architecture.",
@@ -133,16 +142,14 @@ describe("AdminPostsPage", () => {
       authorUsername: "sarah_c",
       authorAvatarUrl: "https://example.com/sarah.jpg",
       createdAt: "2026-06-01T00:00:00.000Z",
-    };
+    });
 
-    vi.mocked(forumApi.usePostVersionsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [mockPost] }] },
-      isLoading: false,
-      isError: false,
-      hasNextPage: false,
-      isFetchingNextPage: false,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(forumApi.usePostVersionsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<PostResponse>([mockPost])],
+        pageParams: [null],
+      }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

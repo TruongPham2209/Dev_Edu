@@ -38,6 +38,8 @@ import React from "react";
  * Unit test for RelatedCourseList component.
  */
 
+import type { CourseResponse } from "@/lib/type/courses";
+import { createMockCourse } from "@/testing/mock-data";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { RelatedCourseList } from "../related-course-list";
@@ -66,29 +68,25 @@ describe("RelatedCourseList", () => {
     // Arrange
     // Mock related courses.
     // ----------------------------------------------------------------------------
-    const mockRelated = [
-      {
-        id: "c-10",
+    const mockRelated: CourseResponse[] = [
+      createMockCourse({
         title: "Advanced TypeScript Techniques",
         originalPrice: 500000,
         discountedPercentage: 10,
         thumbnailUrl: "https://example.com/thumb.jpg",
-        lecturerName: "Jane Doe",
-      },
+      }),
     ];
 
     // ----------------------------------------------------------------------------
-    // Act
     // Render RelatedCourseList.
     // ----------------------------------------------------------------------------
     render(
       <RelatedCourseList
-        relatedCourses={mockRelated as never}
+        relatedCourses={mockRelated}
         loadingRelated={false}
       />,
     );
 
-    // ----------------------------------------------------------------------------
     // Assert
     // Verify course title renders.
     // ----------------------------------------------------------------------------

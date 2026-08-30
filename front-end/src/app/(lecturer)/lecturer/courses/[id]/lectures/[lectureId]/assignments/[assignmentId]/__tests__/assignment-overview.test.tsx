@@ -33,6 +33,8 @@
  * Unit test for AssignmentOverview component.
  */
 
+import type { AssignmentResponse } from "@/lib/type/assignments";
+import { createMockAssignment } from "@/testing/mock-data";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AssignmentOverview } from "../assignment-overview";
@@ -43,22 +45,19 @@ describe("AssignmentOverview", () => {
     // Arrange
     // Mock assignment data.
     // ----------------------------------------------------------------------------
-    const mockAssignment = {
-      id: "assign-100",
+    const mockAssignment: AssignmentResponse = createMockAssignment({
       title: "Clean Code Assignment",
       description:
         "<h3>Task Instructions</h3><p>Refactor legacy code into clean SOLID principles.</p>",
       createdAt: "2026-06-01T00:00:00.000Z",
-    };
+    });
 
-    // ----------------------------------------------------------------------------
     // Act
     // Render AssignmentOverview.
     // ----------------------------------------------------------------------------
-    render(<AssignmentOverview assignment={mockAssignment as never} />);
+    render(<AssignmentOverview assignment={mockAssignment} />);
 
     // ----------------------------------------------------------------------------
-    // Assert
     // Verify header title and description rendering.
     // ----------------------------------------------------------------------------
     expect(screen.getByText("Requirements & Content")).toBeInTheDocument();

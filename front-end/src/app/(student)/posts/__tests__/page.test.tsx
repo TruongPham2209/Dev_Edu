@@ -39,9 +39,17 @@ import React from "react";
  * Unit test for PostDetailPage component.
  */
 
+import type { ForumCommentResponse, PostResponse } from "@/lib/type/forums";
 import * as forumApi from "@/lib/api/forum";
 import * as apiToast from "@/lib/use-api-with-toast";
 import * as useAuthModule from "@/lib/use-auth";
+import {
+  createMockAuthStatus,
+  createMockAuthUser,
+  createMockCustomPaging,
+  createMockForumPost,
+} from "@/testing/mock-data";
+import { createMockApiWithToast } from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import PostDetailPage, { PostDetailContent } from "../page";
@@ -75,27 +83,29 @@ vi.mock("../related-posts-sidebar", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) =>
+    React.createElement("img", { alt, ...props }),
 }));
 
 describe("PostDetailPage (Forum Post)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuthModule.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      user: {},
-      roles: ["STUDENT"],
-    } as never);
+    vi.mocked(useAuthModule.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        user: createMockAuthUser(),
+        roles: ["STUDENT"],
+        role: "STUDENT",
+      }),
+    );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(forumApi.getForumComments).mockResolvedValue({
-      contents: [],
-      nextCursor: null,
-    } as never);
+    vi.mocked(forumApi.getForumComments).mockResolvedValue(
+      createMockCustomPaging<ForumCommentResponse>([]),
+    );
 
     vi.mocked(forumApi.getRelatedPosts).mockResolvedValue([]);
   });
@@ -128,7 +138,7 @@ describe("PostDetailPage (Forum Post)", () => {
     // Arrange
     // Mock valid post data.
     // ----------------------------------------------------------------------------
-    const mockPost = {
+    const mockPost: PostResponse = createMockForumPost({
       id: "post-999",
       title: "Building Microfrontends with Module Federation",
       content: "<p>Microfrontends allow teams to work independently.</p>",
@@ -137,9 +147,9 @@ describe("PostDetailPage (Forum Post)", () => {
       views: 320,
       comments: 5,
       isSaved: false,
-    };
+    });
 
-    vi.mocked(forumApi.getForumPostById).mockResolvedValue(mockPost as never);
+    vi.mocked(forumApi.getForumPostById).mockResolvedValue(mockPost);
 
     // ----------------------------------------------------------------------------
     // Act

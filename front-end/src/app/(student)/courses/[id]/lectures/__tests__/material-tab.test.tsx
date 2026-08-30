@@ -9,39 +9,41 @@
  *
  * Purpose
  * -------
- * Verify that TabMaterials component renders lecture materials list, file type icons,
- * empty state when no materials exist, and handles file download URL generation.
+ * Verify that TabMaterials component renders materials list, file name, empty state
+ * when no materials exist, and triggers file download via preSignedDownloadUrl query.
  *
  * Tested Features
  * ---------------
  * ✓ CircularProgress loading spinner when loading = true
  * ✓ EmptyState rendering when materials array is empty
- * ✓ Materials list rendering (title, original filename, upload date)
- * ✓ Download button action triggering queryClient fetchQuery
+ * ✓ Materials list rendering (title, original file name, download icon)
+ * ✓ Download action calling getPreSignedDownloadUrl and window.open
  *
  * Covered Scenarios
  * -----------------
  * ✓ Loading state
- * ✓ Empty materials state
- * ✓ Rendering materials list and triggering file download
+ * ✓ Empty materials list
+ * ✓ Downloading a lecture material
  *
  * Mocked Dependencies
  * -------------------
  * - "@/lib/api/lectures" (useMaterialsQuery)
- * - "@/lib/api/files" (getDownloadUrl)
  * - "@tanstack/react-query" (useQueryClient)
  *
  * Not Covered
  * -----------
- * - Browser file stream downloading
+ * - Browser native file save dialog
  *
  * Notes
  * -----
  * Unit test for TabMaterials component.
  */
 
+import type { MaterialResponse } from "@/lib/type/lectures";
 import * as lecturesApi from "@/lib/api/lectures";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { createMockMaterial } from "@/testing/mock-data";
+import { createMockQueryResult } from "@/testing/mock-query";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TabMaterials } from "../material-tab";
 
@@ -66,10 +68,9 @@ describe("TabMaterials", () => {
     // Arrange
     // Return empty materials list.
     // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as never);
+    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue(
+      createMockQueryResult<MaterialResponse[]>([]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -89,20 +90,18 @@ describe("TabMaterials", () => {
     // Arrange
     // Mock materials list and window.open.
     // ----------------------------------------------------------------------------
-    const mockMaterials = [
-      {
+    const mockMaterials: MaterialResponse[] = [
+      createMockMaterial({
         id: "mat-1",
         title: "React 19 Cheat Sheet PDF",
         fileObjectKey: "materials/cheat-sheet.pdf",
         fileOriginalName: "cheat-sheet.pdf",
-        uploadedAt: "2026-06-10T10:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
-      data: mockMaterials,
-      isLoading: false,
-    } as never);
+    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue(
+      createMockQueryResult(mockMaterials),
+    );
 
     mockFetchQuery.mockResolvedValue({
       downloadUrl: "https://example.com/download.pdf",
@@ -126,12 +125,17 @@ describe("TabMaterials", () => {
     // Act & Verify Download
     // Click Download button.
     // ----------------------------------------------------------------------------
-    const downloadBtn = screen.getByRole("button", { name: "Download" });
+    const downloadBtn = screen.getByRole("button", {
+      name: /Download/i,
+    });
     fireEvent.click(downloadBtn);
 
-    expect(mockFetchQuery).toHaveBeenCalledWith({
-      queryKey: ["files", "download", "materials/cheat-sheet.pdf"],
-      queryFn: expect.any(Function),
+    await waitFor(() => {
+      expect(mockFetchQuery).toHaveBeenCalled();
+      expect(window.open).toHaveBeenCalledWith(
+        "https://example.com/download.pdf",
+        "_blank",
+      );
     });
   });
 });

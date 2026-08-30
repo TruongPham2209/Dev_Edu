@@ -51,6 +51,9 @@ vi.mock("next/image", () => ({
   default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
 }));
 
+import type { PostResponse } from "@/lib/type/forums";
+import { createMockForumPost } from "@/testing/mock-data";
+
 describe("RelatedPostsSidebar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,16 +64,16 @@ describe("RelatedPostsSidebar", () => {
     // Arrange
     // Mock getRelatedPosts resolution.
     // ----------------------------------------------------------------------------
-    const mockRelated = [
-      {
+    const mockRelated: PostResponse[] = [
+      createMockForumPost({
         id: "rel-1",
         title: "Clean Architecture in Spring Boot",
         shortDescription: "Decoupling business domain logic",
         createdAt: "2026-05-10T10:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(forumApi.getRelatedPosts).mockResolvedValue(mockRelated as never);
+    vi.mocked(forumApi.getRelatedPosts).mockResolvedValue(mockRelated);
 
     // ----------------------------------------------------------------------------
     // Act

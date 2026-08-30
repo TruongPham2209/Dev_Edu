@@ -41,9 +41,21 @@ import React from "react";
  * Unit test for ForumPage component.
  */
 
+import type { PostResponse } from "@/lib/type/forums";
 import * as forumApi from "@/lib/api/forum";
 import * as apiToast from "@/lib/use-api-with-toast";
 import * as useAuthModule from "@/lib/use-auth";
+import {
+  createMockAuthStatus,
+  createMockCustomPaging,
+  createMockForumPost,
+  createMockRouter,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockInfiniteQueryResult,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -75,7 +87,8 @@ vi.mock("@/lib/use-api-with-toast", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) => React.createElement("img", { alt, ...props }),
+  default: ({ alt = "image", ...props }: React.ComponentProps<"img">) =>
+    React.createElement("img", { alt, ...props }),
 }));
 
 describe("ForumPage", () => {
@@ -83,61 +96,55 @@ describe("ForumPage", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
-    vi.mocked(useAuthModule.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      roles: ["STUDENT"],
-    } as never);
+    vi.mocked(useAuthModule.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        roles: ["STUDENT"],
+        role: "STUDENT",
+      }),
+    );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      handleError: vi.fn(),
-      showSuccess: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(forumApi.useCreateForumPostMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
+    vi.mocked(forumApi.useCreateForumPostMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
 
-    vi.mocked(forumApi.useForumFeedInfiniteQuery).mockReturnValue({
-      data: {
-        pages: [
-          {
-            contents: [
-              {
-                id: "post-1",
-                title: "How to master React Server Components?",
-                shortDescription: "Tips and best practices for RSC",
-                createdAt: "2026-06-01T10:00:00.000Z",
-              },
-            ],
-          },
-        ],
-      },
-      isLoading: false,
-      isError: false,
-      error: null,
-      hasNextPage: false,
-      isFetchingNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
+    const mockPost: PostResponse = createMockForumPost({
+      id: "post-1",
+      title: "How to master React Server Components?",
+      shortDescription: "Tips and best practices for RSC",
+      createdAt: "2026-06-01T10:00:00.000Z",
+    });
 
-    vi.mocked(forumApi.useSearchForumPostsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-      isError: false,
-      error: null,
-      hasNextPage: false,
-      isFetchingNextPage: false,
-      fetchNextPage: vi.fn(),
-    } as never);
+    vi.mocked(forumApi.useForumFeedInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<PostResponse>([mockPost])],
+        pageParams: [null],
+      }),
+    );
+
+    vi.mocked(forumApi.useSearchForumPostsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<PostResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as never;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderHeroDiscussionsFeedAndOpenCreatePostModal", () => {
@@ -149,9 +156,11 @@ describe("ForumPage", () => {
 
     // ----------------------------------------------------------------------------
     // Assert
-    // Verify hero title, discussion title, and post title render.
+    // Verify hero text, search bar, and post title render.
     // ----------------------------------------------------------------------------
-    expect(screen.getByText("Latest Discussions")).toBeInTheDocument();
+    expect(
+      screen.getByText(/DevEdu Community/i),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("How to master React Server Components?"),
     ).toBeInTheDocument();
@@ -163,6 +172,8 @@ describe("ForumPage", () => {
     const createBtn = screen.getByRole("button", { name: "Create Post" });
     fireEvent.click(createBtn);
 
-    expect(screen.getAllByText(/Create Post/i).length).toBeGreaterThan(0);
-  }, 15000);
+    expect(
+      screen.getByRole("heading", { name: "Create Post" }),
+    ).toBeInTheDocument();
+  });
 });

@@ -37,7 +37,13 @@
  * Unit test for CartPage component.
  */
 
+import type {
+  CourseItemDetailResponse,
+  OrderDetailResponse,
+} from "@/lib/type/enrollments";
 import * as enrollmentsApi from "@/lib/api/enrollments";
+import { createMockCustomPaging, createMockRouter } from "@/testing/mock-data";
+import { createMockInfiniteQueryResult } from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -69,29 +75,39 @@ vi.mock("@/lib/api/enrollments", () => ({
 describe("CartPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue({ push: vi.fn() } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter());
 
-    vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-    } as never);
+    vi.mocked(enrollmentsApi.useCartItemsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseItemDetailResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
-    vi.mocked(enrollmentsApi.useOrderHistoryInfinateQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-    } as never);
+    vi.mocked(enrollmentsApi.useOrderHistoryInfinateQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<OrderDetailResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
-    vi.mocked(enrollmentsApi.useEnrollmentsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-    } as never);
+    vi.mocked(enrollmentsApi.useEnrollmentsInfiniteQuery).mockReturnValue(
+      createMockInfiniteQueryResult({
+        pages: [createMockCustomPaging<CourseItemDetailResponse>([])],
+        pageParams: [null],
+      }),
+    );
 
     class MockIntersectionObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
     }
-    window.IntersectionObserver = MockIntersectionObserver as never;
+    Object.defineProperty(window, "IntersectionObserver", {
+      writable: true,
+      configurable: true,
+      value: MockIntersectionObserver,
+    });
   });
 
   it("shouldRenderTitleAndTabsAndSwitchBetweenTabContents", () => {

@@ -53,17 +53,19 @@ vi.mock("next/link", () => ({
   default: ({ children, href }: { children?: React.ReactNode; href?: string }) => <a href={href}>{children}</a>,
 }));
 
+import type { LectureResponse } from "@/lib/type/lectures";
+import { createMockLecture } from "@/testing/mock-data";
+
 describe("LectureContent", () => {
-  const mockLecture = {
+  const mockLecture: LectureResponse = createMockLecture({
     id: "lec-10",
     title: "Understanding Server Actions",
     summary: "Comprehensive guide to mutation handling in Next.js",
     duration: 450, // 7m 30s
-    uploadedAt: "2026-06-20T10:00:00.000Z",
     isCompleted: false,
     content: "<p>Server Actions execute securely on the server.</p>",
-    videoObjectKey: null,
-  };
+    videoObjectKey: "",
+  });
 
   it("shouldRenderTextBasedLectureContentAndNavigationButtons", () => {
     // ----------------------------------------------------------------------------
@@ -79,10 +81,10 @@ describe("LectureContent", () => {
     // ----------------------------------------------------------------------------
     render(
       <LectureContent
-        lecture={mockLecture as never}
+        lecture={mockLecture}
         courseId="c-55"
-        prevLecture={{ id: "lec-9", title: "Prev Lecture" } as never}
-        nextLecture={{ id: "lec-11", title: "Next Lecture" } as never}
+        prevLecture={createMockLecture({ id: "lec-9", title: "Prev Lecture" })}
+        nextLecture={createMockLecture({ id: "lec-11", title: "Next Lecture" })}
         onSelectLecture={mockOnSelect}
         onNext={mockOnNext}
         navigating={false}

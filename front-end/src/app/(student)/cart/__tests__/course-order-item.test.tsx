@@ -41,8 +41,10 @@
  * Unit test for CourseOrderItem component.
  */
 
+import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
 import * as coursesApi from "@/lib/api/courses";
-import { useQueryClient } from "@tanstack/react-query";
+import { createMockCourseItemDetail } from "@/testing/mock-data";
+import { createMockMutationResult, createMockQueryResult } from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CourseOrderItem } from "../course-order-item";
@@ -54,8 +56,11 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   }),
 }));
 
+const mockInvalidateQueries = vi.fn();
 vi.mock("@tanstack/react-query", () => ({
-  useQueryClient: vi.fn(),
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+  }),
 }));
 
 vi.mock("@/lib/api/courses", () => ({
@@ -68,7 +73,7 @@ vi.mock("@/components/dialog/review-dialog", () => ({
 }));
 
 describe("CourseOrderItem", () => {
-  const mockItem = {
+  const mockItem: CourseItemDetailResponse = createMockCourseItemDetail({
     id: "item-100",
     courseId: "course-100",
     title: "Mastering React 19 Next.js",
@@ -77,25 +82,18 @@ describe("CourseOrderItem", () => {
     discountedPrice: 800000,
     thumbnailUrl: "https://example.com/thumb.jpg",
     timestamp: "2026-01-01T00:00:00.000Z",
-  };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useQueryClient).mockReturnValue({
-      invalidateQueries: vi.fn(),
-    } as never);
 
-    vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-      isError: false,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(coursesApi.useMyReviewQuery).mockReturnValue(
+      createMockQueryResult(null),
+    );
 
-    vi.mocked(coursesApi.useCreateReviewMutation).mockReturnValue({
-      mutate: vi.fn(),
-      isPending: false,
-    } as never);
+    vi.mocked(coursesApi.useCreateReviewMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderCartContextWithCheckboxAndRemoveButton", () => {

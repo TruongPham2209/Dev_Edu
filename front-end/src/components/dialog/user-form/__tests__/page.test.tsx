@@ -59,13 +59,6 @@ import {
 describe("UserFormDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
     vi.mocked(usersApi.useBatchCreateUsersMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: vi.fn(),

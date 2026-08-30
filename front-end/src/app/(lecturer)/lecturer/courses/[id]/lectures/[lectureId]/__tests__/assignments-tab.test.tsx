@@ -42,8 +42,15 @@
  * Unit test for AssignmentsTab component.
  */
 
+import type { AssignmentResponse } from "@/lib/type/assignments";
 import * as assignmentsApi from "@/lib/api/assignments";
 import * as apiToast from "@/lib/use-api-with-toast";
+import { createMockAssignment, createMockRouter } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useRouter } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -83,16 +90,15 @@ describe("AssignmentsTab (Lecturer)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(useRouter).mockReturnValue({ push: mockPush } as never);
+    vi.mocked(useRouter).mockReturnValue(createMockRouter({ push: mockPush }));
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(assignmentsApi.useDeleteAssignmentMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as never);
+    vi.mocked(assignmentsApi.useDeleteAssignmentMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderEmptyStateWhenNoAssignmentsExist", () => {
@@ -100,10 +106,9 @@ describe("AssignmentsTab (Lecturer)", () => {
     // Arrange
     // Return empty assignments list.
     // ----------------------------------------------------------------------------
-    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue(
+      createMockQueryResult<AssignmentResponse[]>([]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -123,19 +128,18 @@ describe("AssignmentsTab (Lecturer)", () => {
     // Arrange
     // Return sample assignment.
     // ----------------------------------------------------------------------------
-    const mockAssignments = [
-      {
+    const mockAssignments: AssignmentResponse[] = [
+      createMockAssignment({
         id: "assign-1",
         title: "Build RESTful API in Spring Boot",
         description: "<p>Implement GET, POST, and DELETE endpoints.</p>",
         createdAt: "2026-06-10T12:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
-      data: mockAssignments,
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue(
+      createMockQueryResult(mockAssignments),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

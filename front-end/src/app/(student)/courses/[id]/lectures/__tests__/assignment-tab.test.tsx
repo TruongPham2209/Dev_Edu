@@ -38,7 +38,10 @@
  * Unit test for TabAssignments component.
  */
 
+import type { AssignmentResponse } from "@/lib/type/assignments";
 import * as assignmentsApi from "@/lib/api/assignments";
+import { createMockAssignment } from "@/testing/mock-data";
+import { createMockQueryResult } from "@/testing/mock-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TabAssignments } from "../assignment-tab";
@@ -75,10 +78,9 @@ describe("TabAssignments", () => {
     // Arrange
     // Return empty assignments list.
     // ----------------------------------------------------------------------------
-    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue(
+      createMockQueryResult<AssignmentResponse[]>([]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -98,19 +100,17 @@ describe("TabAssignments", () => {
     // Arrange
     // Mock assignments list.
     // ----------------------------------------------------------------------------
-    const mockAssignments = [
-      {
+    const mockAssignments: AssignmentResponse[] = [
+      createMockAssignment({
         id: "asg-1",
         title: "Build Next.js Server Actions Form",
         description: "<p>Create a form using Zod validation.</p>",
-        submittedAt: null,
-      },
+      }),
     ];
 
-    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue({
-      data: mockAssignments,
-      isLoading: false,
-    } as never);
+    vi.mocked(assignmentsApi.useAssignmentsQuery).mockReturnValue(
+      createMockQueryResult(mockAssignments),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

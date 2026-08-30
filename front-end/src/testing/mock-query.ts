@@ -5,7 +5,7 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { vi } from "vitest";
-import type { useApiWithToast } from "@/lib/use-api-with-toast";
+import { useApiWithToast } from "@/lib/use-api-with-toast";
 
 export function createMockQueryResult<TData, TError = Error>(
   data?: TData,

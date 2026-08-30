@@ -79,14 +79,6 @@ describe("QuizAssignmentDetailModal Component", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(quizzesApi.useStudentAttemptHistoryQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as never);
-    vi.mocked(quizzesApi.useStartAttemptMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as never);
     vi.mocked(quizzesApi.useStudentAttemptHistoryQuery).mockReturnValue(
       createMockQueryResult([]),
     );

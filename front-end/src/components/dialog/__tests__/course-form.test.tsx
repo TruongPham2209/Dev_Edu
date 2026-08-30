@@ -132,8 +132,6 @@ import { createMockQueryResult } from "@/testing/mock-query";
 
 describe("CourseFormDialog", () => {
   const mockCategories: CategoryResponse[] = [
-    { id: "cat-1", name: "Web Development" } as never,
-    { id: "cat-2", name: "Mobile Development" } as never,
     createMockCategory({ id: "cat-1", name: "Web Development" }),
     createMockCategory({ id: "cat-2", name: "Mobile Development" }),
   ];
@@ -149,14 +147,6 @@ describe("CourseFormDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as never);
-    vi.mocked(usersApi.useSearchUsersQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-    } as never);
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
       createMockQueryResult<CourseResponse>(),
     );

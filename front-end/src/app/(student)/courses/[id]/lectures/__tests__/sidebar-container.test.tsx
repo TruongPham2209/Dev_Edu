@@ -42,31 +42,34 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { SidebarContainer } from "../sidebar-container";
 
+import type { LectureResponse } from "@/lib/type/lectures";
+import { createMockLecture } from "@/testing/mock-data";
+
 describe("SidebarContainer", () => {
   it("shouldRenderSidebarLecturesAndTriggerSelectionOnUnlockedItems", () => {
     // ----------------------------------------------------------------------------
     // Arrange
     // Mock lectures list: first completed, second active unlocked, third locked.
     // ----------------------------------------------------------------------------
-    const mockLectures = [
-      {
+    const mockLectures: LectureResponse[] = [
+      createMockLecture({
         id: "lec-1",
         title: "01. Introduction to Next.js 15",
         duration: 300,
         isCompleted: true,
-      },
-      {
+      }),
+      createMockLecture({
         id: "lec-2",
         title: "02. Project Setup & Architecture",
         duration: 600,
         isCompleted: false,
-      },
-      {
+      }),
+      createMockLecture({
         id: "lec-3",
         title: "03. Advanced Routing & Layouts",
         duration: 0,
         isCompleted: false,
-      },
+      }),
     ];
 
     const mockOnSelectLecture = vi.fn();
@@ -77,7 +80,7 @@ describe("SidebarContainer", () => {
     // ----------------------------------------------------------------------------
     render(
       <SidebarContainer
-        lectures={mockLectures as never}
+        lectures={mockLectures}
         activeLectureId="lec-2"
         onSelectLecture={mockOnSelectLecture}
       />,

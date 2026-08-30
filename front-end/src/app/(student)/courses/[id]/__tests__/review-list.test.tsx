@@ -41,6 +41,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ReviewList } from "../review-list";
 
+import type { ReviewResponse } from "@/lib/type/courses";
+import { createMockReview } from "@/testing/mock-data";
+
 describe("ReviewList", () => {
   it("shouldRenderEmptyStateWhenReviewsArrayIsEmpty", () => {
     // ----------------------------------------------------------------------------
@@ -71,15 +74,15 @@ describe("ReviewList", () => {
     // Arrange
     // Mock review item.
     // ----------------------------------------------------------------------------
-    const mockReviews = [
-      {
+    const mockReviews: ReviewResponse[] = [
+      createMockReview({
         id: "rev-55",
         fullName: "Nguyen Van A",
         username: "nguyena",
         rating: 5,
         comment: "Amazing course! Very detailed explanations.",
         createdAt: "2026-05-01T10:00:00.000Z",
-      },
+      }),
     ];
 
     const handleLoadMore = vi.fn();
@@ -90,7 +93,7 @@ describe("ReviewList", () => {
     // ----------------------------------------------------------------------------
     render(
       <ReviewList
-        reviews={mockReviews as never}
+        reviews={mockReviews}
         rating={4.8}
         reviewCount={15}
         loadingReviews={false}

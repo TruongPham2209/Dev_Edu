@@ -91,46 +91,26 @@ import {
 describe("ProfilePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
     vi.mocked(apiToast.useApiWithToast).mockReturnValue(
       createMockApiWithToast(),
     );
 
-    vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
     vi.mocked(usersApi.useChangePasswordMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
     vi.mocked(usersApi.useUpdateAvatarMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
     vi.mocked(filesApi.usePreSignedUploadUrlMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(forumApi.usePostedPostsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-    } as never);
     vi.mocked(forumApi.usePostedPostsInfiniteQuery).mockReturnValue(
       createMockInfiniteQueryResult(
         {
@@ -148,10 +128,6 @@ describe("ProfilePage", () => {
       ),
     );
 
-    vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue({
-      data: { pages: [{ contents: [] }] },
-      isLoading: false,
-    } as never);
     vi.mocked(forumApi.useSavedPostsInfiniteQuery).mockReturnValue(
       createMockInfiniteQueryResult(
         {

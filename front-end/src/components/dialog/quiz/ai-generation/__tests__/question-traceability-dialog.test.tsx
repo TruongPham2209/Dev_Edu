@@ -35,21 +35,6 @@ describe("QuestionTraceabilityDialog Component", () => {
 
   it("should render question content and traceability details", () => {
     const onClose = vi.fn();
-    vi.mocked(quizApi.useQuestionTraceabilityQuery).mockReturnValue({
-      data: {
-        id: "tr-1",
-        questionId: "q-1",
-        generationJobId: "job-1",
-        sectionName: "Chapter 4: Concurrency & Multithreading",
-        pageNumber: 42,
-        modelName: "gpt-4o",
-        promptVersion: "v2.1",
-        attemptCount: 1,
-        validationMetrics: "Passed factuality check (0.95 score)",
-      },
-      isLoading: false,
-      isError: false,
-    } as never);
     const mockTraceability: QuestionTraceabilityResponse = {
       id: "tr-1",
       questionId: "q-1",
@@ -92,11 +77,6 @@ describe("QuestionTraceabilityDialog Component", () => {
   });
 
   it("should render fallback message when traceability is not available", () => {
-    vi.mocked(quizApi.useQuestionTraceabilityQuery).mockReturnValue({
-      data: null,
-      isLoading: false,
-      isError: false,
-    } as never);
     vi.mocked(quizApi.useQuestionTraceabilityQuery).mockReturnValue(
       createMockQueryResult<QuestionTraceabilityResponse>(),
     );

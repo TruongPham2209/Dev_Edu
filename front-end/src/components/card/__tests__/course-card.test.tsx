@@ -49,8 +49,10 @@ import { render, screen } from "@testing-library/react";
 import { CourseCard } from "../course-card";
 import type { CourseResponse } from "@/lib/type/courses";
 
+import { createMockCourse } from "@/testing/mock-data";
+
 describe("CourseCard", () => {
-  const baseCourse: CourseResponse = {
+  const baseCourse: CourseResponse = createMockCourse({
     id: "course-101",
     title: "Mastering Next.js & React 19",
     description: "<p>Learn <strong>modern</strong> web development.</p>",
@@ -61,9 +63,7 @@ describe("CourseCard", () => {
     avgReview: 4.8,
     totalEnrollment: 1250,
     categoryId: "cat-1",
-    status: "PUBLISHED",
-    createdDate: "2026-01-01",
-  } as never;
+  });
 
   it("shouldRenderCourseDetailsThumbnailAndDiscountedPrice", () => {
     // ----------------------------------------------------------------------------

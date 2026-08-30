@@ -40,7 +40,9 @@
  */
 
 import * as metricsApi from "@/lib/api/metrics";
+import type { DashboardOverviewResponse } from "@/lib/type/metrics";
 import * as apiToast from "@/lib/use-api-with-toast";
+import { createMockApiWithToast, createMockQueryResult } from "@/testing/mock-query";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { KpiCards } from "../kpi-cards";
@@ -57,44 +59,27 @@ describe("KpiCards", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
   });
 
   it("shouldRenderErrorStateWhenQueryFails", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Return error query state.
-    // ----------------------------------------------------------------------------
-    vi.mocked(metricsApi.useDashboardMetrics).mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error("Network error"),
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(metricsApi.useDashboardMetrics).mockReturnValue(
+      createMockQueryResult<DashboardOverviewResponse>(undefined, {
+        error: new Error("Network error"),
+        isError: true,
+      }),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render KpiCards.
-    // ----------------------------------------------------------------------------
     render(<KpiCards />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify error title.
-    // ----------------------------------------------------------------------------
     expect(
       screen.getByText("Failed to load dashboard metrics"),
     ).toBeInTheDocument();
   });
 
   it("shouldRenderKpiCardsWithFetchedValues", () => {
-    // ----------------------------------------------------------------------------
-    // Arrange
-    // Mock dashboard metrics response.
-    // ----------------------------------------------------------------------------
     const mockMetrics = {
       totalUsers: 1250,
       totalCourses: 45,
@@ -105,23 +90,12 @@ describe("KpiCards", () => {
       courseCompletionRate: 88.5,
     };
 
-    vi.mocked(metricsApi.useDashboardMetrics).mockReturnValue({
-      data: mockMetrics,
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(metricsApi.useDashboardMetrics).mockReturnValue(
+      createMockQueryResult(mockMetrics),
+    );
 
-    // ----------------------------------------------------------------------------
-    // Act
-    // Render KpiCards.
-    // ----------------------------------------------------------------------------
     render(<KpiCards />);
 
-    // ----------------------------------------------------------------------------
-    // Assert
-    // Verify KPI card titles and formatted metric values.
-    // ----------------------------------------------------------------------------
     expect(screen.getByText("Total Users")).toBeInTheDocument();
     expect(screen.getByText(/1[.,]250/)).toBeInTheDocument();
 

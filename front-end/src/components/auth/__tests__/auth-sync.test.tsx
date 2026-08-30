@@ -85,18 +85,29 @@ vi.mock("@/lib/auth/constants", () => ({
   getPrimaryRole: vi.fn(),
 }));
 
+import type { UserResponse } from "@/lib/type/users";
+import { createMockAuthUser } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockQueryResult,
+} from "@/testing/mock-query";
+
 describe("AuthSync Component", () => {
   const mockFetchMe = vi.fn();
   const mockHandleError = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(usersApi.useMeQuery).mockReturnValue({
-      refetch: mockFetchMe,
-    } as never);
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(usersApi.useMeQuery).mockReturnValue(
+      createMockQueryResult<UserResponse>(undefined, {
+        refetch: mockFetchMe,
+      }),
+    );
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        handleError: mockHandleError,
+      }),
+    );
   });
 
   afterEach(() => {
@@ -179,9 +190,9 @@ describe("AuthSync Component", () => {
     // Prepare matching local token and stored user.
     // ----------------------------------------------------------------------------
     vi.mocked(authStorage.getAuthToken).mockReturnValue("same-token");
-    vi.mocked(authStorage.getStoredUser).mockReturnValue({
-      id: "user-1",
-    } as never);
+    vi.mocked(authStorage.getStoredUser).mockReturnValue(
+      createMockAuthUser({ id: "user-1" }),
+    );
 
     // ----------------------------------------------------------------------------
     // Act

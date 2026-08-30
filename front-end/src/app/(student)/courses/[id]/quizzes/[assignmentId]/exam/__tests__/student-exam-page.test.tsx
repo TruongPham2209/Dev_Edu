@@ -44,9 +44,20 @@
  * Unit test for Student Exam Room components & page.
  */
 
+import type { AutosaveState } from "@/hooks/use-quiz-exam-session";
 import * as useQuizExamSessionModule from "@/hooks/use-quiz-exam-session";
 import * as quizzesApi from "@/lib/api/quizzes";
 import * as toastContext from "@/lib/toast-context";
+import type {
+  StartAttemptResponse,
+  StudentQuestionDto,
+  SubmitAttemptResponse
+} from "@/lib/type/quizzes";
+import { createMockToast } from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ExamAutosaveIndicator } from "../exam-autosave-indicator";
@@ -77,45 +88,62 @@ vi.mock("@/lib/toast-context", () => ({
 }));
 
 describe("Student Exam Room Components & Page", () => {
-  const mockToast = { success: vi.fn(), error: vi.fn() };
+  const mockToast = createMockToast();
 
-  const mockStartData = {
+  const mockQuestions: StudentQuestionDto[] = [
+    {
+      id: "q-1",
+      content: "What is Next.js App Router?",
+      questionType: "SINGLE_CHOICE",
+      points: 5,
+      orderIndex: 0,
+      options: [
+        {
+          id: "opt-1",
+          optionText: "A File-System Based Router",
+          orderIndex: 0,
+        },
+        { id: "opt-2", optionText: "A CSS Framework", orderIndex: 1 },
+      ],
+    },
+    {
+      id: "q-2",
+      content: "Explain Server Components.",
+      questionType: "ESSAY",
+      points: 5,
+      orderIndex: 1,
+    },
+  ];
+
+  const mockStartData: StartAttemptResponse = {
     attemptId: "att-1",
     assignmentId: "assign-1",
+    quizId: "quiz-1",
+    attemptNumber: 1,
     status: "IN_PROGRESS",
+    startedAt: "2026-08-06T11:00:00Z",
     expiresAt: "2026-08-06T12:00:00Z",
-    assignmentTitle: "Final Exam 2026",
+    maxScore: 10,
+    activeSessionToken: "st-token",
     quizTitle: "Final Exam 2026",
-    questions: [
-      {
-        questionId: "q-1",
-        content: "What is Next.js App Router?",
-        questionType: "SINGLE_CHOICE",
-        points: 5,
-        options: [
-          { id: "opt-1", optionText: "A File-System Based Router" },
-          { id: "opt-2", optionText: "A CSS Framework" },
-        ],
-      },
-      {
-        questionId: "q-2",
-        content: "Explain Server Components.",
-        questionType: "ESSAY",
-        points: 5,
-      },
-    ],
+    questions: mockQuestions,
   };
 
-  const mockSession = {
+  const mockAnswersMap: Record<
+    string,
+    { selectedOptionIds?: string[]; answerText?: string }
+  > = {
+    "q-1": { selectedOptionIds: ["opt-1"] },
+  };
+
+  const mockSession: ReturnType<typeof useQuizExamSessionModule.useQuizExamSession> = {
     sessionToken: "st-token",
     isSessionLocked: false,
     sessionLockMessage: "",
     timeRemaining: 1800,
     isExpired: false,
-    answersMap: {
-      "q-1": { selectedOptionIds: ["opt-1"] },
-    },
-    autosaveState: "SAVED",
+    answersMap: mockAnswersMap,
+    autosaveState: "SAVED" as AutosaveState,
     updateSingleChoice: vi.fn(),
     updateMultipleChoice: vi.fn(),
     updateEssayAnswer: vi.fn(),
@@ -123,17 +151,15 @@ describe("Student Exam Room Components & Page", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(toastContext.useToast).mockReturnValue(mockToast as never);
-    vi.mocked(quizzesApi.useAttemptQuery).mockReturnValue({
-      data: mockStartData,
-      isLoading: false,
-    } as never);
-    vi.mocked(quizzesApi.useSubmitAttemptMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue({ score: 10 }),
-      isPending: false,
-    } as never);
+    vi.mocked(toastContext.useToast).mockReturnValue(mockToast);
+    vi.mocked(quizzesApi.useAttemptQuery).mockReturnValue(
+      createMockQueryResult<StartAttemptResponse>(mockStartData),
+    );
+    vi.mocked(quizzesApi.useSubmitAttemptMutation).mockReturnValue(
+      createMockMutationResult<SubmitAttemptResponse, Error, string>(),
+    );
     vi.mocked(useQuizExamSessionModule.useQuizExamSession).mockReturnValue(
-      mockSession as never,
+      mockSession,
     );
   });
 
@@ -150,7 +176,7 @@ describe("Student Exam Room Components & Page", () => {
   it("shouldRenderExamQuestionNav", () => {
     render(
       <ExamQuestionNav
-        questions={mockStartData.questions as never}
+        questions={mockQuestions}
         currentIndex={0}
         answersMap={mockSession.answersMap}
         onSelectQuestion={vi.fn()}

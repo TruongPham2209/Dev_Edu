@@ -43,12 +43,6 @@ import { SubmissionHistoryTab } from "../submission-history-tab";
 
 describe("SubmissionHistoryTab", () => {
   beforeEach(() => {
-    // Mock IntersectionObserver
-    window.IntersectionObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    })) as never;
     class MockIntersectionObserver {
       observe = vi.fn();
       unobserve = vi.fn();

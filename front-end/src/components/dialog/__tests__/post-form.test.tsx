@@ -92,9 +92,6 @@ describe("PostFormDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue({
-      mutateAsync: mockConfirmImageMutate,
-    } as never);
     vi.mocked(filesApi.useConfirmImageUploadMutation).mockReturnValue(
       createMockMutationResult({
         mutateAsync: mockConfirmImageMutate,

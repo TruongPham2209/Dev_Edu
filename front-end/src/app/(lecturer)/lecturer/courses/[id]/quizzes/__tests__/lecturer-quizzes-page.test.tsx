@@ -40,6 +40,11 @@
 
 import * as coursesApi from "@/lib/api/courses";
 import * as quizzesApi from "@/lib/api/quizzes";
+import { createMockCourse } from "@/testing/mock-data";
+import {
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import LecturerCreateQuizPage from "../page";
@@ -65,20 +70,10 @@ vi.mock("@/lib/toast-context", () => ({
   useToast: vi.fn(() => ({ success: vi.fn(), error: vi.fn() })),
 }));
 
-import { createMockCourse } from "@/testing/mock-data";
-import {
-  createMockMutationResult,
-  createMockQueryResult,
-} from "@/testing/mock-query";
-
 describe("Lecturer Quizzes Page & QuizHero", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue({
-      data: { id: "course-123", title: "Advanced React & Next.js" },
-      isLoading: false,
-    } as never);
     vi.mocked(coursesApi.useCourseByIdQuery).mockReturnValue(
       createMockQueryResult(
         createMockCourse({
@@ -88,42 +83,22 @@ describe("Lecturer Quizzes Page & QuizHero", () => {
       ),
     );
 
-    vi.mocked(quizzesApi.useCreateQuizMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as never);
     vi.mocked(quizzesApi.useCreateQuizMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as never);
     vi.mocked(quizzesApi.useUpdateQuizMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as never);
     vi.mocked(quizzesApi.useCreateQuizTypeConfigMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-      isPending: false,
-    } as never);
     vi.mocked(quizzesApi.useDeleteQuizTypeConfigMutation).mockReturnValue(
       createMockMutationResult(),
     );
 
-    vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-    } as never);
     vi.mocked(quizzesApi.useQuizTypeConfigsQuery).mockReturnValue(
       createMockQueryResult([]),
     );

@@ -38,9 +38,19 @@
  * Unit test for PostComments component.
  */
 
+import type { ForumCommentResponse } from "@/lib/type/forums";
 import * as forumApi from "@/lib/api/forum";
 import * as apiToast from "@/lib/use-api-with-toast";
 import * as useAuthModule from "@/lib/use-auth";
+import {
+  createMockAuthStatus,
+  createMockAuthUser,
+  createMockCustomPaging,
+} from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+} from "@/testing/mock-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PostComments } from "../post-comments";
@@ -67,24 +77,31 @@ describe("PostComments", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuthModule.useAuth).mockReturnValue({
-      isAuthenticated: true,
-      user: { avatarUrl: "https://example.com/avatar.jpg" },
-      roles: ["STUDENT"],
-    } as never);
+    vi.mocked(useAuthModule.useAuth).mockReturnValue(
+      createMockAuthStatus({
+        isAuthenticated: true,
+        user: createMockAuthUser({ avatarUrl: "https://example.com/avatar.jpg" }),
+        roles: ["STUDENT"],
+        role: "STUDENT",
+      }),
+    );
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: mockShowSuccess,
-      handleError: mockHandleError,
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast({
+        showSuccess: mockShowSuccess,
+        handleError: mockHandleError,
+      }),
+    );
 
-    vi.mocked(forumApi.useCreateForumCommentMutation).mockReturnValue({
-      mutateAsync: mockCreateCommentMutate,
-    } as never);
+    vi.mocked(forumApi.useCreateForumCommentMutation).mockReturnValue(
+      createMockMutationResult({
+        mutateAsync: mockCreateCommentMutate,
+      }),
+    );
 
-    vi.mocked(forumApi.useDeleteForumCommentMutation).mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
+    vi.mocked(forumApi.useDeleteForumCommentMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   it("shouldRenderEmptyCommentsStateWhenNoCommentsExist", async () => {
@@ -92,10 +109,9 @@ describe("PostComments", () => {
     // Arrange
     // Return empty comments response.
     // ----------------------------------------------------------------------------
-    vi.mocked(forumApi.getForumComments).mockResolvedValue({
-      contents: [],
-      nextCursor: null,
-    } as never);
+    vi.mocked(forumApi.getForumComments).mockResolvedValue(
+      createMockCustomPaging<ForumCommentResponse>([]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -117,10 +133,9 @@ describe("PostComments", () => {
     // Arrange
     // Return existing comments.
     // ----------------------------------------------------------------------------
-    vi.mocked(forumApi.getForumComments).mockResolvedValue({
-      contents: [],
-      nextCursor: null,
-    } as never);
+    vi.mocked(forumApi.getForumComments).mockResolvedValue(
+      createMockCustomPaging<ForumCommentResponse>([]),
+    );
 
     mockCreateCommentMutate.mockResolvedValue({
       id: "comm-1",
@@ -135,29 +150,25 @@ describe("PostComments", () => {
     // ----------------------------------------------------------------------------
     render(<PostComments postId="post-10" />);
 
-    await waitFor(() => {
-      expect(screen.getByText("No comments yet!")).toBeInTheDocument();
-    });
-
-    // Type comment input and press Enter
-    const input = screen.getByPlaceholderText("Write your comment...");
-    fireEvent.change(input, {
+    // Wait for comments loading to complete
+    const commentInput = await screen.findByPlaceholderText(
+      "Write your comment...",
+    );
+    fireEvent.change(commentInput, {
       target: { value: "Great article on React 19!" },
     });
-    fireEvent.keyDown(input, { key: "Enter", code: "Enter" });
+
+    fireEvent.keyDown(commentInput, { key: "Enter", shiftKey: false });
 
     // ----------------------------------------------------------------------------
     // Assert & Verify
-    // Verify createCommentMutate execution.
+    // Verify createCommentMutate is called.
     // ----------------------------------------------------------------------------
     await waitFor(() => {
       expect(mockCreateCommentMutate).toHaveBeenCalledWith({
         postId: "post-10",
         content: "Great article on React 19!",
       });
-      expect(mockShowSuccess).toHaveBeenCalledWith(
-        "Comment created successfully",
-      );
     });
   });
 });

@@ -50,18 +50,21 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CoursePurchaseCard } from "../course-purchase-card";
 
+import { createMockCourse, createMockLecture } from "@/testing/mock-data";
+
 describe("CoursePurchaseCard", () => {
-  const baseCourse: CourseResponse = {
+  const baseCourse: CourseResponse = createMockCourse({
     id: "course-123",
     title: "TypeScript Deep Dive",
     originalPrice: 400000,
-    discountedPercentage: 25, // displayPrice = 300000
+    discountedPercentage: 25,
+    discountedPrice: 300000,
     thumbnailUrl: "https://example.com/thumb.jpg",
-  } as never;
+  });
 
   const mockLectures: LectureResponse[] = [
-    { id: "lec-1", title: "Lesson 1" } as never,
-    { id: "lec-2", title: "Lesson 2" } as never,
+    createMockLecture({ id: "lec-1", title: "Lesson 1" }),
+    createMockLecture({ id: "lec-2", title: "Lesson 2" }),
   ];
 
   it("shouldRenderStartLearningButtonWhenUserIsEnrolled", () => {

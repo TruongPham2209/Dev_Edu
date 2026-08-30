@@ -1,3 +1,6 @@
+import type { AuthUser } from "@/lib/auth-storage";
+import type { ToastContextType } from "@/lib/toast-context";
+import type { CustomPaging } from "@/lib/type/api";
 import type { AssignmentResponse, SubmissionResponse } from "@/lib/type/assignments";
 import type {
   CategoryResponse,
@@ -6,6 +9,7 @@ import type {
   ReviewResponse,
 } from "@/lib/type/courses";
 import type { GlobalDocumentResponse } from "@/lib/type/documents";
+import type { CourseItemDetailResponse } from "@/lib/type/enrollments";
 import type {
   ForumCommentResponse,
   PostResponse,
@@ -24,10 +28,8 @@ import type {
   QuizQuestionResponse,
   QuizResponse
 } from "@/lib/type/quizzes";
-import type { UserResponse, EnrollmentUserResponse } from "@/lib/type/users";
-import type { AuthRole, AuthUser } from "@/lib/auth-storage";
+import type { EnrollmentUserResponse, UserResponse } from "@/lib/type/users";
 import type { AuthStatus } from "@/lib/use-auth";
-import type { ToastContextType } from "@/lib/toast-context";
 import { vi } from "vitest";
 
 export function createMockAuthUser(
@@ -441,3 +443,34 @@ export function createMockDashboardOverview(
     ...overrides,
   };
 }
+
+export function createMockCustomPaging<T>(
+  contents: T[] = [],
+  overrides?: Partial<CustomPaging<T>>,
+): CustomPaging<T> {
+  return {
+    contents,
+    currentPage: 0,
+    pageSize: 10,
+    totalElements: contents.length,
+    totalPages: contents.length > 0 ? Math.ceil(contents.length / 10) : 0,
+    ...overrides,
+  };
+}
+
+export function createMockCourseItemDetail(
+  overrides?: Partial<CourseItemDetailResponse>,
+): CourseItemDetailResponse {
+  return {
+    id: "item-1",
+    courseId: "course-1",
+    title: "Sample Course",
+    description: "Sample description",
+    thumbnailUrl: "https://example.com/thumb.jpg",
+    discountedPrice: 500000,
+    originalPrice: 700000,
+    timestamp: "2026-01-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
+

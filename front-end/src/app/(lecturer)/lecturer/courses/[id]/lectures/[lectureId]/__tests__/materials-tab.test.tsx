@@ -42,8 +42,15 @@
  * Unit test for MaterialsTab component.
  */
 
+import type { MaterialResponse } from "@/lib/type/lectures";
 import * as lecturesApi from "@/lib/api/lectures";
 import * as apiToast from "@/lib/use-api-with-toast";
+import { createMockMaterial } from "@/testing/mock-data";
+import {
+  createMockApiWithToast,
+  createMockMutationResult,
+  createMockQueryResult,
+} from "@/testing/mock-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import React from "react";
@@ -88,14 +95,13 @@ describe("MaterialsTab (Lecturer)", () => {
       defaultOptions: { queries: { retry: false } },
     });
 
-    vi.mocked(apiToast.useApiWithToast).mockReturnValue({
-      showSuccess: vi.fn(),
-      handleError: vi.fn(),
-    } as never);
+    vi.mocked(apiToast.useApiWithToast).mockReturnValue(
+      createMockApiWithToast(),
+    );
 
-    vi.mocked(lecturesApi.useDeleteMaterialMutation).mockReturnValue({
-      mutateAsync: vi.fn().mockResolvedValue(undefined),
-    } as never);
+    vi.mocked(lecturesApi.useDeleteMaterialMutation).mockReturnValue(
+      createMockMutationResult(),
+    );
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -107,11 +113,9 @@ describe("MaterialsTab (Lecturer)", () => {
     // Arrange
     // Return empty materials list.
     // ----------------------------------------------------------------------------
-    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
-      data: [],
-      isLoading: false,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue(
+      createMockQueryResult<MaterialResponse[]>([]),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
@@ -131,21 +135,18 @@ describe("MaterialsTab (Lecturer)", () => {
     // Arrange
     // Mock materials list.
     // ----------------------------------------------------------------------------
-    const mockMaterials = [
-      {
+    const mockMaterials: MaterialResponse[] = [
+      createMockMaterial({
         id: "mat-1",
         title: "Clean Architecture Cheat Sheet",
         fileOriginalName: "clean-arch.pdf",
         fileObjectKey: "materials/clean-arch.pdf",
-        uploadedAt: "2026-06-20T10:00:00.000Z",
-      },
+      }),
     ];
 
-    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue({
-      data: mockMaterials,
-      isLoading: false,
-      refetch: vi.fn(),
-    } as never);
+    vi.mocked(lecturesApi.useMaterialsQuery).mockReturnValue(
+      createMockQueryResult(mockMaterials),
+    );
 
     // ----------------------------------------------------------------------------
     // Act
