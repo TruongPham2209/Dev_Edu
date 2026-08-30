@@ -18,8 +18,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -36,6 +38,7 @@ import com.pht.dev_edu.quiz.dto.enums.DocumentVisibility;
 import com.pht.dev_edu.quiz.dto.response.CourseDocumentResponse;
 import com.pht.dev_edu.quiz.engine.DocumentProcessingService;
 import com.pht.dev_edu.quiz.entity.CourseDocumentEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 
 /*
@@ -105,6 +108,7 @@ import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
  * - DocumentProcessingService
  * - FileService
  * - FileUploadRepository
+ * - QuizMapper (Spy)
  */
 @ExtendWith(MockitoExtension.class)
 class CourseDocumentServiceImplTest {
@@ -120,6 +124,9 @@ class CourseDocumentServiceImplTest {
 
     @Mock
     private FileUploadRepository fileUploadRepository;
+
+    @Spy
+    private QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
 
     @InjectMocks
     private CourseDocumentServiceImpl courseDocumentService;

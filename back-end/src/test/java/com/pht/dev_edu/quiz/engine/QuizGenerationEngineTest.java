@@ -1,5 +1,25 @@
 package com.pht.dev_edu.quiz.engine;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.quiz.dto.engine.GeneratedQuestionContract;
 import com.pht.dev_edu.quiz.dto.enums.QuestionDifficulty;
@@ -8,18 +28,63 @@ import com.pht.dev_edu.quiz.dto.enums.ValidationFailureReason;
 import com.pht.dev_edu.quiz.dto.request.GenerateQuizFromDocumentRequest;
 import com.pht.dev_edu.quiz.entity.DocumentKnowledgeChunkEntity;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import java.math.BigDecimal;
-import java.util.*;
+/*
+ * <analysis>
+ * QuizGenerationEngine Components
+ * - QuizRequirementValidator.validateAndNormalize()
+ *   - paths:
+ *       [P1: total questions mismatch with distribution sum -> throw BadRequestException]
+ *       [P2: default normalization when distributions are empty -> fill valid type & difficulty distributions]
+ *   - planned tests:
+ *       [testRequirementValidationMismatchedDistribution -> P1]
+ *       [testRequirementValidationDefaultNormalization -> P2]
+ *
+ * - KnowledgeAvailabilityEvaluator.evaluateCapacity()
+ *   - paths: [P1: requested questions exceed chunk capacity -> status INSUFFICIENT_KNOWLEDGE]
+ *   - planned tests: [testKnowledgeAvailabilityCapacity -> P1]
+ *
+ * - QuestionValidationPipeline.validateQuestion()
+ *   - paths:
+ *       [P1: ambiguous correct options for SINGLE_CHOICE -> fail with AMBIGUOUS_ANSWER]
+ *       [P2: semantic duplicate detection against existing batch -> fail with DUPLICATE]
+ *       [P3: valid grounded question -> pass validation]
+ *   - planned tests:
+ *       [testQuestionValidationAmbiguousAnswer -> P1]
+ *       [testQuestionValidationDuplicateDetection -> P2]
+ *       [testQuestionValidationSuccess -> P3]
+ * </analysis>
+ */
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
+/**
+ * ============================================================================
+ * Unit Test for QuizGenerationEngine Core Components
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify requirement normalization, knowledge capacity evaluation, and question
+ * validation rules (duplicate detection, ambiguous options, grounding) in the AI Quiz generation engine.
+ *
+ * Test Scope
+ * ----------
+ * - QuizRequirementValidator
+ * - KnowledgeAvailabilityEvaluator
+ * - QuestionValidationPipeline
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Distribution sum mismatch validation
+ * ✓ Default type and difficulty distribution normalization
+ * ✓ Insufficient knowledge chunk capacity evaluation
+ * ✓ Single choice question validation rejecting multiple correct options
+ * ✓ Duplicate question rejection via semantic comparison
+ * ✓ Successful validation for well-formed grounded questions
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - QuizQuestionRepo
+ */
 class QuizGenerationEngineTest {
 
     private QuizRequirementValidator requirementValidator;

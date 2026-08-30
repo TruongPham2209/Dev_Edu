@@ -29,6 +29,50 @@ import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.util.SecurityContextUtils;
 import com.pht.dev_edu.tracking.service.SubmissionService;
 
+/*
+ * <analysis>
+ * SubmissionTrackingController
+ * - getSubmissionsTracking(UUID assignmentId, String studentUsername, int page)
+ *   - branches:
+ *       if authorities contain STUDENT -> force studentUsername to current authenticated user
+ *       if authorities do NOT contain STUDENT and studentUsername == null -> throw BadRequestException
+ *       if authorities do NOT contain STUDENT and studentUsername != null -> query for specified studentUsername
+ *   - paths:
+ *       [P1: STUDENT role -> studentUsername automatically set to caller username]
+ *       [P2: Non-STUDENT role with studentUsername -> query for target student]
+ *       [P3: Non-STUDENT role without studentUsername -> BadRequestException]
+ *   - planned tests:
+ *       [shouldGetSubmissionsTrackingForStudentRole -> P1]
+ *       [shouldGetSubmissionsTrackingForNonStudentRole -> P2]
+ *       [shouldThrowBadRequestWhenStudentUsernameNullForNonStudent -> P3]
+ * </analysis>
+ */
+
+/**
+ * ============================================================================
+ * Unit Test for SubmissionTrackingController
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify web layer authorization scoping, role-based student parameter overrides,
+ * and input validation in SubmissionTrackingController.
+ *
+ * Test Scope
+ * ----------
+ * - getSubmissionsTracking()
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ STUDENT role automatically binds query to authenticated user's own submissions
+ * ✓ LECTURER/ADMIN role queries specific student submissions when provided
+ * ✓ LECTURER/ADMIN role throws BadRequestException when studentUsername is missing
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - SubmissionService
+ * - SecurityContextUtils (static)
+ */
 @ExtendWith(MockitoExtension.class)
 class SubmissionTrackingControllerTest {
 

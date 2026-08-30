@@ -8,14 +8,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
@@ -23,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
@@ -47,11 +45,11 @@ import com.pht.dev_edu.quiz.dto.request.GenerateQuizFromDocumentRequest;
 import com.pht.dev_edu.quiz.dto.response.QuestionSourceTraceResponse;
 import com.pht.dev_edu.quiz.dto.response.QuizGenerationJobResponse;
 import com.pht.dev_edu.quiz.entity.CourseDocumentEntity;
-import com.pht.dev_edu.quiz.entity.DocumentKnowledgeChunkEntity;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import com.pht.dev_edu.quiz.entity.QuizGenerationJobEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionSourceTraceEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionTypeConfigEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 import com.pht.dev_edu.quiz.repo.DocumentKnowledgeChunkRepository;
 import com.pht.dev_edu.quiz.repo.QuizGenerationJobRepository;
@@ -152,7 +150,7 @@ import com.pht.dev_edu.quiz.service.QuizAccessService;
  * - DocumentProcessingService, CourseRelevanceEvaluator, KnowledgeAvailabilityEvaluator
  * - QuizRequirementValidator, QuizPlannerService, KnowledgeRetrieverService
  * - QuestionGeneratorService, QuestionValidationPipeline, DocumentPromotionService
- * - QuizAccessService, FileService, Repositories
+ * - QuizAccessService, FileService, Repositories, QuizMapper
  */
 @ExtendWith(MockitoExtension.class)
 class QuizGenerationPipelineImplTest {
@@ -201,6 +199,7 @@ class QuizGenerationPipelineImplTest {
     @Mock
     private Executor taskExecutor;
 
+    private final QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private QuizGenerationPipelineImpl pipeline;
@@ -235,6 +234,7 @@ class QuizGenerationPipelineImplTest {
                 chunkRepository,
                 courseDocumentRepository,
                 fileUploadRepository,
+                quizMapper,
                 taskExecutor,
                 objectMapper
         );

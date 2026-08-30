@@ -36,6 +36,56 @@ import com.pht.dev_edu.tracking.entity.SubmissionTrackingEntity;
 import com.pht.dev_edu.tracking.mapper.SubmissionTrackingMapper;
 import com.pht.dev_edu.tracking.repo.SubmissionRepository;
 
+/*
+ * <analysis>
+ * SubmissionServiceImpl
+ * - getSubmissionLogsByAssignmentIdForStudent(Set<String> authorities, String actor, String studentUsername, UUID assignmentId, int page)
+ *   - paths: [P1: validate view permissions, query repository by assignment & actor, map to CustomPaging response]
+ *   - planned tests: [shouldGetSubmissionLogsByAssignmentIdForStudent -> P1]
+ *
+ * - saveSubmissionLog(SubmissionEvent event)
+ *   - branches:
+ *       if action == SUBMITTED -> save tracking entity with submitted file details
+ *       if action == UNSUBMITTED -> save tracking entity, trigger async delete file event via Kafka after commit
+ *   - paths:
+ *       [P1: SUBMITTED action -> save entity]
+ *       [P2: UNSUBMITTED action -> save entity + schedule Kafka delete file event]
+ *   - planned tests:
+ *       [shouldSaveSubmissionLogSubmitted -> P1]
+ *       [shouldSaveSubmissionLogUnsubmitted -> P2]
+ * </analysis>
+ */
+
+/**
+ * ============================================================================
+ * Unit Test for SubmissionServiceImpl
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify assignment submission audit tracking, student access permissions,
+ * and asynchronous file cleanup dispatch on unsubmission events.
+ *
+ * Test Scope
+ * ----------
+ * - getSubmissionLogsByAssignmentIdForStudent()
+ * - saveSubmissionLog()
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Permission-validated submission log query and response pagination
+ * ✓ SUBMITTED event persistence with file object key details
+ * ✓ UNSUBMITTED event persistence and asynchronous S3 file delete dispatch
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - SubmissionRepository
+ * - AssignmentPermissionService
+ * - SubmissionTrackingMapper
+ * - Executor
+ * - TransactionUtils (static)
+ * - KafkaUtils (static)
+ */
 @ExtendWith(MockitoExtension.class)
 class SubmissionServiceImplTest {
 

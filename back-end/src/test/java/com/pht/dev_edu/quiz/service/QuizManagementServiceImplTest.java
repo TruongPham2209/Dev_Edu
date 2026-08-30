@@ -21,9 +21,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -175,7 +177,7 @@ import static org.mockito.Mockito.*;
  * - QuizQuestionTypeConfigRepo
  * - QuizQuestionRepo
  * - QuizAssignmentRepo
- * - QuizMapper
+ * - QuizMapper (Spy)
  * - QuizService
  * - QuizAuditService
  * - QuizAccessService
@@ -194,8 +196,8 @@ class QuizManagementServiceImplTest {
     QuizQuestionOptionRepo optionRepo;
     @Mock
     QuizAssignmentRepo assignmentRepo;
-    @Mock
-    QuizMapper quizMapper;
+    @Spy
+    private QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
     @Mock
     QuizService quizService;
     @Mock
@@ -233,11 +235,6 @@ class QuizManagementServiceImplTest {
         request.setCourseId(courseId);
         request.setTitle("Java Fundamentals");
         request.setDescription("Basic Java Quiz");
-
-        when(quizMapper.toResponse(any(QuizEntity.class))).thenAnswer(inv -> {
-            QuizEntity q = inv.getArgument(0);
-            return QuizResponse.builder().id(q.getId()).title(q.getTitle()).status(q.getStatus()).build();
-        });
 
         QuizResponse response = quizManagementService.createQuiz(request, username, authorities);
 
@@ -292,8 +289,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).status(QuizStatus.REJECTED).build();
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).title("New Title").status(QuizStatus.DRAFT).build());
 
         QuizResponse response = quizManagementService.updateQuiz(quizId, request, username, authorities);
 
@@ -378,12 +373,6 @@ class QuizManagementServiceImplTest {
         when(typeConfigRepo.findByQuizIdAndQuestionType(quizId, QuestionType.SINGLE_CHOICE))
                 .thenReturn(Optional.empty());
 
-        when(quizMapper.toResponse(any(QuizQuestionTypeConfigEntity.class))).thenAnswer(inv -> {
-            QuizQuestionTypeConfigEntity cfg = inv.getArgument(0);
-            return QuizTypeConfigResponse.builder().questionType(cfg.getQuestionType())
-                    .requiredCount(cfg.getRequiredCount()).build();
-        });
-
         QuizTypeConfigResponse response = quizManagementService.configureTypeConfig(quizId, request, username,
                 authorities);
 
@@ -451,8 +440,6 @@ class QuizManagementServiceImplTest {
         when(typeConfigRepo.findByQuizId(quizId)).thenReturn(List.of(config));
         when(questionRepo.countByQuizIdAndQuestionTypeAndDeletedAtIsNull(quizId, QuestionType.SINGLE_CHOICE))
                 .thenReturn(5);
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.PENDING).build());
 
         QuizResponse response = quizManagementService.submitQuizForApproval(quizId, username, authorities);
 
@@ -472,8 +459,6 @@ class QuizManagementServiceImplTest {
         request.setApproved(true);
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.APPROVED).build());
 
         QuizResponse response = quizManagementService.reviewQuiz(quizId, request, "adminUser");
 
@@ -510,8 +495,6 @@ class QuizManagementServiceImplTest {
         request.setRejectionReason("Not enough options");
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).status(QuizStatus.REJECTED).build());
 
         QuizResponse response = quizManagementService.reviewQuiz(quizId, request, "adminUser");
 
@@ -540,7 +523,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Quiz 1").build();
         when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(""), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Quiz 1").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, "", QuizStatus.APPROVED,
                 null, username, authorities);
@@ -557,7 +539,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Java Basics").build();
         when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Java Basics").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword,
                 QuizStatus.APPROVED,
@@ -577,8 +558,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Bài kiểm tra Java").build();
         when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).title("Bài kiểm tra Java").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword,
                 QuizStatus.APPROVED,
@@ -598,7 +577,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Test Quiz").build();
         when(quizRepo.findByCourseIdAndDeletedAtIsNull(eq(courseId), isNull(), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Test Quiz").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzesByCourse(courseId, keyword, null,
                 null, username, authorities);
@@ -614,7 +592,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Quiz 1").build();
         when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(""), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz)).thenReturn(QuizResponse.builder().id(quizId).title("Quiz 1").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, "", null);
 
@@ -629,8 +606,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Spring Boot Advanced").build();
         when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).title("Spring Boot Advanced").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, keyword, null);
 
@@ -647,8 +622,6 @@ class QuizManagementServiceImplTest {
         QuizEntity quiz = QuizEntity.builder().id(quizId).title("Lập trình Java Web").build();
         when(quizRepo.findByStatusAndDeletedAtIsNull(eq("APPROVED"), eq(keyword), any(), any(), eq(11)))
                 .thenReturn(List.of(quiz));
-        when(quizMapper.toResponse(quiz))
-                .thenReturn(QuizResponse.builder().id(quizId).title("Lập trình Java Web").build());
 
         CustomPaging<QuizResponse> result = quizManagementService.getQuizzes(QuizStatus.APPROVED, keyword, null);
 
@@ -694,10 +667,6 @@ class QuizManagementServiceImplTest {
                 .build();
 
         when(quizService.getQuizDetailResponseFromCache(quizId)).thenReturn(detailResponse);
-        when(quizMapper.toResponse(any(QuizEntity.class))).thenAnswer(inv -> {
-            QuizEntity q = inv.getArgument(0);
-            return QuizResponse.builder().id(q.getId()).title(q.getTitle()).status(q.getStatus()).build();
-        });
 
         QuizResponse response = quizManagementService.duplicateQuiz(quizId, username, authorities);
 

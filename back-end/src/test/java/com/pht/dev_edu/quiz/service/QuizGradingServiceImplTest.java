@@ -15,19 +15,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pht.dev_edu.common.dto.CustomPaging;
 import com.pht.dev_edu.common.dto.RoleEnum;
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
+import com.pht.dev_edu.notification.service.NotificationPersonalService;
 import com.pht.dev_edu.quiz.dto.enums.AttemptStatus;
 import com.pht.dev_edu.quiz.dto.enums.QuestionType;
 import com.pht.dev_edu.quiz.dto.enums.QuizAuditAction;
@@ -39,13 +43,11 @@ import com.pht.dev_edu.quiz.entity.QuizAttemptAnswerEntity;
 import com.pht.dev_edu.quiz.entity.QuizAttemptEntity;
 import com.pht.dev_edu.quiz.entity.QuizEssayGradingEntity;
 import com.pht.dev_edu.quiz.entity.QuizQuestionEntity;
+import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.QuizAttemptAnswerRepo;
 import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
 import com.pht.dev_edu.quiz.repo.QuizEssayGradingRepo;
 import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
-
-import java.util.concurrent.Executor;
-import com.pht.dev_edu.notification.service.NotificationPersonalService;
 
 /*
  * <analysis>
@@ -117,6 +119,7 @@ import com.pht.dev_edu.notification.service.NotificationPersonalService;
  * - QuizAccessService
  * - QuizAttemptService
  * - QuizAuditService
+ * - QuizMapper (Spy)
  * - Executor
  * - NotificationPersonalService
  */
@@ -141,6 +144,8 @@ class QuizGradingServiceImplTest {
     QuizAttemptService attemptService;
     @Mock
     QuizAuditService auditService;
+    @Spy
+    private QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
 
     @InjectMocks
     QuizGradingServiceImpl gradingService;

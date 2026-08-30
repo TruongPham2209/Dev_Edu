@@ -20,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -106,7 +107,7 @@ import com.pht.dev_edu.quiz.repo.QuizQuestionRepo;
  * - QuizAccessService
  * - QuizAuditService
  * - KafkaTemplate
- * - QuizMapper
+ * - QuizMapper (Spy)
  * - ObjectMapper (Spy)
  */
 @ExtendWith(MockitoExtension.class)
@@ -130,8 +131,8 @@ class QuizAttemptServiceImplTest {
     QuizAuditService auditService;
     @Mock
     KafkaTemplate<String, Object> kafkaTemplate;
-    @Mock
-    QuizMapper quizMapper;
+    @Spy
+    private QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
 
     @Spy
     ObjectMapper objectMapper = new ObjectMapper();

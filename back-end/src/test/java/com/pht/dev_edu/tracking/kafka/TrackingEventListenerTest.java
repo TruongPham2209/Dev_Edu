@@ -29,6 +29,82 @@ import com.pht.dev_edu.tracking.service.LogService;
 import com.pht.dev_edu.tracking.service.SubmissionService;
 import com.pht.dev_edu.user.dto.MailPayload;
 
+/*
+ * <analysis>
+ * TrackingEventListener
+ * - handleTrackingEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse TrackingEvent payload, save tracking log, acknowledge]
+ *   - planned tests: [shouldHandleTrackingEvent -> P1]
+ *
+ * - handleSubmissionEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse SubmissionEvent payload, save submission log, acknowledge]
+ *   - planned tests: [shouldHandleSubmissionEvent -> P1]
+ *
+ * - handleCronJobEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse CronJobEvent payload, save cron job log, acknowledge]
+ *   - planned tests: [shouldHandleCronJobEvent -> P1]
+ *
+ * - handleLogRequestEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse RequestLoggingEvent payload, save request log, acknowledge]
+ *   - planned tests: [shouldHandleLogRequestEvent -> P1]
+ *
+ * - handleSendMailEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse MailPayload payload, map and send email, acknowledge]
+ *   - planned tests: [shouldHandleSendMailEvent -> P1]
+ *
+ * - syncPostUpdateEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse PostDocument payload, upsert post in Elasticsearch, acknowledge]
+ *   - planned tests: [shouldSyncPostUpdateEvent -> P1]
+ *
+ * - syncPostInteractiveUpdateEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse PostInteractiveData payload, update interactive counts in Elasticsearch, acknowledge]
+ *   - planned tests: [shouldSyncPostInteractiveUpdateEvent -> P1]
+ *
+ * - syncPostDeleteEvent(String payload, Acknowledgment ack)
+ *   - paths: [P1: parse UUID payload, delete post from Elasticsearch, acknowledge]
+ *   - planned tests: [shouldSyncPostDeleteEvent -> P1]
+ * </analysis>
+ */
+
+/**
+ * ============================================================================
+ * Unit Test for TrackingEventListener
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify Kafka message deserialization, service invocation, and manual offset
+ * acknowledgment for all tracking, telemetry, mail, and Elasticsearch sync topics.
+ *
+ * Test Scope
+ * ----------
+ * - handleTrackingEvent()
+ * - handleSubmissionEvent()
+ * - handleCronJobEvent()
+ * - handleLogRequestEvent()
+ * - handleSendMailEvent()
+ * - syncPostUpdateEvent()
+ * - syncPostInteractiveUpdateEvent()
+ * - syncPostDeleteEvent()
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ User tracking and activity log consumption
+ * ✓ Assignment submission telemetry log consumption
+ * ✓ Cron job execution history consumption
+ * ✓ HTTP access request log consumption
+ * ✓ Transactional mail dispatching
+ * ✓ Elasticsearch forum post CRUD and interaction metric synchronization
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - LogService
+ * - SubmissionService
+ * - MailService
+ * - PostElasticService
+ * - ObjectMapper
+ * - Acknowledgment
+ */
 @ExtendWith(MockitoExtension.class)
 class TrackingEventListenerTest {
 

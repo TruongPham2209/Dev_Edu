@@ -22,9 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pht.dev_edu.common.dto.RoleEnum;
@@ -75,8 +77,7 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
  *       [P2: attempts exist]
  *       [P3: successful deletion]
  *   - planned tests:
- *       [deleteAssignment_WhenAlreadyDeleted_ThrowsDataNotFoundException -> P1]
- *       [deleteAssignment_WhenAttemptsExist_ThrowsBadRequestException -> P2]
+ *       [deleteAssignment_WhenAlreadyDeleted_ThrowsDataNotFoundException -> P1]\n *       [deleteAssignment_WhenAttemptsExist_ThrowsBadRequestException -> P2]
  *       [deleteAssignment_Success -> P3]
  *
  * - getAssignmentsByQuiz(UUID quizId, String username, Set<String> authorities)
@@ -136,7 +137,7 @@ import com.pht.dev_edu.quiz.repo.QuizAttemptRepo;
  * -------------------
  * - QuizAssignmentRepo
  * - QuizAttemptRepo
- * - QuizMapper
+ * - QuizMapper (Spy)
  * - QuizService
  * - QuizAccessService
  * - QuizAuditService
@@ -149,8 +150,8 @@ class QuizAssignmentServiceImplTest {
     QuizAssignmentRepo assignmentRepo;
     @Mock
     QuizAttemptRepo attemptRepo;
-    @Mock
-    QuizMapper quizMapper;
+    @Spy
+    private QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
     @Mock
     QuizService quizService;
     @Mock
@@ -254,15 +255,6 @@ class QuizAssignmentServiceImplTest {
         when(assignmentRepo.existsOverlappingAssignment(quizId, request.getStartTime(), request.getEndTime()))
                 .thenReturn(false);
 
-        when(quizMapper.toResponse(any(QuizAssignmentEntity.class))).thenAnswer(inv -> {
-            QuizAssignmentEntity entity = inv.getArgument(0);
-            return QuizAssignmentResponse.builder()
-                    .id(entity.getId())
-                    .assignmentName(entity.getAssignmentName())
-                    .status(entity.getStatus())
-                    .build();
-        });
-
         QuizAssignmentResponse response = assignmentService.createAssignment(request, username, authorities);
 
         assertNotNull(response);
@@ -287,15 +279,6 @@ class QuizAssignmentServiceImplTest {
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
         when(assignmentRepo.existsOverlappingAssignment(quizId, request.getStartTime(), request.getEndTime()))
                 .thenReturn(false);
-
-        when(quizMapper.toResponse(any(QuizAssignmentEntity.class))).thenAnswer(inv -> {
-            QuizAssignmentEntity entity = inv.getArgument(0);
-            return QuizAssignmentResponse.builder()
-                    .id(entity.getId())
-                    .assignmentName(entity.getAssignmentName())
-                    .status(entity.getStatus())
-                    .build();
-        });
 
         QuizAssignmentResponse response = assignmentService.createAssignment(request, username, authorities);
 
@@ -366,8 +349,6 @@ class QuizAssignmentServiceImplTest {
     void getAssignmentsByQuiz_ReturnsResponseList() {
         QuizAssignmentEntity entity = QuizAssignmentEntity.builder().id(assignmentId).quizId(quizId).build();
         when(assignmentRepo.findByQuizIdAndDeletedAtIsNull(quizId)).thenReturn(List.of(entity));
-        when(quizMapper.toResponse(entity))
-                .thenReturn(QuizAssignmentResponse.builder().id(assignmentId).build());
 
         List<QuizAssignmentResponse> result = assignmentService.getAssignmentsByQuiz(quizId, username,
                 authorities);
@@ -394,8 +375,6 @@ class QuizAssignmentServiceImplTest {
                 });
 
         when(assignmentRepo.findByIdAndDeletedAtIsNull(assignmentId)).thenReturn(Optional.of(assignment));
-        when(quizMapper.toResponse(assignment))
-                .thenReturn(QuizAssignmentResponse.builder().id(assignmentId).build());
 
         QuizAssignmentResponse response = assignmentService.getAssignmentById(assignmentId, username,
                 authorities);
@@ -411,8 +390,6 @@ class QuizAssignmentServiceImplTest {
         QuizAssignmentEntity assignment = QuizAssignmentEntity.builder().id(assignmentId).build();
         when(assignmentRepo.findByCourseIdAndDeletedAtIsNullAndStartTimeAndStatuses(any(), any(), any()))
                 .thenReturn(List.of(assignment));
-        when(quizMapper.toResponse(assignment))
-                .thenReturn(QuizAssignmentResponse.builder().id(assignmentId).build());
 
         List<QuizAssignmentResponse> responses = assignmentService.getAssignmentsByCourseId(courseId, username,
                 authorities);

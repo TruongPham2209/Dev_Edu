@@ -23,9 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pht.dev_edu.common.constant.RedisPrefixConstant;
@@ -41,6 +43,7 @@ import com.pht.dev_edu.notification.dto.NotificationCategory;
 import com.pht.dev_edu.notification.dto.NotificationResponse;
 import com.pht.dev_edu.notification.entity.NotificationGroupEntity;
 import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
+import com.pht.dev_edu.notification.mapper.NotificationMapper;
 import com.pht.dev_edu.notification.repo.NotificationGroupReadStatusRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupTargetRepository;
@@ -154,6 +157,7 @@ import com.pht.dev_edu.tracking.dto.TrackingEvent;
  * - NotificationGroupRepository
  * - NotificationGroupTargetRepository
  * - NotificationGroupReadStatusRepository
+ * - NotificationMapper (Spy)
  * - Executor
  * - RedisUtils (static)
  * - KafkaUtils (static)
@@ -168,6 +172,8 @@ class NotificationGroupServiceImplTest {
     private NotificationGroupTargetRepository notificationGroupTargetRepository;
     @Mock
     private NotificationGroupReadStatusRepository notificationGroupReadStatusRepository;
+    @Spy
+    private NotificationMapper notificationMapper = Mappers.getMapper(NotificationMapper.class);
     @Mock
     private Executor executor;
 
@@ -195,7 +201,7 @@ class NotificationGroupServiceImplTest {
         transactionUtilsMock.close();
     }
 
-    // ==================== createGroupNotification ====================
+    // ==================== createGroupNotification ====================\
 
     @Test
     @DisplayName("createGroupNotification - should throw BadRequestException when target roles is empty")
@@ -251,7 +257,7 @@ class NotificationGroupServiceImplTest {
         verify(notificationGroupTargetRepository).saveAll(any());
     }
 
-    // ==================== getAllGroupNotifications ====================
+    // ==================== getAllGroupNotifications ====================\
 
     @Test
     @DisplayName("getAllGroupNotifications - should return empty paging when no group notifications found")
@@ -301,7 +307,7 @@ class NotificationGroupServiceImplTest {
         assertThat(firstItem.getTargetRoles()).containsExactly(RoleEnum.STUDENT);
     }
 
-    // ==================== getUnreadGroupCountForUser ====================
+    // ==================== getUnreadGroupCountForUser ====================\
 
     @Test
     @DisplayName("getUnreadGroupCountForUser - should return zero when user roles is empty")
@@ -329,7 +335,7 @@ class NotificationGroupServiceImplTest {
         assertThat(count).isEqualTo(5L);
     }
 
-    // ==================== markGroupNotificationAsRead ====================
+    // ==================== markGroupNotificationAsRead ====================\
 
     @Test
     @DisplayName("markGroupNotificationAsRead - should throw DataNotFoundException when group notification does not exist")
@@ -361,7 +367,7 @@ class NotificationGroupServiceImplTest {
                 any(), eq(GROUP_ID), eq(USERNAME), any(LocalDateTime.class));
     }
 
-    // ==================== markAllAsReadBefore ====================
+    // ==================== markAllAsReadBefore ====================\
 
     @Test
     @DisplayName("markAllAsReadBefore - should return early when user roles is empty")
@@ -411,7 +417,7 @@ class NotificationGroupServiceImplTest {
                 any(LocalDateTime.class));
     }
 
-    // ==================== softDeleteGroupNotification ====================
+    // ==================== softDeleteGroupNotification ====================\
 
     @Test
     @DisplayName("softDeleteGroupNotification - should throw DataNotFoundException when soft deleting non-existent group notification")

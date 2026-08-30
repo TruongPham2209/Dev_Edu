@@ -20,9 +20,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.pht.dev_edu.common.dto.RoleEnum;
@@ -109,8 +111,7 @@ import com.pht.dev_edu.quiz.repo.QuizRepo;
  * ----------
  * - addQuestion(UUID, QuizQuestionRequest, String, Set<String>)
  * - updateQuestion(UUID, UUID, QuizQuestionRequest, String, Set<String>)
- * - deleteQuestion(UUID, UUID, String, Set<String>)
- *
+ * - deleteQuestion(UUID, UUID, String, Set<String>)\n *
  * Covered Scenarios
  * -----------------
  * ✓ Question type configuration count limit enforcement
@@ -128,7 +129,7 @@ import com.pht.dev_edu.quiz.repo.QuizRepo;
  * - QuizQuestionOptionRepo
  * - QuizAssignmentRepo
  * - QuizRepo
- * - QuizMapper
+ * - QuizMapper (Spy)
  * - QuizService
  * - RedisUtils (static mock)
  */
@@ -145,8 +146,8 @@ class QuizQuestionServiceImplTest {
     QuizAssignmentRepo assignmentRepo;
     @Mock
     QuizRepo quizRepo;
-    @Mock
-    QuizMapper quizMapper;
+    @Spy
+    private QuizMapper quizMapper = Mappers.getMapper(QuizMapper.class);
     @Mock
     QuizService quizService;
 
@@ -349,11 +350,6 @@ class QuizQuestionServiceImplTest {
                 .thenReturn(0);
         when(optionRepo.save(any(QuizQuestionOptionEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        when(quizMapper.toResponse(any(QuizQuestionEntity.class))).thenAnswer(inv -> {
-            QuizQuestionEntity q = inv.getArgument(0);
-            return QuizQuestionResponse.builder().id(q.getId()).content(q.getContent()).build();
-        });
-
         QuizQuestionResponse response = questionService.addQuestion(quizId, request, username, authorities);
 
         assertNotNull(response);
@@ -411,8 +407,6 @@ class QuizQuestionServiceImplTest {
 
         when(quizService.getQuizEntityOrThrow(quizId)).thenReturn(quiz);
         when(questionRepo.findByIdAndDeletedAtIsNull(questionId)).thenReturn(Optional.of(question));
-        when(quizMapper.toResponse(question))
-                .thenReturn(QuizQuestionResponse.builder().id(questionId).content("Updated essay prompt").build());
 
         QuizQuestionResponse response = questionService.updateQuestion(quizId, questionId, request, username,
                 authorities);

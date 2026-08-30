@@ -14,6 +14,7 @@ import com.pht.dev_edu.notification.dto.NotificationEvent;
 import com.pht.dev_edu.notification.dto.NotificationTargetType;
 import com.pht.dev_edu.notification.dto.PersonalNotificationEvent;
 import com.pht.dev_edu.notification.entity.NotificationPersonalEntity;
+import com.pht.dev_edu.notification.mapper.NotificationMapper;
 import com.pht.dev_edu.notification.repo.NotificationPersonalRepository;
 import com.pht.dev_edu.quiz.entity.QuizEntity;
 import com.pht.dev_edu.quiz.repo.QuizRepo;
@@ -22,9 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -162,6 +165,7 @@ import static org.mockito.Mockito.when;
  * - LectureRepository
  * - EnrollmentRepository
  * - AssignmentRepository
+ * - NotificationMapper (Spy)
  * - KafkaUtils (static)
  * - RedisUtils (static)
  */
@@ -180,6 +184,8 @@ class NotificationPersonalServiceImplTest {
     private EnrollmentRepository enrollmentRepository;
     @Mock
     private AssignmentRepository assignmentRepository;
+    @Spy
+    private NotificationMapper notificationMapper = Mappers.getMapper(NotificationMapper.class);
 
     @InjectMocks
     private NotificationPersonalServiceImpl notificationPersonalService;
@@ -216,7 +222,7 @@ class NotificationPersonalServiceImplTest {
         redisUtilsMock.close();
     }
 
-    // ==================== publishNotification ====================
+    // ==================== publishNotification ====================\
 
     @Test
     @DisplayName("publishNotification - should publish notification event to Kafka")
@@ -235,7 +241,7 @@ class NotificationPersonalServiceImplTest {
         kafkaUtilsMock.verify(() -> KafkaUtils.sendPersonalNotificationEvent(event));
     }
 
-    // ==================== saveFromEvent ====================
+    // ==================== saveFromEvent ====================\
 
     @Test
     @DisplayName("saveFromEvent - should save notifications from course new lecture event for enrolled users")
@@ -474,7 +480,7 @@ class NotificationPersonalServiceImplTest {
         verify(notificationPersonalRepository, never()).saveAll(any());
     }
 
-    // ==================== getUnreadCount ====================
+    // ==================== getUnreadCount ====================\
 
     @Test
     @DisplayName("getUnreadCount - should return unread personal notification count")
@@ -489,7 +495,7 @@ class NotificationPersonalServiceImplTest {
         assertThat(count).isEqualTo(3L);
     }
 
-    // ==================== markAsRead ====================
+    // ==================== markAsRead ====================\
 
     @Test
     @DisplayName("markAsRead - should throw DataNotFoundException when personal notification does not exist")
@@ -541,7 +547,7 @@ class NotificationPersonalServiceImplTest {
         verify(notificationPersonalRepository).markAsReadByIdAndUsername(eq(NOTIF_ID), eq(USERNAME), any(LocalDateTime.class));
     }
 
-    // ==================== markAllAsRead ====================
+    // ==================== markAllAsRead ====================\
 
     @Test
     @DisplayName("markAllAsRead - should mark all personal notifications as read for user")

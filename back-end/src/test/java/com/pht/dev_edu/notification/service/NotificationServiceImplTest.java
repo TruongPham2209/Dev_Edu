@@ -23,9 +23,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,6 +46,7 @@ import com.pht.dev_edu.notification.dto.UnreadCountResponse;
 import com.pht.dev_edu.notification.entity.NotificationGroupEntity;
 import com.pht.dev_edu.notification.entity.NotificationGroupTargetEntity;
 import com.pht.dev_edu.notification.entity.NotificationPersonalEntity;
+import com.pht.dev_edu.notification.mapper.NotificationMapper;
 import com.pht.dev_edu.notification.repo.NotificationGroupRepository;
 import com.pht.dev_edu.notification.repo.NotificationGroupTargetRepository;
 import com.pht.dev_edu.notification.repo.NotificationRepository;
@@ -175,6 +178,7 @@ import com.pht.dev_edu.user.service.UserService;
  * - UserService
  * - NotificationPersonalService
  * - NotificationGroupService
+ * - NotificationMapper (Spy)
  * - ObjectMapper
  * - RedisUtils (static)
  */
@@ -193,6 +197,8 @@ class NotificationServiceImplTest {
     private NotificationPersonalService notificationPersonalService;
     @Mock
     private NotificationGroupService notificationGroupService;
+    @Spy
+    private NotificationMapper notificationMapper = Mappers.getMapper(NotificationMapper.class);
     @Mock
     private ObjectMapper objectMapper;
 
@@ -221,7 +227,7 @@ class NotificationServiceImplTest {
         redisUtilsMock.close();
     }
 
-    // ==================== getUnifiedNotifications ====================
+    // ==================== getUnifiedNotifications ====================\
 
     @Test
     @DisplayName("getUnifiedNotifications - should fallback to STUDENT role when user roles is empty")
@@ -270,7 +276,7 @@ class NotificationServiceImplTest {
         verify(objectMapper).readValue(eq("{\"COURSE\":\"123\"}"), any(TypeReference.class));
     }
 
-    // ==================== getUnreadNotificationCounts ====================
+    // ==================== getUnreadNotificationCounts ====================\
 
     @Test
     @DisplayName("getUnreadNotificationCounts - should get unread notification counts successfully")
@@ -291,7 +297,7 @@ class NotificationServiceImplTest {
         assertThat(response.getTotalUnreadCount()).isEqualTo(10L);
     }
 
-    // ==================== markNotificationAsRead ====================
+    // ==================== markNotificationAsRead ====================\
 
     @Test
     @DisplayName("markNotificationAsRead - should mark group notification as read and invalidate cache")
@@ -320,7 +326,7 @@ class NotificationServiceImplTest {
                         + NOTIF_ID));
     }
 
-    // ==================== markAllNotificationsAsRead ====================
+    // ==================== markAllNotificationsAsRead ====================\
 
     @Test
     @DisplayName("markAllNotificationsAsRead - should only mark personal notifications when user roles is empty")
@@ -355,7 +361,7 @@ class NotificationServiceImplTest {
         verify(notificationGroupService).markAllAsReadBefore(USERNAME, List.of("ROLE_STUDENT"), createdAt);
     }
 
-    // ==================== getCachedNotification ====================
+    // ==================== getCachedNotification ====================\
 
     @Test
     @DisplayName("getCachedNotification - should throw BadRequestException when category is null")
@@ -449,7 +455,7 @@ class NotificationServiceImplTest {
         assertThat(cached.getCategory()).isEqualTo(NotificationCategory.PERSONAL);
     }
 
-    // ==================== deleteNotification ====================
+    // ==================== deleteNotification ====================\
 
     @Test
     @DisplayName("deleteNotification - should throw DataNotFoundException when deleting non-existent notification")

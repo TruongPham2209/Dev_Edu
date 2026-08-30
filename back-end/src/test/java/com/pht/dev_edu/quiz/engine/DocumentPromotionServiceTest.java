@@ -26,6 +26,52 @@ import com.pht.dev_edu.quiz.mapper.QuizMapper;
 import com.pht.dev_edu.quiz.repo.CourseDocumentRepository;
 import com.pht.dev_edu.quiz.repo.DocumentUploadAuditRepository;
 
+/*
+ * <analysis>
+ * DocumentPromotionServiceImpl
+ * - applySavePolicyAndAudit(QuizGenerationJobEntity job, GenerateQuizFromDocumentRequest request, CourseDocumentEntity tempDoc, boolean generationSuccess, String username, String role)
+ *   - branches:
+ *       if saveDocument == true and generationSuccess == true -> promote to GLOBAL library, status = READY, audit = PROMOTED
+ *       if saveDocument == true and generationSuccess == false -> keep TEMPORARY, status = FAILED, audit = CLEANED_UP_ON_FAILURE
+ *       if saveDocument == false -> keep TEMPORARY, status = READY, audit = RETAINED_TEMPORARY
+ *   - paths:
+ *       [P1: save requested and success -> promoted to GLOBAL]
+ *       [P2: save requested but failed -> retained TEMPORARY with FAILED status]
+ *       [P3: save not requested -> retained TEMPORARY with READY status]
+ *   - planned tests:
+ *       [testSavePolicy_PromoteToGlobalOnSuccess -> P1]
+ *       [testSavePolicy_NoPromotionOnQuizFailure -> P2]
+ *       [testSavePolicy_RetainTemporaryWhenSaveFalse -> P3]
+ * </analysis>
+ */
+
+/**
+ * ============================================================================
+ * Unit Test for DocumentPromotionServiceImpl
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify document promotion policies, visibility transitions (TEMPORARY -> GLOBAL),
+ * audit trail recording, and failure state management in the AI Quiz generation pipeline.
+ *
+ * Test Scope
+ * ----------
+ * - applySavePolicyAndAudit()
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Successful AI quiz generation with saveDocument=true promotes document to GLOBAL library
+ * ✓ Failed AI quiz generation keeps document as TEMPORARY with FAILED status and audit log
+ * ✓ Successful generation with saveDocument=false retains document as TEMPORARY
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - CourseDocumentRepository
+ * - DocumentUploadAuditRepository
+ * - FileUploadRepository
+ * - QuizMapper (real instance via Mappers.getMapper)
+ */
 class DocumentPromotionServiceTest {
 
         private CourseDocumentRepository mockDocRepo;

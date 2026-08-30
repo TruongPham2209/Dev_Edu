@@ -24,6 +24,51 @@ import com.pht.dev_edu.tracking.repo.LogCronJobRepository;
 import com.pht.dev_edu.tracking.repo.LogRepository;
 import com.pht.dev_edu.tracking.repo.LogRequestRepository;
 
+/*
+ * <analysis>
+ * LogServiceImpl
+ * - saveTrackingLog(TrackingEvent event)
+ *   - paths: [P1: map TrackingEvent to LogTrackingEntity and save to LogRepository]
+ *   - planned tests: [shouldSaveTrackingLog -> P1]
+ *
+ * - saveCronJobLog(CronJobEvent event)
+ *   - paths: [P1: map CronJobEvent to LogCronJobEntity and save to LogCronJobRepository]
+ *   - planned tests: [shouldSaveCronJobLog -> P1]
+ *
+ * - saveRequestLog(RequestLoggingEvent event)
+ *   - paths: [P1: map RequestLoggingEvent to LogRequestEntity and save to LogRequestRepository]
+ *   - planned tests: [shouldSaveRequestLog -> P1]
+ * </analysis>
+ */
+
+/**
+ * ============================================================================
+ * Unit Test for LogServiceImpl
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify entity mapping and persistence for user tracking events, cron job
+ * execution telemetry, and HTTP access logs.
+ *
+ * Test Scope
+ * ----------
+ * - saveTrackingLog()
+ * - saveCronJobLog()
+ * - saveRequestLog()
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Mapping and storing user action tracking logs
+ * ✓ Mapping and storing scheduled background job execution metrics
+ * ✓ Mapping and storing HTTP request and response payload logs
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - LogRepository
+ * - LogCronJobRepository
+ * - LogRequestRepository
+ */
 @ExtendWith(MockitoExtension.class)
 class LogServiceImplTest {
 

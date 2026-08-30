@@ -1,7 +1,16 @@
 package com.pht.dev_edu.metric.service;
 
-import com.pht.dev_edu.metric.dto.*;
-import com.pht.dev_edu.metric.repo.MetricRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,17 +18,91 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import com.pht.dev_edu.metric.dto.ActivityMetricDto;
+import com.pht.dev_edu.metric.dto.DashboardOverviewDto;
+import com.pht.dev_edu.metric.dto.GrowthDataDto;
+import com.pht.dev_edu.metric.dto.GrowthPeriod;
+import com.pht.dev_edu.metric.dto.RecentActivityDto;
+import com.pht.dev_edu.metric.dto.RevenueGrowthDto;
+import com.pht.dev_edu.metric.dto.TopContributorDto;
+import com.pht.dev_edu.metric.dto.TopCourseDto;
+import com.pht.dev_edu.metric.dto.TopStudentDto;
+import com.pht.dev_edu.metric.dto.TopUserDto;
+import com.pht.dev_edu.metric.repo.MetricRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+/*
+ * <analysis>
+ * MetricServiceImpl
+ * - getDashboardOverview()
+ *   - paths: [P1: aggregate total users, courses, lectures, assignments, enrollments, revenue, completion rate]
+ *   - planned tests: [shouldGetDashboardOverview -> P1]
+ *
+ * - getUserGrowth(GrowthPeriod period)
+ *   - paths:
+ *       [P1: DAILY period -> calculate daily date series and fill gaps]
+ *       [P2: WEEKLY period -> calculate weekly date series and fill gaps]
+ *       [P3: MONTHLY period -> calculate monthly date series and fill gaps]
+ *       [P4: YEARLY period -> calculate yearly date series and fill gaps]
+ *   - planned tests:
+ *       [shouldGetUserGrowthDaily -> P1]
+ *       [shouldGetUserGrowthWeekly -> P2]
+ *       [shouldGetUserGrowthMonthly -> P3]
+ *       [shouldGetUserGrowthYearly -> P4]
+ *
+ * - getCourseGrowth(GrowthPeriod period)
+ *   - paths: [P1: aggregate course creation growth over period]
+ *   - planned tests: [shouldGetCourseGrowth -> P1]
+ *
+ * - getRevenueGrowth(GrowthPeriod period)
+ *   - paths: [P1: aggregate financial revenue growth over period]
+ *   - planned tests: [shouldGetRevenueGrowth -> P1]
+ *
+ * - getActivityMetrics(int days)
+ *   - paths: [P1: aggregate DAU, request logs, recent activity list, action distribution]
+ *   - planned tests: [shouldGetActivityMetrics -> P1]
+ *
+ * - getTopCourses(int limit)
+ *   - paths: [P1: fetch top courses by enrollment/rating]
+ *   - planned tests: [shouldGetTopCourses -> P1]
+ *
+ * - getTopUsers(int limit)
+ *   - paths: [P1: aggregate top students and top forum contributors]
+ *   - planned tests: [shouldGetTopUsers -> P1]
+ * </analysis>
+ */
 
+/**
+ * ============================================================================
+ * Unit Test for MetricServiceImpl
+ * ============================================================================
+ *
+ * Purpose
+ * -------
+ * Verify analytics aggregation, date range series gap filling, growth calculations,
+ * and leaderboard generation in MetricServiceImpl.
+ *
+ * Test Scope
+ * ----------
+ * - getDashboardOverview()
+ * - getUserGrowth()
+ * - getCourseGrowth()
+ * - getRevenueGrowth()
+ * - getActivityMetrics()
+ * - getTopCourses()
+ * - getTopUsers()
+ *
+ * Covered Scenarios
+ * -----------------
+ * ✓ Dashboard overview metrics retrieval and calculations
+ * ✓ Growth period calculations (DAILY, WEEKLY, MONTHLY, YEARLY)
+ * ✓ Course and revenue time series generation
+ * ✓ System activity telemetry and action distribution aggregation
+ * ✓ Leaderboard lookups for courses and users
+ *
+ * Mocked Dependencies
+ * -------------------
+ * - MetricRepository
+ */
 @ExtendWith(MockitoExtension.class)
 class MetricServiceImplTest {
 
