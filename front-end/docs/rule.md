@@ -605,3 +605,97 @@ The test suite must pass without:
 - Unnecessary `@ts-expect-error`
 
 The objective is not merely to make tests compile, but to ensure that test data accurately represents the real application data contract.
+
+### 14.16. Component Isolation & Heavy Subsystem Mocking in Unit Tests
+
+1. **Page-Level Tests vs. Heavy Dialog Isolation**:
+   - Page-level integration tests (`src/app/**/__tests__/*.test.tsx`) verify the page layout, data fetching hooks, and interaction triggers (e.g. clicking a "Create Post" or "Add Course" button).
+   - Heavy modal dialogs containing rich-text editors (`RichTextEditor`, TipTap, ProseMirror), complex file uploader states, or nested forms (`PostFormDialog`, `CourseFormDialog`, `CategoryFormDialog`) **MUST** be mocked at the page level.
+   - Example mock pattern:
+     ```tsx
+     vi.mock("@/components/dialog/post-form", () => ({
+       PostFormDialog: ({ open, onClose }: { open?: boolean; onClose?: () => void }) =>
+         open ? (
+           <div data-testid="post-form-dialog" role="dialog">
+             <h2>Create Post</h2>
+             <button onClick={onClose}>Close</button>
+           </div>
+         ) : null,
+     }));
+     ```
+   - Rationale: Unmocked WYSIWYG editors pull in 15+ ProseMirror plugins and DOM listeners, causing significant memory/CPU overhead, slow test execution, and intermittent timeouts. Dialogs have their own dedicated unit tests under `src/components/dialog/__tests__/`.
+
+2. **Layout & Header Action Widgets**:
+   - When testing navigation headers (`StudentHeader`, `ManageHeader`), peripheral action widgets that pull large dependency subtrees (such as `ThemeToggle` importing `@/lib/theme` and Ant Design, or `UserMenu`, `NotificationCenter`) **MUST** be mocked in the header test.
+   - Example:
+     ```tsx
+     vi.mock("@/components/common/theme-toggle", () => ({
+       ThemeToggle: () => <div data-testid="theme-toggle">ThemeToggle</div>,
+     }));
+     ```
+   - Rationale: Prevents loading the entire Ant Design runtime (~3.7s import penalty) in isolated header tests.
+
+### 14.17. Timeout Policy & Anti-Patterns
+
+- **Strict Prohibition of Artificial Timeouts**:
+  - Never increase test timeouts (e.g., `it(..., 15000)`) or bump global Vitest timeouts simply to mask slow execution or hanging tests.
+- **Root Cause Investigation**:
+  - If a test times out, investigate:
+    1. Unmocked heavy dependencies (TipTap, AntD, complex dialogs).
+    2. Unresolved Promises or uncalled mock callbacks.
+    3. Unbounded timers (`setInterval`, debounced `setTimeout` without fake timers or cleanup).
+    4. Re-rendering loops caused by unstable prop references or state synchronization.
+    5. Missing cleanup across tests.
+
+### 14.18. Test Environment & Mock Cleanup
+
+- **Global Browser Mocking**:
+  - Global browser API mocks (such as `window.IntersectionObserver` and `window.ResizeObserver`) are configured once in `src/setupTests.ts`.
+  - Individual test suites must **NOT** redefine `window.IntersectionObserver` or `window.ResizeObserver` in `beforeEach` without cleanup, as this causes global prototype pollution and leaks between test workers.
+- **Mock State Cleanup**:
+  - Call `vi.clearAllMocks()` in `beforeEach()` of every test suite to ensure clean spy call history and prevent assertion cross-contamination.
+
+### 14.19. Mock Factory Domain Alignment
+
+- **Strict Model Matching**:
+  - Before using a mock factory (e.g. `createMockCourseItemDetail`), verify that its return type exactly matches the property expected by the component under test.
+  - Do **NOT** use a factory returning `CourseItemDetailResponse` for a field typed as `CourseItemResponse`. If a factory does not exist for a model, provide a typed object or create a dedicated factory adhering to the canonical interface in `src/lib/type/`.
+
+---
+
+## 15. ESLint Standards & Zero-Suppression Policy
+
+### 15.1. Strict Prohibition of Suppression Comments
+
+1. **No `eslint-disable`**:
+   - Do **NOT** use `// eslint-disable`, `// eslint-disable-next-line`, or `/* eslint-disable ... */` to bypass ESLint errors or warnings.
+   - Every lint violation must be addressed by fixing the source code or test architecture properly.
+
+### 15.2. Unused Variables & Parameters (`@typescript-eslint/no-unused-vars`)
+
+1. **Dead Code & Imports**:
+   - Remove unused imports, variables, functions, and mock helpers immediately.
+   - Do not prefix variables with `_` hoping to silence warnings; the project's ESLint configuration strictly checks all declared identifiers.
+2. **Interface Implementation & Callback Contracts**:
+   - When an implementation must accept parameters to conform to a standard signature (e.g. DOM callbacks in `src/setupTests.ts` like `constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit)`), use a `void` expression:
+     ```ts
+     constructor(
+       callback: IntersectionObserverCallback,
+       options?: IntersectionObserverInit,
+     ) {
+       void callback;
+       void options;
+     }
+     ```
+   - This explicitly acknowledges the parameters and satisfies `@typescript-eslint/no-unused-vars` in a clean, standard TypeScript manner without suppression comments.
+
+### 15.3. Explicit Typing & No `any` (`@typescript-eslint/no-explicit-any`)
+
+1. **Domain Paging Models**:
+   - Paging envelopes must always be generic and typed with the specific domain response interface:
+     - ✅ `CustomPaging<SubmissionResponse>`
+     - ✅ `CustomPaging<PostResponse>`
+     - ❌ `CustomPaging<any>`
+2. **Query & Mutation Mocks**:
+   - Explicitly type mock results: `createMockQueryResult<UserResponse>(mockUser)` or `createMockInfiniteQueryResult<PostResponse>(...)`.
+   - Never use `as any` to coerce mock return structures.

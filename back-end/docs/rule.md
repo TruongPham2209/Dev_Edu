@@ -1,6 +1,6 @@
 # Rules & Conventions — Dev-Edu Backend
 
-> This document summarizes the business rules, coding guidelines, validation constraints, and architectural conventions across the Dev-Edu Backend system.
+> This document summarizes the business rules, coding guidelines, validation constraints, object mapping standards, documentation practices, and architectural conventions across the Dev-Edu Backend system.
 
 ---
 
@@ -12,8 +12,10 @@
 - [4. Authorization & Security Rules](#4-authorization--security-rules)
 - [5. Naming Conventions](#5-naming-conventions)
 - [6. Code Organization Rules](#6-code-organization-rules)
-- [7. Common Recurring Patterns](#7-common-recurring-patterns)
-- [8. Guidelines for Developing New Features](#8-guidelines-for-developing-new-features)
+- [7. Object Mapping Standards (MapStruct)](#7-object-mapping-standards-mapstruct)
+- [8. Documentation & Commenting Rules](#8-documentation--commenting-rules)
+- [9. Common Recurring Patterns](#9-common-recurring-patterns)
+- [10. Guidelines for Developing New Features](#10-guidelines-for-developing-new-features)
 
 ---
 
@@ -85,7 +87,7 @@
 
 ### 1.9. Soft Delete & Automated Cleanup
 
-- Entities use soft-deletion by setting status to `DELETED`.
+- Entities use soft-deletion by setting status to `DELETED` .
 - Periodic cron jobs execute physical data purges:
   - File: `cleanExpiredAndFailedFilesJob`
   - Assignment: `cleanDeletedAssignmentsJob`
@@ -135,24 +137,91 @@
 
 - Maintain clear layer separation: `Controller` → `Service` → `Repository` → `Entity`.
 - Controllers must remain thin, delegating all domain logic and transactional processing to services.
-- Data mapping between entities and DTOs should strictly use MapStruct mappers (`*Mapper`).
+- Data mapping between entities, DTOs, events, and projections must strictly use MapStruct mappers (`*Mapper`).
 
 ---
 
-## 7. Common Recurring Patterns
+## 7. Object Mapping Standards (MapStruct)
+
+> **Mandatory Rule**: All object conversions between Entities, DTOs, Kafka Events, Projections, and Responses MUST use **MapStruct** mappers. Manual builder chaining or setter copying in service/controller layers for object transformation is strictly prohibited.
+
+### 7.1. General Mapping Rules
+1. **Mapper Interface Definition**:
+   - Annotate mapper interfaces with `@Mapper(componentModel = "spring")`.
+   - Place mapper interfaces in the module's `mapper` package (e.g. `com.pht.dev_edu.quiz.mapper.QuizMapper`).
+2. **Spring Injection**:
+   - Inject mappers via constructor injection (`@RequiredArgsConstructor`) in services, listeners, and handlers.
+3. **No Manual Builder Duplication**:
+   - Do NOT manually reconstruct entity instances from DTOs or DTOs from entities inside business methods using `.builder()`.
+   - Instead, declare declarative mapping methods in the respective mapper interface:
+     - `toEntity(CreateRequest request)`
+     - `toResponse(Entity entity)`
+     - `toEvent(Entity entity)`
+     - `updateEntityFromDto(UpdateRequest dto, @MappingTarget Entity entity)`
+4. **Projections & Custom Conversions**:
+   - For database projections (e.g., `UnifiedNotificationProjection`, `QuizEssaySubmissionProjection`), define mapper methods that unpack projection fields or accept auxiliary parameters (e.g. `ObjectMapper`, `DateTimeFormatter`).
+5. **Collection Mappings**:
+   - Declare collection mapping signatures (e.g. `List<ResponseDto> toListResponse(List<Entity> list)`) in the mapper interface to leverage MapStruct's auto-generated null-safe iteration.
+
+---
+
+## 8. Documentation & Commenting Rules
+
+> **Mandatory Rule**: All source files, core beans, asynchronous listeners, business methods, and unit test suites must include comprehensive JavaDoc documentation comments.
+
+### 8.1. Kafka Listeners Documentation
+All `@KafkaListener` classes and consumer methods must document:
+- **Class JavaDoc**: Purpose of the listener, domain events handled, fault-tolerance mechanisms (retries, DLQ).
+- **Method JavaDoc**:
+  - Target Kafka topic (reference `KafkaTopicConstant.*`).
+  - Retry policy configuration (`attempts`, `backoff`, `dltTopicSuffix`).
+  - Expected JSON payload structure / DTO type.
+  - Exception and transactional behavior.
+
+### 8.2. Startup & Runner Beans Documentation
+All `@Bean` methods returning `CommandLineRunner` or `ApplicationRunner` (e.g., in `InitDataConfig`) must document:
+- **Execution Order (`@Order`)**: Explicit sequence and dependency on prior bootstrap steps.
+- **Transactional Boundary (`@Transactional`)**: Database write scope.
+- **Idempotency & Seed Logic**: Verification conditions (e.g. `count() == 0`) and default initialized data records.
+
+### 8.3. Service & Controller Methods Documentation
+- **Interface & Implementation Methods**: State the business intent, input parameter expectations, return values, and possible runtime/business exceptions (`@throws`).
+- **Complex Domain Logic**: Add concise inline comments explaining algorithmic steps (e.g. dual-write autosaving, cursor-based pagination encoding, scoring formulas).
+
+### 8.4. Test Classes & Test Cases Documentation (Mô tả Test)
+> **Mandatory Rule**: 100% of test classes (`*Test.java`) must contain a standardized test description and branch analysis block.
+1. **Analysis & Branch Coverage Block (`/* <analysis> ... </analysis> */`)**:
+   - Document the target class under test.
+   - List each public/package-private method under test.
+   - Detail branch conditions, execution paths (P1, P2, ...), and planned test case names mapped to their respective paths.
+2. **Javadoc Test Header (`/** ... */`)**:
+   - **Purpose**: High-level objective of the test suite.
+   - **Test Scope**: List of target methods and workflows evaluated.
+   - **Covered Scenarios**: Clear checklist of functional cases, edge cases, error cases, and security boundary tests.
+   - **Mocked Dependencies**: Explicit list of repositories, mappers, services, and static mocks.
+   - **Not Covered & Notes**: Limitations (e.g., pure unit test, no real DB connection).
+3. **Test Method Documentation**:
+   - Use `@DisplayName("<methodName> - <condition> - should <expectedBehavior>")`.
+   - Organize test body into `// Arrange`, `// Act`, and `// Assert` sections.
+
+---
+
+## 9. Common Recurring Patterns
 
 - **Pre-signed File Uploads**: Request URL → Direct S3 Upload → Callback Confirmation.
 - **Unified Pagination**: Request parameters (`page`, `size`, `sort`) processed by `PagingUtils` returning standardized paginated responses.
 - **Asynchronous Processing**: Non-blocking workloads dispatched through Kafka topics or Java 21 Virtual Threads (`taskExecutor`).
+- **MapStruct Data Transfer**: Clean, compiled, type-safe entity ↔ DTO translations across all module boundaries.
 
 ---
 
-## 8. Guidelines for Developing New Features
+## 10. Guidelines for Developing New Features
 
 1. Create database migration script under `src/main/resources/db/migration/V*__description.sql`.
 2. Define domain Entity models with proper JPA annotations and `@PrePersist` UUIDv7 hooks.
 3. Build repository interface extending `JpaRepository`.
 4. Define DTO models with validation group markers (`CreateValidation`, `UpdateValidation`).
-5. Create MapStruct interface mapper for Entity ↔ DTO conversion.
-6. Implement Service interface and ServiceImpl class with `@Transactional` management.
+5. Create MapStruct interface mapper (`*Mapper`) for Entity ↔ DTO ↔ Event conversions.
+6. Implement Service interface and ServiceImpl class with `@Transactional` management and full JavaDoc comments.
 7. Expose REST endpoints in Controller class returning standardized `ApiResponse`.
+8. Write comprehensive unit tests following the AAA pattern with MapStruct spy mappers and complete `<analysis>` / JavaDoc test descriptions.
