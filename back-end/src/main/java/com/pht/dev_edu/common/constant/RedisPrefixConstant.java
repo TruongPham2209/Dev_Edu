@@ -24,4 +24,5 @@ public class RedisPrefixConstant {
     public static final String QUIZ_ASSIGNMENT_PREFIX = "dev_edu:quizzes:assignments:"; // Prefix for quiz assignment data
 
     public static final String NOTIFICATION_PREFIX = "dev_edu:notifications:";
+    public static final String FILE_MULTIPART_SESSION_PREFIX = "dev_edu:file:multipart:session:";
 }

@@ -16,7 +16,7 @@ import {
   alpha,
 } from "@mui/material";
 import { Calendar, Play, Video } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface LectureHeroInfoProps {
   lecture: LectureResponse;
@@ -25,6 +25,8 @@ interface LectureHeroInfoProps {
 export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
   const { handleError } = useApiWithToast();
 
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isRefreshingRef = useRef(false);
   const [loadingVideo, setLoadingVideo] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
@@ -43,6 +45,30 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
       handleError(err, "Could not load video");
     } finally {
       setLoadingVideo(false);
+    }
+  };
+
+  const handleVideoError = async () => {
+    if (!lecture.videoObjectKey || isRefreshingRef.current) return;
+    isRefreshingRef.current = true;
+    const resumeTime = videoRef.current?.currentTime ?? 0;
+
+    try {
+      const res = await getDownloadUrl(lecture.videoObjectKey);
+      const freshUrl = res.downloadUrl || res.publicUrl;
+      if (freshUrl) {
+        setVideoUrl(freshUrl);
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.currentTime = resumeTime;
+            videoRef.current.play().catch(() => {});
+          }
+        }, 150);
+      }
+    } catch (err) {
+      handleError(err, "Video link expired. Please reload.");
+    } finally {
+      isRefreshingRef.current = false;
     }
   };
 
@@ -71,8 +97,12 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
                 overflow: "hidden",
                 aspectRatio: "16/9",
                 boxShadow: "0 12px 24px -10px rgba(15, 23, 42, 0.25)",
-                border: "1px solid rgba(15, 23, 42, 0.08)",
-                bgcolor: "#0f172a", // Dark background for video container
+                border: "1px solid",
+                borderColor: "divider",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "background.default"
+                    : "common.black",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -82,34 +112,39 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
                 // No Video Attached
                 <Stack
                   spacing={1.5}
-                  sx={{ alignItems: "center", color: "slate.400" }}
+                  sx={{ alignItems: "center", color: "text.secondary" }}
                 >
                   <Box
                     sx={{
                       width: 48,
                       height: 48,
                       borderRadius: "50%",
-                      bgcolor: "rgba(255,255,255,0.06)",
+                      bgcolor: "action.hover",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      color: "text.secondary",
                     }}
                   >
-                    <Video size={24} style={{ color: "#94a3b8" }} />
+                    <Video size={24} />
                   </Box>
                   <Typography
                     variant="body2"
-                    sx={{ color: "#94a3b8", fontWeight: 600 }}
+                    sx={{ color: "text.secondary", fontWeight: 600 }}
                   >
                     No video uploaded
                   </Typography>
                 </Stack>
               ) : videoUrl ? (
-                // Native HTML5 Video Player
+                // Native HTML5 Video Player with Chunked HTTP Range Streaming
                 <video
+                  ref={videoRef}
                   src={videoUrl}
                   controls
                   autoPlay
+                  preload="metadata"
+                  playsInline
+                  onError={handleVideoError}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -182,7 +217,8 @@ export function LectureHeroInfo({ lecture }: LectureHeroInfoProps) {
                     sx={{
                       position: "absolute",
                       inset: 0,
-                      bg: "linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.8) 100%)",
+                      background:
+                        "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.75) 100%)",
                       zIndex: 1,
                     }}
                   />

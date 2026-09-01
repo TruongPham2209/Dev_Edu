@@ -2,7 +2,7 @@
 
 import { useDownloadUrlQuery } from "@/lib/api/files";
 import { useUpdateLectureProgressMutation } from "@/lib/api/lectures";
-import { alpha, Box, CircularProgress, Paper, Typography } from "@mui/material";
+import { alpha, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 
@@ -21,53 +21,75 @@ export function LectureVideoPlayer({
 }: LectureVideoPlayerProps) {
   const queryClient = useQueryClient();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCompleted, setIsCompleted] = useState(isInitiallyCompleted);
   const lastTrackedTime = useRef<number>(0);
   const lastCurrentTime = useRef<number>(0);
 
-  const { data: response, isLoading: loadingUrl } = useDownloadUrlQuery(
-    videoObjectKey,
-    {
-      enabled: !!videoObjectKey,
-    },
-  );
+  const {
+    data: response,
+    isLoading: loadingUrl,
+    error: queryError,
+    refetch: refetchDownloadUrl,
+  } = useDownloadUrlQuery(videoObjectKey, {
+    enabled: !!videoObjectKey,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   const { mutateAsync: updateProgress } = useUpdateLectureProgressMutation();
 
-  // Fetch video URL and load as blob to avoid 403 on long videos
+  const streamUrl = response?.downloadUrl || response?.publicUrl || null;
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const activeVideoUrl = videoUrl || streamUrl;
+  const isRefreshingRef = useRef(false);
+
+  // When streamUrl is obtained or updated
   useEffect(() => {
-    const fetchBlob = async () => {
-      if (!response?.downloadUrl) return;
-      setLoading(true);
+    if (streamUrl) {
+      setVideoUrl(streamUrl);
       setError(null);
-      try {
-        const videoRes = await fetch(response.downloadUrl);
-        if (!videoRes.ok) throw new Error("Failed to download video content");
-        const blob = await videoRes.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        setVideoUrl(objectUrl);
-      } catch (err) {
-        console.error("Failed to fetch video URL", err);
-        setError("Cannot fetch video url");
-      } finally {
-        setLoading(false);
-      }
-    };
+    } else if (queryError) {
+      setError("Cannot fetch video URL. Please try again.");
+    }
+  }, [streamUrl, queryError]);
 
-    fetchBlob();
-  }, [response]);
+  // Handle stream error (e.g. expired presigned URL or network interruption during seek)
+  const handleVideoError = async () => {
+    if (isRefreshingRef.current) return;
+    isRefreshingRef.current = true;
 
-  // Cleanup blob URL on unmount or URL change
-  useEffect(() => {
-    return () => {
-      if (videoUrl && videoUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(videoUrl);
+    // Preserve playback timestamp
+    const resumeTime =
+      videoRef.current?.currentTime ?? lastCurrentTime.current ?? 0;
+    lastCurrentTime.current = resumeTime;
+
+    try {
+      const refreshed = await refetchDownloadUrl();
+      const freshUrl =
+        refreshed.data?.downloadUrl || refreshed.data?.publicUrl;
+
+      if (freshUrl) {
+        setVideoUrl(freshUrl);
+        setError(null);
+
+        // Restore playback position on next tick
+        setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.currentTime = resumeTime;
+            videoRef.current.play().catch(() => {
+              // Autoplay may be restricted by browser policy
+            });
+          }
+        }, 150);
+      } else {
+        setError("Video link expired. Please refresh the page.");
       }
-    };
-  }, [videoUrl]);
+    } catch {
+      setError("Failed to refresh video stream.");
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  };
 
   // Handle Visibility Change (Pause when tab is inactive)
   useEffect(() => {
@@ -146,7 +168,7 @@ export function LectureVideoPlayer({
     return () => clearInterval(interval);
   }, [lectureId, isCompleted, onCompleted, updateProgress, queryClient]);
 
-  const isLoadingVideo = loadingUrl || loading;
+  const isLoadingVideo = loadingUrl;
 
   if (isLoadingVideo) {
     return (
@@ -187,15 +209,33 @@ export function LectureVideoPlayer({
         sx={{
           aspectRatio: "16/9",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          gap: 1.5,
           bgcolor: "grey.100",
           borderRadius: 3,
           border: "1px dashed",
           borderColor: "divider",
+          p: 3,
+          textAlign: "center",
         }}
       >
-        <Typography color="error">{error}</Typography>
+        <Typography color="error" variant="body2" sx={{ fontWeight: 600 }}>
+          {error}
+        </Typography>
+        <Button
+          size="small"
+          variant="outlined"
+          color="primary"
+          onClick={() => {
+            setError(null);
+            refetchDownloadUrl();
+          }}
+          sx={{ textTransform: "none" }}
+        >
+          Reload video
+        </Button>
       </Paper>
     );
   }
@@ -215,8 +255,11 @@ export function LectureVideoPlayer({
     >
       <video
         ref={videoRef}
-        src={videoUrl || undefined}
+        src={activeVideoUrl || undefined}
         controls
+        preload="metadata"
+        playsInline
+        onError={handleVideoError}
         style={{ width: "100%", height: "100%", display: "block" }}
         onEnded={() => {
           // Final progress update if not completed

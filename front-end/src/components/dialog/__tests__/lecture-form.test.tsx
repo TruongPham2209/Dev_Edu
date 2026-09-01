@@ -67,6 +67,10 @@ vi.mock("@/lib/use-api-with-toast", () => ({
   useApiWithToast: vi.fn(),
 }));
 
+vi.mock("@/lib/util/chunked-upload", () => ({
+  uploadFileWithStrategy: vi.fn(),
+}));
+
 vi.mock("@/components/common/form/rich-text-editor", () => ({
   RichTextEditor: ({
     value,
@@ -208,4 +212,66 @@ describe("LectureFormDialog", () => {
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
   });
+
+  it("shouldUploadVideoAndCreateLectureWhenInputsAreValid", async () => {
+    const handleSaved = vi.fn();
+    const handleClose = vi.fn();
+    mockCreateMutate.mockResolvedValue({ id: "lec-new-1" });
+
+    const chunkedUpload = await import("@/lib/util/chunked-upload");
+    vi.mocked(chunkedUpload.uploadFileWithStrategy).mockResolvedValue({
+      originalFileName: "intro.mp4",
+      contentType: "video/mp4",
+      objectKey: "videos/intro-uploaded.mp4",
+    });
+
+    render(
+      <LectureFormDialog
+        open={true}
+        onClose={handleClose}
+        onSaved={handleSaved}
+        courseId="c-10"
+      />,
+    );
+
+    // Fill form
+    const titleInput = screen.getByPlaceholderText(/Setting up the environment/i);
+    fireEvent.change(titleInput, { target: { value: "Getting Started" } });
+
+    const summaryInput = screen.getByPlaceholderText(/programming tools/i);
+    fireEvent.change(summaryInput, { target: { value: "Learn fundamentals." } });
+
+    const contentEditor = screen.getByTestId("lecture-content-editor");
+    fireEvent.change(contentEditor, { target: { value: "<p>Detailed guide.</p>" } });
+
+    // Select video file
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    expect(fileInput).not.toBeNull();
+    const testVideo = new File(["dummy video data"], "intro.mp4", { type: "video/mp4" });
+    fireEvent.change(fileInput, { target: { files: [testVideo] } });
+
+    // Submit form
+    const submitBtn = screen.getByRole("button", { name: "Create lecture" });
+    expect(submitBtn).not.toBeDisabled();
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(chunkedUpload.uploadFileWithStrategy).toHaveBeenCalledWith(
+        testVideo,
+        expect.objectContaining({ isPublic: false }),
+      );
+      expect(mockCreateMutate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          courseId: "c-10",
+          title: "Getting Started",
+          summary: "Learn fundamentals.",
+          videoObjectKey: "videos/intro-uploaded.mp4",
+        }),
+      );
+      expect(mockShowSuccess).toHaveBeenCalledWith("Lecture created successfully!");
+      expect(handleSaved).toHaveBeenCalledTimes(1);
+      expect(handleClose).toHaveBeenCalledTimes(1);
+    });
+  });
 });
+

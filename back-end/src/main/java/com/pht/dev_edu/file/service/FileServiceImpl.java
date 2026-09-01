@@ -1,17 +1,5 @@
 package com.pht.dev_edu.file.service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-
 import com.pht.dev_edu.common.exception.data.BadRequestException;
 import com.pht.dev_edu.common.exception.data.DataNotFoundException;
 import com.pht.dev_edu.common.exception.server.ServerInternalException;
@@ -22,21 +10,26 @@ import com.pht.dev_edu.file.dto.FileUploadResponse;
 import com.pht.dev_edu.file.dto.UploadStatus;
 import com.pht.dev_edu.file.entity.FileUploadEntity;
 import com.pht.dev_edu.file.repo.FileUploadRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -59,7 +52,7 @@ public class FileServiceImpl implements FileService {
     @Value("${cloudflare.r2.public-url}")
     String publicUrl;
 
-    private static final Duration PRIVATE_FILE_PRESIGNED_DURATION = Duration.ofMinutes(15);
+    private static final Duration PRIVATE_FILE_PRESIGNED_DURATION = Duration.ofMinutes(90);
     private static final Duration PUBLIC_FILE_PRESIGNED_DURATION = Duration.ofHours(30);
 
     private static final Long MAX_EXPIRED_FILE_DURATION_MINUTES = 15L; // 15 phút, nếu quá thời gian này mà file vẫn

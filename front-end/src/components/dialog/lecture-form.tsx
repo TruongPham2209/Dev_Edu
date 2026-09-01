@@ -7,7 +7,6 @@ import { RichTextEditor } from "@/components/common/form/rich-text-editor";
 import {
   useConfirmImageUploadMutation,
   useDownloadUrlQuery,
-  usePreSignedUploadUrlMutation,
 } from "@/lib/api/files";
 import {
   useCreateLectureMutation,
@@ -15,9 +14,10 @@ import {
 } from "@/lib/api/lectures";
 import type { LectureRequest, LectureResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { alpha, Box, Typography } from "@mui/material";
+import { uploadFileWithStrategy } from "@/lib/util/chunked-upload";
+import { alpha, Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import { AlignLeft, Lock, Type } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface LectureFormDialogProps {
   open: boolean;
@@ -45,6 +45,9 @@ export function LectureFormDialog({
   });
 
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStage, setUploadStage] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Track exact S3/R2 object keys mapped to their editor URLs during the current session
   const [uploadedImages, setUploadedImages] = useState<
@@ -75,7 +78,6 @@ export function LectureFormDialog({
   const isFormValid = !isTitleInvalid && !isSummaryInvalid && !isContentInvalid;
 
   // React Query Hooks
-  const { mutateAsync: preSignMutate } = usePreSignedUploadUrlMutation();
   const { mutateAsync: createLectureMutate } = useCreateLectureMutation();
   const { mutateAsync: updateLectureMutate } = useUpdateLectureMutation();
   const { mutateAsync: confirmImageUploadMutate } =
@@ -92,6 +94,8 @@ export function LectureFormDialog({
       setTouched({ title: false, summary: false, content: false });
       setVideoFile(null);
       setUploadedImages([]);
+      setUploadProgress(0);
+      setUploadStage(null);
 
       if (initialData) {
         setForm({
@@ -107,6 +111,16 @@ export function LectureFormDialog({
       }
     }
   }, [open, initialData, courseId]);
+
+  const handleCancelUpload = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
+    setUploadStage(null);
+    setUploadProgress(0);
+  };
 
   const handleSave = async () => {
     // Mark all as touched on submit
@@ -162,36 +176,28 @@ export function LectureFormDialog({
 
       // 2. Upload video ONLY in CREATE mode or if not locked
       if (videoFile && !isVideoLocked) {
-        const preSignRes = await preSignMutate({
-          fileName: videoFile.name,
-          contentType: videoFile.type,
-          fileSize: videoFile.size,
+        setUploadStage("Preparing video upload...");
+        setUploadProgress(0);
+        const abortController = new AbortController();
+        abortControllerRef.current = abortController;
+
+        const uploadRes = await uploadFileWithStrategy(videoFile, {
           isPublic: false,
-        });
-
-        if (!preSignRes.uploadUrl || !preSignRes.objectKey) {
-          throw new Error("Failed to get upload URL");
-        }
-
-        // Custom upload with progress tracking
-        await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.open("PUT", preSignRes.uploadUrl!, true);
-          xhr.setRequestHeader("Content-Type", videoFile.type);
-
-          xhr.onload = () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(true);
+          signal: abortController.signal,
+          onProgress: (percent, currentPart, totalParts) => {
+            setUploadProgress(percent);
+            if (totalParts > 1) {
+              setUploadStage(
+                `Uploading video: part ${currentPart}/${totalParts} (${percent}%)`,
+              );
             } else {
-              reject(new Error("Upload failed"));
+              setUploadStage(`Uploading video (${percent}%)`);
             }
-          };
-
-          xhr.onerror = () => reject(new Error("Network error during upload"));
-          xhr.send(videoFile);
+          },
         });
 
-        payload.videoObjectKey = preSignRes.objectKey;
+        payload.videoObjectKey = uploadRes.objectKey;
+        setUploadStage(null);
       }
 
       // 3. Save lecture
@@ -206,9 +212,15 @@ export function LectureFormDialog({
       await onSaved();
       onClose();
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       handleError(err, "Failed to save lecture");
     } finally {
       setLoading(false);
+      setUploadStage(null);
+      setUploadProgress(0);
+      abortControllerRef.current = null;
     }
   };
 
@@ -328,6 +340,46 @@ export function LectureFormDialog({
                 : "Maximum file size: 200MB. Supported formats: MP4, AVI, MKV, WEBM, MOV"
             }
           />
+
+          {loading && uploadStage && (
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                bgcolor: "action.hover",
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Stack
+                sx={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 1,
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  {uploadStage}
+                </Typography>
+                <Button
+                  size="small"
+                  color="error"
+                  variant="outlined"
+                  onClick={handleCancelUpload}
+                  sx={{ textTransform: "none", py: 0.25, px: 1.5 }}
+                >
+                  Cancel Upload
+                </Button>
+              </Stack>
+              <LinearProgress
+                variant="determinate"
+                value={uploadProgress}
+                sx={{ height: 8, borderRadius: 4 }}
+              />
+            </Box>
+          )}
 
           {isVideoLocked && (
             <Box

@@ -3,13 +3,13 @@
 import { FormDialog } from "@/components/common/form/form-dialog";
 import { FormInput } from "@/components/common/form/form-input";
 import { FileUpload } from "@/components/common/form/file-upload";
-import { usePreSignedUploadUrlMutation } from "@/lib/api/files";
 import { useCreateMaterialMutation } from "@/lib/api/lectures";
 import type { MaterialResponse } from "@/lib/type/lectures";
 import { useApiWithToast } from "@/lib/use-api-with-toast";
-import { Box, LinearProgress, Stack, Typography } from "@mui/material";
+import { uploadFileWithStrategy } from "@/lib/util/chunked-upload";
+import { Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import { Type, UploadCloud } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface MaterialFormDialogProps {
   open: boolean;
@@ -32,8 +32,8 @@ export function MaterialFormDialog({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [titleError, setTitleError] = useState("");
   const [fileError, setFileError] = useState("");
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const { mutateAsync: preSignMutate } = usePreSignedUploadUrlMutation();
   const { mutateAsync: createMaterialMutate } = useCreateMaterialMutation();
 
   useEffect(() => {
@@ -47,8 +47,19 @@ export function MaterialFormDialog({
     }
   }, [open]);
 
+  const handleCancelUpload = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setUploading(false);
+    setUploadProgress(0);
+  };
+
   const handleCloseDialog = () => {
-    if (uploading) return;
+    if (uploading) {
+      handleCancelUpload();
+    }
     onClose();
   };
 
@@ -75,56 +86,29 @@ export function MaterialFormDialog({
     setUploadProgress(5);
 
     try {
-      // 1. Get Presigned S3 Upload URL
-      const preSignRes = await preSignMutate({
-        fileName: file!.name,
-        contentType: file!.type || "application/octet-stream",
-        fileSize: file!.size,
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
+      // 1. Upload file using Unified Single / Chunked Upload strategy
+      const uploadRes = await uploadFileWithStrategy(file!, {
         isPublic: false,
+        signal: abortController.signal,
+        onProgress: (percent) => {
+          setUploadProgress(percent);
+        },
       });
 
-      if (!preSignRes.uploadUrl || !preSignRes.objectKey) {
-        throw new Error("Could not generate upload URL");
+      if (!uploadRes.objectKey) {
+        throw new Error("Could not obtain file object key");
       }
 
-      setUploadProgress(20);
+      setUploadProgress(95);
 
-      // 2. Upload file to S3 with Progress Tracking
-      await new Promise<void>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", preSignRes.uploadUrl!, true);
-        xhr.setRequestHeader(
-          "Content-Type",
-          file!.type || "application/octet-stream",
-        );
-
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            // Scale progress between 20% and 85% during S3 transfer
-            const percent = Math.round((e.loaded / e.total) * 65) + 20;
-            setUploadProgress(percent);
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Failed to upload: ${xhr.statusText}`));
-          }
-        };
-
-        xhr.onerror = () => reject(new Error("Error connecting during upload"));
-        xhr.send(file);
-      });
-
-      setUploadProgress(90);
-
-      // 3. Call Material Creation API
+      // 2. Call Material Creation API
       const newMaterial = await createMaterialMutate({
         lectureId,
         title: title.trim(),
-        fileObjectKey: preSignRes.objectKey,
+        fileObjectKey: uploadRes.objectKey,
       });
 
       setUploadProgress(100);
@@ -133,10 +117,14 @@ export function MaterialFormDialog({
       onSuccess(newMaterial);
       onClose();
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       handleError(err, "Failed to upload material");
     } finally {
       setUploading(false);
       setUploadProgress(0);
+      abortControllerRef.current = null;
     }
   };
 
@@ -205,12 +193,29 @@ export function MaterialFormDialog({
               >
                 Uploading material...
               </Typography>
-              <Typography
-                variant="caption"
-                sx={{ fontWeight: 700, color: "primary.main" }}
+              <Stack
+                sx={{
+                  flexDirection: "row",
+                  gap: 1,
+                  alignItems: "center",
+                }}
               >
-                {uploadProgress}%
-              </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ fontWeight: 700, color: "primary.main" }}
+                >
+                  {uploadProgress}%
+                </Typography>
+                <Button
+                  size="small"
+                  color="error"
+                  variant="text"
+                  onClick={handleCancelUpload}
+                  sx={{ textTransform: "none", p: 0, minWidth: "auto", fontSize: "0.75rem" }}
+                >
+                  Cancel
+                </Button>
+              </Stack>
             </Stack>
             <LinearProgress
               variant="determinate"

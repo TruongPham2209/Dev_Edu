@@ -1,4 +1,10 @@
 import type {
+  ChunkCompleteRequest,
+  ChunkPresignRequest,
+  ChunkPresignResponse,
+  ChunkStatusResponse,
+  ChunkUploadInitRequest,
+  ChunkUploadInitResponse,
   FilePreSignUploadRequest,
   FileUploadResponse,
 } from "@/lib/type/files";
@@ -9,7 +15,7 @@ import {
   useQueryClient,
   UseQueryOptions,
 } from "@tanstack/react-query";
-import { apiGet, apiPost } from "./client";
+import { apiDelete, apiGet, apiPost } from "./client";
 
 export async function getPreSignedUploadUrl(
   request: FilePreSignUploadRequest,
@@ -101,3 +107,124 @@ export function useConfirmImageUploadMutation(
     },
   });
 }
+
+// --- Chunked / Multipart Upload Endpoints ---
+
+export async function initChunkUpload(
+  request: ChunkUploadInitRequest,
+): Promise<ChunkUploadInitResponse> {
+  return apiPost<ChunkUploadInitResponse>(
+    "/api/v1/files/chunk-upload/init",
+    request,
+  );
+}
+
+export async function presignChunkUpload(
+  sessionId: string,
+  request: ChunkPresignRequest,
+): Promise<ChunkPresignResponse> {
+  return apiPost<ChunkPresignResponse>(
+    `/api/v1/files/chunk-upload/${encodeURIComponent(sessionId)}/presign`,
+    request,
+  );
+}
+
+export async function completeChunkUpload(
+  sessionId: string,
+  request: ChunkCompleteRequest,
+): Promise<FileUploadResponse> {
+  return apiPost<FileUploadResponse>(
+    `/api/v1/files/chunk-upload/${encodeURIComponent(sessionId)}/complete`,
+    request,
+  );
+}
+
+export async function abortChunkUpload(sessionId: string): Promise<string> {
+  return apiDelete<string>(
+    `/api/v1/files/chunk-upload/${encodeURIComponent(sessionId)}`,
+  );
+}
+
+export async function getChunkUploadStatus(
+  sessionId: string,
+): Promise<ChunkStatusResponse> {
+  return apiGet<ChunkStatusResponse>(
+    `/api/v1/files/chunk-upload/${encodeURIComponent(sessionId)}/status`,
+  );
+}
+
+export function useInitChunkUploadMutation(
+  options?: UseMutationOptions<
+    ChunkUploadInitResponse,
+    Error,
+    ChunkUploadInitRequest
+  >,
+) {
+  return useMutation({
+    mutationFn: initChunkUpload,
+    ...options,
+  });
+}
+
+export function usePresignChunkUploadMutation(
+  options?: UseMutationOptions<
+    ChunkPresignResponse,
+    Error,
+    { sessionId: string; request: ChunkPresignRequest }
+  >,
+) {
+  return useMutation({
+    mutationFn: ({ sessionId, request }) =>
+      presignChunkUpload(sessionId, request),
+    ...options,
+  });
+}
+
+export function useCompleteChunkUploadMutation(
+  options?: UseMutationOptions<
+    FileUploadResponse,
+    Error,
+    { sessionId: string; request: ChunkCompleteRequest }
+  >,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ sessionId, request }) =>
+      completeChunkUpload(sessionId, request),
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useAbortChunkUploadMutation(
+  options?: UseMutationOptions<string, Error, string>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: abortChunkUpload,
+    ...options,
+    onSuccess: (...args) => {
+      queryClient.invalidateQueries({ queryKey: ["files"] });
+      options?.onSuccess?.(...args);
+    },
+  });
+}
+
+export function useChunkUploadStatusQuery(
+  sessionId: string,
+  options?: Omit<
+    UseQueryOptions<ChunkStatusResponse, Error>,
+    "queryKey" | "queryFn"
+  >,
+) {
+  return useQuery({
+    queryKey: ["files", "chunk-status", sessionId],
+    queryFn: () => getChunkUploadStatus(sessionId),
+    enabled: !!sessionId,
+    ...options,
+  });
+}
+

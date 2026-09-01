@@ -172,3 +172,25 @@ export type ApiResponse<T> = {
 | :--- | :--- | :--- |
 | Dashboard Metrics | `GET` | `/api/v1/metrics/dashboard` |
 | Growth Analytics | `GET` | `/api/v1/metrics/growth` |
+
+---
+
+### 2.11. Feature: Storage & File Management (Single & Chunked Multipart Uploads)
+**Service File**: [files.ts](../src/lib/api/files.ts) | **Types**: [files.ts](../src/lib/type/files.ts) | **Upload Utility**: [chunked-upload.ts](../src/lib/util/chunked-upload.ts)
+
+#### Upload Strategies:
+- **Flow 1: Single Upload (< 10MB)**: Uses `getPreSignedUploadUrl` to obtain direct presigned URL and uploads binary payload via standard `PUT` to Cloudflare R2 / S3.
+- **Flow 2: Chunked / Multipart Upload (>= 10MB)**: Uses `ChunkedUploadManager` (via `uploadFileWithStrategy`) to slice large files (default 10MB chunks), presign in sliding windows (default 20 parts per batch), upload concurrently (concurrency = 5), collect ETags, and complete multipart upload on backend.
+
+| Action | Hook / Function | Method | Endpoint Path | Params / Payload | Header / Auth |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Get Single Presigned Upload URL | `usePreSignedUploadUrlMutation`, `getPreSignedUploadUrl` | `POST` | `/api/v1/files/pre-signed-url` | `{ fileName, contentType, fileSize, isPublic }` | `Authorization: Bearer <token>` |
+| Confirm Image Upload | `useConfirmImageUploadMutation`, `confirmImageUpload` | `POST` | `/api/v1/files/confirm-image-upload` | Query: `fullObjectKey` | `Authorization: Bearer <token>` |
+| Get Download URL | `useDownloadUrlQuery`, `getDownloadUrl` | `GET` | `/api/v1/files/download` | Query: `fullObjectKey` | `Authorization: Bearer <token>` |
+| Get File Metadata | `useFileMetadataQuery`, `getFileMetadata` | `GET` | `/api/v1/files/metadata` | Query: `fullObjectKey` | `Authorization: Bearer <token>` |
+| **Init Chunk Upload** | `useInitChunkUploadMutation`, `initChunkUpload` | `POST` | `/api/v1/files/chunk-upload/init` | `{ fileName, contentType, fileSize, isPublic }` | `Authorization: Bearer <token>` |
+| **Presign Batch Chunks** | `usePresignChunkUploadMutation`, `presignChunkUpload` | `POST` | `/api/v1/files/chunk-upload/{sessionId}/presign` | Body: `{ fromPart, partCount }` | `Authorization: Bearer <token>` |
+| **Complete Chunk Upload** | `useCompleteChunkUploadMutation`, `completeChunkUpload` | `POST` | `/api/v1/files/chunk-upload/{sessionId}/complete` | Body: `{ parts: [{ partNumber, eTag }] }` | `Authorization: Bearer <token>` |
+| **Abort Chunk Upload** | `useAbortChunkUploadMutation`, `abortChunkUpload` | `DELETE` | `/api/v1/files/chunk-upload/{sessionId}` | None | `Authorization: Bearer <token>` |
+| **Chunk Upload Status** | `useChunkUploadStatusQuery`, `getChunkUploadStatus` | `GET` | `/api/v1/files/chunk-upload/{sessionId}/status` | None | `Authorization: Bearer <token>` |
+

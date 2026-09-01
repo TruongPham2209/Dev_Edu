@@ -126,10 +126,31 @@ describe("LectureHeroInfo", () => {
 
     // ----------------------------------------------------------------------------
     // Assert & Verify
-    // Verify getDownloadUrl was called with "videos/lec-2.mp4".
+    // Verify getDownloadUrl was called with "videos/lec-2.mp4" and video element rendered with streaming attributes.
     // ----------------------------------------------------------------------------
     await waitFor(() => {
       expect(filesApi.getDownloadUrl).toHaveBeenCalledWith("videos/lec-2.mp4");
+    });
+
+    const videoEl = document.querySelector("video");
+    expect(videoEl).not.toBeNull();
+    expect(videoEl?.getAttribute("src")).toBe(
+      "https://example.com/video-stream.mp4",
+    );
+    expect(videoEl?.getAttribute("preload")).toBe("metadata");
+
+    // Trigger video error to test recovery
+    vi.mocked(filesApi.getDownloadUrl).mockResolvedValueOnce({
+      originalFileName: "lec-2.mp4",
+      contentType: "video/mp4",
+      objectKey: "videos/lec-2.mp4",
+      downloadUrl: "https://example.com/video-stream-refreshed.mp4",
+    });
+
+    fireEvent.error(videoEl!);
+
+    await waitFor(() => {
+      expect(filesApi.getDownloadUrl).toHaveBeenCalledTimes(2);
     });
   });
 });

@@ -9,9 +9,9 @@ import {
 import {
   getDownloadUrl,
   useFileMetadataQuery,
-  usePreSignedUploadUrlMutation,
 } from "@/lib/api/files";
 import type { AssignmentResponse } from "@/lib/type/assignments";
+import { uploadFileWithStrategy } from "@/lib/util/chunked-upload";
 import { formatServerDate } from "@/lib/util/date-utils";
 import {
   Box,
@@ -81,8 +81,6 @@ export function AssignmentModal({
 
   const { mutateAsync: createSubmissionMutate } = useCreateSubmissionMutation();
   const { mutateAsync: deleteSubmissionMutate } = useDeleteSubmissionMutation();
-  const { mutateAsync: getPreSignedUploadUrlMutate } =
-    usePreSignedUploadUrlMutation();
 
   const handleFileChange = (selectedFile: File | null) => {
     setFile(selectedFile);
@@ -92,39 +90,22 @@ export function AssignmentModal({
     if (!file) return;
 
     setUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(5);
     try {
-      // 1. Get Pre-signed URL
-      const preSigned = await getPreSignedUploadUrlMutate({
-        fileName: file.name,
-        contentType: file.type,
-        fileSize: file.size,
+      // Upload using Single or Chunked Multipart strategy depending on size
+      const uploadRes = await uploadFileWithStrategy(file, {
+        isPublic: false,
+        onProgress: (percent) => setUploadProgress(percent),
       });
 
-      setUploadProgress(40);
+      if (!uploadRes.objectKey) throw new Error("Failed to upload file");
 
-      // 2. Upload to S3
-      if (preSigned.uploadUrl) {
-        const uploadRes = await fetch(preSigned.uploadUrl, {
-          method: "PUT",
-          body: file,
-          headers: {
-            "Content-Type": file.type,
-          },
-        });
-
-        if (!uploadRes.ok) throw new Error("Failed to upload to S3");
-      }
-
-      setUploadProgress(80);
-
-      // 3. Create Submission
+      // Create Submission
       await createSubmissionMutate({
         assignmentId: assignment.id,
-        fileObjectKey: preSigned.objectKey,
+        fileObjectKey: uploadRes.objectKey,
       });
 
-      setUploadProgress(100);
       setFile(null);
     } catch (err) {
       console.error("Upload failed", err);
